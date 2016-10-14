@@ -21,8 +21,8 @@ class TestDoseProcessVisualizer(unittest.TestCase):
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "doseProcessVisualizerTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_doseProcessVisualizer")
       self.tempRoot = os.path.join(os.path.split(__file__)[0],"temporary")
-      self.rTemplateFile = os.path.join(getAVIDRootPath(),"python","templates", "diagramCSVSource.R")
-      self.rTemplateAdditionalFile = os.path.join(getAVIDRootPath(),"python","templates", "deltaDiagramWithQuantilAndAdditionalDataCSVSource.R")
+      self.rTemplateFile = os.path.join(getAVIDRootPath(),"templates", "diagramCSVSource.R")
+      self.rTemplateAdditionalFile = os.path.join(getAVIDRootPath(),"templates", "deltaDiagramWithQuantilAndAdditionalDataCSVSource.R")
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
 

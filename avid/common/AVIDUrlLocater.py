@@ -2,15 +2,11 @@
    used to identify the location of a action specific tool.
   
    every action has to use this action tool location routines!
-  
-   1. checks if there is a valid tool in workflow.actionTools[actionID] if there is return it else 2.
-   2. check path:workflowRootPath/tools/<defaultName-dir>/defaultName if there is return it else 4.
-   3. check path:avidRoot/Utilities/<defaultName-dir>/defaultName if there is return it else 4.
-   4. return default value
 '''
 
 import os
 import logging
+import ConfigParser
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +18,18 @@ def getAVIDRootPath():
   path = os.path.dirname(__file__)
 
   # navigate to the root dir - to do so we navigate the directory tree upwards 
-  return os.path.split(os.path.split(os.path.split(path)[0])[0])[0]
+  return os.path.split(os.path.split(path)[0])[0]
 
 
 def getUtilityPath(): 
   '''
      identify the Utility root dir (here are the specific action subdirs located)
   '''  
-  rootPath = getAVIDRootPath()
-  actionToolRootPath = os.path.join(rootPath,"Utilities")
+  actionToolRootPath = os.environ.get('AVID_TOOL_PATH')
+  if actionToolRootPath is None:
+    rootPath = getAVIDRootPath()
+    actionToolRootPath = os.path.join(rootPath,"Utilities")
+  
   if os.path.isdir(actionToolRootPath):
     return actionToolRootPath
   else:
@@ -42,10 +41,12 @@ def getExecutableURL(workflow, actionID, defaultRelativePath):
      @param actionID of the action that requests the URL 
      @defaultRelativePath relative path to the action executable that should be used if no user definition
      exists.
-     1. checks if there is a valid tool in workflow.actionTools[actionID] if there is return it else 2.
-     2. check path:workflowRootPath/tools/<defaultRelativePath> if there is return it else 3.
-     3. check path:avidRoot/Utilities/<defaultRelativePath> if there is return it else 4.
-     4. return default value
+     1. checks if there is a valid tool in workflow.actionTools[actionID]. If there is, return it else 2.
+     2. check path:workflowRootPath/tools/<defaultRelativePath>. If it is valid, return it else 3.
+     3. check the path:<environment variable AVID_TOOL_PATH>/<defaultRelativePath>. If it is valid, return it else 4. 
+     4. check the file <environment variable AVID_TOOL_PATH>/user_tools.ini for the entry of the URL. If it is valid, return it else 5.
+     5. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 6.
+     6. return default value
   '''
   returnURL = None
 
@@ -59,6 +60,25 @@ def getExecutableURL(workflow, actionID, defaultRelativePath):
     if os.path.isfile(actionPath):
       returnURL = actionPath
 
+  if returnURL is None:
+    toolPath = os.environ.get('AVID_TOOL_PATH')
+    if not toolPath is None:
+      actionPath = os.path.join(toolPath,defaultRelativePath)
+      if os.path.isfile(actionPath):
+        returnURL = actionPath
+
+  if returnURL is None:
+    toolPath = os.environ.get('AVID_TOOL_PATH')
+    if not toolPath is None:
+      iniPath = os.path.join(toolPath,'user_tools.ini')
+      if os.path.isfile(iniPath):
+        config = ConfigParser.ConfigParser()
+        config.read(fullPath)
+    
+        execURL = config.get('tools',actionID)
+        if os.path.isfile(execURL):
+          returnURL = execURL        
+        
   if returnURL is None:
     actionRootPath = getUtilityPath()
     if not actionRootPath is None:

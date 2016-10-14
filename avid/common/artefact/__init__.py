@@ -5,6 +5,7 @@
 
 import sys
 import os
+import platform
 import uuid
 import time
 import logging
@@ -264,8 +265,12 @@ def ensureValidPath(unsafePath):
     import string
     validPathChars = ":-_.() %s%s" % (string.ascii_letters, string.digits)
     validPathChars += os.sep
+    if platform.system() is 'Windows':
+      #also add unix version because windows can handle it to.
+      validPathChars += '/'
     cleanedFilename = unicodedata.normalize('NFKD', unicode(unsafePath, "utf-8")).encode('ASCII', 'ignore')
-    return ''.join(c for c in cleanedFilename if c in validPathChars)
+    result = ''.join(c for c in cleanedFilename if c in validPathChars)
+    return result
 
 
 def generateArtefactPath(workflow, workflowArtefact):

@@ -5,7 +5,7 @@
 		<avid:property key="actionTag">Plan</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">virtuos</avid:property>
-		<avid:property key="url">..\..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B108.pln</avid:property>
+		<avid:property key="url">..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B108.pln</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
@@ -13,7 +13,7 @@
 		<avid:property key="actionTag">BPLCT</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">virtuos</avid:property>
-		<avid:property key="url">..\..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B000.ctx.gz</avid:property>
+		<avid:property key="url">..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B000.ctx.gz</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
@@ -21,6 +21,6 @@
 		<avid:property key="actionTag">Struct</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">virtuos</avid:property>
-		<avid:property key="url">..\..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B000.vdx</avid:property>
+		<avid:property key="url">..\..\..\..\Utilities\pdc++\Resources\TestData\data\2000_TEST_B\2000_TEST_B000.vdx</avid:property>
 	</avid:artefact>
 </avid:artefacts>
