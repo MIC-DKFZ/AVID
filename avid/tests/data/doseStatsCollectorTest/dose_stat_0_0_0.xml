@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<statistics>
+	<config>
+		<requestedStructRegex>[Nose|nose|NOSE]</requestedStructRegex>
+		<structName>Nose</structName>
+		<doseUID>9iwdei32i3ejkewk</doseUID>
+		<doseFile>testdose.mhd</doseFile>	
+		<structFile>teststruct.dcm</structFile>		
+	</config>
+	<results>
+		<property name="numberOfVoxels">701</property>
+		<property name="volume">13.15900235728852</property>
+		<property name="minimum">
+			0
+			<voxel>
+				<voxelGridID>34247945</voxelGridID>
+				<worldCoordinate>
+					<x>0</x>
+					<y>0</y>
+					<z>0</z>
+				</worldCoordinate>
+			</voxel>
+			<voxel>
+				<voxelGridID>34227945</voxelGridID>
+				<worldCoordinate>
+					<x>0</x>
+					<y>1</y>
+					<z>0</z>
+				</worldCoordinate>
+			</voxel>
+		</property>
+		<property name="maximum">
+			1.598613235583097
+			<voxel>
+				<voxelGridID>24008475</voxelGridID>
+				<worldCoordinate>
+					<x>40</x>
+					<y>20</y>
+					<z>5</z>
+				</worldCoordinate>
+			</voxel>
+		</property>
+		<property name="mean">0.02510018641382149</property>
+		<property name="standardDeviation">0.0783226343722</property>
+		<property name="variance">0.006134435055001324</property>
+		<property name="Dx" x="2">0.3104220032691956</property>
+		<property name="Dx" x="5">0.1736000031232834</property>
+		<property name="Dx" x="10">0.1017239987850189</property>
+		<property name="Dx" x="90">0</property>
+		<property name="Dx" x="95">0</property>
+		<property name="Dx" x="98">0</property>
+		<property name="MOHx" x="2">0.4624829790037048</property>
+		<property name="MOHx" x="5">0.3142748026296525</property>
+		<property name="MOHx" x="10">0.2228713551993619</property>
+		<property name="MOCx" x="2">0</property>
+		<property name="MOCx" x="5">0</property>
+		<property name="MOCx" x="10">0</property>
+		<property name="MaxOHx" x="2">0.3027780055999756</property>
+		<property name="MaxOHx" x="5">0.169512003660202</property>
+		<property name="MaxOHx" x="10">0.1017239987850189</property>
+		<property name="MinOCx" x="2">0</property>
+		<property name="MinOCx" x="5">0</property>
+		<property name="MinOCx" x="10">0</property>
+	</results>
+</statistics>
+

@@ -1,0 +1,202 @@
+import os
+import logging
+
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact as artefactHelper
+from avid.common import osChecker, AVIDUrlLocater
+from . import BatchActionBase
+from cliActionBase import CLIActionBase
+from avid.linkers import FractionLinker
+from avid.selectors import TypeSelector
+from simpleScheduler import SimpleScheduler
+from doseMap import _getArtefactLoadStyle
+from doseAcc import _getFractionWeight
+import avid.externals.virtuos as virtuos
+
+logger = logging.getLogger(__name__)
+
+class BioModelCalcAction(CLIActionBase):
+  '''Class that wraps the single action for the tool doseMap.'''
+
+  def __init__(self, inputDose, weight=1.0, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
+               actionTag = "DoseStat", alwaysDo = False, session = None,
+               additionalActionProps = None, bioModelCalcExe = os.path.join("BioModelCalc4V","BioModelCalc4V.exe")):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+    self._setCaseInstanceByArtefact(inputDose)
+    self._inputDose = inputDose
+    self._weight = weight
+    self._modelParameters = modelParameters
+    self._modelParameterMaps = modelParameterMaps
+    self._modelName = modelName
+    self._outputExt = outputExt
+    self._bioModelCalcExe = bioModelCalcExe
+    
+  def _generateName(self):
+    name = "bioModelCalc_"
+
+    name += "__"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.ACTIONTAG))\
+            +"_#"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.TIMEPOINT))
+    return name
+   
+  def _indicateOutputs(self):
+    
+    name = self.instanceName
+                        
+    self._batchArtefact = self.generateArtefact(self._inputDose)
+    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
+    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
+
+    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
+    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
+    batName = os.path.join(path, batName)
+    
+    self._batchArtefact[artefactProps.URL] = batName
+    
+    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
+    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
+    
+    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
+    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + self._outputExt
+    resName = os.path.join(path, resName)
+    
+    self._resultArtefact[artefactProps.URL] = resName
+
+    return [self._batchArtefact, self._resultArtefact]
+ 
+                
+  def _prepareCLIExecution(self):
+    
+    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
+    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+    inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
+
+    
+    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
+    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
+    
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._bioModelCalcExe)
+    
+    content = '"' + execURL + '"' + ' -d "' + inputPath+ '"'
+    content += ' -t ' + _getArtefactLoadStyle(self._inputDose)
+    content += ' -o "' + resultPath + '"'
+    content += ' --doseScaling ' + str(self._weight)
+    content += ' -m "'+ self._modelName +'"'
+    if self._modelParameterMaps:
+      content += ' -a '
+      for val in self._modelParameterMaps:
+        mapsPath = artefactHelper.getArtefactProperty(val, artefactProps.URL)
+        content += mapsPath + " "
+      content += ' -u ' + _getArtefactLoadStyle(self._modelParameterMaps[0])
+    else:
+      content += ' -p '
+      for val in self._modelParameters:
+        content+= str(val) + " "
+
+    with open(batPath, "w") as outputFile:
+      outputFile.write(content)
+      outputFile.close()
+      
+    return batPath
+
+def _getStructLoadStyle(structArtefact):
+  'deduce the load style parameter for an artefact that should be input'
+  aPath = artefactHelper.getArtefactProperty(structArtefact,artefactProps.URL)
+  aFormat = artefactHelper.getArtefactProperty(structArtefact,artefactProps.FORMAT)
+  
+  result = ""
+  
+  if aFormat == artefactProps.FORMAT_VALUE_ITK:
+    result = aFormat
+  elif aFormat == artefactProps.FORMAT_VALUE_DCM:
+    result = "dicom"
+  elif aFormat == artefactProps.FORMAT_VALUE_HELAX_DCM:
+    result = "helax"
+  elif aFormat == artefactProps.FORMAT_VALUE_VIRTUOS:
+    result = "virtuos"
+    ctxPath = virtuos.stripFileExtensions(aPath)
+    ctxPath = ctxPath + os.extsep+"ctx"
+    if not os.path.isfile(ctxPath):
+      ctxPath = ctxPath + os.extsep+"gz"
+      if not os.path.isfile(ctxPath):
+        msg = "Cannot calculate dose statistic. Virtuos cube file not found. Struct file: "+aPath
+        logger.error(msg)
+        raise RuntimeError(msg)
+          
+    result = result + ' "' + ctxPath + '"'
+  else:
+    logger.info("No load style known for artefact format: %s", aFormat)
+    
+  return result
+
+
+class BioModelCalcBatchAction(BatchActionBase):
+  '''Base class for action objects that are used together with selectors and
+    should therefore able to process a batch of SingleActionBased actions.'''
+  
+  def __init__(self,  inputSelector, planSelector=None, planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01], modelParameterMapsSelector = None, modelName="LQ", outputExt = "nrrd",
+               actionTag = "bioModelCalc", alwaysDo = False,
+               session = None, additionalActionProps = None, bioModelCalcExe = os.path.join("BioModelCalc4V","BioModelCalc4V.exe"), scheduler = SimpleScheduler()):
+    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+
+    self._inputDoses = inputSelector.getSelection(self._session.inData)
+    if planSelector is not None:
+        self._plan = planSelector.getSelection(self._session.inData)
+    else:
+        self._plan=None
+    self._planLinker = planLinker
+
+    if modelParameterMapsSelector is not None:
+      self._modelParameterMaps = modelParameterMapsSelector.getSelection(self._session.inData)
+      self._modelParameters = list()
+    else:
+      self._modelParameterMaps = None
+      self._modelParameters = modelParameters
+    self._modelName = modelName
+    self._outputExt = outputExt
+    self._bioModelCalcExe = bioModelCalcExe
+
+      
+  def _generateActions(self):
+    #filter only type result. Other artefact types are not interesting
+    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+    
+    inputs = self.ensureValidArtefacts(self._inputDoses, resultSelector, "bioModelCalc doses")
+    if self._plan is not None:
+        aPlan = self.ensureValidArtefacts(self._plan, resultSelector, "plan")
+
+    if self._modelParameterMaps is not None:
+      validParameterMaps = self.ensureValidArtefacts(self._modelParameterMaps, resultSelector, "parameter maps")
+    else :
+      validParameterMaps = list()
+       
+    actions = list()
+    
+    for (pos,inputDose) in enumerate(inputs):
+      weight = 1.0
+      if self._plan is not None:
+          linkedPlans = self._planLinker.getLinkedSelection(pos,inputs,aPlan)
+
+          if len(linkedPlans) > 0:
+            #deduce weight by planned fraction number
+            lPlan = linkedPlans[0]
+            planWeight = _getFractionWeight(lPlan)
+            if planWeight is None:
+              logger.warning("Selected plan has no fraction number information. Cannot determine fraction weight. Fall back to default strategy (weight: %s). Used plan artefact: %s", weight, lPlan)
+            else:
+              weight = planWeight
+
+            if len(linkedPlans) > 1:
+              logger.warning("Improper selection of plans. Multiple plans for one dose/fraction selected. Action assumes only one plan linked per dose. Use first plan. Drop other plan. Used plan artefact: %s", lPlan)
+          else:
+            logger.info("No plan selected, no fraction number information available. Cannot determine fraction weight. Fall back to default strategy (1/number of selected doses => weight: %s).", weight)
+
+
+      action = BioModelCalcAction(inputDose, weight, self._modelParameters, validParameterMaps, self._modelName, self._outputExt,
+                          self._actionTag, alwaysDo = self._alwaysDo,
+                          session = self._session,
+                          additionalActionProps = self._additionalActionProps,
+                          bioModelCalcExe =self._bioModelCalcExe)
+      actions.append(action)
+    
+    return actions

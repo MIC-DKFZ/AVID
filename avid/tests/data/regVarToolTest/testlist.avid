@@ -1,0 +1,34 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">Target</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">.\MatchPointLogo.mhd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">Moving</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">.\MatchPointLogo.mhd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">Moving</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">.\MatchPointLogoShifted10x-16y-5z.mhd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">Registration</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">MatchPoint</avid:property>
+		<avid:property key="url">.\Shift-3x-30y8z.mapr</avid:property>
+	</avid:artefact>
+</avid:artefacts>

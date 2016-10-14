@@ -1,0 +1,77 @@
+/** \page Python package example.
+
+See README.rst for more info.
+This is text was copied from README.rst (maybe not updated):
+
+Sample Module Repository
+========================
+
+This simple project is an example repo for Python projects.
+
+It is adapted from [this github example](https://github.com/kennethreitz/samplemod/tree/master).
+[Learn more](<http://www.kennethreitz.org/essays/repository-structure-and-python>).
+
+And tries to follow the instructions on [this guide](<http://docs.python-guide.org/en/latest/writing/structure/>).
+
+The actual code can be found in sample/thinker.py. It implements a toy class
+which "thinks" random thoughts.
+The tests for this class are located in sample/tests. Python will automatically
+discover tests if you name them test_*.py
+Look at test_advanced.py for a simple unittest example.
+
+## install dependencies
+either use:
+```
+pip install -r requirements.txt
+```
+or
+```
+make init
+```
+
+## install this package
+You have two choices:
+1. install a development version. This means that if you make
+changes to the packages code you make will affect the code you write which is
+based on this package.
+2. "normal" install. This will install the current version.
+
+After you installed your package, it can be imported in your via import sample
+where ever you are.
+
+### install development version:
+either use:
+```
+python setup.py develop
+```
+or
+```
+make install_develop
+```
+
+### "normal" install
+either use:
+```
+python setup.py install
+```
+or
+```
+make install
+```
+
+## run tests
+either run:
+```
+python -m unittest discover
+```
+or
+```
+make test
+```
+
+
+## run scripts
+Scripts can be found in subfolder bin. They are declared as entry points
+(see setup.py). This means you can call them by calling the entry points
+directly in console!
+*/

@@ -1,0 +1,25 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="id">ID_1</avid:property>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="caseInstance">instance_1</avid:property>
+		<avid:property key="timePoint">time</avid:property>
+		<avid:property key="actionTag">tag_1</avid:property>
+		<avid:property key="objective">obj_1</avid:property>
+		<avid:property key="type">type_1</avid:property>
+		<avid:property key="format">format_1</avid:property>
+		<avid:property key="url">.\artefact1.txt</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_2</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="url">invalid.file</avid:property>
+		<avid:property key="customProp">custom_1</avid:property>		
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_3</avid:property>
+		<avid:property key="timePoint">2</avid:property>
+		<avid:property key="url">.\artefact2.txt</avid:property>
+		<avid:property key="invalid">True</avid:property>
+	</avid:artefact>
+</avid:artefacts>

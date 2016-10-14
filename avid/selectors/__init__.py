@@ -1,0 +1,55 @@
+class SelectorBase(object):
+  '''
+      Base class for selectors. Derive from this class to implement special
+      selector versions. This class is not functional.
+  '''
+  def __init__(self):
+    ''' init '''
+    pass
+
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    return workflowData #default just returns everything.
+     
+  def __add__(self,other):
+    '''Creates an AndSelector with self and other and returns it'''
+    andSelector = AndSelector(self,other)
+    return andSelector
+  
+  
+class AndSelector(SelectorBase):
+  '''
+      Special selector that works like an and operation on to child selectors.
+      The selction result of the AndSelector is the intersection of the selection
+      of both child selectors.
+  '''
+  def __init__(self, selector1, selector2):
+    ''' init '''
+    self._selector1 = selector1
+    self._selector2 = selector2
+
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    selection1 = self._selector1.getSelection(workflowData)
+    selection2 = self._selector2.getSelection(workflowData)
+    resultSelection = list(dict(),)
+    for item1 in selection1:
+      for item2 in selection2:
+        if item1 == item2:
+          resultSelection.append(item1)
+          selection2.remove(item2)
+          break
+          
+    return resultSelection
+
+from multiKeyValueSelector import MultiKeyValueSelector
+from keyValueSelector import KeyValueSelector
+from keyValueSelector import ActionTagSelector
+from keyValueSelector import CaseSelector
+from keyValueSelector import CaseInstanceSelector
+from keyValueSelector import FormatSelector
+from keyValueSelector import TimepointSelector
+from keyValueSelector import TypeSelector
+from keyValueSelector import ObjectiveSelector
+from keyValueSelector import DoseStatSelector
+from validitySelector import ValiditySelector

@@ -1,0 +1,35 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="caseInstance">instance_1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">collector</avid:property>
+		<avid:property key="objective">RO_1</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">csv</avid:property>
+		<avid:property key="url">.\doseStatCollector_maximum.csv</avid:property>
+		<avid:property key="dose_stat">maximum</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="caseInstance">instance_1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">plannedCollector</avid:property>
+		<avid:property key="objective">RO_1</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">csv</avid:property>
+		<avid:property key="url">.\doseStatPlannedCollectorWithInterpolation_maximum.csv</avid:property>
+		<avid:property key="dose_stat">maximum</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="caseInstance">instance_1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">additionalCollector</avid:property>
+		<avid:property key="objective">RO_1</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">csv</avid:property>
+		<avid:property key="url">.\doseStatAdditionalCollectorWithInterpolation_maximum.csv</avid:property>
+		<avid:property key="dose_stat">maximum</avid:property>
+	</avid:artefact>
+</avid:artefacts>

@@ -1,0 +1,24 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="caseInstance">instance_1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">collector</avid:property>
+		<avid:property key="objective">RO_1</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">csv</avid:property>
+		<avid:property key="url">.\doseStatCollector_maximum.csv</avid:property>
+		<avid:property key="dose_stat">maximum</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="format">virtuos</avid:property>
+		<avid:property key="url">.\0001663996_SarkomPatient2_106.pln</avid:property>
+		<avid:property key="timestamp">1446727235.71</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">plan</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="id">6937f9e9-83ba-11e5-ab99-db1c0c9b4eca</avid:property>
+		<avid:property key="prescribed_dose">50.0</avid:property>
+		<avid:property key="planned_fractions">25</avid:property>
+  </avid:artefact>
+</avid:artefacts>

@@ -1,0 +1,174 @@
+!!!!WARNING: No valid plan file. Only for testing purposes in the avid pipeline!!!!!
+RTP File Version                    6.0 
+Created by                          
+Created on                          
+Plan Number                         103
+Plan Name                           0000000003_TEST_DOE103
+Name of Patient                     unkown
+Patient Id                          0000000003_TEST_DOE_ID
+Diagnose                            
+Diagnose Key                        
+Site of Target                      
+Name of Therapist                   Doctor
+Comment:                           
+DC09 Information: Ref. point for dose calculation (image coordinates) x: 260.986511 y: 298.583984 z: -184.799988
+Relative reference dose value (cube/ref. point): 1.5 
+End_of_Comment                     
+Patient Coordinate System           IMAGE
+Device Coordinate Systems           IEC
+Init Treatment Transformation       FALSE
+Dose Calculated by                  
+Dose Calculated on                  
+Dose File                           
+Dose Calculation Based on           
+Dose Comment:            
+End_of_Dose_Comment      
+Report Generated on                 Fri Mar  4 00:11:22 1900
+Report File                         unkown
+Number of Misc. Plan Data           1 
+  LocalisationSystem      CT_Body_2 
+Number of Modifications             0
+Kind of Field Weighting             TIME 
+Use MLC Data for Dose Calc          YES 
+Dose Data                           DSRMNF 
+  Prescribed Dose                   50.40 
+  Prescribed Dose at Target Surface 0.00 
+  Reference Point (x,y,z)           0.000000 0.000000 0.000000
+  Max Dose at (x,y,z)               301.757660 329.101410 -228.800003
+  Normalisation Dose                900.00 
+  No of Fractions                   28 
+Number of Fields                    1 
+
+
+  Field Name                        Star_9_1 
+  Field Number                      1 
+  Field Type                        ST9 
+  Field Weight                      10.565283 
+  Irradiation Device                ARTISTE3 
+    Radiation Type                  PHOTON 
+    Iso Distance                    1000.00 
+    Multi Leaf Name                 160MLC 
+      MLC Rotation                  0.00 
+      MLC Distance                  460.00 
+      MLC Thickness                 76.00 
+      MLC Variable Leaf Width       YES 
+      MLC No of Leaf Pairs          80 
+        Leaf Width Pair 01          2.30
+        Leaf Width Pair 02          2.30
+        Leaf Width Pair 03          2.30
+        Leaf Width Pair 04          2.30
+        Leaf Width Pair 05          2.30
+        Leaf Width Pair 06          2.30
+        Leaf Width Pair 07          2.30
+        Leaf Width Pair 08          2.30
+        Leaf Width Pair 09          2.30
+        Leaf Width Pair 10          2.30
+        Leaf Width Pair 11          2.30
+        Leaf Width Pair 12          2.30
+        Leaf Width Pair 13          2.30
+        Leaf Width Pair 14          2.30
+        Leaf Width Pair 15          2.30
+        Leaf Width Pair 16          2.30
+        Leaf Width Pair 17          2.30
+        Leaf Width Pair 18          2.30
+        Leaf Width Pair 19          2.30
+        Leaf Width Pair 20          2.30
+        Leaf Width Pair 21          2.30
+        Leaf Width Pair 22          2.30
+        Leaf Width Pair 23          2.30
+        Leaf Width Pair 24          2.30
+        Leaf Width Pair 25          2.30
+        Leaf Width Pair 26          2.30
+        Leaf Width Pair 27          2.30
+        Leaf Width Pair 28          2.30
+        Leaf Width Pair 29          2.30
+        Leaf Width Pair 30          2.30
+        Leaf Width Pair 31          2.30
+        Leaf Width Pair 32          2.30
+        Leaf Width Pair 33          2.30
+        Leaf Width Pair 34          2.30
+        Leaf Width Pair 35          2.30
+        Leaf Width Pair 36          2.30
+        Leaf Width Pair 37          2.30
+        Leaf Width Pair 38          2.30
+        Leaf Width Pair 39          2.30
+        Leaf Width Pair 40          2.30
+        Leaf Width Pair 41          2.30
+        Leaf Width Pair 42          2.30
+        Leaf Width Pair 43          2.30
+        Leaf Width Pair 44          2.30
+        Leaf Width Pair 45          2.30
+        Leaf Width Pair 46          2.30
+        Leaf Width Pair 47          2.30
+        Leaf Width Pair 48          2.30
+        Leaf Width Pair 49          2.30
+        Leaf Width Pair 50          2.30
+        Leaf Width Pair 51          2.30
+        Leaf Width Pair 52          2.30
+        Leaf Width Pair 53          2.30
+        Leaf Width Pair 54          2.30
+        Leaf Width Pair 55          2.30
+        Leaf Width Pair 56          2.30
+        Leaf Width Pair 57          2.30
+        Leaf Width Pair 58          2.30
+        Leaf Width Pair 59          2.30
+        Leaf Width Pair 60          2.30
+        Leaf Width Pair 61          2.30
+        Leaf Width Pair 62          2.30
+        Leaf Width Pair 63          2.30
+        Leaf Width Pair 64          2.30
+        Leaf Width Pair 65          2.30
+        Leaf Width Pair 66          2.30
+        Leaf Width Pair 67          2.30
+        Leaf Width Pair 68          2.30
+        Leaf Width Pair 69          2.30
+        Leaf Width Pair 70          2.30
+        Leaf Width Pair 71          2.30
+        Leaf Width Pair 72          2.30
+        Leaf Width Pair 73          2.30
+        Leaf Width Pair 74          2.30
+        Leaf Width Pair 75          2.30
+        Leaf Width Pair 76          2.30
+        Leaf Width Pair 77          2.30
+        Leaf Width Pair 78          2.30
+        Leaf Width Pair 79          2.30
+        Leaf Width Pair 80          2.30
+      MLC Split Line Offset         0.00 
+      MLC X Grid Resolution         5.00 
+      MLC Application Mode          StepAndShoot 
+  Number of Misc. Field Data           0 
+  Beamgroup Type                    F 
+  Kind of Beam Weighting            VARIABLE 
+  Indiv. Parameter Flags            RXETGLCJWIMA 
+    Relative Beam Weight            1.000000 
+    Dose Data:                        MROCPSWD
+      Monitor Units                   30000.00 
+      Radiological Depth              155.98 
+      Output Factor                   0.000 
+      Calib. Tissue Max Ratio         0.000000 
+      Tissue Phantom Ratio            0.0000 
+      Source Skin Dist                841.72 
+      Wege Factor                     0.0000 
+      Relative Dose                   0.0000 
+    Energy                          6.00 
+    Dose Rate (Mu/min)              0 
+    Target Point (x,y,z)            260.986511  298.583984  -184.799988 
+    Gantry Angle                    0.00 
+    Patient Support  Angle          -0.00 
+    Beam Limiting Device Angle      0.00 
+    Beam Limiting Device Type       A 
+      Field Edges  (X1,X2)          -75.00 75.00 
+      Field Edges  (Y1,Y2)          -75.00 75.00 
+    Wedge Type                      WITHOUT 
+    Wedge Angle                     0.00 
+    Wedge Orientation               W 
+    Wedge Key                       WITHOUT 
+    Irregular Field Number          0 
+    Irregular Field File             
+    Number of Contours              0 
+    Number of MLC Leaf Pairs        0 
+    Dose Calc. Splitline Correction 0 
+    MLC Block Code                   
+    Applicator Name                  
+    Applicator Type                  
+    Source Applicator Distance      0.00 

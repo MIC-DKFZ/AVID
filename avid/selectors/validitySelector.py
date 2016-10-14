@@ -1,0 +1,19 @@
+from avid.selectors import SelectorBase
+import avid.common.artefact.defaultProps as artefactProps
+from avid.common.artefact import getArtefactProperty
+
+class ValiditySelector(SelectorBase):
+  ''' Convenience selector to select only artefacts that are not invalid.'''
+  def __init__(self):
+    ''' init '''
+    
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    outList = list(dict(),)
+    
+    for entry in workflowData:
+      value = getArtefactProperty(entry, artefactProps.INVALID)
+      
+      if value is not True: #value may also be None and should be seen as valid.
+        outList.append(entry)
+    return outList

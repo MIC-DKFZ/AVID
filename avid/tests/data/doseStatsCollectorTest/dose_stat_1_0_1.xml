@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<statistics>
+	<config>
+		<requestedStructRegex>[Nose|nose|NOSE]</requestedStructRegex>
+		<structName>Nose</structName>
+		<doseUID>9iwdei32i3ejkewk</doseUID>
+		<doseFile>testdose.mhd</doseFile>	
+		<structFile>teststruct.dcm</structFile>		
+	</config>
+	<results>
+		<property name="numberOfVoxels">701</property>
+		<property name="volume">14.15900235728852</property>
+		<property name="minimum">
+			101
+			<voxel>
+				<voxelGridID>34247945</voxelGridID>
+				<worldCoordinate>
+					<x>0</x>
+					<y>0</y>
+					<z>0</z>
+				</worldCoordinate>
+			</voxel>
+			<voxel>
+				<voxelGridID>34227945</voxelGridID>
+				<worldCoordinate>
+					<x>0</x>
+					<y>1</y>
+					<z>0</z>
+				</worldCoordinate>
+			</voxel>
+		</property>
+		<property name="maximum">
+			102.598613235583097
+			<voxel>
+				<voxelGridID>24008475</voxelGridID>
+				<worldCoordinate>
+					<x>40</x>
+					<y>20</y>
+					<z>5</z>
+				</worldCoordinate>
+			</voxel>
+		</property>
+		<property name="mean">101.02510018641382149</property>
+		<property name="standardDeviation">101.0783226343722</property>
+		<property name="variance">101.006134435055001324</property>
+		<property name="Dx" x="2">101.3104220032691956</property>
+		<property name="Dx" x="5">101.1736000031232834</property>
+		<property name="Dx" x="10">101.1017239987850189</property>
+		<property name="MOHx" x="5">101.3142748026296525</property>
+		<property name="MOHx" x="10">101.2228713551993619</property>
+		<property name="MaxOHx" x="5">101.169512003660202</property>
+		<property name="MinOCx" x="2">101</property>
+	</results>
+</statistics>
+

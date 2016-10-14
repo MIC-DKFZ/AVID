@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<DoseConfig Version="1.0">
+	<Name>auto generated</Name>
+	<Description>auto generated for testing purpose only</Description>
+	<Parameters>
+		<Parameter Name="TargetDoseFile">
+			<Value Name="Type">itk</Value>
+			<Value Name="File">AccDose1.mhd</Value>
+			<Value Name="Path">D:/ajaeger/PatientenDaten/Meilenstein/0000532758_SarkomPatient0/</Value>
+		</Parameter>
+    <Parameter Name="TargetMask">
+			<Value Name="Type">virtuos</Value>
+			<Value Name="VDXFile">0000532758_SarkomPatient0_000.vdx</Value>
+			<Value Name="VDXPath">D:/ajaeger/Packages/NotMeVisLab/Research-repo/ajaeger/AVID/trunk/testing/data/common/DataFiles/VIRTUOS/TestPat/</Value>
+			<Value Name="CTXFile">0000532758_SarkomPatient0_000.ctx.gz</Value>
+			<Value Name="CTXPath">D:/ajaeger/Packages/NotMeVisLab/Research-repo/ajaeger/AVID/trunk/testing/data/common/DataFiles/VIRTUOS/TestPat/</Value>
+      <Value Name="StartPos"></Value>
+			<Value Name="Length"></Value>
+			<Value Name="VoiNames">GTVINT||GTV||GTVCOPY1</Value>
+			<Value Name="BBox">False</Value>
+		</Parameter>
+		<Parameter Name="ResultInfo">
+			<Value Name="ResultFileName">AccDose1</Value>
+			<Value Name="ResultFilePath">D:/ajaeger/Packages/NotMeVisLab/Research-repo/ajaeger/AVID/trunk/ResultFiles/milestoneDoseStatistics/</Value>
+			<Value Name="DVH">
+				<Name>AccDose1</Name>
+				<Path>D:/ajaeger/Packages/NotMeVisLab/Research-repo/ajaeger/AVID/trunk/ResultFiles/milestoneDoseStatistics/</Path>
+			</Value>
+		</Parameter>
+		<Parameter Name="RegistrationInfos">
+			<Value Name="RegistrationResultFilePath">D:/dummy/</Value>
+			<Value Name="RegistrationResultFile">dummy.res.xml</Value>
+		</Parameter>
+	</Parameters>
+</DoseConfig>

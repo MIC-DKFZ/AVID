@@ -1,0 +1,204 @@
+import os
+import logging
+import time
+
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact as artefactHelper
+
+from avid.common import osChecker, AVIDUrlLocater
+from . import BatchActionBase
+from cliActionBase import CLIActionBase
+from avid.linkers import CaseLinker
+from avid.linkers import FractionLinker
+from avid.selectors import TypeSelector
+from simpleScheduler import SimpleScheduler
+
+from xml.etree.ElementTree import ElementTree
+import avid.common.customTags as Tag
+
+logger = logging.getLogger(__name__)
+
+
+class matchRAction(CLIActionBase):
+  '''Class that wrapps the single action for the tool mapR.'''
+
+  def __init__(self, targetImage, movingImage, algorithm, algorithmParameters=dict(), targetMask = None,  movingMask = None,
+               targetIsReference = True, actionTag = "matchR", alwaysDo = False,
+               session = None, additionalActionProps = None, matchRExe = os.path.join("matchR","matchR.exe")):
+       
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+    self._setCaseInstanceByArtefact(targetImage, movingImage, targetMask, movingMask)
+
+    self._targetImage = targetImage
+    self._targetMask = targetMask
+    self._movingImage = movingImage
+    self._movingMask = movingMask
+    self._matchRExe = matchRExe
+    self._algorithm = algorithm
+    self._algorithmParameters = algorithmParameters
+    self._targetIsReference = targetIsReference
+
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", matchRExe))
+    self._cwd = cwd
+  
+  
+  def _generateName(self):
+    name = "reg_"+str(artefactHelper.getArtefactProperty(self._movingImage,artefactProps.ACTIONTAG))\
+            +"_#"+str(artefactHelper.getArtefactProperty(self._movingImage,artefactProps.TIMEPOINT))
+
+    if self._movingMask is not None:
+      name += "_"+str(artefactHelper.getArtefactProperty(self._movingMask,artefactProps.ACTIONTAG))
+
+    name += "_to_"+str(artefactHelper.getArtefactProperty(self._targetImage,artefactProps.ACTIONTAG))\
+            +"_#"+str(artefactHelper.getArtefactProperty(self._targetImage,artefactProps.TIMEPOINT))
+
+    if self._targetMask is not None:
+      name += "_"+str(artefactHelper.getArtefactProperty(self._targetMask,artefactProps.ACTIONTAG))
+      
+    return name
+    
+  def _indicateOutputs(self):
+    
+    artefactRef = self._targetImage
+    if not self._targetIsReference:
+      artefactRef = self._movingImage
+    
+    name = self._generateName()
+    
+    #Specify batch artefact                
+    self._batchArtefact = self.generateArtefact(artefactRef)
+    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
+    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
+
+    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
+    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
+    batName = os.path.join(path, batName)
+    
+    self._batchArtefact[artefactProps.URL] = batName
+    
+    #Specify result artefact                
+    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
+    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
+    
+    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
+    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "mapr"
+    resName = os.path.join(path, resName)
+    
+    self._resultArtefact[artefactProps.URL] = resName
+
+    return [self._batchArtefact, self._resultArtefact]
+
+
+
+        
+  def _prepareCLIExecution(self):
+    
+    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
+    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+
+    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
+    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
+      
+    try:
+      execURL = AVIDUrlLocater.getExecutableURL(self._session, "matchR", self._matchRExe)
+      targetImageURL = artefactHelper.getArtefactProperty(self._targetImage,artefactProps.URL)
+      movingImageURL = artefactHelper.getArtefactProperty(self._movingImage, artefactProps.URL)
+    
+      content = '"' + execURL + '"'
+      content += ' "' + movingImageURL + '"'
+      content +=  ' "' + targetImageURL + '"'
+      content +=  ' "' + self._algorithm + '"'
+      content += ' --output "' + resultPath + '"'
+      if self._algorithmParameters:
+        content += ' --parameters'
+      for key, value in self._algorithmParameters.iteritems():
+        content += ' "' + key + "=" + value + '"'
+      if self._movingMask:
+        movingMaskURL = artefactHelper.getArtefactProperty(self._movingMask, artefactProps.URL)
+        content += ' --moving-mask ' + movingMaskURL
+      if self._targetMask:
+        targetMaskURL = artefactHelper.getArtefactProperty(self._targetMask, artefactProps.URL)
+        content += ' --target-mask ' + targetMaskURL
+
+    except:
+      logger.error("Error for getExecutable.")
+      raise
+    
+    try:
+      with open(batPath, "w") as outputFile:
+        outputFile.write(content)
+        outputFile.close()
+    except:
+      logger.error("Error for bat write.")
+      raise
+      
+    return batPath      
+
+
+class matchRBatchAction(BatchActionBase):
+  '''Action for batch processing of the matchR.'''
+  
+  def __init__(self,  targetSelector, movingSelector, algorithm, algorithmParameters=dict(),
+               targetMaskSelector = None, movingMaskSelector = None,
+               movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
+               movingMaskLinker = FractionLinker(), targetIsReference = True, 
+               actionTag = "matchR", alwaysDo = False,
+               session = None, additionalActionProps = None, matchRExe = os.path.join("matchR","matchR.exe"), scheduler = SimpleScheduler()):
+    
+    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+
+    self._targetImages = targetSelector.getSelection(self._session.inData)
+    self._targetMasks = list()
+    if targetMaskSelector is not None:
+      self._targetMasks = targetMaskSelector.getSelection(self._session.inData)
+
+    self._movingImages = movingSelector.getSelection(self._session.inData)
+    self._movingMasks = list()
+    if movingMaskSelector is not None:
+      self._movingMasks = movingMaskSelector.getSelection(self._session.inData)
+    
+    self._movingLinker = movingLinker
+    self._targetMaskLinker = targetMaskLinker  
+    self._movingMaskLinker = movingMaskLinker
+    self._targetIsReference = targetIsReference
+    self._matchRExe = matchRExe
+    self._algorithmParameters = algorithmParameters
+    self._algorithm = algorithm
+
+      
+  def _generateActions(self):
+    #filter only type result. Other artefact types are not interesting
+    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+    
+    targets = self.ensureValidArtefacts(self._targetImages, resultSelector, "matchR targets")
+    movings = self.ensureValidArtefacts(self._movingImages, resultSelector, "matchR movings")
+    targetMasks = self.ensureValidArtefacts(self._targetMasks, resultSelector, "matchR target masks")
+    movingMasks = self.ensureValidArtefacts(self._movingMasks, resultSelector, "matchR moving masks")
+      
+    global logger
+    
+    actions = list()
+    
+    for (pos,target) in enumerate(targets):
+      linkedMovings = self._movingLinker.getLinkedSelection(pos,targets,movings)
+        
+      linkedTargetMasks = self._targetMaskLinker.getLinkedSelection(pos, targets, targetMasks)
+      if len(linkedTargetMasks) == 0:
+        linkedTargetMasks = [None]
+
+      for (pos2,lm) in enumerate(linkedMovings):
+        linkedMovingMasks = self._movingMaskLinker.getLinkedSelection(pos2, linkedMovings, movingMasks)
+        if len(linkedMovingMasks) == 0:
+          linkedMovingMasks = [None]
+
+        for ltm in linkedTargetMasks:
+          for lmm in linkedMovingMasks:
+            action = matchRAction(target, lm, self._algorithm, self._algorithmParameters, ltm, lmm,
+                                   self._targetIsReference, self._actionTag,
+                                   alwaysDo = self._alwaysDo, session = self._session,
+                                   additionalActionProps = self._additionalActionProps,
+                                   matchRExe =self._matchRExe)
+            actions.append(action)
+    
+    return actions

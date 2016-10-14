@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<RegVariationConfig Version="1.0">
+	<Name>@NAME@</Name>
+	<Description>@DESCRIPTION@</Description>
+	<Parameters>
+		<Parameter Name="InputRegistrationInfo">
+			<Value Name="MapResultObject">@MAPR_FILE@</Value>
+			<Value Name="MapResultObjectPath">@MAPR_PATH@</Value>
+			<Value Name="RegToolResultFile"></Value>
+			<Value Name="RegToolResultFilePath"></Value>
+		</Parameter>
+		<Parameter Name="ResultInfo">
+			<Value Name="ResultFileName"></Value>
+			<Value Name="ResultFilePath"></Value>
+			<Value Name="ResultImage"></Value>
+			<Value Name="ResultObject">@MAPR_RESULT_FILE@</Value>
+			<Value Name="ResultObjectPath">@MAPR_RESULT_PATH@</Value>
+		</Parameter>
+		<Parameter Name="VariationAlgorithmInfo">
+			<Value Name="DebugDllPath"></Value>
+			<Value Name="ReleaseDllPath"></Value>
+			<Value Name="DebugDll"></Value>
+			<Value Name="ReleaseDll"></Value>
+			<Value Name="UID"></Value>
+		</Parameter>
+		<Parameter Name="AlgParameters">
+			<Value Name="Mean">@MEAN@</Value>
+			<Value Name="SD">@STANDARD_DEVIATION@</Value>
+			<Value Name="Scales">
+				<Value Name="0">0</Value>
+				<Value Name="1">0</Value>
+				<Value Name="2">0</Value>
+				<Value Name="3">1</Value>
+				<Value Name="4">1</Value>
+				<Value Name="5">1</Value>
+			</Value>			
+		</Parameter>
+	</Parameters>
+</RegVariationConfig>
+
