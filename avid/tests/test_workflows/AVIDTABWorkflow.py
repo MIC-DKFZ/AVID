@@ -11,7 +11,7 @@ from avid.selectors import FormatSelector
 from avid.actions.regTool import regToolBatchAction as regTool
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.actions.pdc import pdcBatchAction as pdc
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseStats import DoseStatBatchAction as doseTool
 from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as doseStatsCollector
@@ -19,9 +19,9 @@ from avid.selectors.validitySelector import ValiditySelector
 
 __this__ = sys.modules[__name__]
 
-transRegTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "DIPP_translation_default.reg.xml")
-rigidRegTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "DIPP_rigid_default.reg.xml")
-pdcTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "PDC_DICOM_template.bat")
+transRegTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "DIPP_translation_default.reg.xml")
+rigidRegTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "DIPP_rigid_default.reg.xml")
+pdcTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "PDC_DICOM_template.bat")
 
 doRegistration = False
 doPDC = False

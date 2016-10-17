@@ -11,15 +11,15 @@ from avid.selectors import TimepointSelector
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.actions.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
 from avid.actions.pdc import pdcBatchAction as pdc
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseStats import DoseStatBatchAction as doseTool
 from avid.actions.doseMap import DoseMapBatchAction as doseMap
 
 __this__ = sys.modules[__name__]
 
-templatePath = os.path.join(getAVIDRootPath(), "python", "templates")
-pdcTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "PDC_template.bat")
+templatePath = os.path.join(getAVIDProjectRootPath(), "templates")
+pdcTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "PDC_template.bat")
 
 with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as session:
     mapR(ActionTagSelector("CCT"), templateSelector=ActionTagSelector("BPLCT"), outputExt = "ctx.gz", actionTag = "MapCT").do()

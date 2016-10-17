@@ -18,11 +18,10 @@ class RegVarToolAction(CLIActionBase):
   '''Class that wrapps the single action for the tool regVarTool.'''
 
   def __init__(self, reg, instanceNr, algorithmDLL, parameters = None, templateImage = None, actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, regVarToolExe = os.path.join("RegVarTool","RegVarTool.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(reg)
     self._reg = reg
-    self._regVarToolExe = regVarToolExe
     self._algorithmDLL = algorithmDLL
     self._parameters = parameters
     self._templateImage = templateImage
@@ -81,7 +80,7 @@ class RegVarToolAction(CLIActionBase):
     if self._parameters is not None:
       parametersAsString = self._toString(self._parameters)
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "regVarTool", self._regVarToolExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "RegVarTool", self._actionConfig)
     
     content = '"' + execURL + '"'
     content += ' -a ' + '"' + self._algorithmDLL + '"'
@@ -113,7 +112,7 @@ class RegVarToolBatchAction(BatchActionBase):
   def __init__(self, regs, variationCount, algorithmDLL, parameters = None, templateSelector = None,
                templateLinker = CaseLinker(),
                actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, regVarToolExe =os.path.join("RegVarTool","RegVarTool.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -127,7 +126,7 @@ class RegVarToolBatchAction(BatchActionBase):
     self._algorithmDLL = algorithmDLL
     self._parameters = parameters
     self._variationCount = variationCount
-    self._regVarToolExe = regVarToolExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -150,7 +149,7 @@ class RegVarToolBatchAction(BatchActionBase):
                                      self._parameters, lt, self._actionTag,
                                      alwaysDo = self._alwaysDo, session = self._session,
                                      additionalActionProps = self._additionalActionProps,
-                                     regVarToolExe =self._regVarToolExe)
+                                     actionConfig =self._actionConfig)
           actions.append(action)
     
     return actions

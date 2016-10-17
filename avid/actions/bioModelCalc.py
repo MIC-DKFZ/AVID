@@ -20,8 +20,8 @@ class BioModelCalcAction(CLIActionBase):
 
   def __init__(self, inputDose, weight=1.0, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, bioModelCalcExe = os.path.join("BioModelCalc4V","BioModelCalc4V.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(inputDose)
     self._inputDose = inputDose
     self._weight = weight
@@ -29,7 +29,6 @@ class BioModelCalcAction(CLIActionBase):
     self._modelParameterMaps = modelParameterMaps
     self._modelName = modelName
     self._outputExt = outputExt
-    self._bioModelCalcExe = bioModelCalcExe
     
   def _generateName(self):
     name = "bioModelCalc_"
@@ -75,7 +74,7 @@ class BioModelCalcAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._bioModelCalcExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._actionConfig)
     
     content = '"' + execURL + '"' + ' -d "' + inputPath+ '"'
     content += ' -t ' + _getArtefactLoadStyle(self._inputDose)
@@ -136,7 +135,7 @@ class BioModelCalcBatchAction(BatchActionBase):
   
   def __init__(self,  inputSelector, planSelector=None, planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01], modelParameterMapsSelector = None, modelName="LQ", outputExt = "nrrd",
                actionTag = "bioModelCalc", alwaysDo = False,
-               session = None, additionalActionProps = None, bioModelCalcExe = os.path.join("BioModelCalc4V","BioModelCalc4V.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -154,7 +153,7 @@ class BioModelCalcBatchAction(BatchActionBase):
       self._modelParameters = modelParameters
     self._modelName = modelName
     self._outputExt = outputExt
-    self._bioModelCalcExe = bioModelCalcExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -196,7 +195,7 @@ class BioModelCalcBatchAction(BatchActionBase):
                           self._actionTag, alwaysDo = self._alwaysDo,
                           session = self._session,
                           additionalActionProps = self._additionalActionProps,
-                          bioModelCalcExe =self._bioModelCalcExe)
+                          actionConfig =self._actionConfig)
       actions.append(action)
     
     return actions

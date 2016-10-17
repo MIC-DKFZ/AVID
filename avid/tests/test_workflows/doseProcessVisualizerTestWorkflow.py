@@ -6,12 +6,12 @@ import avid.common.workflow as workflow
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.selectors.keyValueSelector import DoseStatSelector
 from avid.actions.doseProcessVisualizer import doseProcessVisualizerBatchAction as doseProcessVisualizer
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 
 __this__ = sys.modules[__name__]
 
 RSCRIPTEXE = "C:/Program Files/R/R-3.1.0/bin/Rscript.exe"
-templatePath = os.path.join(getAVIDRootPath(), "python", "templates")
+templatePath = os.path.join(getAVIDProjectRootPath(), "templates")
 
 with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as session:
 

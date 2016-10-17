@@ -8,11 +8,11 @@ from avid.selectors.keyValueSelector import DoseStatSelector
 
 from avid.actions.prospectiveDoseAnalysisSimulator import ProspectiveDoseAnalysisSimulatorBatchAction as prospectiveDoseAnalysisSimulator
 from avid.actions.arima import AmiraBatchAction as amira
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 
 __this__ = sys.modules[__name__]
 
-templatePath = os.path.join(getAVIDRootPath(), "python", "templates")
+templatePath = os.path.join(getAVIDProjectRootPath(), "templates")
 
 with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as session:
   #prospectiveDoseAnalysisSimulator(ActionTagSelector("DoseStatsActualCollector")+DoseStatSelector("maximum"), actionTag = "ProspectiveDoseAnalysis").do()

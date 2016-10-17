@@ -13,7 +13,7 @@ from avid.selectors import TypeSelector
 from avid.actions.regTool import regToolBatchAction as regTool
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.actions.pdc import pdcBatchAction as pdc
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseStats import DoseStatBatchAction as doseTool
 from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as doseStatsCollector
@@ -29,9 +29,9 @@ execStyle = None
 if cliargs.style is not None:
   execStyle = cliargs.style
   
-transRegTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "DIPP_translation_default.reg.xml")
-rigidRegTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "DIPP_rigid_default.reg.xml")
-pdcTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "PDC_DICOM_template.bat")
+transRegTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "DIPP_translation_default.reg.xml")
+rigidRegTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "DIPP_rigid_default.reg.xml")
+pdcTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "PDC_DICOM_template.bat")
 
 with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as session:
   if execStyle is None: #do everything including the registration

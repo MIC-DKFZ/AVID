@@ -23,8 +23,8 @@ class ImageAccAction(CLIActionBase):
   def __init__(self, image1, image2, registration = None, weight1 = None,
                weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, imageAccExe = os.path.join("DoseAcc","DoseAcc.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(image1, image2, registration)
         
     self._image1 = image1
@@ -35,7 +35,6 @@ class ImageAccAction(CLIActionBase):
     self._interpolator = interpolator
     self._operator = operator
     self._outputExt = outputExt
-    self._imageAccExe = imageAccExe
     self._accumulationNR = additionalActionProps[artefactProps.ACC_ELEMENT]
     self._resultArtefact = None;
     
@@ -111,7 +110,7 @@ class ImageAccAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "imageAcc", self._imageAccExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "imageAcc", self._actionConfig)
     
     content = '"'+execURL + '"' + ' "' + image1Path + '"'+ ' "' + image2Path + '"' + ' "' + resultPath + '"'
 
@@ -145,7 +144,7 @@ class ImageAccBatchAction(BatchActionBase):
                imageSorter = TimePointSorter(), 
                interpolator = "linear", operator="+", outputExt = "nrrd", imageSplitProperty = None, 
                actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, imageAccExe =os.path.join("DoseAcc","DoseAcc.exe")):
+               session = None, additionalActionProps = None, actionConfig = None):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
     self._images = imageSelector.getSelection(self._session.inData)
@@ -159,7 +158,7 @@ class ImageAccBatchAction(BatchActionBase):
     self._interpolator = interpolator
     self._operator = operator
     self._outputExt = outputExt
-    self._imageAccExe = imageAccExe
+    self._actionConfig = actionConfig
     self._imageSplitProperty = imageSplitProperty
 
         
@@ -213,7 +212,7 @@ class ImageAccBatchAction(BatchActionBase):
                                   self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
-                                  imageAccExe =self._imageAccExe)
+                                  actionConfig =self._actionConfig)
           
         action._indicateOutputs() #call to ensure the result artefact is defined
         actions.append(action)

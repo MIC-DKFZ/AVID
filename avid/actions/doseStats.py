@@ -22,15 +22,14 @@ class DoseStatAction(CLIActionBase):
 
   def __init__(self, inputDose, structSet, structName,
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, doseStatExe = os.path.join("DoseTool","DoseTool.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(inputDose,structSet)
     self._inputDose = inputDose
     self._structSet = structSet
     self._structName = structName
-    self._doseStatExe = doseStatExe
        
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", doseStatExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", actionConfig))
     self._cwd = cwd    
     
   def _generateName(self):
@@ -96,7 +95,7 @@ class DoseStatAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", self._doseStatExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", self._actionConfig)
     
     content = '"' + execURL + '"' + ' -d "' + inputPath + '" -s "' + structPath + '" --doseStatistics "' + resultPath + '"'
 
@@ -166,7 +165,7 @@ class DoseStatBatchAction(BatchActionBase):
   def __init__(self,  inputSelector, structSetSelector, structNames,
                structLinker = CaseLinker()+CaseInstanceLinker(), 
                actionTag = "doseStat", alwaysDo = False,
-               session = None, additionalActionProps = None, doseStatExe = os.path.join("DoseTool","DoseTool.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -174,7 +173,7 @@ class DoseStatBatchAction(BatchActionBase):
 
     self._structLinker = structLinker
     self._structNames = structNames
-    self._doseStatExe = doseStatExe  
+    self._actionConfig = actionConfig  
 
       
   def _generateActions(self):
@@ -197,7 +196,7 @@ class DoseStatBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              doseStatExe =self._doseStatExe)
+                              actionConfig =self._actionConfig)
           actions.append(action)
     
     return actions

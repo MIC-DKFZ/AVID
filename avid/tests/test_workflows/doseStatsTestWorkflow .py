@@ -4,7 +4,6 @@ import os
 import avid.common.workflow as workflow
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.actions.doseStats import DoseStatBatchAction as doseStats
-from avid.common.AVIDUrlLocater import getAVIDRootPath
 
 __this__ = sys.modules[__name__]
 

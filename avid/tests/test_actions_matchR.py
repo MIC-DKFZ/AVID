@@ -4,7 +4,6 @@ import unittest
 
 import avid.common.workflow as workflow
 from avid.actions.matchR import matchRBatchAction as matchR
-from avid.common.AVIDUrlLocater import getAVIDRootPath
 from avid.common.AVIDUrlLocater import getUtilityPath
 from avid.selectors.keyValueSelector import ActionTagSelector
 

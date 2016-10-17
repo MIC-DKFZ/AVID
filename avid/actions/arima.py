@@ -13,14 +13,14 @@ from avid.selectors import TypeSelector
 from simpleScheduler import SimpleScheduler
 from avid.linkers import FractionLinker
 from avid.selectors.keyValueSelector import FormatSelector
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 import avid.common.templateFileCustomizer as templateFileCustomizer
 
 logger = logging.getLogger(__name__)
 
 class ArimaAction(CLIActionBase):
 
-  def __init__(self, doseStatsCollector, selectedStats=None, nPlannedFractions=25, rTemplateFile = os.path.join(getAVIDRootPath(), "python", "templates", "arima.R"), rowKey='Fractions',
+  def __init__(self, doseStatsCollector, selectedStats=None, nPlannedFractions=25, rTemplateFile = os.path.join(getAVIDProjectRootPath(), "templates", "arima.R"), rowKey='Fractions',
                columnKey='Percentil', withHeaders=True, actionTag="Arima",
                alwaysDo=False, session=None, additionalActionProps=None, rScriptExe = "Rscript.exe"):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
@@ -125,7 +125,7 @@ class ArimaAction(CLIActionBase):
 class ArimaBatchAction(BatchActionBase):
   '''Batch class for the dose collection actions.'''
 
-  def __init__(self, doseStatsSelector, selectedStats=None, planSelector = None, planLinker = FractionLinker(useClosestPast=True), rTemplateFile=os.path.join(getAVIDRootPath(), "python", "templates", "arima.R"), rowKey='Fractions',
+  def __init__(self, doseStatsSelector, selectedStats=None, planSelector = None, planLinker = FractionLinker(useClosestPast=True), rTemplateFile=os.path.join(getAVIDProjectRootPath(), "templates", "arima.R"), rowKey='Fractions',
                columnKey='Percentil', withHeaders=True, actionTag="arima", alwaysDo=False,
                session=None, additionalActionProps=None, rScriptExe = "Rscript.exe", scheduler=SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)

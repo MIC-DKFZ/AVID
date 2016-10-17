@@ -10,9 +10,19 @@ import ConfigParser
 
 logger = logging.getLogger(__name__)
 
-def getAVIDRootPath():
+def getAVIDPackagePath():
   '''
-  identifies the root dir of the AVID source dir
+  identifies the root dir of the AVID package dir
+  '''
+  # get the location of this file (to be precisely it's the .pyc)
+  path = os.path.dirname(__file__)
+
+  # navigate to the root dir - to do so we navigate the directory tree upwards 
+  return os.path.split(path)[0]
+
+def getAVIDProjectRootPath():
+  '''
+  identifies the root dir of the AVID project source dir
   '''
   # get the location of this file (to be precisely it's the .pyc)
   path = os.path.dirname(__file__)
@@ -24,71 +34,89 @@ def getAVIDRootPath():
 def getUtilityPath(): 
   '''
      identify the Utility root dir (here are the specific action subdirs located)
-  '''  
-  actionToolRootPath = os.environ.get('AVID_TOOL_PATH')
-  if actionToolRootPath is None:
-    rootPath = getAVIDRootPath()
-    actionToolRootPath = os.path.join(rootPath,"Utilities")
+  '''
+  toolpath = None
+  configPath = os.path.join(getAVIDProjectRootPath(), "avid.config")
+    
+  if os.path.isfile(configPath):
+    config = ConfigParser.ConfigParser()
+    config.read(configPath)
+    toolpath = config.get('avid','toolpath') 
+          
+  if toolpath is None:
+    rootPath = getAVIDProjectRootPath()
+    toolpath = os.path.join(rootPath,"Utilities")
   
-  if os.path.isdir(actionToolRootPath):
-    return actionToolRootPath
+  if os.path.isdir(toolpath):
+    return toolpath
   else:
     return None
- 
-def getExecutableURL(workflow, actionID, defaultRelativePath):
+  
+def getToolConfigPath(actionID, workflowRootPath = None):
+  ''' Helper functions that gets the path to the config file for the passed actionID
+      If workflowRootPath is set it will be also checked 
+     @param actionID of the action that requests the URL
+     @param workflowRootPath Path of the workflow. If none it will be ignored.
+     The following rules will used to determine the tool config path.
+     1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
+     2. check the path:<AVID toolpath>/<actionID>/avidtool.config. If it is valid, return it else 2. 
+     3. check path:avidRoot/Utilities/<actionID>/avidtool.config. If it is valid, return it else 4.
+     4. return None      
+  '''
+  configPath = None
+
+  if not workflowRootPath is None:
+    testPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")
+    if os.path.isfile(testPath):
+      configPath = testPath
+
+  if configPath is None:
+    try:
+      testPath = os.path.join(getUtilityPath(), actionID, "avidtool.config")
+      if os.path.isfile(testPath):
+        configPath = testPath
+    except:
+      pass
+  
+  return configPath       
+
+
+def getExecutableURL(workflow, actionID, actionConfig = None):
   '''
      returns url+executable for a actionID request
-     @param actionID of the action that requests the URL 
-     @defaultRelativePath relative path to the action executable that should be used if no user definition
-     exists.
+     @param actionID of the action that requests the URL
+     @param actionConfig specifies if a certian configuration of an action should be used.
      1. checks if there is a valid tool in workflow.actionTools[actionID]. If there is, return it else 2.
-     2. check path:workflowRootPath/tools/<defaultRelativePath>. If it is valid, return it else 3.
-     3. check the path:<environment variable AVID_TOOL_PATH>/<defaultRelativePath>. If it is valid, return it else 4. 
-     4. check the file <environment variable AVID_TOOL_PATH>/user_tools.ini for the entry of the URL. If it is valid, return it else 5.
-     5. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 6.
-     6. return default value
+     2. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 3.
+     3. check the path:<AVID toolpath>/<actionID>/avidtool.config. If it is valid, return it else 4. 
+     4. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 5.
+     5. return None
   '''
   returnURL = None
 
   if actionID in workflow.actionTools:
+    #option 1
     returnURL = workflow.actionTools[actionID]
 
   if returnURL is None:
-    if not workflow.rootPath:
-      print "Warning: no workflowRootPath set"
-    actionPath = os.path.join(os.path.join(workflow.rootPath,"tools"),defaultRelativePath)
-    if os.path.isfile(actionPath):
-      returnURL = actionPath
-
-  if returnURL is None:
-    toolPath = os.environ.get('AVID_TOOL_PATH')
-    if not toolPath is None:
-      actionPath = os.path.join(toolPath,defaultRelativePath)
-      if os.path.isfile(actionPath):
-        returnURL = actionPath
-
-  if returnURL is None:
-    toolPath = os.environ.get('AVID_TOOL_PATH')
-    if not toolPath is None:
-      iniPath = os.path.join(toolPath,'user_tools.ini')
-      if os.path.isfile(iniPath):
-        config = ConfigParser.ConfigParser()
-        config.read(fullPath)
+    #option 2-4
+    toolconfigPath = getToolConfigPath(actionID, workflow.rootPath)
+    if os.path.isfile(str(toolconfigPath)):
+      config = ConfigParser.ConfigParser()
+      config.read(toolconfigPath)
     
-        execURL = config.get('tools',actionID)
-        if os.path.isfile(execURL):
-          returnURL = execURL        
+      configSection = 'default'
+      if not actionConfig is None:
+        configSection = str(actionConfig)
         
-  if returnURL is None:
-    actionRootPath = getUtilityPath()
-    if not actionRootPath is None:
-      actionPath = os.path.join(actionRootPath,defaultRelativePath)
-      if os.path.isfile(actionPath):
-        returnURL = actionPath
-
-  if returnURL is None:
-    returnURL = defaultRelativePath
-    
+      execURL = config.get(configSection,'exe')
+      
+      if not os.path.isabs(execURL):
+        execURL = os.path.join(os.path.dirname(toolconfigPath),execURL)
+                  
+      if os.path.isfile(execURL):
+        returnURL = execURL        
+   
   if not os.path.exists(returnURL):
     logger.debug('Found executable URL for action "%s" seems to be invalid. Found URL: %s', actionID, returnURL)
   

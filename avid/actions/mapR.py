@@ -21,17 +21,16 @@ class mapRAction(CLIActionBase):
   def __init__(self, inputImage, registration = None, templateImage = None, 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, mapRExe = os.path.join("mapR4V","mapR4V.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(inputImage,registration,templateImage)
     self._inputImage = inputImage
     self._registration = registration
     self._templateImage = templateImage
     self._interpolator = interpolator
     self._outputExt = outputExt
-    self._mapRExe = mapRExe
     
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", mapRExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", actionConfig))
     self._cwd = cwd    
     
   def _generateName(self):
@@ -94,7 +93,7 @@ class mapRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "mapR", self._mapRExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "mapR", self._actionConfig)
     
     content = '"' + execURL + '"' + ' "' + inputPath + '"'
     if registrationPath is not None:
@@ -124,7 +123,7 @@ class mapRBatchAction(BatchActionBase):
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, mapRExe = os.path.join("mapR4V","mapR4V.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputImages = inputSelector.getSelection(self._session.inData)
@@ -140,7 +139,7 @@ class mapRBatchAction(BatchActionBase):
     self._templateLinker = templateLinker  
     self._interpolator = interpolator
     self._outputExt = outputExt
-    self._mapRExe = mapRExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -168,7 +167,7 @@ class mapRBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              mapRExe =self._mapRExe)
+                              actionConfig =self._actionConfig)
           actions.append(action)
     
     return actions

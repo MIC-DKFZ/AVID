@@ -5,6 +5,10 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.pdc import pdcBatchAction as pdc
 from avid.selectors.keyValueSelector import ActionTagSelector
+from avid.common.artefact import Artefact
+from avid.common.artefact import generateArtefactEntry
+import avid.common.artefact.defaultProps as defaultProps
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
 class TestPDC(unittest.TestCase):
 
@@ -18,7 +22,15 @@ class TestPDC(unittest.TestCase):
 
       self.batPath = os.path.join(os.path.split(__file__)[0],"data", "pdcTest", "PDC_template.bat")
          
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True)
+      
+      pdcDataPath = os.path.join(os.path.dirname(getToolConfigPath('pdc++')),'Resources', 'TestData','data','2000_TEST_B')
+      plan = generateArtefactEntry('case1', None, 0, 'Plan', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B108.pln'))
+      self.session.inData.append(plan)
+      ct = generateArtefactEntry('case1', None, 0, 'BPLCT', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B000.ctx.gz'))
+      self.session.inData.append(ct)
+      structurset = generateArtefactEntry('case1', None, 0, 'Struct', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B000.vdx'))
+      self.session.inData.append(structurset)
 
               
     def tearDown(self):

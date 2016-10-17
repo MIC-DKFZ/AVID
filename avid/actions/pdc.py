@@ -24,15 +24,14 @@ class pdcAction(CLIActionBase):
 
   def __init__(self, image, plan, struct, 
                actionTag = "pdc", executionBat = None, alwaysDo = False,
-               session = None, additionalActionProps = None, pdcExe = os.path.join("pdc++","pdc++","pdcTest","bin","pdc.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(image, plan, struct)
 
     self._image = image
     self._plan = plan
     self._struct = struct
     self._executionBat = executionBat
-    self._pdcExe = pdcExe
   
   def _generateName(self):
     name = "pdc_"+str(artefactHelper.getArtefactProperty(self._plan,artefactProps.ACTIONTAG))\
@@ -192,7 +191,7 @@ class pdcAction(CLIActionBase):
     batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     inputPath = os.path.split(ownPlan)[0]
 
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "pdc", self._pdcExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "pdc++", self._actionConfig)
     #It assumes that the exe is stored in root/bin/[exe]
     pdcRootPath = os.path.dirname(os.path.dirname(execURL)) 
     pdcDevicePath= os.path.join(os.path.dirname(pdcRootPath),"Resources", "TestData")
@@ -253,7 +252,7 @@ class pdcBatchAction(BatchActionBase):
                planLinker = FractionLinker(useClosestPast = True), structLinker = FractionLinker(),
                actionTag = "pdc", executionBat = None, alwaysDo = False,
                session = None, additionalActionProps = None,
-               pdcExe = os.path.join("pdc++","General","bin","pdc.exe"),
+               actionConfig = None,
                scheduler = SimpleScheduler()):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
@@ -265,7 +264,7 @@ class pdcBatchAction(BatchActionBase):
     self._planLinker = planLinker
     self._structLinker = structLinker  
     self._executionBat = executionBat
-    self._pdcExe = pdcExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -288,7 +287,7 @@ class pdcBatchAction(BatchActionBase):
           action = pdcAction(image, lplan, lstruct, self._actionTag, self._executionBat,
                              alwaysDo = self._alwaysDo, session = self._session,
                              additionalActionProps = self._additionalActionProps,
-                             pdcExe =self._pdcExe)
+                             actionConfig =self._actionConfig)
           actions.append(action)
     
     return actions

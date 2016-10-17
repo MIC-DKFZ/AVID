@@ -22,8 +22,8 @@ class DoseMapAction(CLIActionBase):
   def __init__(self, inputDose, registration = None, templateDose = None, 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "doseMap", alwaysDo = False,
-               session = None, additionalActionProps = None, doseMapExe = os.path.join("DoseMap","DoseMap.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(inputDose, registration, templateDose)
 
     self._inputDose = inputDose
@@ -31,9 +31,8 @@ class DoseMapAction(CLIActionBase):
     self._templateDose = templateDose
     self._interpolator = interpolator
     self._outputExt = outputExt
-    self._doseMapExe = doseMapExe
     
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", doseMapExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", actionConfig))
     self._cwd = cwd    
     
 
@@ -99,7 +98,7 @@ class DoseMapAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", self._doseMapExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", self._actionConfig)
     
     content = '"' + execURL + '"' + ' "' + inputPath + '"' + ' "' + resultPath + '"'
     if registrationPath is not None:
@@ -158,7 +157,7 @@ class DoseMapBatchAction(BatchActionBase):
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "doseMap", alwaysDo = False,
-               session = None, additionalActionProps = None, doseMapExe = os.path.join("DoseMap","DoseMap.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -174,7 +173,7 @@ class DoseMapBatchAction(BatchActionBase):
     self._templateLinker = templateLinker  
     self._interpolator = interpolator
     self._outputExt = outputExt
-    self._doseMapExe = doseMapExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -202,7 +201,7 @@ class DoseMapBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              doseMapExe =self._doseMapExe)
+                              actionConfig =self._actionConfig)
           actions.append(action)
     
     return actions

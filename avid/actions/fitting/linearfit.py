@@ -18,16 +18,14 @@ class LinearFitAction(CLIActionBase):
 
   def __init__(self, inputImage, maskImage = None, roibased = False,
                actionTag = "FFMaps", alwaysDo = False,
-               session = None, additionalActionProps = None, miniapp = os.path.join("GenericFittingMiniApp","GenericFittingMiniApp.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, None, actionConfig = None)
     self._setCaseInstanceByArtefact(inputImage, maskImage)
      
     self._inputImage = inputImage
     self._maskImage = maskImage
     
     self._roibased = roibased
-    
-    self._miniapp = miniapp
     
     self._coolstartID = artefactHelper.getArtefactProperty(inputImage, "coolstartID")
     self._coolendID = artefactHelper.getArtefactProperty(inputImage, "coolendID")
@@ -97,7 +95,7 @@ class LinearFitAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "GenericFittingMiniApp", self._miniapp)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "GenericFittingMiniApp", self._actionConfig)
     
     content = '"' + execURL + '" -f Linear -i "'+str(inputPath)+'" -o "'+ self._outputTemplatePath+'"'
     
@@ -119,12 +117,12 @@ class LinearFitBatchAction(BatchActionBase):
   '''Batch action that uses the MITK GenericFittingMiniApp to make a linear fit.'''
   
   def __init__(self,  inputSelector, maskSelector, maskLinker = CaseLinker(), roibased = False, actionTag = "LinearFit", alwaysDo = False,
-               session = None, additionalActionProps = None, miniapp = os.path.join("GenericFittingMiniApp","GenericFittingMiniApp.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputs = inputSelector.getSelection(self._session.inData)
     self._masks = maskSelector.getSelection(self._session.inData)
-    self._miniapp = miniapp
+    self._actionConfig = actionConfig
     self._maskLinker = maskLinker
     self._roibased = roibased
 

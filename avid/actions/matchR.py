@@ -24,21 +24,20 @@ class matchRAction(CLIActionBase):
 
   def __init__(self, targetImage, movingImage, algorithm, algorithmParameters=dict(), targetMask = None,  movingMask = None,
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, matchRExe = os.path.join("matchR","matchR.exe")):
+               session = None, additionalActionProps = None, actionConfig = None):
        
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(targetImage, movingImage, targetMask, movingMask)
 
     self._targetImage = targetImage
     self._targetMask = targetMask
     self._movingImage = movingImage
     self._movingMask = movingMask
-    self._matchRExe = matchRExe
     self._algorithm = algorithm
     self._algorithmParameters = algorithmParameters
     self._targetIsReference = targetIsReference
 
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", matchRExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", actionConfig))
     self._cwd = cwd
   
   
@@ -101,7 +100,7 @@ class matchRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
       
     try:
-      execURL = AVIDUrlLocater.getExecutableURL(self._session, "matchR", self._matchRExe)
+      execURL = AVIDUrlLocater.getExecutableURL(self._session, "matchR", self._actionConfig)
       targetImageURL = artefactHelper.getArtefactProperty(self._targetImage,artefactProps.URL)
       movingImageURL = artefactHelper.getArtefactProperty(self._movingImage, artefactProps.URL)
     
@@ -144,7 +143,7 @@ class matchRBatchAction(BatchActionBase):
                movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
                movingMaskLinker = FractionLinker(), targetIsReference = True, 
                actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, matchRExe = os.path.join("matchR","matchR.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -162,7 +161,7 @@ class matchRBatchAction(BatchActionBase):
     self._targetMaskLinker = targetMaskLinker  
     self._movingMaskLinker = movingMaskLinker
     self._targetIsReference = targetIsReference
-    self._matchRExe = matchRExe
+    self._actionConfig = actionConfig
     self._algorithmParameters = algorithmParameters
     self._algorithm = algorithm
 
@@ -198,7 +197,7 @@ class matchRBatchAction(BatchActionBase):
                                    self._targetIsReference, self._actionTag,
                                    alwaysDo = self._alwaysDo, session = self._session,
                                    additionalActionProps = self._additionalActionProps,
-                                   matchRExe =self._matchRExe)
+                                   actionConfig =self._actionConfig)
             actions.append(action)
     
     return actions

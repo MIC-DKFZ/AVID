@@ -14,7 +14,7 @@ from avid.selectors import DoseStatSelector
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.actions.pdc import pdcBatchAction as pdc
 from avid.actions.cleanWorkflow import cleanWorkflowBatchAction as cleanWorkflow
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.actions.regVarTool import RegVariationToolBatchAction as regVar
 from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseStats import DoseStatBatchAction as doseTool
@@ -25,10 +25,10 @@ from avid.actions.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
 
 __this__ = sys.modules[__name__]
 
-templatePath = os.path.join(getAVIDRootPath(), "python", "templates")
-pdcTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "PDC_template.bat")
-regVarTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "Gauss_trans.reg.var.xml")
-pdcExe = os.path.join(getAVIDRootPath(),"Utilities","pdc++", "General", "bin", "PDC.exe" )
+templatePath = os.path.join(getAVIDProjectRootPath(), "templates")
+pdcTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "PDC_template.bat")
+regVarTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "Gauss_trans.reg.var.xml")
+pdcExe = os.path.join(getAVIDProjectRootPath(),"Utilities","pdc++", "General", "bin", "PDC.exe" )
 RSCRIPTEXE = "C:/Program Files/R/R-3.1.0/bin/Rscript.exe"
 
 parser = argparse.ArgumentParser()

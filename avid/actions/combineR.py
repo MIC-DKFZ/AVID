@@ -19,14 +19,13 @@ class combineRAction(CLIActionBase):
 
   def __init__(self, reg1, reg2, combOperation = "+", 
                actionTag = "combineR", alwaysDo = False,
-               session = None, additionalActionProps = None, combineRExe = os.path.join("combineR","combineR.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(reg1,reg2)
 
     self._reg1 = reg1
     self._reg2 = reg2
     self._combOp = combOperation
-    self._combineRExe = combineRExe
 
   def _generateName(self):
     name = "combineR_"+str(artefactHelper.getArtefactProperty(self._reg1,artefactProps.ACTIONTAG))\
@@ -72,7 +71,7 @@ class combineRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "combineR", self._combineRExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "combineR", self._actionConfig)
     
     content = '"'+ execURL + '"' + ' "' + resultPath + '" "' + reg1Path +'" '+self._combOp+'"' + reg2Path + '"'
     
@@ -89,7 +88,7 @@ class combineRBatchAction(BatchActionBase):
   def __init__(self,  reg1Selector, reg2Selector,
                regLinker = FractionLinker(), combOperation = "+", 
                actionTag = "combineR", alwaysDo = False, session = None,
-               additionalActionProps = None, combineRExe = os.path.join("combineR","combineR.exe"), scheduler = SimpleScheduler()):
+               additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._reg1s = reg1Selector.getSelection(self._session.inData)
@@ -98,6 +97,7 @@ class combineRBatchAction(BatchActionBase):
     self._regLinker = regLinker
     self._combOp = combOperation
     self._combineRExe = combineRExe
+    self._actionConfig = actionConfig
 
       
   def _generateActions(self):
@@ -121,7 +121,7 @@ class combineRBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              combineRExe=self._combineRExe)
+                              actionConfig=self._actionConfig)
         actions.append(action)
     
     return actions

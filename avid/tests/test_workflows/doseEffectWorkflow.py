@@ -10,15 +10,15 @@ from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseMap import DoseMapBatchAction as doseMap
 from avid.actions.matchR import matchRBatchAction as matchR
 from avid.actions.mapR import mapRBatchAction as mapR
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.selectors import ActionTagSelector
 from avid.selectors import FormatSelector
 from avid.selectors import TimepointSelector
 
 __this__ = sys.modules[__name__]
 
-plastimatchParameterFile = os.path.join(getAVIDRootPath(), "python", "templates", "plastimatchTest.txt")
-plastimatchAlgorithm = os.path.join(getAVIDRootPath(), "Utilities", "matchR", "mdra-0-12_PlmParameterFileCLI3DRegistration.dll")
+plastimatchParameterFile = os.path.join(getAVIDProjectRootPath(), "templates", "plastimatchTest.txt")
+plastimatchAlgorithm = os.path.join(getAVIDProjectRootPath(), "Utilities", "matchR", "mdra-0-12_PlmParameterFileCLI3DRegistration.dll")
 plastimatchDirectory = "C:/Program Files/plastimatch 1.6.4/bin"
 
 with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as session:

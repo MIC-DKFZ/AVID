@@ -8,7 +8,7 @@ from avid.selectors import ActionTagSelector
 from avid.selectors import FormatSelector
 from avid.selectors import CaseInstanceSelector
 from avid.actions.mapR import mapRBatchAction as mapR
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.actions.regVarTool import RegVarToolBatchAction as regVar
 from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.actions.doseStats import DoseStatBatchAction as doseTool
@@ -16,7 +16,7 @@ from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as dos
 
 __this__ = sys.modules[__name__]
 
-#regVarTemplatePath = os.path.join(getAVIDRootPath(), "python", "templates", "Gauss_trans.reg.var.xml")
+#regVarTemplatePath = os.path.join(getAVIDProjectRootPath(), "templates", "Gauss_trans.reg.var.xml")
 
 NR_VARIATIONS=2
 #ALGORITHMDLL = "D:/dev/AVIDPyWorkflow/rework_ng/Utilities/RegVarTool/mdra-0-12_RegVariationRandomGaussianEuler.dll"

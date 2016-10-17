@@ -23,8 +23,8 @@ class DoseAccAction(CLIActionBase):
   def __init__(self, dose1, dose2, registration = None, weight1 = None,
                weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "doseAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, doseAccExe = os.path.join("DoseAcc","DoseAcc.exe")):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               session = None, additionalActionProps = None, actionConfig = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(dose1, dose2, registration)
         
     self._dose1 = dose1
@@ -35,10 +35,9 @@ class DoseAccAction(CLIActionBase):
     self._interpolator = interpolator
     self._operator = operator
     self._outputExt = outputExt
-    self._doseAccExe = doseAccExe
     self._resultArtefact = None;
     
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", doseAccExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", actionConfig))
     self._cwd = cwd    
     
   def _generateName(self):
@@ -113,7 +112,7 @@ class DoseAccAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", self._doseAccExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", self._actionConfig)
     
     content = '"'+execURL + '"' + ' "' + dose1Path + '"'+ ' "' + dose2Path + '"' + ' "' + resultPath + '"'
 
@@ -157,7 +156,7 @@ class DoseAccBatchAction(BatchActionBase):
                regLinker = FractionLinker(), planLinker = FractionLinker(useClosestPast=True), doseSorter = TimePointSorter(), 
                interpolator = "linear", operator="+", outputExt = "nrrd", doseSplitProperty = None, 
                actionTag = "doseAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, doseAccExe =os.path.join("DoseAcc","DoseAcc.exe")):
+               session = None, additionalActionProps = None, actionConfig = None):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
     self._doses = doseSelector.getSelection(self._session.inData)
@@ -176,7 +175,7 @@ class DoseAccBatchAction(BatchActionBase):
     self._interpolator = interpolator
     self._operator = operator
     self._outputExt = outputExt
-    self._doseAccExe = doseAccExe
+    self._actionConfig = actionConfig
     self._doseSplitProperty = doseSplitProperty
 
         
@@ -239,14 +238,14 @@ class DoseAccBatchAction(BatchActionBase):
                                   self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
-                                  doseAccExe =self._doseAccExe)
+                                  actionConfig =self._actionConfig)
         else:
           interimDoseArtefact = actions[-1]._resultArtefact #take the dose result of the last action
           action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2, self._interpolator, self._operator, self._outputExt,
                                   self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
-                                  doseAccExe =self._doseAccExe)
+                                  actionConfig =self._actionConfig)
           
         action._indicateOutputs() #call to ensure the result artefact is defined
         actions.append(action)

@@ -15,10 +15,11 @@ class CLIActionBase(SingleActionBase):
   for the CLI call to run properly. Then the call should be returned as result of
   the method.'''
 
-  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None):
+  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionConfig = None):
     '''@param cwd Specifies the current working directory that should be used for the cli call'''
     SingleActionBase.__init__(self, actionTag,alwaysDo, session, additionalActionProps)
     self._cwd = cwd
+    self._actionConfig = actionConfig
     
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed

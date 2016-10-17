@@ -7,7 +7,7 @@ import argparse
 
 import avid.common.workflow as workflow
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common.AVIDUrlLocater import getAVIDRootPath
+from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.selectors import ActionTagSelector
 from avid.selectors import FormatSelector
 from avid.selectors import TimepointSelector
@@ -41,8 +41,8 @@ if cliargs.variationParameters is not None:
     variationParameters = cliargs.variationParameters
 
 #general setup variables and selectors for a more readable script
-regTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "DIPP_FastSymmetricForcesDemons.reg.xml")
-regDummyTemplate = os.path.join(getAVIDRootPath(), "python", "templates", "Dummy3D.reg.xml")
+regTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "DIPP_FastSymmetricForcesDemons.reg.xml")
+regDummyTemplate = os.path.join(getAVIDProjectRootPath(), "templates", "Dummy3D.reg.xml")
 ALGORITHMDLL = "C:/dev/AVID/trunk/Utilities/RegVarTool/mdra-0-12_RegVariationKernelRandomGaussianTPS.dll"
 PARAMETERS = {"Mean" : "0.0", "StandardDeviation" : "3.0", "GridSize" : "5"}
 
