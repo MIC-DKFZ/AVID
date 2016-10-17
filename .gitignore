@@ -3,6 +3,7 @@
 /AVID.egg-info
 /build
 *.log
+/avid/tests/temporary*
 
 ########## Git related
 
