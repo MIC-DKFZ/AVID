@@ -24,20 +24,19 @@ class regToolAction(CLIActionBase):
 
   def __init__(self, targetImage, movingImage, configTemplate, targetMask = None,  movingMask = None, 
                targetIsReference = True, actionTag = "regTool", alwaysDo = False,
-               session = None, additionalActionProps = None, regToolExe = os.path.join("RegTool","RegTool.exe")):
+               session = None, additionalActionProps = None, actionConfig = None):
        
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(targetImage, movingImage, targetMask, movingMask)
 
     self._targetImage = targetImage
     self._targetMask = targetMask
     self._movingImage = movingImage
     self._movingMask = movingMask
-    self._regToolExe = regToolExe
     self._configTemplate = configTemplate
     self._targetIsReference = targetIsReference
 
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "regTool", regToolExe))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "regTool", actionConfig))
     self._cwd = cwd
   
   
@@ -225,7 +224,7 @@ class regToolAction(CLIActionBase):
       raise
       
     try:
-      execURL = AVIDUrlLocater.getExecutableURL(self._session, "regTool", self._regToolExe)
+      execURL = AVIDUrlLocater.getExecutableURL(self._session, "regTool", self._actionConfig)
     
       content = '"' + execURL + '"' + ' "' + configPath + '"'
     except:
@@ -251,7 +250,7 @@ class regToolBatchAction(BatchActionBase):
                movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
                movingMaskLinker = FractionLinker(), targetIsReference = True, 
                actionTag = "regTool", alwaysDo = False,
-               session = None, additionalActionProps = None, regToolExe = os.path.join("RegTool","RegTool.exe"), scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -269,7 +268,7 @@ class regToolBatchAction(BatchActionBase):
     self._targetMaskLinker = targetMaskLinker  
     self._movingMaskLinker = movingMaskLinker
     self._targetIsReference = targetIsReference
-    self._regToolExe = regToolExe
+    self._actionConfig = actionConfig
     self._configTemplate = configTemplate
 
       
@@ -304,7 +303,7 @@ class regToolBatchAction(BatchActionBase):
                                    self._targetIsReference, self._actionTag,
                                    alwaysDo = self._alwaysDo, session = self._session,
                                    additionalActionProps = self._additionalActionProps,
-                                   regToolExe =self._regToolExe)
+                                   actionConfig =self._actionConfig)
             actions.append(action)
     
     return actions
