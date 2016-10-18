@@ -45,6 +45,18 @@ or
 make install
 ```
 
+## configure your AVID tools path
+use
+```
+  avidconfig settings avid.toolspath <your_desired_tools_path>
+```
+
+## install all tools specified by your AVID distribution
+use
+```
+  avidconfig tools install
+```
+
 ## run tests
 either run:
 ```
@@ -55,9 +67,7 @@ or
 make test
 ```
 
-## execute tutorial
-In your console, navigate to the tutorials subfolder and start ipython notebook.
-
+## Have fun
 
 ## run scripts
 Scripts can be found in subfolder bin. They are declared as entry points
