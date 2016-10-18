@@ -30,25 +30,37 @@ def getAVIDProjectRootPath():
   # navigate to the root dir - to do so we navigate the directory tree upwards 
   return os.path.split(os.path.split(path)[0])[0]
 
-
-def getUtilityPath(): 
+def getAVIDConfigPath():
+  '''
+  Gets the path to the AVID config file.
+  '''
+  return os.path.join(getAVIDProjectRootPath(), "avid.config")
+   
+def getDefaultToolsSourceConfigPath():
+  '''
+  Gets the path to the AVID config file.
+  '''
+  return os.path.join(getAVIDProjectRootPath(), "tools-sources.config")
+   
+      
+def getUtilityPath(checkExistance = True): 
   '''
      identify the Utility root dir (here are the specific action subdirs located)
   '''
-  toolpath = None
-  configPath = os.path.join(getAVIDProjectRootPath(), "avid.config")
+  toolspath = None
+  configPath = getAVIDConfigPath()
     
   if os.path.isfile(configPath):
     config = ConfigParser.ConfigParser()
     config.read(configPath)
-    toolpath = config.get('avid','toolpath') 
+    toolspath = config.get('avid','toolspath') 
           
-  if toolpath is None:
+  if toolspath is None:
     rootPath = getAVIDProjectRootPath()
-    toolpath = os.path.join(rootPath,"Utilities")
+    toolspath = os.path.join(rootPath,"Utilities")
   
-  if os.path.isdir(toolpath):
-    return toolpath
+  if os.path.isdir(toolspath) or not checkExistance:
+    return toolspath
   else:
     return None
   
@@ -59,7 +71,7 @@ def getToolConfigPath(actionID, workflowRootPath = None):
      @param workflowRootPath Path of the workflow. If none it will be ignored.
      The following rules will used to determine the tool config path.
      1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
-     2. check the path:<AVID toolpath>/<actionID>/avidtool.config. If it is valid, return it else 2. 
+     2. check the path:<AVID toolspath>/<actionID>/avidtool.config. If it is valid, return it else 2. 
      3. check path:avidRoot/Utilities/<actionID>/avidtool.config. If it is valid, return it else 4.
      4. return None      
   '''
@@ -88,7 +100,7 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
      @param actionConfig specifies if a certian configuration of an action should be used.
      1. checks if there is a valid tool in workflow.actionTools[actionID]. If there is, return it else 2.
      2. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 3.
-     3. check the path:<AVID toolpath>/<actionID>/avidtool.config. If it is valid, return it else 4. 
+     3. check the path:<AVID toolspath>/<actionID>/avidtool.config. If it is valid, return it else 4. 
      4. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 5.
      5. return None
   '''
