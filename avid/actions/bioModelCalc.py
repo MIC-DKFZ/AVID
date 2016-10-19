@@ -76,21 +76,23 @@ class BioModelCalcAction(CLIActionBase):
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._actionConfig)
     
-    content = '"' + execURL + '"' + ' -d "' + inputPath+ '"'
-    content += ' -t ' + _getArtefactLoadStyle(self._inputDose)
-    content += ' -o "' + resultPath + '"'
+    content = '"' + execURL + '"' + ' --dose "' + inputPath+ '"'
+    content += ' --loadStyle ' + _getArtefactLoadStyle(self._inputDose)
+    content += ' --outputFile "' + resultPath + '"'
     content += ' --doseScaling ' + str(self._weight)
-    content += ' -m "'+ self._modelName +'"'
+    content += ' --model "'+ self._modelName +'"'
     if self._modelParameterMaps:
-      content += ' -a '
+      content += ' --modelParameterMaps '
       for val in self._modelParameterMaps:
         mapsPath = artefactHelper.getArtefactProperty(val, artefactProps.URL)
         content += mapsPath + " "
-      content += ' -u ' + _getArtefactLoadStyle(self._modelParameterMaps[0])
+      content += ' --loadStyleParameterMaps ' + _getArtefactLoadStyle(self._modelParameterMaps[0]) + " "
     else:
-      content += ' -p '
+      content += ' --modelParameters '
       for val in self._modelParameters:
         content+= str(val) + " "
+    if self._weight is not 0:
+      content += ' --nFractions ' + str(int(1/self._weight))
 
     with open(batPath, "w") as outputFile:
       outputFile.write(content)
