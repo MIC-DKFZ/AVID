@@ -37,6 +37,36 @@ def getAllKnownTools(sourceConfigPath):
   return sourceConfig.sections()
 
 
+def updateTool(toolName, toolsPath, sourceConfigPath):
+  '''
+  Updates the tool. Supported only for svn. Function does an svn update
+  for the tool or and svn checkout if the tool is not available yet.
+  '''
+  sourceConfig = ConfigParser.ConfigParser()
+  sourceConfig.read(sourceConfigPath)
+
+  svnURL = sourceConfig.get(toolName, 'svn')
+  sourceType = sourceConfig.get(toolName, 'preferred-source')
+
+  toolPath = os.path.join(toolsPath, toolName)
+  checkAndCreateDir(toolsPath)
+
+  if sourceType == 'svn':
+    if os.path.isdir(toolPath):
+      print("Update tool %s" % (toolName))
+      p = subprocess.Popen("svn update "+toolPath)
+      (output, error) = p.communicate()
+      print("\n\n")
+    else:
+      print("Update tool %s. Commencing initial checkout. Source = svn:%s" % (toolName, svnURL))
+      p = subprocess.Popen("svn checkout "+svnURL+" "+toolPath)
+      (output, error) = p.communicate()
+      print("\n\n")
+  else:
+    print("Error. Subcommand 'update' is only possible for source type 'svn'. Skipped tool %s." % (toolName))
+
+
+
 def installTool(toolName, toolsPath, sourceConfigPath):
   '''
   installs a tool in the given toolspath
@@ -73,20 +103,27 @@ def main():
       print("Error. Command 'tools' has to specify a subcommand ('update', 'install').")
       exit
     else:
-      if args_dict['subcommands'][0] == "install":
+      if args_dict['subcommands'][0] == "install" or args_dict['subcommands'][0] == "update":
+        doInstall = args_dict['subcommands'][0] == "install"
         tools = args_dict['subcommands'][1:]
-        toolspath = getUtilityPath(False)
+        toolsPath = getUtilityPath(False)
         if not args_dict['toolspath'] is None:
-          toolspath = args_dict['toolspath']
+          toolsPath = args_dict['toolspath']
 
         sourceConfigPath = getDefaultToolsSourceConfigPath()
 
         if len(tools) == 0:
           tools = getAllKnownTools(sourceConfigPath)
           print("No tool specified to be installed. Install all tools with defined sources: "+ str(tools))
-        for tool in tools:          
-          installTool(tool, toolspath, sourceConfigPath)
-      
+        for tool in tools:
+          if doInstall:
+            installTool(tool, toolsPath, sourceConfigPath)
+          else:
+            updateTool(tool, toolsPath, sourceConfigPath)
+      else:
+        print("Error. Subcommand '%s' is not supported for command avidconfig tools." % args_dict['subcommands'][0])
+
+
   elif args_dict['command'] == "tool-settings":
     if len(args_dict['subcommands'])<3:
       print("Error. Command 'settings' needs two additional positional arguments (tool id, settings name and value).")
@@ -96,7 +133,7 @@ def main():
       name = args_dict['subcommands'][1]
       value = args_dict['subcommands'][2]
       section, name = name.split('.',1)
-      
+
       if section is None or name is None or value is None:
         print("Error. Cannot save settings for tool %s. Specified setting name or value is invalid. (section: %s; name: %s; value: %s" % (actionID, section, name, value))
         exit
