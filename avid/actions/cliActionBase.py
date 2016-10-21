@@ -2,7 +2,7 @@ from . import SingleActionBase
 import subprocess
 import logging
 import os
-
+import time
 logger = logging.getLogger(__name__)
 
 class CLIActionBase(SingleActionBase):
@@ -37,6 +37,7 @@ class CLIActionBase(SingleActionBase):
     
   def _generateOutputs(self):
     clicall = self._prepareCLIExecution()
+    global logger
     
     try:
       logfile = open(clicall+".log", "w")
@@ -48,16 +49,33 @@ class CLIActionBase(SingleActionBase):
       errlogfile = open(clicall+".error.log", "w")
     except:
       errlogfile = None
-      logger.debug('Unable to generate errorlog file for call: %s', clicall)
+      logger.debug('Unable to generate error log file for call: %s', clicall)
       
     try:
         returnValue = 0
+        #very crude and unsatisfying solution, but found no better way on windows
+        #if you make the subprocess calls directly without sleep then you get random
+        #Error 32 file errors (File already opened by another process) caused
+        #by opening the bat files, which are normally
+        #produced by the actions. normaly  
+        #time.sleep(1)
+        waitCount = 0
+          
+        time.sleep(0.1)
+        while True :
+          try:
+            os.rename(clicall, clicall)
+            break
+          except OSError as e:
+            time.sleep(2)
+            logger.warning('"%s" is not accessible. Wait and try again.', clicall)
+      
         if self._cwd is None:
           subprocess.call(clicall, stdout = logfile, stderr = errlogfile)
         else:
           subprocess.call(clicall, cwd = self._cwd, stdout = logfile, stderr = errlogfile)
 
-        logger = logging.getLogger(__name__)
+
         if returnValue == 0:
           logger.debug('Call "%s" finished and returned %s', clicall, returnValue)
         else:

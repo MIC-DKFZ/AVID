@@ -95,7 +95,7 @@ class ActionBase(object):
     Normaly it is activated, but may be usefull to deactivate it if yiu trigger
     an action within an other action. See the schedulers of batch actions for
     example.'''
-    
+    global logger
     logger.info("Starting action: "+self.instanceName+" (hash: "+str(self.__hash__())+") ...")
 
     token = self._do()
@@ -238,6 +238,8 @@ class SingleActionBase(ActionBase):
      
   def _do(self):
     ''' Triggers the processing of an action. '''
+    global logger
+
     outputs = self.indicateOutputs()
     (isNeeded, alternatives) = self._checkNecessity(outputs)
     
@@ -249,11 +251,11 @@ class SingleActionBase(ActionBase):
       try:
         self._generateOutputs()
       except BaseException as e:
-        logger.warning('Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s', self.actionTag, str(e))
+        logger.warning('(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',str(self.__hash__()), self.actionTag, str(e))
         for artefact in outputs:
           artefact[artefactProps.INVALID] = True
       except:
-        logger.warning('Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.', self.actionTag)
+        logger.warning('(hash: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',str(self.__hash__()), self.actionTag)
         for artefact in outputs:
           artefact[artefactProps.INVALID] = True
       else:
@@ -305,6 +307,7 @@ class BatchActionBase(ActionBase):
     result = afilter.getSelection(artefacts)
     
     if len(result) == 0:
+      global logger
       logger.debug("Input selection contains no valid artefacts. Info tag: %s", infoTag)    
 
     return result   

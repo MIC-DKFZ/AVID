@@ -110,8 +110,7 @@ class mapRAction(CLIActionBase):
     
     with open(batPath, "w") as outputFile:
       outputFile.write(content)
-      outputFile.close()
-      
+
     return batPath      
 
 

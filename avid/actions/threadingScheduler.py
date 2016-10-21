@@ -29,11 +29,15 @@ class ThreadingScheduler(object):
     
     actionqueue = Queue.Queue()
     tokens = list()
-        
+
+    threadcount = self.threadcount
+    if threadcount>len(actionList):
+      threadcount = len(actionList)
+
     for action in actionList:
       actionqueue.put(action)
       
-    for i in range(self.threadcount):
+    for i in range(threadcount):
       w = Worker(actionqueue, tokens)
       
     actionqueue.join();
