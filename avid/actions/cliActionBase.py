@@ -3,6 +3,8 @@ import subprocess
 import logging
 import os
 import time
+import avid.common.settings as AVIDSettings
+
 logger = logging.getLogger(__name__)
 
 class CLIActionBase(SingleActionBase):
@@ -53,22 +55,31 @@ class CLIActionBase(SingleActionBase):
       
     try:
         returnValue = 0
-        #very crude and unsatisfying solution, but found no better way on windows
-        #if you make the subprocess calls directly without sleep then you get random
-        #Error 32 file errors (File already opened by another process) caused
-        #by opening the bat files, which are normally
-        #produced by the actions. normaly  
-        #time.sleep(1)
-        waitCount = 0
-          
-        time.sleep(0.1)
-        while True :
-          try:
-            os.rename(clicall, clicall)
-            break
-          except OSError as e:
-            time.sleep(2)
-            logger.warning('"%s" is not accessible. Wait and try again.', clicall)
+        
+        if os.path.isfile(clicall):
+          #Fix for T20136. Unsatisfying solution, but found no better way on
+          #windows. If you make the subprocess calls to batch files (thats the
+          #reason for the isfile() check) directly you get random "Error 32"
+          #file errors (File already opened by another process) caused
+          #by opening the bat files, which are normally produced by the actions.
+          #"os.rename" approach was the simpliest way to check os independent
+          #if the process can access the bat file or if there is still a racing
+          #condition.
+          pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE) 
+          max_pause_count = AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration
+          pause_count = 0
+          time.sleep(0.1)
+          while True :
+            try:
+              os.rename(clicall, clicall)
+              break
+            except OSError as e:
+              if pause_count < max_pause_count:
+                time.sleep(pause_duration)
+                pause_count = pause_count + 1
+                logger.debug('"%s" is not accessible. Wait and try again.', clicall)
+              else:
+                break
       
         if self._cwd is None:
           subprocess.call(clicall, stdout = logfile, stderr = errlogfile)
