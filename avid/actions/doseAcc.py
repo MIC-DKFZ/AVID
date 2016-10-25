@@ -231,24 +231,33 @@ class DoseAccBatchAction(BatchActionBase):
         
         if self._additionalActionProps is not None:
           additionalActionProps.update(self._additionalActionProps)
-          
+
         if pos == 0:
           # first element should be handled differently
-          action = DoseAccAction(dose, dose, lReg, 0.0, weight2, self._interpolator, self._operator, self._outputExt,
-                                  self._actionTag, alwaysDo = self._alwaysDo,
-                                  session = self._session,
-                                  additionalActionProps = additionalActionProps,
-                                  actionConfig =self._actionConfig)
+          if self._operator is not "*":
+            action = DoseAccAction(dose, dose, lReg, 0.0, weight2, self._interpolator, self._operator, self._outputExt,
+                                    self._actionTag, alwaysDo = self._alwaysDo,
+                                    session = self._session,
+                                    additionalActionProps = additionalActionProps,
+                                    actionConfig =self._actionConfig)
+          else:
+            action = None
         else:
-          interimDoseArtefact = actions[-1]._resultArtefact #take the dose result of the last action
+          if not actions and self._operator is "*":
+            interimDoseArtefact = dose
+          else:
+            interimDoseArtefact = actions[-1]._resultArtefact #take the dose result of the last action
+          if self._operator is "*":
+            weight2 = 1.0
           action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2, self._interpolator, self._operator, self._outputExt,
                                   self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
                                   actionConfig =self._actionConfig)
-          
-        action._indicateOutputs() #call to ensure the result artefact is defined
-        actions.append(action)
+
+        if action is not None:
+          action._indicateOutputs() #call to ensure the result artefact is defined
+          actions.append(action)
     
     return actions
   
