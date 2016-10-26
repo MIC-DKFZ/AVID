@@ -25,8 +25,10 @@ FORMAT = "format"
 URL = "url"
 '''Indicates if a given artefact is valid (True) or not (False).'''
 INVALID = "invalid"
-'''Indicates if a given artefact is valid (True) or not (False).'''
+'''Creation time of an artefact.'''
 TIMESTAMP = "timestamp"
+'''Duration of the action execution that generated the artefact (in [s]).'''
+EXECUTION_DURATION = "execution_duration"
 '''Defines a reference to a plan file the artefact is associated with. Normaly
 this could be found as optional property for virtuos dose artefacts.'''
 VIRTUOS_PLAN_REF = "virtuos_plan_ref"

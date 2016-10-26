@@ -82,7 +82,12 @@ def loadArtefactList_csv(filePath, expandPaths = False, rootPath = None):
         artefact[defaultProps.TIMEPOINT] = int(artefact[defaultProps.TIMEPOINT])
       except:
         pass
-      
+
+      try:
+        artefact[defaultProps.EXECUTION_DURATION] = float(artefact[defaultProps.EXECUTION_DURATION])
+      except:
+        pass      
+
       artefacts.append(artefact)
 
   return artefacts

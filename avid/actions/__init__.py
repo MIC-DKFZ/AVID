@@ -247,9 +247,13 @@ class SingleActionBase(ActionBase):
     
     if self._alwaysDo or isNeeded:
       isValid = False
+      
+      starttime = time.time()
+      endtime = None
 
       try:
         self._generateOutputs()
+        endtime = time.time()
       except BaseException as e:
         logger.warning('(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',str(self.__hash__()), self.actionTag, str(e))
         for artefact in outputs:
@@ -262,7 +266,13 @@ class SingleActionBase(ActionBase):
         (isValid, outputs) = self._checkOutputs(outputs)
         
       token.generatedArtefacts = outputs
+      
       for artefact in outputs:
+        try:
+          artefact[artefactProps.EXECUTION_DURATION] = endtime - starttime
+        except:
+          pass
+        
         self._session.addArtefact(artefact, True)
 
       if not isValid:

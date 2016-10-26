@@ -4,6 +4,7 @@ import avid.common.artefact as artefact
 from avid.selectors import AndSelector
 from avid.selectors import ActionTagSelector
 from avid.selectors import CaseSelector
+from avid.selectors import ValidResultSelector
 
 class TestSelectors(unittest.TestCase):
   def setUp(self):
@@ -25,6 +26,15 @@ class TestSelectors(unittest.TestCase):
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a7)
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
+
+    self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "config", "dummy", None)
+    self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", invalid=true)
+    self.data2 = list()
+    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a1)
+    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a2)
+    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a3)
+    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a9)
+    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a10)
 
   def test_ActionTagSelector(self):
     selector = ActionTagSelector("Action1")
@@ -62,7 +72,6 @@ class TestSelectors(unittest.TestCase):
     self.assertIn(self.a6, selection)
     self.assertIn(self.a8, selection)
 
-
   def test_AndSelector(self):
     selector = ActionTagSelector("Action1") + CaseSelector("Case2")
     selection = selector.getSelection(self.data)
@@ -76,6 +85,14 @@ class TestSelectors(unittest.TestCase):
     self.assertIn(self.a4, selection)
     self.assertIn(self.a5, selection)
 
+  def test_ValidResultSelector(self):
+    selector = ValidResultSelector()
+    selection = selector.getSelection(self.data2)
+    self.assertEqual(len(selection), 3)
+    self.assertIn(self.a1, selection)
+    self.assertIn(self.a2, selection)
+    self.assertIn(self.a3, selection)
+  
 
 if __name__ == '__main__':
     unittest.main()

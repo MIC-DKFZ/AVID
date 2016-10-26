@@ -5,12 +5,17 @@ from avid.selectors import TypeSelector
 from avid.selectors import ValiditySelector
 from avid.selectors import AndSelector
 from avid.common.artefact import defaultProps
+from avid.statistics import mean
+from avid.statistics import sd
 
 
 logger = logging.getLogger(__name__)
 
 class MetricCriterionBase(object):
   '''Base class for metric criterions used in evaluating avid workflow results.'''
+
+  '''Measurement value ID for the failed instances.'''
+  MID_FailedInstances = __class__.__name__+'FailedInstances'
   
   def __init__(self, valuesInfo = dict()):
     '''
@@ -40,18 +45,25 @@ class MetricCriterionBase(object):
     @note: The selection of the artefacts is handled by derived criterion classes 
     @param instanceArtefacts: List of avid artefacts that should/could be used for the evaluation.
     @return: Returns a dictionary with the criterion measurements. Key is the
-    value ID. The dict value is the measurement value(s). 
+    value ID. The dict value is the measurement value(s). If the artefacts are not
+    sufficient (no data for all selectors), it will be interpreted as a failed case
+    and the return will be None.
      '''
+    insufficientData = False
     
     relevantArtefacts = dict()
     for name in self._selectors:
       relevantArtefacts[name] = self._selectors[name].getSelection(instaceArtefacts)
+      if len(relevantArtefacts[name]) == 0:
+        insufficientData = True
     
-    return _evaluateInstance(relevantArtefacts)  
-    pass    
+    if insufficientData:
+      return None
+    else:
+      return _evaluateInstance(relevantArtefacts)
 
   def _evaluateInstance(self, relevantArtefacts):
-    '''Internal method that realy does the evaluation regaring the passed list
+    '''Internal method that really does the evaluation regaring the passed list
     of relevant artefacts. It will be called by evaluateInstance(), which generates
     the passed dictionary.
     @param relevantArtefacts: dictionary of relevant artefacts (may be lists).
@@ -73,9 +85,33 @@ class MetricCriterionBase(object):
     should be compiled into measurements for the whole data set.
     @return: Returns a dictionary with the criterion measurements for the whole
     set. Key is the value ID. The dict value is the measurement value(s).'''
+   
+    collectedData = dict()
+    failureCount = 0
     
-    raise NotImplementedError("Reimplement in a derived class to function correctly.")
-    pass    
+    for instance in instanceMeasures:
+      if instance is None:
+        failureCount = failureCount + 1
+      else:
+        for valueID in instance:
+          if not valueID in collectedData:
+            collectedData[valueID] = list()
+            
+          try:
+            collectedData[valueID].extend(instance[valueID])
+          except:
+            collecteData[valueID].append(instance[valueID])
+      
+    #calculate statistics for each value
+    for valueID in collectedData:
+      result[valueID+'.mean'] = mean(collectedData[valueID])
+      result[valueID+'.min'] = min(collectedData[valueID])
+      result[valueID+'.max'] = max(collectedData[valueID])
+      result[valueID+'.sd'] = sd(collectedData[valueID])
+      
+    result[MID_FailedInstances] = failureCount
+    
+    return 
      
   def setSelectors(self, ensureValidResults = true, **selectors):
     '''Method can be used by derived classes to register avid selectors that should be
@@ -93,10 +129,12 @@ class MetricCriterionBase(object):
   def valueNames(self):
     '''Returns a dict with all valueID:valueNames of measurements the criterion generates
     when evaluating instances or whole sets. In this default implementation it
-    adds for each registered value also the descreptive statistical "facets"
-    (mean, max, min, std)'''
+    adds for each registered value also the descriptive statistical "facets"
+    (mean, max, min, std) and failed_instances'''
     
     result = dict()
+
+    result[MID_FailedInstances] = 'Failure counts'
     
     for id in self._valueNames:
       result[id] = self._valueNames[id]
@@ -115,6 +153,8 @@ class MetricCriterionBase(object):
     (mean, max, min, std)'''
     
     result = dict()
+
+    result[MID_FailedInstances] = 'Number of failed instances in the evaluated set.'
     
     for id in self._valueDescs:
       result[id] = self._valueDescss[id]

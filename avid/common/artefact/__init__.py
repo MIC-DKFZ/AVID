@@ -46,7 +46,9 @@ class Artefact(object):
       self._defaultProps[defaultProps.ID] = str(uuid.uuid1())
     if not defaultProps.TIMESTAMP in self._defaultProps:
       self._defaultProps[defaultProps.TIMESTAMP] = str(time.time())
-
+    if not defaultProps.EXECUTION_DURATION in self._defaultProps:
+      self._defaultProps[defaultProps.EXECUTION_DURATION] = None
+      
     self._additionalProps = dict()
     if not additionalP is None:
       self._additionalProps = additionalP
@@ -96,6 +98,11 @@ class Artefact(object):
         try:
           #If timepoint can be converted into a number, do so
           value = int(value)
+        except:
+          pass
+      elif key == defaultProps.EXECUTION_DURATION:
+        try:
+          value = float(value)
         except:
           pass
       elif key == defaultProps.INVALID:
