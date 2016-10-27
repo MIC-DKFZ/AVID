@@ -11,7 +11,7 @@ from avid.statistics import sd
 logger = logging.getLogger(__name__)
 
 class MetricCriterionBase(object):
-  '''Base class for metric criterions used in evaluating avid workflow results.'''
+  '''Base class for metric critera used in evaluating avid workflow results.'''
 
   '''Measurement value ID for the failed instances.'''
   MID_FailedInstances = 'ngeo.eval.criteria.MetricCriterionBase.FailedInstances'
@@ -47,6 +47,8 @@ class MetricCriterionBase(object):
     sufficient (no data for all selectors), it will be interpreted as a failed case
     and the return will be None.
      '''
+    global logger
+    
     insufficientData = False
     
     relevantArtefacts = dict()
@@ -54,8 +56,10 @@ class MetricCriterionBase(object):
       relevantArtefacts[name] = self._selectors[name].getSelection(instaceArtefacts)
       if len(relevantArtefacts[name]) == 0:
         insufficientData = True
+        logger.debug('Insufficent data for instance evaluation: No data for slot "%s"',name)
     
     if insufficientData:
+      logger.debug('Evaluated instance as failure due to insufficent data.')
       return None
     else:
       return self._evaluateInstance(relevantArtefacts)

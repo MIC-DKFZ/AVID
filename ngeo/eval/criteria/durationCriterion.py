@@ -6,7 +6,10 @@ from avid.common.artefact import getArtefactProperty, defaultProps
 
 
 class DurationCriterion(MetricCriterionBase):
-  '''Base class for metric criterions used in evaluating avid workflow results.'''
+  '''Criterion that evaluates the execution duration of workflow results.
+     When evaluating an instance, it will sum up all execution duration properties
+     of the input artefacts.
+  '''
 
   '''Measurement value ID for the duration.'''
   MID_Duration = 'ngeo.eval.criteria.DurationCriterion.duration'
