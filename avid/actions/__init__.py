@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 from ..common import actionToken
 from ..common.artefact.generator import generateArtefactEntry

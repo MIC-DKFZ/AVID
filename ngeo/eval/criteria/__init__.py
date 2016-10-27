@@ -1,8 +1,7 @@
 
 
 import logging
-from avid.selectors import TypeSelector
-from avid.selectors import ValiditySelector
+from avid.selectors import ValidResultSelector
 from avid.selectors import AndSelector
 from avid.common.artefact import defaultProps
 from avid.statistics import mean
@@ -15,7 +14,7 @@ class MetricCriterionBase(object):
   '''Base class for metric criterions used in evaluating avid workflow results.'''
 
   '''Measurement value ID for the failed instances.'''
-  MID_FailedInstances = __class__.__name__+'FailedInstances'
+  MID_FailedInstances = 'ngeo.eval.criteria.MetricCriterionBase.FailedInstances'
   
   def __init__(self, valuesInfo = dict()):
     '''
@@ -27,18 +26,17 @@ class MetricCriterionBase(object):
     self._valueNames = dict()
     self._valueDescs = dict()
             
-    for id in valueInfo:
+    for id in valuesInfo:
       try:
-        self._valueNames[id] = str(valueInfo[id][0])
+        self._valueNames[id] = str(valuesInfo[id][0])
       except:
-        self._valueNames[id] = str(valueInfo[id])
+        self._valueNames[id] = str(valuesInfo[id])
         
       try:
-        self._valueDescs[id] = str(valueInfo[id][1])
+        self._valueDescs[id] = str(valuesInfo[id][1])
       except:
         pass
-      
-    pass
+
 
   def evaluateInstance(self, instaceArtefacts):
     '''evaluates an instance/case resembled by the passed artefact list.
@@ -60,7 +58,7 @@ class MetricCriterionBase(object):
     if insufficientData:
       return None
     else:
-      return _evaluateInstance(relevantArtefacts)
+      return self._evaluateInstance(relevantArtefacts)
 
   def _evaluateInstance(self, relevantArtefacts):
     '''Internal method that really does the evaluation regaring the passed list
@@ -75,13 +73,13 @@ class MetricCriterionBase(object):
     raise NotImplementedError("Reimplement in a derived class to function correctly.")
     pass    
       
-  def compileSetEvaluation(self, instanceMeasures):
+  def compileSetEvaluation(self, instanceMeasurements):
     '''Compiles the evaluation of the complete set using the passed instance
     measurements.
     The default implementation generates for all values of the instances the
     mean, min, max and SD. If values if instances are not a scalar but a list
     all lists of this value will be "merged" before the statistics are calculated.
-    @param instanceMeasures: List of measures from calls of evaluateInstance that
+    @param instanceMeasurements: List of measures from calls of evaluateInstance that
     should be compiled into measurements for the whole data set.
     @return: Returns a dictionary with the criterion measurements for the whole
     set. Key is the value ID. The dict value is the measurement value(s).'''
@@ -89,7 +87,7 @@ class MetricCriterionBase(object):
     collectedData = dict()
     failureCount = 0
     
-    for instance in instanceMeasures:
+    for instance in instanceMeasurements:
       if instance is None:
         failureCount = failureCount + 1
       else:
@@ -100,28 +98,29 @@ class MetricCriterionBase(object):
           try:
             collectedData[valueID].extend(instance[valueID])
           except:
-            collecteData[valueID].append(instance[valueID])
+            collectedData[valueID].append(instance[valueID])
       
     #calculate statistics for each value
+    result = dict()
     for valueID in collectedData:
       result[valueID+'.mean'] = mean(collectedData[valueID])
       result[valueID+'.min'] = min(collectedData[valueID])
       result[valueID+'.max'] = max(collectedData[valueID])
       result[valueID+'.sd'] = sd(collectedData[valueID])
       
-    result[MID_FailedInstances] = failureCount
+    result[self.MID_FailedInstances] = failureCount
     
-    return 
+    return result
      
-  def setSelectors(self, ensureValidResults = true, **selectors):
+  def setSelectors(self, ensureValidResults = True, **selectors):
     '''Method can be used by derived classes to register avid selectors that should be
        used to select the data for an instance evaluation.
        @param ensureValidResults: If set to true only valid result artefacts will
        be passed. This is achieved by adding result and validity selectors.'''
     for selectorName in selectors:
-      aSelector = selector
+      aSelector = selectors[selectorName]
       if ensureValidResults:
-        aSelector = AndSelector(AndSelector(selector, ValiditySelector), TypeSelector(defaultProps.TYPE_VALUE_RESULT))
+        aSelector = AndSelector(selectors[selectorName], ValidResultSelector())
            
       self._selectors[selectorName] = aSelector
               
@@ -134,7 +133,7 @@ class MetricCriterionBase(object):
     
     result = dict()
 
-    result[MID_FailedInstances] = 'Failure counts'
+    result[self.MID_FailedInstances] = 'Failures'
     
     for id in self._valueNames:
       result[id] = self._valueNames[id]
@@ -154,10 +153,10 @@ class MetricCriterionBase(object):
     
     result = dict()
 
-    result[MID_FailedInstances] = 'Number of failed instances in the evaluated set.'
+    result[self.MID_FailedInstances] = 'Number of failed instances in the evaluated set.'
     
     for id in self._valueDescs:
-      result[id] = self._valueDescss[id]
+      result[id] = self._valueDescs[id]
       result[id+'.mean'] = 'Mean of' +self._valueDescs[id]
       result[id+'.min'] = 'Minimum of' +self._valueDescs[id]
       result[id+'.max'] = 'Maximum of' +self._valueDescs[id]

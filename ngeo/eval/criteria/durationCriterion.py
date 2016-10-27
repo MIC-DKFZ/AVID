@@ -1,7 +1,7 @@
 
 
-from criteria import MetricCriterionBase
-from avid.selectors import SelectorBase, AndSelector
+from ..criteria import MetricCriterionBase
+from avid.selectors import SelectorBase, AndSelector, ValidResultSelector
 from avid.common.artefact import getArtefactProperty, defaultProps
 
 
@@ -9,13 +9,11 @@ class DurationCriterion(MetricCriterionBase):
   '''Base class for metric criterions used in evaluating avid workflow results.'''
 
   '''Measurement value ID for the duration.'''
-  MID_Duration = __class__.__name__+'duration'
+  MID_Duration = 'ngeo.eval.criteria.DurationCriterion.duration'
   
   def __init__(self, inputSelector = SelectorBase()):
-    self.setSelectors(inputSelector = AndSelector(artefactSelector,Val)  
-    MetricCriterionBase.__init__(self, valuesInfo = { MID_Duration: ['Duration','Duration of execution ( in [s])']})
-    
-    pass
+    MetricCriterionBase.__init__(self, valuesInfo = { self.MID_Duration: ['Duration','Duration of execution ( in [s])']})
+    self.setSelectors(inputSelector = inputSelector)  
 
   def _evaluateInstance(self, relevantArtefacts):
     '''Internal method that really does the evaluation regaring the passed list
@@ -37,4 +35,6 @@ class DurationCriterion(MetricCriterionBase):
       except:
         pass
       
-    return duration
+    result = { self.MID_Duration : duration }
+
+    return result

@@ -2,11 +2,13 @@ import unittest
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
 from ngeo.eval.criteria.durationCriterion import DurationCriterion
+from avid.selectors.keyValueSelector import CaseSelector
+from ngeo.eval.criteria import MetricCriterionBase
 
 class TestSelectors(unittest.TestCase):
   def setUp(self):
     self.a1 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", "result", "dummy", None, execution_duration = 1)
-    self.a2 = artefactGenerator.generateArtefactEntry("Case1", None, 1, "Action1", "result", "dummy", None, execution_duration = 10)
+    self.a2 = artefactGenerator.generateArtefactEntry("Case2", None, 1, "Action3", "result", "dummy", None, execution_duration = 10)
     self.a3 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action2", "config", "dummy", None, execution_duration = 100)
     self.a4 = artefactGenerator.generateArtefactEntry("Case2", None, 0, "Action1", "result", "dummy", None, execution_duration = 1000, invalid= True)
 
@@ -24,47 +26,79 @@ class TestSelectors(unittest.TestCase):
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a5)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a6)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a7)
+    
+    self.instanceResultRef = { DurationCriterion.MID_Duration : 11}
+    self.instanceResultRef2 = { DurationCriterion.MID_Duration : 10}
+    
+    self.setResultRef = { DurationCriterion.MID_Duration+".mean" : 20.5,
+                          DurationCriterion.MID_Duration+".min": 11.0,
+                          DurationCriterion.MID_Duration+".max": 30.0,
+                          DurationCriterion.MID_Duration+".sd": 9.5,
+                          MetricCriterionBase.MID_FailedInstances : 0
+                        }
+    
+    self.setResultWithFailRef = { DurationCriterion.MID_Duration+".mean" : 11.0,
+                          DurationCriterion.MID_Duration+".min": 11.0,
+                          DurationCriterion.MID_Duration+".max": 11.0,
+                          DurationCriterion.MID_Duration+".sd": 0.0,
+                          MetricCriterionBase.MID_FailedInstances : 1
+                        }
+    
+    self.setResultFailOnlyRef = { MetricCriterionBase.MID_FailedInstances : 2  }    
 
+    self.setResultEmptyRef = { MetricCriterionBase.MID_FailedInstances : 0  }  
+    
+    self.namesRef = { DurationCriterion.MID_Duration: 'Duration',
+                      DurationCriterion.MID_Duration+".mean" : 'Duration (mean)',
+                      DurationCriterion.MID_Duration+".min": 'Duration (min)',
+                      DurationCriterion.MID_Duration+".max": 'Duration (max)',
+                      DurationCriterion.MID_Duration+".sd": 'Duration (std dev)',
+                      MetricCriterionBase.MID_FailedInstances : 'Failures' }
+                        
   def test_DurationCriterion_instance(self):
-    TODO
-    selector = ActionTagSelector("Action1")
-    selection = selector.getSelection(self.data)
-    self.assertEqual(len(selection), 4)
-    self.assertIn(self.a1, selection)
-    self.assertIn(self.a2, selection)
-    self.assertIn(self.a4, selection)
-    self.assertIn(self.a5, selection)
+    criterion = DurationCriterion()
+    
+    result = criterion.evaluateInstance(self.data)
+    self.assertDictEqual(self.instanceResultRef, result)
+
+    criterionWithCase = DurationCriterion(CaseSelector('Case2'))
+    result = criterionWithCase.evaluateInstance(self.data)
+    self.assertDictEqual(self.instanceResultRef2, result)
+    
+    result = criterion.evaluateInstance([])
+    self.assertEqual(None, result)
+    
     
   def test_DurationCriterion_set(self):
-    TODO
-    selector = ActionTagSelector("Action1", negate=True)
-    selection = selector.getSelection(self.data)
-    self.assertEqual(len(selection), 4)
-    self.assertIn(self.a3, selection)
-    self.assertIn(self.a6, selection)
-    self.assertIn(self.a7, selection)
-    self.assertIn(self.a8, selection)
+    criterion = DurationCriterion()
+    
+    instanceMeasurements = list()
+    instanceMeasurements.append(criterion.evaluateInstance(self.data))
+    instanceMeasurements.append(criterion.evaluateInstance(self.data2))
 
+    result = criterion.compileSetEvaluation(instanceMeasurements)
+    self.assertDictEqual(self.setResultRef, result, 'Check compileSetEvaluation() with normal usage')
+    
+    instanceMeasurements[1] = None
+
+    result = criterion.compileSetEvaluation(instanceMeasurements)
+    self.assertDictEqual(self.setResultWithFailRef, result, 'Check compileSetEvaluation() with failure')
+
+    result = criterion.compileSetEvaluation([None, None])
+    self.assertDictEqual(self.setResultFailOnlyRef, result, 'Check compileSetEvaluation() with failures only')
+ 
+    result = criterion.compileSetEvaluation([])
+    self.assertDictEqual(self.setResultEmptyRef, result, 'Check compileSetEvaluation() with empty list')
+
+  
   def test_DurationCriterion_names(self):
-    TODO
-    selector = CaseSelector("Case3")
-    selection = selector.getSelection(self.data)
-    self.assertEqual(len(selection), 1)
-    self.assertIn(self.a7, selection)
+    names = DurationCriterion().valueNames
+    
+    self.assertDictEqual(names, self.namesRef)
 
-  def test_DurationCriterion_descriptions(self):
-    TODO
-    selector = CaseSelector("Case3", True)
-    selection = selector.getSelection(self.data)
-    self.assertEqual(len(selection), 7)
-    self.assertIn(self.a1, selection)
-    self.assertIn(self.a2, selection)
-    self.assertIn(self.a3, selection)
-    self.assertIn(self.a4, selection)
-    self.assertIn(self.a5, selection)
-    self.assertIn(self.a6, selection)
-    self.assertIn(self.a8, selection)
-
+    descs = DurationCriterion().valueDescriptions
+    
+    self.assertListEqual(names.keys(), descs.keys())
 
 if __name__ == '__main__':
     unittest.main()

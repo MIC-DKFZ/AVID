@@ -28,7 +28,7 @@ class TestSelectors(unittest.TestCase):
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
 
     self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "config", "dummy", None)
-    self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", invalid=true)
+    self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", invalid=True)
     self.data2 = list()
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a1)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a2)
