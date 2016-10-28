@@ -1,0 +1,93 @@
+import os
+
+logger = logging.getLogger(__name__)
+
+class MetricBase (object):
+  '''Base class for metrics. A metric implements an evaluation strategy to
+  evaluate an avid workflow according to result artefacts it produces. In
+  order to evaluate the metric uses specifid criteria.'''
+  
+  def __init__(self, metricCriteria, sessionDir, svWeights = None, instanceDefiningProps = [defaultProps.CASE]):
+    '''Initialization of the metric.
+    @param metricCriteria: list of criterion instances that should be used to
+    evaluate.
+    @param sessionDir: specifies the directory where the session for evaluation will be created. 
+    @param instanceDefiningProps: List of artefact properties that discriminate
+    evaluation instances. E.g. as a default, the case property will be used to
+    discriminate evaluation instances, thus one instance evaluation per case.
+    @param svWeights: Weights that should be used when computing the single value
+    measurement by summing up the measurements of all criteria. It is a dictionary
+    with the measurement value IDs as keys and the weights as values. All
+    measurement values not declared in the dict are assumed to have a weight of 0.
+    Passing None implies that everything has a weight of 1. 
+    ''' 
+    self._metricCriteria = metricCriteria
+    self._instanceDefiningProps = instanceDefiningProps
+    self.sessionDir = sessionDir
+    self._svWeights = svWeights
+    
+    
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+    '''Function is called to evaluate a workflow used the passed artfact definitions
+    @param workflowFile: String defining the path to the avid workflow that should
+    be executed.
+    @param artefactFile: String defining the path to the artefact bootstrap file
+     for the workflow session that will be evaluated.
+    @param workflowModifier: Dict that defines the modifier for the workflow.
+    They will be passed as arguments to the workflow execution. Key is the argument
+    name and the dict value the argument value. The default implementation will
+    generate an cl argument signature like --<key> <value>. Thus {'a':120} will
+    be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
+    @param label: You can specify a lable that is used by the metric when defining
+    the workflow session path. If not specified a unique lable will be generated.
+    @return: Returns a EvaluationResult instance with everythin you want to know.
+    '''
+    result = self._evaluate()
+
+  def _generateWorkflowCall(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+    '''Helper function generating the cl call that runs the workflow
+    @param workflowFile: String defining the path to the avid workflow that should
+    be executed.
+    @param artefactFile: String defining the path to the artefact bootstrap file
+     for the workflow session that will be evaluated.
+    @param workflowModifier: Dict that defines the modifier for the workflow.
+    They will be passed as arguments to the workflow execution. Key is the argument
+    name and the dict value the argument value. The default implementation will
+    generate an cl argument signature like --<key> <value>. Thus {'a':120} will
+    be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
+    @param label: You can specify a lable that is used by the metric when defining
+    the workflow session path. If not specified a unique lable will be generated.
+    @return: Returns a EvaluationResult instance with everythin you want to know.
+    '''
+  TODO
+    
+  def _generateSessionPath(lable = None):
+    '''Helper function that returns a tuple (<path to the session file>, <session directory>)'''
+    todo
+   
+
+  @property
+  def valueNames(self):
+    '''Returns a dict with all valueID:valueNames of measurements the metric (and
+    it criteria) generates.'''
+    
+    result = dict()
+
+    for criterion in self._metricCriteria:
+      result.update(criterion.valueNames)
+    
+    return result
+
+  @property
+  def valueDescriptions(self):
+    '''Returns a dict with all valueID:valueDescriptions of measurements the metric (and
+    it criteria) generates.'''
+    
+    result = dict()
+
+    for criterion in self._metricCriteria:
+      result.update(criterion.valueDescriptions)
+    
+    return result
+    
+    
