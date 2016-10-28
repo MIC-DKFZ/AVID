@@ -13,8 +13,8 @@ class DataSetEvaluator (object):
   that instances will be defined by the 'case' property, so each case will be evaluated
   as an instance.'''
   
-  def __init__(self, usedCriteria, instanceDefiningProps = [defaultProps.CASE]):
-    self._usedCriteria = usedCriteria
+  def __init__(self, metricCriteria, instanceDefiningProps = [defaultProps.CASE]):
+    self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
     
     
@@ -35,7 +35,7 @@ class DataSetEvaluator (object):
       #collect the measurements
       measurements = dict()
       
-      for criterion in self._usedCriteria:
+      for criterion in self._metricCriteria:
         cm = criterion.evaluateInstance(resultData)
         if not cm is None:
           measurements.update(cm)
@@ -66,7 +66,7 @@ class DataSetEvaluator (object):
     
     datasetMeasures = dict()
       
-    for criterion in self._usedCriteria:
+    for criterion in self._metricCriteria:
       datasetMeasures.update(criterion.compileSetEvaluation(instanceValues))
       
     return (datasetMeasures, instanceMeasures)
