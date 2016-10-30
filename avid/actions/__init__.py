@@ -156,7 +156,7 @@ class SingleActionBase(ActionBase):
     Other properties will be taken from the reference (if given). URL will allways
     be None.
     @param reference An other artefact as reference. If given, the following
-    properties will be copied to the new artefact: Case, case instance, timepoint,
+    properties will be copied to the new artefact: Case, timepoint,
     type, format, objective.'''
     result = artefactGenerator.generateArtefactEntry(artefactHelper.getArtefactProperty(reference, artefactProps.CASE),\
                                                      self._caseInstance,\
