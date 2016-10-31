@@ -1,15 +1,22 @@
 import os
 import logging
+import datetime
+import subprocess
+import shutil
 
 from avid.common.artefact import defaultProps
+from ngeo.eval.dataSetEvaluator import DataSetEvaluator
+from avid.common.artefact.fileHelper import loadArtefactList_xml
+from ngeo.eval import EvaluationResult
+
 logger = logging.getLogger(__name__)
 
-class MetricBase (object):
-  '''Base class for metrics. A metric implements an evaluation strategy to
+class DefaultMetric (object):
+  '''Base class for metrics. A metric implements a method to
   evaluate an avid workflow according to result artefacts it produces. In
-  order to evaluate the metric uses specifid criteria.'''
+  order to evaluate, the metric uses the specified criteria.'''
   
-  def __init__(self, metricCriteria, sessionDir, svWeights = None, instanceDefiningProps = [defaultProps.CASE], cleareSessionDir = True):
+  def __init__(self, metricCriteria, sessionDir, svWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
     '''Initialization of the metric.
     @param metricCriteria: list of criterion instances that should be used to
     evaluate.
@@ -29,7 +36,7 @@ class MetricBase (object):
     self._instanceDefiningProps = instanceDefiningProps
     self.sessionDir = sessionDir
     self._svWeights = svWeights
-    self._clearSessionDir = cleareSessionDir
+    self._clearSessionDir = clearSessionDir
     
     
   def evaluate(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
@@ -43,16 +50,49 @@ class MetricBase (object):
     name and the dict value the argument value. The default implementation will
     generate an cl argument signature like --<key> <value>. Thus {'a':120} will
     be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
-    @param label: You can specify a lable that is used by the metric when defining
-    the workflow session path. If not specified a unique lable will be generated.
-    @return: Returns a EvaluationResult instance with everythin you want to know.
+    @param label: You can specify a label that is used by the metric when defining
+    the workflow session path. If not specified a unique label will be generated.
+    @return: Returns a EvaluationResult instance with everything you want to know.
     '''
-    result = self._evaluate()
+    sessionFile,sessionName = self._generateSessionPath(label)
+    callStr = self._generateWorkflowCall(workflowFile, sessionFile, sessionName, artefactFile, workflowModifier)
+    
+    global logger
+    logger.debug('Evaluate workflow. workflow file: "%s"; artefact file: "%s"; workflow modifier: "%s"; session: "%s"', workflowFile, artefactFile, workflowModifier, sessionFile)
+    logger.debug('Starting workflow processing... Call: "%s"', callStr)
 
-  def _generateWorkflowCall(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+    subprocess.call(callStr)
+    
+    logger.debug('Evaluating workflow results...')
+    
+    evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps)
+    
+    artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
+    
+    gmeasure, imeasure = evaluator.evaluate(artefacts)
+       
+    if self._clearSessionDir:
+      artefactDir = os.path.join(self.sessionDir, sessionName)
+      logger.debug('Remove session directory after evaluation. Dir: "%s"', artefactDir)
+      
+      try:
+        shutil.rmtree(artefactDir)
+        os.remove(sessionFile)
+        os.remove(sessionFile+os.extsep+'log')
+      except:
+        logger.debug('Unkown error when clearing the session dir.')       
+    
+    result = EvaluationResult(gmeasure, imeasure, sessionName, workflowFile, artefactFile, workflowModifier, self._svWeights, self.valueNames, self.valueDescriptions)
+      
+    return result
+
+
+  def _generateWorkflowCall(self, workflowFile, sessionFile, sessionName, artefactFile, workflowModifier = {}):
     '''Helper function generating the cl call that runs the workflow
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
+    @param sessionFile: Path where the session of the workflow call should be stored.
+    @param sessionName: Name of the session of the workflow call.
     @param artefactFile: String defining the path to the artefact bootstrap file
      for the workflow session that will be evaluated.
     @param workflowModifier: Dict that defines the modifier for the workflow.
@@ -60,16 +100,28 @@ class MetricBase (object):
     name and the dict value the argument value. The default implementation will
     generate an cl argument signature like --<key> <value>. Thus {'a':120} will
     be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
-    @param label: You can specify a lable that is used by the metric when defining
-    the workflow session path. If not specified a unique lable will be generated.
     @return: Returns a EvaluationResult instance with everythin you want to know.
     '''
-  TODO
     
-  def _generateSessionPath(lable = None):
+    callStr = 'python "'+workflowFile\
+      +'" --sessionPath "'+sessionFile\
+      +'" --name "'+sessionName\
+      +'" --bootstrapArtefacts "'+artefactFile\
+      +'" --overwriteExistingSession --autoSave'
+      
+    for modKey in workflowModifier:
+      callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'     
+      
+    return callStr
+    
+    
+  def _generateSessionPath(self, label = None):
     '''Helper function that returns a tuple (<path to the session file>, <session directory>)'''
-    todo
-   
+    name = label
+    if label is None:
+      name = datetime.datetime.now().strftime("EvalSession_%Y-%m-%d_%H-%M-%S")
+    
+    return (os.path.join(self.sessionDir, name+os.extsep+"avid"), name) 
 
   @property
   def valueNames(self):

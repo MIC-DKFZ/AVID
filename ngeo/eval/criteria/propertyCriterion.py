@@ -1,9 +1,10 @@
 
-
+import logging
 from ngeo.eval.criteria import MetricCriterionBase
 from avid.selectors import SelectorBase, AndSelector, ValidResultSelector
 from avid.common.artefact import getArtefactProperty, defaultProps
 
+logger = logging.getLogger(__name__)
 
 class PropertyCriterion(MetricCriterionBase):
   '''Criterion that evaluates a user defined property of workflow result artefacts.
@@ -14,28 +15,33 @@ class PropertyCriterion(MetricCriterionBase):
 
   '''Measurement value ID for the duration.'''
   MID_PropertyValueBase = 'ngeo.eval.criteria.PropertyCriterion'
-  
+    
   def __init__(self, evaluatedPropertyName, inputSelector = SelectorBase()):
     '''
     @param evaluatedPropertyName: Defines the property that should be "measured"
     by the criterion.
     '''
-    self.MID_PropertyValue = self.MID_PropertyValueBase+'.'+evaluatedPropertyName
+    self.MID_PropertyValueSum = self.MID_PropertyValueBase+'.'+evaluatedPropertyName+'.sum'
+    self.MID_PropertyValues = self.MID_PropertyValueBase+'.'+evaluatedPropertyName
 
-    MetricCriterionBase.__init__(self, valuesInfo = { self.MID_PropertyValue : [evaluatedPropertyName]})
+    MetricCriterionBase.__init__(self, valuesInfo = { self.MID_PropertyValues : [evaluatedPropertyName], self.MID_PropertyValueSum : ['Sum of '+evaluatedPropertyName]})
     
     self.setSelectors(inputSelector = inputSelector)
     self._evaluatedPropertyName = evaluatedPropertyName
 
   def _evaluateInstance(self, relevantArtefacts):
-    value = 0.0
+    values = list()
     
     for artefact in relevantArtefacts['inputSelector']:
       try:
-        value = value + float(getArtefactProperty(artefact, self._evaluatedPropertyName))
+        values.append(float(getArtefactProperty(artefact, self._evaluatedPropertyName)))
       except:
+        global logger
+        logger.debug('Drop property value of artefact. Cannot convert value to float. Problematic value: %s. Concerned artefact: "%s"', getArtefactProperty(artefact, self._evaluatedPropertyName), artefact)
         pass
       
-    result = { self.MID_PropertyValue : value }
+    propsum = sum(values)
+    
+    result = { self.MID_PropertyValueSum : propsum, self.MID_PropertyValues: values }
 
     return result
