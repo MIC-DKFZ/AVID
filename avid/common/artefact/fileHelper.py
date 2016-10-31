@@ -102,8 +102,7 @@ XML_NAMESPACE_DICT = {"avid":XML_NAMESPACE}
 CURRENT_XML_VERSION = "1.0"
 
 def loadArtefactList_xml(filePath, expandPaths = False, rootPath = None):
-  '''Loads a artefact list from a CSV file. This is a methods to load the first
-  generation input files.
+  '''Loads a artefact list from a XML file.
   @param filePath Path where the artefact list is located.
   @param expandPaths If true all relative url will be expanded by the rootPath
   If rootPath is not set, it will be the directory of filePath
