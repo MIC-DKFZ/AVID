@@ -1,3 +1,5 @@
+###AVIDHEADER
+
 import uuid
 
 class EvalInstanceDescriptor (object):
@@ -42,37 +44,43 @@ class EvalInstanceDescriptor (object):
   def __str__(self):
     return '(%s)' % (self._definingValues)
 
-class EvaluationResult (object):
-  
-  def __init__(self, measurements, instanceMeasurements, name = 'unknown_evaluation',
-               workflowFile = '', artefactFile = '', workflowModifier = {},
-               svWeights = None, valueNames = {}, valueDescriptions = {}):
-    '''Init of a EvaluationResult instance.
-    @param measurements: Dictionary containing the overall measurements for the
-    whole test set.  
-    @param instanceMeasurements: Result dictionary with measurements for each
-    instance. The key of the dict is a EvalInstanceDescriptor instance,
-    the value is dictionary of measurements of one instance.  
-    @param name: Name/lable of this evaluation.  
-    @param workflowFile: Path to the workflow script that was evaluated.  
-    @param artefactFile: Path to the artefact file that used to evaluated the workflow.  
-    @param workflowModifier: Dictionary of the workflow modifier used for the evaluation.
-    @param svWeights: Dictionary of the weights used to calculate the single
-    value measure of the evaluation.
-    @param valueNames: Dictionary of the display names of used measurements.  
-    @param valueDescriptions: Dictionary of the descriptions of used measurements.  
-    '''  
-    self.measurements = measurements
-    self.instanceMeasurements = instanceMeasurements
-    self.svWeights = dict()
-    self.name = name
-    self.workflowFile = workflowFile
-    self.artefactFile = artefactFile
-    self.workflowModifier = workflowModifier
-    self.svWeights = svWeights
-    self.valueNames = valueNames
-    self.valueDescriptions = valueDescriptions
+
+class EvaluationStrategy(object):
+  ''' Helper object to define a EvaluationStrategy that can be used by
+  execution scripts like avid evaluation or optimization. It is simelar to 
+  the TestCase class of the unittest package. ngeo execution scripts will search
+  for classes based on EvaluationStrategy and will use instances of them.
+  '''
+  def __init__(self, sessionDir, clearSessionDir = True):
+    self.sessionDir = sessionDir
+    self.clearSessionDir = clearSessionDir
+
+  def defineMetric(self):
+    '''This method must be implemented and return an metric instance.'''
+    raise NotImplementedError("Reimplement in a derived class to function correctly.")
+    pass    
+
+  def defineName(self):
+    '''This method returns the name of the evaluation strategy. It can be
+     reimplemented to specify the name of the strategy.'''
+    return "Unnamed Evaluation"
+
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}):
+    '''Function is called to evaluate a workflow used the passed artfact definitions
+    @param workflowFile: String defining the path to the avid workflow that should
+    be executed.
+    @param artefactFile: String defining the path to the artefact bootstrap file
+     for the workflow session that will be evaluated.
+    @param workflowModifier: Dict that defines the modifier for the workflow.
+    They will be passed as arguments to the workflow execution. Key is the argument
+    name and the dict value the argument value. The default implementation will
+    generate an cl argument signature like --<key> <value>. Thus {'a':120} will
+    be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
+    @return: Returns a EvaluationResult instance with everything you want to know.
+    '''
+    metric = self.defineMetric()
+    name = self.defineName()
     
+    result = metric.evaluate(workflowFile, artefactFile, workflowModifier, name)
     
-    
-    
+    return result
