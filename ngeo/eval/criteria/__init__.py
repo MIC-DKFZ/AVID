@@ -1,4 +1,4 @@
-
+###AVIDHEADER
 
 import logging
 from avid.selectors import ValidResultSelector

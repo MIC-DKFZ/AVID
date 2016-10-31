@@ -1,3 +1,5 @@
+###AVIDHEADER
+
 import unittest
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact

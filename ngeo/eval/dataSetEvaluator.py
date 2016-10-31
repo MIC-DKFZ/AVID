@@ -1,3 +1,5 @@
+###AVIDHEADER
+
 import logging
 from avid.common.artefact import defaultProps
 from avid.common.demultiplexer import getSelectors

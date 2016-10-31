@@ -1,3 +1,5 @@
+###AVIDHEADER
+
 import os
 import logging
 import datetime
@@ -146,5 +148,4 @@ class DefaultMetric (object):
       result.update(criterion.valueDescriptions)
     
     return result
-    
     
