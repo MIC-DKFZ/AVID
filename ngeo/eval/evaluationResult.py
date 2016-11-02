@@ -3,6 +3,7 @@
 import os
 import xml.etree.ElementTree as ElementTree
 from ngeo.eval import EvalInstanceDescriptor
+from avid.common.artefact.fileHelper import indent
 
 class EvaluationResult (object):
   
@@ -276,7 +277,7 @@ def saveEvaluationResult_xml(filePath, evalResult):
    
   root = builder.close()
   tree = ElementTree.ElementTree(root)
-  xml_indent(root)
+  indent(root)
   
   try:
     os.makedirs(os.path.split(filePath)[0])
