@@ -1,0 +1,12 @@
+<statistics>
+  <results>
+    <property name="RATIO">0.0861666666667</property>
+    <property name="MIN">-255.0</property>
+    <property name="MAX">255.0</property>
+    <property name="DIF">51700.0</property>
+    <property name="NUM">600000.0</property>
+    <property name="MAE">13.191383</property>
+    <property name="AVE">0.0</property>
+    <property name="MSE">2679.976074</property>
+  </results>
+</statistics>

@@ -1,0 +1,19 @@
+<statistics>
+  <results>
+    <property name="FP">0.0</property>
+    <property name="Avg average Hausdorff distance">0.0</property>
+    <property name="Hausdorff distance">0.0</property>
+    <property name="DICE">1.0</property>
+    <property name="Max average Hausdorff distance">0.0</property>
+    <property name="Hausdorff distance (boundary)">0.0</property>
+    <property name="Avg average Hausdorff distance (boundary)">0.0</property>
+    <property name="SP">1.0</property>
+    <property name="TP">30440.0</property>
+    <property name="TN">569560.0</property>
+    <property name="Percent (0.95) Hausdorff distance">0.0</property>
+    <property name="FN">0.0</property>
+    <property name="Percent (0.95) Hausdorff distance (boundary)">0.0</property>
+    <property name="Max average Hausdorff distance (boundary)">0.0</property>
+    <property name="SE">1.0</property>
+  </results>
+</statistics>
