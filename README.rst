@@ -51,10 +51,36 @@ use
   avidconfig settings avid.toolspath <your_desired_tools_path>
 ```
 
-## install all tools specified by your AVID distribution
+## Get the tools (for the AVID actions)
+You have two choices:
+1. "install" the tools. This means that you will get copies to the tools, but
+it is not connected to any versioning of the version control system the tools
+are stored in.
+
+2. "update" the tools. This will make an svn checkout/update on the central tool
+repository. This is interesting for developers or if you will often update the avid source
+and you want to have an easy possibility to update the tools accordingly.
+
+###install all tools specified by your AVID distribution
 use
 ```
   avidconfig tools install
+```
+
+###update all tools specified by your AVID distribution
+use
+```
+  avidconfig tools update
+```
+
+###install or update specific tools
+use
+```
+  avidconfig tools install <toolname1> [<toolname2> [...]]
+```
+or
+```
+  avidconfig tools update <toolname1> [<toolname2> [...]]
 ```
 
 ## run tests
