@@ -1,5 +1,8 @@
 import xml.etree.ElementTree as ElementTree
 import logging
+import os
+from avid.common.artefact.fileHelper import indent
+
 logger = logging.getLogger(__name__)
 
 XML_STATISTICS = "statistics"
@@ -124,3 +127,34 @@ def loadResult(fileName):
     raise
 
   return result
+
+def saveSimpleDictAsResultXML(resultDict,resultPath):
+  '''Helper that stores the passed dictionary in a RTTB dose tool compliant xml
+  format.
+  @param resultDict Dictionary with the values that should be stored
+  @param resultPath Path where the xml output should be stored.'''
+
+  builder = ElementTree.TreeBuilder()
+
+  builder.start(XML_STATISTICS, {})
+  builder.start(XML_RESULTS, {})
+  for key in resultDict:
+    builder.start(XML_PROPERTY, {XML_ATTR_NAME : key})
+    builder.data(str(resultDict[key]))
+    builder.end(XML_PROPERTY)
+  builder.end(XML_RESULTS)
+  builder.end(XML_STATISTICS)
+
+  root = builder.close()
+  tree = ElementTree.ElementTree(root)
+  indent(root)
+
+  try:
+    os.makedirs(os.path.split(resultPath)[0])
+  except:
+    pass
+
+  if os.path.isfile(resultPath):
+    os.remove(resultPath)
+
+  tree.write(resultPath, xml_declaration = True)

@@ -22,6 +22,8 @@ class CLIActionBase(SingleActionBase):
     SingleActionBase.__init__(self, actionTag,alwaysDo, session, additionalActionProps)
     self._cwd = cwd
     self._actionConfig = actionConfig
+    self._logFilePath = None
+    self._logErrorFilePath = None
     
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed
@@ -42,13 +44,17 @@ class CLIActionBase(SingleActionBase):
     global logger
     
     try:
-      logfile = open(clicall+".log", "w")
+      filePath = clicall+os.extsep+"log"
+      logfile = open(filePath, "w")
+      self._logFilePath = filePath
     except:
       logfile = None
       logger.debug('Unable to generate log file for call: %s', clicall)
       
     try:
-      errlogfile = open(clicall+".error.log", "w")
+      filePath = clicall+os.extsep+"error.log"
+      errlogfile = open(filePath, "w")
+      self._logErrorFilePath = filePath
     except:
       errlogfile = None
       logger.debug('Unable to generate error log file for call: %s', clicall)
