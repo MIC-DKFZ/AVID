@@ -9,7 +9,7 @@ import shutil
 from avid.common.artefact import defaultProps
 from ngeo.eval.dataSetEvaluator import DataSetEvaluator
 from avid.common.artefact.fileHelper import loadArtefactList_xml
-from ngeo.eval import EvaluationResult
+from ngeo.eval.evaluationResult import EvaluationResult
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class DefaultMetric (object):
     
     evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps)
     
-    artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
+    artefacts = loadArtefactList_xml(artefactFile, True, self.sessionDir)
     
     gmeasure, imeasure = evaluator.evaluate(artefacts)
        
