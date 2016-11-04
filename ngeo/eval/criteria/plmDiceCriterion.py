@@ -3,7 +3,11 @@
 from ..criteria import MetricCriterionBase
 from avid.common.artefact import getArtefactProperty, defaultProps
 from avid.selectors.keyValueSelector import ActionTagSelector
+import subprocess
+from StringIO import StringIO
 
+
+logger = logging.getLogger(__name__)
 
 class PlmDiceCriterion(MetricCriterionBase):
   '''Criterion that evaluates the difference between to masks using the
@@ -29,6 +33,9 @@ class PlmDiceCriterion(MetricCriterionBase):
   MID_HausdorffBoundaryAvg = 'ngeo.eval.criteria.PlmDiceCriterion.hausdorff.boundary.avg'
   MID_HausdorffBoundaryMaxAvg = 'ngeo.eval.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg'
   MID_HausdorffBoundaryP95 = 'ngeo.eval.criteria.PlmDiceCriterion.hausdorff.boundary.p95'
+  
+  MAPPING_PLM_ID_2_CRITERION_ID = {PlmDiceCriterion.MID_TP: 'TP',
+                                   PlmDiceCriterion.MID_TN: 'TN'}
   
   def __init__(self, referenceSelector = ActionTagSelector('Reference'), testSelector = ActionTagSelector('Test')):
     valuesInfo = { self.MID_TP: ['True Positives','Number of true positive voxels.'],
@@ -60,16 +67,35 @@ class PlmDiceCriterion(MetricCriterionBase):
     @return: Returns a dictionary with the criterion measurements. Key is the
     value ID. The dict value is the measurement value(s). 
      '''
-    TODO check if only one per slot than use plastimatch and push back the result dict.
-    duration = 0
+    result = None
     
-    for artefact in relevantArtefacts['inputSelector']:
-      try:
-        duration = duration + getArtefactProperty(artefact, defaultProps.EXECUTION_DURATION)
-
-      except:
-        pass
+    if len(relevantArtefacts['referenceSelector']) == 1 and len(relevantArtefacts['referenceSelector']) == 1:
       
-    result = { self.MID_Duration : duration }
+      plmResult = self._callPlastimatchDice(relevantArtefacts['referenceSelector'][0], relevantArtefacts['referenceSelector'][0])
+      
+      result = {valueID: plmResult[self.MAPPING_PLM_ID_2_CRITERION_ID[valueID]] for valueID in self._valueNames}
+      
+    else:
+      global logger
+      logger.error("Error in plmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
+         
+    return result
 
+  def _callPlastimatchDice(self, reference, test):
+    refPath = getArtefactProperty(reference,artefactProps.URL)
+    testPath = getArtefactProperty(test,artefactProps.URL)
+    
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
+    
+    callStr = '"' + execURL + '" dice ' + ' "' + refPath + '"' + ' "' + testPath +'" --all'
+    
+    output = StringIO
+    errors = StringIO
+    result = None
+    if not subprocess.call(callStr,stdout = output, stderr = errors) == 0:
+      global logger
+      logger.error("Error in plmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
+    else:
+      result = parseDiceResult(output.getvalue())
+    
     return result
