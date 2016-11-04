@@ -107,7 +107,7 @@ def initSession_byCLIargs( sessionPath = None, **args):
    For more details see also initSession. 
    '''
   parser = argparse.ArgumentParser()
-  parser.add_argument('--sessionPath', help = "Flag has to jobs. 1) PAth identifies location where the session xml should be stored. If the file exists, the content will be read in and reused. After the session is finished all artefacts (including newly generated once) are stored back. 2) It defines the root location where all the data is stored.")
+  parser.add_argument('--sessionPath', help = "Flag has two jobs. 1) Path identifies location where the session xml should be stored. If the file exists, the content will be read in and reused. After the session is finished all artefacts (including newly generated once) are stored back. 2) It defines the root location where all the data is stored.")
   parser.add_argument('--name', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it will be "<sessionFile name>_session".')
   parser.add_argument('--expandPaths', help = 'Indicates if relative artefact path should be expanded when loading the data.')
   parser.add_argument('--bootstrapArtefacts', help = 'File with additional artefacts that should be loaded when the session is initialized.')
