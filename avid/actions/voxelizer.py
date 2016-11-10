@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class VoxelizerAction(CLIActionBase):
   '''Class that wraps the single action for the tool rttb VoxelizerTool.'''
 
-  def __init__(self, structSet, structName, referenceImage,
+  def __init__(self, structSet, referenceImage, structName,
                actionTag = "Voxelizer", allowIntersections = True,
                booleanMask = False, outputExt = 'nrrd', alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None):
@@ -120,10 +120,15 @@ class VoxelizerAction(CLIActionBase):
 class VoxelizerBatchAction(BatchActionBase):    
   '''Batch action for the voxelizer tool..'''
   
-  def __init__(self,  structSetSelector, structNames, referenceSelector,
+  def __init__(self, structSetSelector, referenceSelector, structNames = None,
                referenceLinker = CaseLinker(), 
                actionTag = "doseStat", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), **actionParameter):
+    ''' Batch action for the voxelizer tool.
+    @param structNames: List of the structures names that should be voxelized.
+     If none is passed all structures defined in current session's structure
+     definitions. 
+    '''
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._references = referenceSelector.getSelection(self._session.inData)
@@ -131,6 +136,8 @@ class VoxelizerBatchAction(BatchActionBase):
 
     self._refLinker = referenceLinker
     self._structNames = structNames
+    if (self._structNames is None):
+      self._structNames = self._session.structureDefinitions.keys()
     self._actionConfig = actionConfig
     self._actionParameter = actionParameter
 
@@ -151,7 +158,7 @@ class VoxelizerBatchAction(BatchActionBase):
         
       for lr in linkedRefs:
         for name in self._structNames:
-          action = VoxelizerAction(struct, name, lr,
+          action = VoxelizerAction(struct, lr, name,
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,

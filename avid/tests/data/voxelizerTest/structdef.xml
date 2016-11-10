@@ -1,0 +1,6 @@
+<avid:structure_definition version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:structure name="Brain">
+		<avid:struct_pattern>Gehirn|GEHIRN|Brain</avid:struct_pattern>
+	</avid:structure>
+	<avid:structure name="Liver"/>
+</avid:structure_definition>
