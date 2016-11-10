@@ -18,13 +18,14 @@ logger = logging.getLogger(__name__)
 class BioModelCalcAction(CLIActionBase):
   '''Class that wraps the single action for the tool doseMap.'''
 
-  def __init__(self, inputDose, weight=1.0, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
+  def __init__(self, inputDose, weight=1.0, nFractions=1, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
                actionTag = "DoseStat", alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
     self._setCaseInstanceByArtefact(inputDose)
     self._inputDose = inputDose
     self._weight = weight
+    self._nFractions = nFractions
     self._modelParameters = modelParameters
     self._modelParameterMaps = modelParameterMaps
     self._modelName = modelName
@@ -91,8 +92,7 @@ class BioModelCalcAction(CLIActionBase):
       content += ' --modelParameters '
       for val in self._modelParameters:
         content+= str(val) + " "
-    if self._weight is not 0:
-      content += ' --nFractions ' + str(int(1/self._weight))
+    content += ' --nFractions ' + str(self._nFractions)
 
     with open(batPath, "w") as outputFile:
       outputFile.write(content)
@@ -135,7 +135,7 @@ class BioModelCalcBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and
     should therefore able to process a batch of SingleActionBased actions.'''
   
-  def __init__(self,  inputSelector, planSelector=None, planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01], modelParameterMapsSelector = None, modelName="LQ", outputExt = "nrrd",
+  def __init__(self,  inputSelector, planSelector=None, normalizeFractions= True, useDoseScaling=True, planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01], modelParameterMapsSelector = None, modelName="LQ", outputExt = "nrrd",
                actionTag = "bioModelCalc", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
@@ -146,6 +146,8 @@ class BioModelCalcBatchAction(BatchActionBase):
     else:
         self._plan=None
     self._planLinker = planLinker
+    self._normalizeFractions = normalizeFractions
+    self._useDoseScaling = useDoseScaling
 
     if modelParameterMapsSelector is not None:
       self._modelParameterMaps = modelParameterMapsSelector.getSelection(self._session.inData)
@@ -175,6 +177,7 @@ class BioModelCalcBatchAction(BatchActionBase):
     
     for (pos,inputDose) in enumerate(inputs):
       weight = 1.0
+      nFractions = 1
       if self._plan is not None:
           linkedPlans = self._planLinker.getLinkedSelection(pos,inputs,aPlan)
 
@@ -193,7 +196,12 @@ class BioModelCalcBatchAction(BatchActionBase):
             logger.info("No plan selected, no fraction number information available. Cannot determine fraction weight. Fall back to default strategy (1/number of selected doses => weight: %s).", weight)
 
 
-      action = BioModelCalcAction(inputDose, weight, self._modelParameters, validParameterMaps, self._modelName, self._outputExt,
+      if self._normalizeFractions is True:
+        nFractions = int(1/weight)
+      if self._useDoseScaling is False:
+        weight = 1.0
+
+      action = BioModelCalcAction(inputDose, weight, nFractions, self._modelParameters, validParameterMaps, self._modelName, self._outputExt,
                           self._actionTag, alwaysDo = self._alwaysDo,
                           session = self._session,
                           additionalActionProps = self._additionalActionProps,

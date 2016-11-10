@@ -31,8 +31,8 @@ with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as sess
     doseMap(ActionTagSelector("dose")+FormatSelector(artefactProps.FORMAT_VALUE_ITK),ActionTagSelector("matchR")+FormatSelector("MatchPoint"), actionTag="DoseMap").do()
 
     lastFraction = 2
-    bioModelCalc(ActionTagSelector("DoseAcc")+TimepointSelector(lastFraction), modelParameterMapsSelector=ActionTagSelector("parameterMap"), modelName="LQ", actionTag = "BioModelAccumulatedDose").do()
-    bioModelCalc(ActionTagSelector("dose")+FormatSelector(artefactProps.FORMAT_VALUE_ITK), ActionTagSelector("plan"), modelParameters=[0.1, 0.0333], modelName="LQ", actionTag = "BioModelFractionDose").do()
+    bioModelCalc(ActionTagSelector("DoseAcc")+TimepointSelector(lastFraction), useDoseScaling = False, normalizeFractions= True, planSelector=ActionTagSelector("plan"), modelParameterMapsSelector=ActionTagSelector("parameterMap"), modelName="LQ", actionTag = "BioModelAccumulatedDose").do()
+    bioModelCalc(ActionTagSelector("dose")+FormatSelector(artefactProps.FORMAT_VALUE_ITK), useDoseScaling = False, normalizeFractions= False, planLinker=ActionTagSelector("plan"), modelParameterMapsSelector=ActionTagSelector("parameterMap"), modelName="LQ", actionTag = "BioModelFractionDose").do()
 
     doseAcc(ActionTagSelector("BioModelFractionDose"),ActionTagSelector("matchR")+FormatSelector("MatchPoint"),ActionTagSelector("plan"), operator="*", actionTag="DoseAccBioModel").do()
 
