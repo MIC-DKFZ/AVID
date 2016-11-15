@@ -18,7 +18,6 @@ class doseProcessVisualizerAction(CLIActionBase):
     def __init__(self, doseStatVariations, doseStatBaseline, doseStatAdditional, rTemplateFile, diagramTitle="", xAxisName="", yAxisName="", actionTag = "DoseProcessVisualizer", alwaysDo = False,
                session = None, additionalActionProps = None, rScriptExe = "Rscript.exe"):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
-        self._addInputArtefacts(doseStatVariations = doseStatVariations[0], doseStatBaseline = doseStatBaseline[0], doseStatAdditional)
 
         self._doseStatVariations = doseStatVariations[0]
         self._doseStatBaseline = doseStatBaseline[0]
