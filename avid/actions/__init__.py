@@ -89,10 +89,11 @@ class ActionBase(object):
 
 
   def do(self, autoTokenAdding = True):
-    ''' Triggers the processing of an action. This should be used as public
-    trigger of an action. You can control if the resulting session token should
+    '''Triggers the processing of an action. This should be used as public
+    trigger of an action.
+    @param autoTokenAdding You can control if the resulting session token should
     be automatically added to the session by the optional flag autoTokenAdding.
-    Normaly it is activated, but may be usefull to deactivate it if yiu trigger
+    Normally it is activated, but may be useful to deactivate it if you trigger
     an action within an other action. See the schedulers of batch actions for
     example.'''
     global logger

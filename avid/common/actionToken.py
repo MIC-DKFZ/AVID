@@ -1,3 +1,5 @@
+from avid.selectors import ActionTagSelector
+
 ACTION_SUCCESS = "SUCCESS"
 ACTION_FAILUER = "FAILURE"
 ACTION_SKIPPED = "SKIPPED"
@@ -29,8 +31,7 @@ class ActionToken:
         return self.state == ACTION_SKIPPED
     
     def getActionTag(self):
-        _id = self.actionTag    
-        return _id
+        return self.actionTag
 
     def getTokenID(self):
         _id = str(self.actionInstanceName)+"@"+str(self.getActionTag()) +"@"+self.session.name     
@@ -38,3 +39,8 @@ class ActionToken:
     
     def __str__ (self):
         return self.getTokenID()+"::"+self.state
+
+    @property
+    def tagSelector(self):
+        '''Convinience method that returns a ActionTagSelector for the action token.'''
+        return ActionTagSelector(self.actionTag)
