@@ -10,6 +10,10 @@ from avid.common.artefact import ensureValidPath
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 from avid.common import artefact
 
+'''set when at least one session was initialized to ensure this stream is only
+ generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
+stdoutlogstream = None
+
 def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False, debug = False, structDefinition = None, overwriteExistingSession = False):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
@@ -49,11 +53,14 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   logging.basicConfig(filename=sessionPath+".log", filemode = filemode, level=logginglevel, format='%(levelname)-8s %(asctime)s [MODULE] %(module)-20s [Message] %(message)s [Location] %(funcName)s in %(pathname)s %(lineno)d' )
   rootlogger = logging.getLogger()
   
-  stream = logging.StreamHandler(sys.stdout)
-  stream.setLevel(logging.INFO)
-  streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
-  stream.setFormatter(streamFormater)
-  rootlogger.addHandler(stream)
+  global stdoutlogstream
+  
+  if stdoutlogstream is None:    
+    stdoutlogstream = logging.StreamHandler(sys.stdout)
+    stdoutlogstream.setLevel(logging.INFO)
+    streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
+    stdoutlogstream.setFormatter(streamFormater)
+    rootlogger.addHandler(stdoutlogstream)
   
   #result path setup
   
