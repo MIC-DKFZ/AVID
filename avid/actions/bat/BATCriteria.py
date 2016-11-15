@@ -20,7 +20,7 @@ class BATCriteriaAction(CLIActionBase):
                actionTag = "BATCriteria", alwaysDo = False,
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe")):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, scriptDirectory)
-    self._setCaseInstanceByArtefact(ffImage, maskImage)
+    self._addInputArtefacts(ffImage=ffImage, maskImage=maskImage)
      
     self._ffImage = ffImage
     self._maskImage = maskImage

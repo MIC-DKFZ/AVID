@@ -26,7 +26,7 @@ class pdcAction(CLIActionBase):
                actionTag = "pdc", executionBat = None, alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(image, plan, struct)
+    self._addInputArtefacts(image = image, plan = plan, struct = struct)
 
     self._image = image
     self._plan = plan

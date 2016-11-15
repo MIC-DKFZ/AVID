@@ -24,7 +24,7 @@ class DoseStatAction(CLIActionBase):
                actionTag = "DoseStat", alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(inputDose,structSet)
+    self._addInputArtefacts(inputDose=inputDose, structSet=structSet)
     self._inputDose = inputDose
     self._structSet = structSet
     self._structName = structName

@@ -22,7 +22,7 @@ class BioModelCalcAction(CLIActionBase):
                actionTag = "DoseStat", alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(inputDose)
+    self._addInputArtefacts(inputDose=inputDose)
     self._inputDose = inputDose
     self._weight = weight
     self._nFractions = nFractions

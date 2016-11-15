@@ -25,7 +25,7 @@ class ImageAccAction(CLIActionBase):
                actionTag = "imageAcc", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(image1, image2, registration)
+    self._addInputArtefacts(image1 = image1, image2 = image2, registration=registration)
         
     self._image1 = image1
     self._registration = registration

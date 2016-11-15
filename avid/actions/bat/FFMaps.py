@@ -20,7 +20,7 @@ class FFMapsAction(CLIActionBase):
                actionTag = "FFMaps", alwaysDo = False,
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe")):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, scriptDirectory)
-    self._setCaseInstanceByArtefact(waterImage, fatImage)
+    self._addInputArtefacts(waterImage=waterImage, fatImage=fatImage)
      
     self._waterImage = waterImage
     self._fatImage = fatImage

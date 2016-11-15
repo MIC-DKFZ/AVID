@@ -22,7 +22,7 @@ class plmCompareAction(CLIActionBase):
                actionTag = "plmCompare", alwaysDo = False, 
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(refImage,testImage)
+    self._addInputArtefacts(refImage = refImage, testImage = testImage)
     self._refImage = refImage
     self._testImage = testImage
     

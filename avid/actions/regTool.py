@@ -27,7 +27,7 @@ class regToolAction(CLIActionBase):
                session = None, additionalActionProps = None, actionConfig = None):
        
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(targetImage, movingImage, targetMask, movingMask)
+    self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask, movingMask = movingMask)
 
     self._targetImage = targetImage
     self._targetMask = targetMask

@@ -25,7 +25,7 @@ class DoseAccAction(CLIActionBase):
                actionTag = "doseAcc", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(dose1, dose2, registration)
+    self._addInputArtefacts(dose1=dose1, dose2=dose2, registration=registration)
         
     self._dose1 = dose1
     self._registration = registration

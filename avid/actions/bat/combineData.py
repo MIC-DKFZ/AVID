@@ -21,7 +21,12 @@ class CombineDataAction(CLIActionBase):
                actionTag = "combineData", alwaysDo = False,
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe")):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, scriptDirectory)
-    self._setCaseInstanceByArtefact(*inputImages)
+    
+    inputs = dict();
+    for pos, aInput in enumerate(inputImages):
+      inputs[str(pos)] = aInput
+      
+    self._addInputArtefacts(**inputs)
     
     sorter = TimePointSorter()
     

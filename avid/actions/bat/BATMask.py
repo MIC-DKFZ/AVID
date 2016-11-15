@@ -20,7 +20,7 @@ class BATMaskAction(CLIActionBase):
                actionTag = "BATMask", alwaysDo = False,
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe")):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, scriptDirectory)
-    self._setCaseInstanceByArtefact(lungImage, thoraxImage)
+    self._addInputArtefacts(lungImage=lungImage, thoraxImage=thoraxImage)
      
     self._lungImage = lungImage
     self._thoraxImage = thoraxImage

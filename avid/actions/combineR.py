@@ -21,7 +21,7 @@ class combineRAction(CLIActionBase):
                actionTag = "combineR", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(reg1,reg2)
+    self._addInputArtefacts(reg1=reg1,reg2=reg2)
 
     self._reg1 = reg1
     self._reg2 = reg2

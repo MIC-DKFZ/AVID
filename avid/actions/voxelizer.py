@@ -22,7 +22,7 @@ class VoxelizerAction(CLIActionBase):
                booleanMask = False, outputExt = 'nrrd', alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(structSet, referenceImage)
+    self._addInputArtefacts(structSet = structSet, referenceImage = referenceImage)
     self._referenceImage = referenceImage
     self._structSet = structSet
     self._structName = structName

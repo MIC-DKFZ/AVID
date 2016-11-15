@@ -48,7 +48,8 @@ class DummyCLIAction(CLIActionBase):
                actionTag = "DummyCLI", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, None, actionConfig = None)
-    self._setCaseInstanceByArtefact(input)
+    
+    self._addInputArtefacts(input = input)
      
     self._input = input
     

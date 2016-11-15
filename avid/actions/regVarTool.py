@@ -20,7 +20,7 @@ class RegVarToolAction(CLIActionBase):
   def __init__(self, reg, instanceNr, algorithmDLL, parameters = None, templateImage = None, actionTag = "regVarTool", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(reg)
+    self._addInputArtefacts(reg = reg)
     self._reg = reg
     self._algorithmDLL = algorithmDLL
     self._parameters = parameters

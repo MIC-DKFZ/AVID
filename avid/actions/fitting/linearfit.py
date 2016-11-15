@@ -20,7 +20,7 @@ class LinearFitAction(CLIActionBase):
                actionTag = "FFMaps", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, None, actionConfig = None)
-    self._setCaseInstanceByArtefact(inputImage, maskImage)
+    self._addInputArtefacts(inputImage = inputImage, maskImage = maskImage)
      
     self._inputImage = inputImage
     self._maskImage = maskImage

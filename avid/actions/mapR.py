@@ -23,7 +23,7 @@ class mapRAction(CLIActionBase):
                actionTag = "mapR", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
-    self._setCaseInstanceByArtefact(inputImage,registration,templateImage)
+    self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
     self._inputImage = inputImage
     self._registration = registration
     self._templateImage = templateImage
