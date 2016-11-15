@@ -32,7 +32,7 @@ class doseProcessVisualizerAction(CLIActionBase):
 
         self.rScriptExe = rScriptExe
 
-        self._addInputArtefacts(doseStatVariations = self._doseStatVariations, doseStatBaseline = self._doseStatBaseline, self._doseStatAdditional)
+        self._addInputArtefacts(doseStatVariations = self._doseStatVariations, doseStatBaseline = self._doseStatBaseline, doseStatAdditional = self._doseStatAdditional)
 
 
     def _generateName(self):
