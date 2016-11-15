@@ -5,6 +5,8 @@ Created on 26.01.2016
 '''
 import os
 
+from avid.common.artefact import artefactExists
+
 
 def splitall(path):
     allparts = []
@@ -26,11 +28,13 @@ class DirectoryCrawler(object):
   The crawler assumes that every file, that he founds is an potential artefact.
   The crawler will call the file functor to interpret the file. If the file
   functor returns the artefact the crawler enlists it to the result in the
-  artefact list 
-  '''
-  def __init__(self, rootPath, fileFunctor = None):
+  artefact list.
+  @param ignoreExistingArtefacts If set to true artefacts returned by fileFunctor
+  will only be added if they do not already exist in the artefact list.'''
+  def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts = False):
     self._rootPath = rootPath
     self._fileFunctor = fileFunctor
+    self._ignoreExistingArtefacts = ignoreExistingArtefacts
     
   def getArtefacts(self):
     artefacts = list()
@@ -44,7 +48,7 @@ class DirectoryCrawler(object):
         
         artefact = self._fileFunctor(pathParts,aFile, os.path.join(root, aFile))
         
-        if artefact is not None:
+        if artefact is not None and not (artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts):
           artefacts.append(artefact)
 
     return artefacts

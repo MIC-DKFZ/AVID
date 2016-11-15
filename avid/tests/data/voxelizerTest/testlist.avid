@@ -5,7 +5,7 @@
 		<avid:property key="actionTag">Reference</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">dicom</avid:property>
-		<avid:property key="url">.\dummy.dcm</avid:property>
+		<avid:property key="url">.\ref_geometry.nrrd</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
@@ -13,6 +13,6 @@
 		<avid:property key="actionTag">Struct</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">dicom</avid:property>
-		<avid:property key="url">.\dummy.dcm</avid:property>
+		<avid:property key="url">.\rtss.dcm</avid:property>
 	</avid:artefact>
 </avid:artefacts>
