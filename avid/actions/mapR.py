@@ -21,8 +21,8 @@ class mapRAction(CLIActionBase):
   def __init__(self, inputImage, registration = None, templateImage = None, 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
     self._inputImage = inputImage
     self._registration = registration
@@ -122,7 +122,7 @@ class mapRBatchAction(BatchActionBase):
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), propInheritanceDict = dict()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputImages = inputSelector.getSelection(self._session.inData)
@@ -139,6 +139,7 @@ class mapRBatchAction(BatchActionBase):
     self._interpolator = interpolator
     self._outputExt = outputExt
     self._actionConfig = actionConfig
+    self._propInheritanceDict = propInheritanceDict
 
       
   def _generateActions(self):
@@ -166,7 +167,8 @@ class mapRBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              actionConfig =self._actionConfig)
+                              actionConfig =self._actionConfig,
+                              propInheritanceDict=self._propInheritanceDict)
           actions.append(action)
     
     return actions

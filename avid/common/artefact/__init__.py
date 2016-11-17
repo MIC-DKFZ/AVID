@@ -23,11 +23,6 @@ class Artefact(object):
     
     self.lock = threading.RLock()    
 
-    if defaultP is not None and not isinstance(defaultP, dict.__class__):
-      raise RuntimeError("Cannot init artefact. Passed default property variable is not a dictionary. Variable %s", defaultP)
-    if additionalP is not None and not isinstance(additionalP, dict.__class__):
-      raise RuntimeError("Cannot init artefact. Passed additional property variable is not a dictionary. Variable %s", defaultP)
-
     self._defaultProps = dict()
     if defaultP is None:
       self._defaultProps[defaultProps.CASE] = None
@@ -40,8 +35,9 @@ class Artefact(object):
       self._defaultProps[defaultProps.OBJECTIVE] = None
       self._defaultProps[defaultProps.INVALID] = None
     else:
-      self._defaultProps = defaultP
-    
+      for key in defaultP:
+        self._defaultProps[key] = defaultP[key]
+
     if not defaultProps.ID in self._defaultProps:
       self._defaultProps[defaultProps.ID] = str(uuid.uuid1())
     if not defaultProps.TIMESTAMP in self._defaultProps:
@@ -49,7 +45,8 @@ class Artefact(object):
 
     self._additionalProps = dict()
     if not additionalP is None:
-      self._additionalProps = additionalP
+      for key in additionalP:
+        self._additionalProps[key] = additionalP[key]
 
     
   def is_similar(self, other):
