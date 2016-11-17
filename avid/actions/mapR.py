@@ -19,7 +19,7 @@ class mapRAction(CLIActionBase):
   '''Class that wraps the single action for the tool mapR.'''
 
   def __init__(self, inputImage, registration = None, templateImage = None, 
-               interpolator = "linear", outputExt = "nrrd", 
+               interpolator = "linear", outputExt = "nrrd", paddingValue = None,
                actionTag = "mapR", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
@@ -29,6 +29,7 @@ class mapRAction(CLIActionBase):
     self._templateImage = templateImage
     self._interpolator = interpolator
     self._outputExt = outputExt
+    self._paddingValue = paddingValue
     
     cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", actionConfig))
     self._cwd = cwd    
@@ -103,26 +104,27 @@ class mapRAction(CLIActionBase):
       content += ' -t "' + templatePath + '"'
       
     content += ' -o "' + resultPath + '"'
-    content += ' -i ' + self._interpolator + ' -p 1024 --handleMappingFailure' 
+    content += ' -i ' + self._interpolator + ' --handleMappingFailure'
+
+    if not self._paddingValue is None:
+        content += ' -p %s'%self._paddingValue
     
     if self._outputExt.lower() =="dcm" or self._outputExt.lower() == "ima":
-      content += '--seriesReader dicom'
+      content += ' --seriesReader dicom'
     
     with open(batPath, "w") as outputFile:
       outputFile.write(content)
 
-    return batPath      
+    return batPath
 
-
-class mapRBatchAction(BatchActionBase):    
+class mapRBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and
     should therefore able to process a batch of SingleActionBased actions.'''
   
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
-               interpolator = "linear", outputExt = "nrrd", 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputImages = inputSelector.getSelection(self._session.inData)
@@ -136,10 +138,7 @@ class mapRBatchAction(BatchActionBase):
     
     self._regLinker = regLinker
     self._templateLinker = templateLinker  
-    self._interpolator = interpolator
-    self._outputExt = outputExt
-    self._actionConfig = actionConfig
-    self._propInheritanceDict = propInheritanceDict
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -163,12 +162,12 @@ class mapRBatchAction(BatchActionBase):
       
       for lt in linkedTemps:
         for lr in linkedRegs:
-          action = mapRAction(inputImage, lr, lt, self._interpolator, self._outputExt,
-                              self._actionTag, alwaysDo = self._alwaysDo,
+          action = mapRAction(inputImage, lr, lt,
+                              actionTag = self._actionTag,
+                              alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              actionConfig =self._actionConfig,
-                              propInheritanceDict=self._propInheritanceDict)
+                              **self._singleActionParameters)
           actions.append(action)
     
     return actions
