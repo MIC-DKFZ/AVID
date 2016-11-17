@@ -123,7 +123,7 @@ class VoxelizerBatchAction(BatchActionBase):
   def __init__(self, structSetSelector, referenceSelector, structNames = None,
                referenceLinker = CaseLinker(), 
                actionTag = "doseStat", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), **actionParameter):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     ''' Batch action for the voxelizer tool.
     @param structNames: List of the structures names that should be voxelized.
      If none is passed all structures defined in current session's structure
@@ -138,8 +138,7 @@ class VoxelizerBatchAction(BatchActionBase):
     self._structNames = structNames
     if (self._structNames is None):
       self._structNames = self._session.structureDefinitions.keys()
-    self._actionConfig = actionConfig
-    self._actionParameter = actionParameter
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -162,7 +161,7 @@ class VoxelizerBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              actionConfig =self._actionConfig, **self._actionParameter)
+                              **self._singleActionParameters)
           actions.append(action)
     
     return actions
