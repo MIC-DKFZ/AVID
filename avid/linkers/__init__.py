@@ -8,12 +8,15 @@ class LinkerBase(object):
       
   def getLinkedSelection(self, masterIndex, masterSelection, slaveSelection):
     ''' Get the sub selection of slave that has a meaningful semantic link
-        to the master selection/index.
+        to the master selection/index. The default implementation just passes through
+        the slaveSelection (so everything gets linked).
+        @result List of all linked artefacts. Therefore all artefacts from slave selection
+        that fullfill the link criterion in respect to the master artefact.
         @param masterIndex index of the entry in the masterSelection that is defining
         for the link.
         @param masterSelection the master selection that contains the master entry
         @param slaveSelection that is used to generate the subset. '''
-    pass
+    return slaveSelection
 
   def __add__(self,other):
     ''' Creates an AndLinker with both operands.'''

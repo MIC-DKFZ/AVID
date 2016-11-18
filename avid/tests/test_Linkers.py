@@ -1,7 +1,7 @@
 import unittest
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
-from avid.linkers import AndLinker
+from avid.linkers import AndLinker, LinkerBase
 from avid.linkers import CaseLinker
 from avid.linkers import TimePointLinker
 
@@ -29,6 +29,15 @@ class TestLinkers(unittest.TestCase):
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a9)
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a10)
+
+  def test_LinkerBase(self):
+    linker = LinkerBase()
+    selection = linker.getLinkedSelection(2, self.data, self.data)
+    self.assertEqual(selection, self.data)
+
+    selection = linker.getLinkedSelection(0, self.data, self.data)
+    self.assertEqual(selection, self.data)
+
 
   def test_AndLinker(self):
     linker = CaseLinker() + TimePointLinker()

@@ -7,7 +7,7 @@ import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
 from cliActionBase import CLIActionBase
-from avid.linkers import CaseLinker
+from avid.linkers import CaseLinker, LinkerBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from simpleScheduler import SimpleScheduler
@@ -35,8 +35,13 @@ class mapRAction(CLIActionBase):
     self._cwd = cwd    
     
   def _generateName(self):
-    name = "map_"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.TIMEPOINT))
+    name = "map_"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.ACTIONTAG))
+
+    objective = artefactHelper.getArtefactProperty(self._inputImage,artefactProps.OBJECTIVE)
+    if not objective is None:
+        name += '-%s'%objective
+
+    name += "_#"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.TIMEPOINT))
 
     if self._registration is not None:
       name += "_reg_"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.ACTIONTAG))\
@@ -124,7 +129,18 @@ class mapRBatchAction(BatchActionBase):
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
                actionTag = "mapR", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), templateRegLinker = LinkerBase(),
+               **singleActionParameters):
+    '''@param inputSelector Selector for the artefacts that should be mapped.
+    @param registrationSelector Selector for the artefacts that specify the registration. If no registrations are
+    specified, anidentity transform will be assumed.
+    @param templateSelector Selector for the reference geometry that should be used to map into it. If None is
+    specified, the geometry of the input will be used.
+    @param regLinker Linker to select the registration that should be used on an input. Default is FractionLinker.
+    @param templateLinker Linker to select the reference geometry that should be used to map an input. Default is CaseLinker.
+    @param templateRegLinker Linker to select which regs (resulting from the regLinker should be used regarding
+    the template that will be used. Default is LinkerBase (so every link registration will be used with every linked
+    template.'''
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputImages = inputSelector.getSelection(self._session.inData)
@@ -137,7 +153,9 @@ class mapRBatchAction(BatchActionBase):
       self._templateImages = templateSelector.getSelection(self._session.inData)
     
     self._regLinker = regLinker
-    self._templateLinker = templateLinker  
+    self._templateLinker = templateLinker
+    self._templateRegLinker = templateRegLinker
+
     self._singleActionParameters = singleActionParameters
 
       
@@ -160,8 +178,10 @@ class mapRBatchAction(BatchActionBase):
       if len(linkedRegs) == 0:
         linkedRegs = [None]
       
-      for lt in linkedTemps:
-        for lr in linkedRegs:
+      for (pos2, lt) in enumerate(linkedTemps):
+        linkedRegsByTemp = self._templateRegLinker.getLinkedSelection(pos2, linkedTemps, linkedRegs)
+
+        for lr in linkedRegsByTemp:
           action = mapRAction(inputImage, lr, lt,
                               actionTag = self._actionTag,
                               alwaysDo = self._alwaysDo,
