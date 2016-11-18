@@ -30,10 +30,20 @@ class plmDiceAction(CLIActionBase):
     self._cwd = cwd    
     
   def _generateName(self):
-    name = "plmDice_"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.TIMEPOINT))\
-            +"_vs_"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.TIMEPOINT))
+    name = "plmDice_"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.ACTIONTAG))
+
+    objective = artefactHelper.getArtefactProperty(self._refImage,artefactProps.OBJECTIVE)
+    if not objective is None:
+        name += '-%s'%objective
+
+    name += "_#"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.TIMEPOINT))\
+            +"_vs_"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.ACTIONTAG))
+
+    objective = artefactHelper.getArtefactProperty(self._testImage,artefactProps.OBJECTIVE)
+    if not objective is None:
+        name += '-%s'%objective
+
+    name += "_#"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.TIMEPOINT))
 
     return name
    
