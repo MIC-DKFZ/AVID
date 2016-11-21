@@ -71,7 +71,6 @@ class TestDoseStatsCollector(unittest.TestCase):
       self.assertEqual(token.isSuccess(), True)
       self.assertEqual(self.readFile(refFile), self.readFile(resultFile))
 
-
     def test_collect_all_batch_action(self):
 
       action = collector(CaseSelector("case_1")+ActionTagSelector("stats"))
@@ -79,19 +78,6 @@ class TestDoseStatsCollector(unittest.TestCase):
 
       self.assertEqual(token.isSuccess(), True)
       self.assertEqual(sorted(action._actions[0]._resultArtefacts.keys()), sorted(['MOHx_x=10', 'standardDeviation', 'maximum', 'minimum', 'MOCx_x=2', 'MOCx_x=5', 'MinOCx_x=10', 'Dx_x=5', 'Dx_x=2', 'Dx_x=10', 'volume', 'MOCx_x=10', 'Dx_x=98', 'MinOCx_x=5', 'Dx_x=95', 'MaxOHx_x=10', 'Dx_x=90', 'MOHx_x=5', 'MOHx_x=2', 'numberOfVoxels', 'MinOCx_x=2', 'variance', 'MaxOHx_x=2', 'MaxOHx_x=5', 'mean']))
-
-    def test_simple_batch_action_with_baseline(self):
-
-      action = collector(CaseSelector("case_1") + ActionTagSelector("stats"), ["minimum", "maximum"],
-                         baseLineSelector=ActionTagSelector("base"))
-      token = action.do()
-
-      refFile = os.path.join(self.testDataDir, "ref_baseline_caseInstance_x_timePoint_maximum.csv")
-      resultFile = artefactHelper.getArtefactProperty(action._actions[0]._baseLineArtefacts["maximum"],
-                                                      artefactProps.URL)
-
-      self.assertEqual(token.isSuccess(), True)
-      self.assertEqual(self.readFile(refFile), self.readFile(resultFile))
 
 
 if __name__ == "__main__":

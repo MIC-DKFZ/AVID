@@ -20,12 +20,11 @@ class DoseStatsCollectorAction(SingleActionBase):
   '''Class that establishes a dose stats collection action. the result will be stored as CSV'''
 
   def __init__(self, doseSelections, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
-               columnKey=artefactProps.TIMEPOINT, baseLineSelection=None,
+               columnKey=artefactProps.TIMEPOINT,
                withHeaders=True, actionTag="DoseStatCollector",
-               alwaysDo=True, session=None, additionalActionProps=None):
-    SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = dict()):
+    SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._doseSelections = doseSelections
-    self._baseLineSelection = baseLineSelection
 
     self._statsMatrix = None
     self._baseLineValues = None
@@ -35,8 +34,12 @@ class DoseStatsCollectorAction(SingleActionBase):
     self._rowValues = sorted(set([d[rowKey] for d in doseSelections]))
     self._columnValues = sorted(set([d[columnKey] for d in doseSelections]))
     self._resultArtefacts = dict()
-    self._baseLineArtefacts = dict()
     self._withHeaders = withHeaders
+
+    inputStats = dict();
+    for pos, aInput in enumerate(doseSelections):
+      inputStats['Stat_' + str(pos)] = aInput
+    self._addInputArtefacts(**inputStats)
 
   def _generateName(self):
     name = "stat_collection_" + self._rowKey + "_x_" + self._columnKey
@@ -48,11 +51,7 @@ class DoseStatsCollectorAction(SingleActionBase):
     if self._keys is None:
       self._keys = self._statsMatrix.keys()
 
-    if self._baseLineSelection is not None:
-      self._baseLineValues = self._generateBaselineDict()
-
     name = self._generateName()
-    basename = "baseline_" + self._rowKey + "_x_" + self._columnKey
 
     for key in self._keys:
       if len(self._doseSelections) > 0:
@@ -70,23 +69,7 @@ class DoseStatsCollectorAction(SingleActionBase):
 
         self._resultArtefacts[key] = artefact
 
-      if self._baseLineSelection is not None:
-        artefact = self.generateArtefact(self._baseLineSelection)
-        artefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-        artefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_CSV
-        artefact[artefactProps.DOSE_STAT] = str(key)
-        artefact[artefactProps.ACTIONTAG] = artefact[artefactProps.ACTIONTAG] + "_baseline"
-
-        path = artefactHelper.generateArtefactPath(self._session, artefact)
-        resName = artefactHelper.ensureValidPath(basename + "_" + str(key) + "." + str(
-          artefactHelper.getArtefactProperty(artefact, artefactProps.ID))) + os.extsep + "csv"
-        resName = os.path.join(path, resName)
-
-        artefact[artefactProps.URL] = resName
-
-        self._baseLineArtefacts[key] = artefact
-
-    return self._resultArtefacts.values() + self._baseLineArtefacts.values()
+    return self._resultArtefacts.values()
 
   def _parseDoseStats(self, filename, statsOfInterest):
     """get relevant values from file (DoseStatistics)"""
@@ -104,15 +87,6 @@ class DoseStatsCollectorAction(SingleActionBase):
                        filename)
 
     return doseMapOneFraction
-
-  def _generateBaselineDict(self):
-    aPath = artefactHelper.getArtefactProperty(self._baseLineSelection, artefactProps.URL)
-    baseContainer = doseTool.loadResult(aPath)
-    result = dict()
-    for key in baseContainer.results.keys():
-      result[key] = baseContainer.results[key].value
-
-    return result
 
   def _generateStatsMatrix(self):
     '''generates and returns a n-dimensional value matrix.
@@ -144,6 +118,7 @@ class DoseStatsCollectorAction(SingleActionBase):
 
     return matrix
 
+
   def _generateRow(self, rowValueDict, columnHeaderValues):
     '''ensures that a row covers a certain key range. missing keys will be filled with None.
        the row will be returned as list of values'''
@@ -158,6 +133,7 @@ class DoseStatsCollectorAction(SingleActionBase):
     # @TODO Interpolation of missing values. Is this feature still needed?
 
     return result
+
 
   def _getColumnHeaderValues(self, matrix):
     headers = list()
@@ -206,40 +182,18 @@ class DoseStatsCollectorAction(SingleActionBase):
 
       self._writeToCSV(key, columnHeaderValues, csvContent, csvPath)
 
-      # baseline processing
-      if self._baseLineSelection is not None:
-        csvPath = artefactHelper.getArtefactProperty(self._baseLineArtefacts[key], artefactProps.URL)
-        baseValue = self._baseLineValues[key]
-        csvContent = dict()
-        baserow = list()
-
-        for pos in columnHeaderValues:
-          baserow.append(baseValue)
-
-        csvContent["baseline"] = baserow
-
-        self._writeToCSV(key, columnHeaderValues, csvContent, csvPath)
-
 
 class DoseStatsCollectorBatchAction(BatchActionBase):
   '''Batch class for the dose collection actions.'''
 
-  def __init__(self, inputSelector, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
-               columnKey=artefactProps.TIMEPOINT, baseLineSelector=None,
-               withHeaders=True,
-               actionTag="doseStatCollector", alwaysDo=True,
-               session=None, additionalActionProps=None, scheduler=SimpleScheduler()):
+  def __init__(self, inputSelector, selectedStats=None, actionTag="doseStatCollector", alwaysDo=True,
+               session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputStats = inputSelector.getSelection(self._session.inData)
-    self._baseline = None
-    if baseLineSelector is not None:
-      self._baseline = baseLineSelector.getSelection(self._session.inData)
-
-    self._rowKey = rowKey
-    self._columnKey = columnKey
     self._selectedStats = selectedStats
-    self._withHeaders = withHeaders
+
+    self._singleActionParameters = singleActionParameters
 
   def _generateActions(self):
     # filter only type result. Other artefact types are not interesting
@@ -247,28 +201,18 @@ class DoseStatsCollectorBatchAction(BatchActionBase):
 
     inputs = resultSelector.getSelection(self._inputStats)
 
-    baseLine = None
-
     global logger
     if len(inputs) == 0:
       logger.debug("Input selection contains no usable artefacts (type = result).")
 
-    try:
-      baseSelection = resultSelector.getSelection(self._baseline)
-      if len(baseSelection) == 0:
-        logger.debug("BaseLine selection contains no usable artefacts (type = result).")
-      else:
-        baseLine = baseSelection[0]
-        if len(baseSelection) > 1:
-          logger.debug("BaseLine selection contains more then one artefact. Only use ferst artefact: %s", baseLine)
-    except:
-      pass
-
     actions = list()
 
-    action = DoseStatsCollectorAction(inputs, self._selectedStats, self._rowKey,
-                                      self._columnKey, baseLine, self._withHeaders, self._actionTag,
-                                      self._alwaysDo, self._session, self._additionalActionProps)
+    action = DoseStatsCollectorAction(inputs, self._selectedStats,
+                                      actionTag=self._actionTag,
+                                      alwaysDo=self._alwaysDo,
+                                      session=self._session,
+                                      additionalActionProps=self._additionalActionProps,
+                                      **self._singleActionParameters)
     actions.append(action)
 
     return actions
