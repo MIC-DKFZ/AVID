@@ -22,8 +22,8 @@ class DoseStatAction(CLIActionBase):
 
   def __init__(self, inputDose, structSet, structName,
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputDose=inputDose, structSet=structSet)
     self._inputDose = inputDose
     self._structSet = structSet
@@ -165,7 +165,7 @@ class DoseStatBatchAction(BatchActionBase):
   def __init__(self,  inputSelector, structSetSelector, structNames,
                structLinker = CaseLinker()+CaseInstanceLinker(), 
                actionTag = "doseStat", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -173,7 +173,7 @@ class DoseStatBatchAction(BatchActionBase):
 
     self._structLinker = structLinker
     self._structNames = structNames
-    self._actionConfig = actionConfig  
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -196,7 +196,7 @@ class DoseStatBatchAction(BatchActionBase):
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              actionConfig =self._actionConfig)
+                              **self._singleActionParameters)
           actions.append(action)
     
     return actions

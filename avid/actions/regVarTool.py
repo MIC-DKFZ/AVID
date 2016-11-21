@@ -18,8 +18,8 @@ class RegVarToolAction(CLIActionBase):
   '''Class that wrapps the single action for the tool regVarTool.'''
 
   def __init__(self, reg, instanceNr, algorithmDLL, parameters = None, templateImage = None, actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(reg = reg)
     self._reg = reg
     self._algorithmDLL = algorithmDLL
@@ -108,11 +108,12 @@ class RegVarToolAction(CLIActionBase):
 
 class RegVarToolBatchAction(BatchActionBase):
   '''Action for batch processing of the regVarTool.'''
-  
-  def __init__(self, regs, variationCount, algorithmDLL, parameters = None, templateSelector = None,
+
+  def __init__(self, regs, variationCount, templateSelector = None,
                templateLinker = CaseLinker(),
                actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
+               **singleActionParameters):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -123,10 +124,8 @@ class RegVarToolBatchAction(BatchActionBase):
       self._templateImages = templateSelector.getSelection(self._session.inData)
     self._templateLinker = templateLinker
     
-    self._algorithmDLL = algorithmDLL
-    self._parameters = parameters
     self._variationCount = variationCount
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -145,11 +144,13 @@ class RegVarToolBatchAction(BatchActionBase):
 
       for pos in range(0, self._variationCount):
         for lt in linkedTemps:
-          action = RegVarToolAction(reg, pos, self._algorithmDLL,
-                                     self._parameters, lt, self._actionTag,
-                                     alwaysDo = self._alwaysDo, session = self._session,
-                                     additionalActionProps = self._additionalActionProps,
-                                     actionConfig =self._actionConfig)
+          action = RegVarToolAction(reg, pos,
+                                    templateImage = lt,
+                                    actionTag = self._actionTag,
+                                    alwaysDo = self._alwaysDo,
+                                    session = self._session,
+                                    additionalActionProps = self._additionalActionProps,
+                                    **self._singleActionParameters)
           actions.append(action)
     
     return actions

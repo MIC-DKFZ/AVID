@@ -22,8 +22,9 @@ class DoseMapAction(CLIActionBase):
   def __init__(self, inputDose, registration = None, templateDose = None, 
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "doseMap", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(inputDose=inputDose, registration=registration, templateDose=templateDose)
 
     self._inputDose = inputDose
@@ -155,9 +156,9 @@ class DoseMapBatchAction(BatchActionBase):
   
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
-               interpolator = "linear", outputExt = "nrrd", 
                actionTag = "doseMap", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
+               **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -171,9 +172,7 @@ class DoseMapBatchAction(BatchActionBase):
     
     self._regLinker = regLinker
     self._templateLinker = templateLinker  
-    self._interpolator = interpolator
-    self._outputExt = outputExt
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -197,11 +196,11 @@ class DoseMapBatchAction(BatchActionBase):
       
       for lt in linkedTemps:
         for lr in linkedRegs:
-          action = DoseMapAction(inputDose, lr, lt, self._interpolator, self._outputExt,
-                              self._actionTag, alwaysDo = self._alwaysDo,
+          action = DoseMapAction(inputDose, registration=lr, templateDose=lt,
+                              actionTag=self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
-                              actionConfig =self._actionConfig)
+                              **self._singleActionParameters)
           actions.append(action)
     
     return actions

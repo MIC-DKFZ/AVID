@@ -24,8 +24,9 @@ class pdcAction(CLIActionBase):
 
   def __init__(self, image, plan, struct, 
                actionTag = "pdc", executionBat = None, alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(image = image, plan = plan, struct = struct)
 
     self._image = image
@@ -250,10 +251,9 @@ class pdcBatchAction(BatchActionBase):
   
   def __init__(self,  imageSelector, planSelector, structSelector,
                planLinker = FractionLinker(useClosestPast = True), structLinker = FractionLinker(),
-               actionTag = "pdc", executionBat = None, alwaysDo = False,
+               actionTag = "pdc", alwaysDo = False,
                session = None, additionalActionProps = None,
-               actionConfig = None,
-               scheduler = SimpleScheduler()):
+               scheduler = SimpleScheduler(),**singleActionParameters):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -263,8 +263,7 @@ class pdcBatchAction(BatchActionBase):
    
     self._planLinker = planLinker
     self._structLinker = structLinker  
-    self._executionBat = executionBat
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -284,10 +283,10 @@ class pdcBatchAction(BatchActionBase):
         linkedstructs = self._structLinker.getLinkedSelection(planPos, linkedPlans, structs)
         for lstruct in linkedstructs:
 
-          action = pdcAction(image, lplan, lstruct, self._actionTag, self._executionBat,
+          action = pdcAction(image, lplan, lstruct, self._actionTag,
                              alwaysDo = self._alwaysDo, session = self._session,
                              additionalActionProps = self._additionalActionProps,
-                             actionConfig =self._actionConfig)
+                             **self._singleActionParameters)
           actions.append(action)
     
     return actions

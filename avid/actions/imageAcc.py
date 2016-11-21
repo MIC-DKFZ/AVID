@@ -23,8 +23,9 @@ class ImageAccAction(CLIActionBase):
   def __init__(self, image1, image2, registration = None, weight1 = None,
                weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(image1 = image1, image2 = image2, registration=registration)
         
     self._image1 = image1
@@ -110,7 +111,7 @@ class ImageAccAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "imageAcc", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", self._actionConfig)
     
     content = '"'+execURL + '"' + ' "' + image1Path + '"'+ ' "' + image2Path + '"' + ' "' + resultPath + '"'
 
@@ -123,9 +124,9 @@ class ImageAccAction(CLIActionBase):
     if self._weight2 is not None:
       content += ' --weight2 "' + str(self._weight2) + '"'
       
-    content += ' -i ' + self._interpolator
+    content += ' --interpolator ' + self._interpolator
 
-    content += ' -o ' + self._operator
+    content += ' --operator ' + self._operator
     
     content += ' --loadStyle1 ' + _getArtefactLoadStyle(self._image1)
     content += ' --loadStyle2 ' + _getArtefactLoadStyle(self._image2)
@@ -141,10 +142,9 @@ class ImageAccBatchAction(BatchActionBase):
   '''This action accumulates a whole selection of images and stores the result.'''
   
   def __init__(self,  imageSelector, registrationSelector = None, regLinker = FractionLinker(),
-               imageSorter = TimePointSorter(), 
-               interpolator = "linear", operator="+", outputExt = "nrrd", imageSplitProperty = None, 
+               imageSorter = TimePointSorter(), imageSplitProperty = None,
                actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
+               session = None, additionalActionProps = None, **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
     self._images = imageSelector.getSelection(self._session.inData)
@@ -155,11 +155,8 @@ class ImageAccBatchAction(BatchActionBase):
  
     self._regLinker = regLinker
     self._imageSorter = imageSorter
-    self._interpolator = interpolator
-    self._operator = operator
-    self._outputExt = outputExt
-    self._actionConfig = actionConfig
     self._imageSplitProperty = imageSplitProperty
+    self._singleActionParameters = singleActionParameters
 
         
   def _generateActions(self):
@@ -201,18 +198,18 @@ class ImageAccBatchAction(BatchActionBase):
           
         if pos == 0:
           # first element should be handled differently
-          action = ImageAccAction(image, image, lReg, 0.0, weight2, self._interpolator, self._operator, self._outputExt,
-                                  self._actionTag, alwaysDo = self._alwaysDo,
+          action = ImageAccAction(image, image, lReg, 0.0, weight2,
+                                  actionTag = self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
-                                  imageAccExe =self._imageAccExe)
+                                  **self._singleActionParameters)
         else:
           interimImageArtefact = actions[-1]._resultArtefact #take the image result of the last action
-          action = ImageAccAction(interimImageArtefact, image, lReg, 1.0, weight2, self._interpolator, self._operator, self._outputExt,
-                                  self._actionTag, alwaysDo = self._alwaysDo,
+          action = ImageAccAction(interimImageArtefact, image, lReg, 1.0, weight2,
+                                  actionTag = self._actionTag, alwaysDo = self._alwaysDo,
                                   session = self._session,
                                   additionalActionProps = additionalActionProps,
-                                  actionConfig =self._actionConfig)
+                                  **self._singleActionParameters)
           
         action._indicateOutputs() #call to ensure the result artefact is defined
         actions.append(action)

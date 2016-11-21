@@ -20,8 +20,9 @@ class BioModelCalcAction(CLIActionBase):
 
   def __init__(self, inputDose, weight=1.0, nFractions=1, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputDose=inputDose)
     self._inputDose = inputDose
     self._weight = weight
@@ -135,9 +136,11 @@ class BioModelCalcBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and
     should therefore able to process a batch of SingleActionBased actions.'''
   
-  def __init__(self,  inputSelector, planSelector=None, normalizeFractions= True, useDoseScaling=True, planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01], modelParameterMapsSelector = None, modelName="LQ", outputExt = "nrrd",
+  def __init__(self,  inputSelector, planSelector=None, normalizeFractions= True, useDoseScaling=True,
+               planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01],
+               modelParameterMapsSelector = None,
                actionTag = "bioModelCalc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._inputDoses = inputSelector.getSelection(self._session.inData)
@@ -155,9 +158,8 @@ class BioModelCalcBatchAction(BatchActionBase):
     else:
       self._modelParameterMaps = None
       self._modelParameters = modelParameters
-    self._modelName = modelName
-    self._outputExt = outputExt
-    self._actionConfig = actionConfig
+
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -201,11 +203,11 @@ class BioModelCalcBatchAction(BatchActionBase):
       if self._useDoseScaling is False:
         weight = 1.0
 
-      action = BioModelCalcAction(inputDose, weight, nFractions, self._modelParameters, validParameterMaps, self._modelName, self._outputExt,
-                          self._actionTag, alwaysDo = self._alwaysDo,
+      action = BioModelCalcAction(inputDose, weight, nFractions, self._modelParameters, validParameterMaps,
+                          actionTag = self._actionTag, alwaysDo = self._alwaysDo,
                           session = self._session,
                           additionalActionProps = self._additionalActionProps,
-                          actionConfig =self._actionConfig)
+                          **self._singleActionParameters)
       actions.append(action)
     
     return actions

@@ -24,9 +24,9 @@ class regToolAction(CLIActionBase):
 
   def __init__(self, targetImage, movingImage, configTemplate, targetMask = None,  movingMask = None, 
                targetIsReference = True, actionTag = "regTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
        
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask, movingMask = movingMask)
 
     self._targetImage = targetImage
@@ -245,12 +245,12 @@ class regToolAction(CLIActionBase):
 class regToolBatchAction(BatchActionBase):    
   '''Action for batch processing of the regTool.'''
   
-  def __init__(self,  targetSelector, movingSelector, configTemplate,
+  def __init__(self,  targetSelector, movingSelector,
                targetMaskSelector = None, movingMaskSelector = None,
                movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
-               movingMaskLinker = FractionLinker(), targetIsReference = True, 
-               actionTag = "regTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               movingMaskLinker = FractionLinker(), actionTag = "regTool", alwaysDo = False,
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
+               **singleActionParameters):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -267,9 +267,7 @@ class regToolBatchAction(BatchActionBase):
     self._movingLinker = movingLinker
     self._targetMaskLinker = targetMaskLinker  
     self._movingMaskLinker = movingMaskLinker
-    self._targetIsReference = targetIsReference
-    self._actionConfig = actionConfig
-    self._configTemplate = configTemplate
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -299,11 +297,11 @@ class regToolBatchAction(BatchActionBase):
 
         for ltm in linkedTargetMasks:
           for lmm in linkedMovingMasks:
-            action = regToolAction(target, lm, self._configTemplate, ltm, lmm,
-                                   self._targetIsReference, self._actionTag,
+            action = regToolAction(target, movingImage=lm, targetMask=ltm, movingMask=lmm,
+                                   actionTag = self._actionTag,
                                    alwaysDo = self._alwaysDo, session = self._session,
                                    additionalActionProps = self._additionalActionProps,
-                                   actionConfig =self._actionConfig)
+                                   **self._singleActionParameters)
             actions.append(action)
     
     return actions

@@ -24,9 +24,10 @@ class matchRAction(CLIActionBase):
 
   def __init__(self, targetImage, movingImage, algorithm, algorithmParameters=dict(), targetMask = None,  movingMask = None,
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
        
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask, movingMask = movingMask)
 
     self._targetImage = targetImage
@@ -138,12 +139,10 @@ class matchRAction(CLIActionBase):
 class matchRBatchAction(BatchActionBase):
   '''Action for batch processing of the matchR.'''
   
-  def __init__(self,  targetSelector, movingSelector, algorithm, algorithmParameters=dict(),
-               targetMaskSelector = None, movingMaskSelector = None,
+  def __init__(self,  targetSelector, movingSelector, targetMaskSelector = None, movingMaskSelector = None,
                movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
-               movingMaskLinker = FractionLinker(), targetIsReference = True, 
-               actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               movingMaskLinker = FractionLinker(), actionTag = "matchR", alwaysDo = False,
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
@@ -160,12 +159,8 @@ class matchRBatchAction(BatchActionBase):
     self._movingLinker = movingLinker
     self._targetMaskLinker = targetMaskLinker  
     self._movingMaskLinker = movingMaskLinker
-    self._targetIsReference = targetIsReference
-    self._actionConfig = actionConfig
-    self._algorithmParameters = algorithmParameters
-    self._algorithm = algorithm
+    self._singleActionParameters = singleActionParameters
 
-      
   def _generateActions(self):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
@@ -193,11 +188,11 @@ class matchRBatchAction(BatchActionBase):
 
         for ltm in linkedTargetMasks:
           for lmm in linkedMovingMasks:
-            action = matchRAction(target, lm, self._algorithm, self._algorithmParameters, ltm, lmm,
-                                   self._targetIsReference, self._actionTag,
-                                   alwaysDo = self._alwaysDo, session = self._session,
-                                   additionalActionProps = self._additionalActionProps,
-                                   actionConfig =self._actionConfig)
+            action = matchRAction(target, movingImage = lm, targetMask = ltm, movingMask = lmm,
+                                  actionTag=self._actionTag,
+                                  alwaysDo = self._alwaysDo, session = self._session,
+                                  additionalActionProps = self._additionalActionProps,
+                                  **self._singleActionParameters)
             actions.append(action)
     
     return actions

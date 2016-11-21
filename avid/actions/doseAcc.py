@@ -23,8 +23,9 @@ class DoseAccAction(CLIActionBase):
   def __init__(self, dose1, dose2, registration = None, weight1 = None,
                weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "doseAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(dose1=dose1, dose2=dose2, registration=registration)
         
     self._dose1 = dose1
@@ -154,9 +155,9 @@ class DoseAccBatchAction(BatchActionBase):
   
   def __init__(self,  doseSelector, registrationSelector = None, planSelector = None,
                regLinker = FractionLinker(), planLinker = FractionLinker(useClosestPast=True), doseSorter = TimePointSorter(), 
-               interpolator = "linear", operator="+", outputExt = "nrrd", doseSplitProperty = None, 
+               doseSplitProperty = None, operator="+",
                actionTag = "doseAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
+               session = None, additionalActionProps = None, **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
     self._doses = doseSelector.getSelection(self._session.inData)
@@ -172,11 +173,9 @@ class DoseAccBatchAction(BatchActionBase):
     self._regLinker = regLinker
     self._planLinker = planLinker
     self._doseSorter = doseSorter
-    self._interpolator = interpolator
-    self._operator = operator
-    self._outputExt = outputExt
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
     self._doseSplitProperty = doseSplitProperty
+    self._operator = operator
 
         
   def _generateActions(self):
@@ -235,11 +234,12 @@ class DoseAccBatchAction(BatchActionBase):
         if pos == 0:
           # first element should be handled differently
           if self._operator is not "*":
-            action = DoseAccAction(dose, dose, lReg, 0.0, weight2, self._interpolator, self._operator, self._outputExt,
-                                    self._actionTag, alwaysDo = self._alwaysDo,
-                                    session = self._session,
-                                    additionalActionProps = additionalActionProps,
-                                    actionConfig =self._actionConfig)
+            action = DoseAccAction(dose, dose, lReg, 0.0, weight2,
+                                   operator=self._operator,
+                                   actionTag =  self._actionTag, alwaysDo = self._alwaysDo,
+                                   session = self._session,
+                                   additionalActionProps = additionalActionProps,
+                                   **self._singleActionParameters)
           else:
             action = None
         else:
@@ -249,11 +249,12 @@ class DoseAccBatchAction(BatchActionBase):
             interimDoseArtefact = actions[-1]._resultArtefact #take the dose result of the last action
           if self._operator is "*":
             weight2 = 1.0
-          action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2, self._interpolator, self._operator, self._outputExt,
-                                  self._actionTag, alwaysDo = self._alwaysDo,
-                                  session = self._session,
-                                  additionalActionProps = additionalActionProps,
-                                  actionConfig =self._actionConfig)
+          action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2,
+                                 operator=self._operator,
+                                 actionTag = self._actionTag, alwaysDo = self._alwaysDo,
+                                 session = self._session,
+                                 additionalActionProps = additionalActionProps,
+                                 **self._singleActionParameters)
 
         if action is not None:
           action._indicateOutputs() #call to ensure the result artefact is defined

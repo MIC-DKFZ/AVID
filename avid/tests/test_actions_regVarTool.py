@@ -30,7 +30,7 @@ class TestRegVarTool(unittest.TestCase):
         pass
 
     def test_simple_regvartool_action(self):
-      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, self.algorithmDLLEuler, actionTag = "TestRegVar")
+      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, actionTag = "TestRegVar")
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
@@ -41,7 +41,7 @@ class TestRegVarTool(unittest.TestCase):
 
     def test_simple_regvar_action_alwaysdo(self):
       
-      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, self.algorithmDLLEuler, alwaysDo = True, actionTag = "TestRegVar")
+      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, alwaysDo = True, actionTag = "TestRegVar")
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
@@ -51,14 +51,14 @@ class TestRegVarTool(unittest.TestCase):
 
     def test_simple_regvar_action_parameters(self):
       action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
-                          self.algorithmDLLEuler, self.parameters, actionTag="TestRegVarParam")
+                          algorithmDLL=self.algorithmDLLEuler, parameters = self.parameters, actionTag="TestRegVarParam")
       token = action.do()
 
       self.assertEqual(token.isSuccess(), True)
 
     def test_simple_regvar_action_image(self):
       action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
-                          self.algorithmDLLTPS, templateSelector=ActionTagSelector("Target"), actionTag="TestRegVarImage")
+                          algorithmDLL=self.algorithmDLLTPS, templateSelector=ActionTagSelector("Target"), actionTag="TestRegVarImage")
       token = action.do()
 
       self.assertEqual(token.isSuccess(), True)

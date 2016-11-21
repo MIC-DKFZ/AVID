@@ -34,7 +34,7 @@ class TestRegTool(unittest.TestCase):
 
     def test_simple_reg_action(self):
       
-      action = regTool(ActionTagSelector("Target"), ActionTagSelector("Moving"), self.confTemplatePath, actionTag = "TestReg")     
+      action = regTool(ActionTagSelector("Target"), ActionTagSelector("Moving"), configTemplate = self.confTemplatePath, actionTag = "TestReg")
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
@@ -45,7 +45,7 @@ class TestRegTool(unittest.TestCase):
 
     def test_simple_reg_action_allways_do(self):
       
-      action = regTool(ActionTagSelector("Target"), ActionTagSelector("Moving"), self.confTemplatePath, actionTag = "TestReg", alwaysDo = True)     
+      action = regTool(ActionTagSelector("Target"), ActionTagSelector("Moving"), configTemplate = self.confTemplatePath, actionTag = "TestReg", alwaysDo = True)
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)

@@ -20,8 +20,8 @@ class VoxelizerAction(CLIActionBase):
   def __init__(self, structSet, referenceImage, structName,
                actionTag = "Voxelizer", allowIntersections = True,
                booleanMask = False, outputExt = 'nrrd', alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(structSet = structSet, referenceImage = referenceImage)
     self._referenceImage = referenceImage
     self._structSet = structSet

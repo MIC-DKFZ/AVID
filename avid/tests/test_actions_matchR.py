@@ -30,7 +30,7 @@ class TestMatchR(unittest.TestCase):
 
     def test_simple_reg_action(self):
       
-      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), self.itkAlgorithm, actionTag = "TestReg")
+      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg")
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
@@ -41,7 +41,7 @@ class TestMatchR(unittest.TestCase):
 
     def test_simple_reg_action_always_do(self):
       
-      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), self.itkAlgorithm, actionTag = "TestReg", alwaysDo = True)
+      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg", alwaysDo = True)
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)

@@ -20,8 +20,9 @@ class plmCompareAction(CLIActionBase):
 
   def __init__(self, refImage, testImage, 
                actionTag = "plmCompare", alwaysDo = False, 
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
+                           propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(refImage = refImage, testImage = testImage)
     self._refImage = refImage
     self._testImage = testImage
@@ -107,14 +108,14 @@ class plmCompareBatchAction(BatchActionBase):
   def __init__(self,  refSelector, testSelector,
                inputLinker = CaseLinker(), 
                actionTag = "plmCompare", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._refImages = refSelector.getSelection(self._session.inData)
     self._testImages = testSelector.getSelection(self._session.inData)
 
     self._inputLinker = inputLinker
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
 
 
   def _generateActions(self):
@@ -134,7 +135,7 @@ class plmCompareBatchAction(BatchActionBase):
                             self._actionTag, alwaysDo = self._alwaysDo,
                             session = self._session,
                             additionalActionProps = self._additionalActionProps,
-                            actionConfig =self._actionConfig)
+                            **self._singleActionParameters)
         actions.append(action)
 
     return actions

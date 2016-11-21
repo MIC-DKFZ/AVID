@@ -19,8 +19,9 @@ class combineRAction(CLIActionBase):
 
   def __init__(self, reg1, reg2, combOperation = "+", 
                actionTag = "combineR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig)
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+                           propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(reg1=reg1,reg2=reg2)
 
     self._reg1 = reg1
@@ -86,18 +87,16 @@ class combineRBatchAction(BatchActionBase):
   '''Batch action for combineR.'''
 
   def __init__(self,  reg1Selector, reg2Selector,
-               regLinker = FractionLinker(), combOperation = "+", 
+               regLinker = FractionLinker(),
                actionTag = "combineR", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
+               additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._reg1s = reg1Selector.getSelection(self._session.inData)
     self._reg2s = reg2Selector.getSelection(self._session.inData)
 
     self._regLinker = regLinker
-    self._combOp = combOperation
-    self._combineRExe = combineRExe
-    self._actionConfig = actionConfig
+    self._singleActionParameters = singleActionParameters
 
       
   def _generateActions(self):
@@ -117,11 +116,12 @@ class combineRBatchAction(BatchActionBase):
         logger.debug("Linked reg2 selection contains no usable artefacts. For reg1 no combinations will be generated. Reg1: %s", str(reg1))    
 
       for reg2 in linkedRegs:
-        action = combineRAction(reg1, reg2, self._combOp,
-                              self._actionTag, alwaysDo = self._alwaysDo,
-                              session = self._session,
-                              additionalActionProps = self._additionalActionProps,
-                              actionConfig=self._actionConfig)
+        action = combineRAction(reg1, reg2,
+                                actionTag=self._actionTag,
+                                alwaysDo = self._alwaysDo,
+                                session = self._session,
+                                additionalActionProps = self._additionalActionProps,
+                                **self._singleActionParameters)
         actions.append(action)
     
     return actions

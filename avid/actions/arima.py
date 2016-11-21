@@ -22,8 +22,8 @@ class ArimaAction(CLIActionBase):
 
   def __init__(self, doseStatsCollector, selectedStats=None, nPlannedFractions=25, rTemplateFile = os.path.join(getAVIDProjectRootPath(), "templates", "arima.R"), rowKey='Fractions',
                columnKey='Percentil', withHeaders=True, actionTag="Arima",
-               alwaysDo=False, session=None, additionalActionProps=None, rScriptExe = "Rscript.exe"):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps)
+               alwaysDo=False, session=None, additionalActionProps=None, actionConfig = None, propInheritanceDict = dict()):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._doseStatsCollector = doseStatsCollector
 
     self._nPlannedFractions = nPlannedFractions
@@ -33,8 +33,6 @@ class ArimaAction(CLIActionBase):
     self._columnKey = columnKey
     self._resultArtefacts = dict()
     self._withHeaders = withHeaders
-
-    self.rScriptExe = rScriptExe
 
   def _generateName(self):
     name = "arima" +"_" + str(artefactHelper.getArtefactProperty(self._doseStatsCollector,artefactProps.DOSE_STAT))
@@ -111,7 +109,7 @@ class ArimaAction(CLIActionBase):
 
     self._generateConfigFile(configPath)
 
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "Rscript", self.rScriptExe)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "Rscript", self._actionConfig)
 
     content = '"' + execURL + '"' + ' "' + configPath + '"'
 
@@ -125,9 +123,9 @@ class ArimaAction(CLIActionBase):
 class ArimaBatchAction(BatchActionBase):
   '''Batch class for the dose collection actions.'''
 
-  def __init__(self, doseStatsSelector, selectedStats=None, planSelector = None, planLinker = FractionLinker(useClosestPast=True), rTemplateFile=os.path.join(getAVIDProjectRootPath(), "templates", "arima.R"), rowKey='Fractions',
-               columnKey='Percentil', withHeaders=True, actionTag="arima", alwaysDo=False,
-               session=None, additionalActionProps=None, rScriptExe = "Rscript.exe", scheduler=SimpleScheduler()):
+  def __init__(self, doseStatsSelector, planSelector = None, planLinker = FractionLinker(useClosestPast=True),
+               actionTag="arima", alwaysDo=False,
+               session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._doseStatsCollector = doseStatsSelector.getSelection(self._session.inData)
@@ -135,12 +133,7 @@ class ArimaBatchAction(BatchActionBase):
     if planSelector is not None:
       self._plans = planSelector.getSelection(self._session.inData)
     self._planLinker = planLinker
-    self._rTemplateFile = rTemplateFile
-    self._rowKey = rowKey
-    self._columnKey = columnKey
-    self._selectedStats = selectedStats
-    self._rScriptExe = rScriptExe
-    self._withHeaders = withHeaders
+    self._singleActionParameters = singleActionParameters
 
   def _generateActions(self):
     # filter only type result. Other artefact types are not interesting
@@ -161,7 +154,12 @@ class ArimaBatchAction(BatchActionBase):
       if len(plans) > 0:
         #lPlan = linkedPlans[0]
         nPlannedFractions = artefactHelper.getArtefactProperty(plans[0], artefactProps.PLANNED_FRACTIONS)
-        action = ArimaAction(input, self._selectedStats, nPlannedFractions, self._rTemplateFile, self._rowKey, self._columnKey, self._withHeaders, self._actionTag, self._alwaysDo, self._session, self._additionalActionProps, self._rScriptExe)
+        action = ArimaAction(input, nPlannedFractions=nPlannedFractions,
+                             actionTag=self._actionTag, alwaysDo=self._alwaysDo,
+                             session=self._session,
+                             additionalActionProps=self._additionalActionProps,
+                             **self._singleActionParameters)
+
         actions.append(action)
       else:
         logger.info(
