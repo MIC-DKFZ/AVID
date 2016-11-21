@@ -150,15 +150,16 @@ def saveArtefactList_xml(filePath, artefacts, rootPath = None):
     builder.start(XML_ARTEFACT, {})
     for key in artefact._defaultProps:
       if artefact[key] is not None:
+        value = artefact[key]
         if key is defaultProps.URL:
           #make all paths relative
           try:
-            artefact[key] = os.path.relpath(artefact[key], rootPath)
+            value = os.path.relpath(artefact[key], rootPath)
           except:
-            logging.warning("Artefact URL cannot be converted to be realtive. Path is keept absolute. Artefact URL: %s", artefact[key])
-          artefact[key] = artefact[key].replace("\\", "/")
+            logging.warning("Artefact URL cannot be converted to be realtive. Path is keept absolute. Artefact URL: %s", value)
+          value = value.replace("\\", "/")
         builder.start(XML_PROPERTY, {XML_ATTR_KEY : key})
-        builder.data(str(artefact[key]))
+        builder.data(str(value))
         builder.end(XML_PROPERTY)
     for key in artefact._additionalProps:
       if artefact[key] is not None:
