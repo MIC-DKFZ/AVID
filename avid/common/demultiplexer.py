@@ -31,7 +31,7 @@ class Demultiplexer:
     result = dict()
     
     for value in values:
-      result[value] = KeyValueSelector(self._propKey, value)
+      result[value] = self._selector + KeyValueSelector(self._propKey, value)
       
     return result
 
