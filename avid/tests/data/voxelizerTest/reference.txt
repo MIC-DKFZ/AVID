@@ -1,0 +1,6 @@
+rtss.dcm is a RTSTRUCT test data set from Dicompyler (http://www.dicompyler.com/).
+ref_geometry.nrrd originates from the RTDOSE dataset from Dicompyler (http://www.dicompyler.com/).
+
+The original data set is available at https://bit.ly/dicompylertestdata.
+
+Used with permission from the Dicompyler author Aditya Panchal.
