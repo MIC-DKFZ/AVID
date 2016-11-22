@@ -25,7 +25,7 @@ class TestVoxelizer(unittest.TestCase):
       except:
         pass
 
-    def test_simple_mapr_action(self):
+    def test_simple_action(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          ['Heart'], actionTag = "TestVoxelizer")
@@ -36,7 +36,7 @@ class TestVoxelizer(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
-    def test_simple_mapr_action_session_struct(self):
+    def test_simple_action_session_struct(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          actionTag = "TestVoxelizer", alwaysDo = True)
@@ -44,7 +44,7 @@ class TestVoxelizer(unittest.TestCase):
                     
       self.assertEqual(token.isSuccess(), True)
 
-    def test_simple_mapr_action_boolean(self):
+    def test_simple_action_boolean(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          booleanMask = True, actionTag = "TestVoxelizer", alwaysDo = True)
@@ -52,7 +52,7 @@ class TestVoxelizer(unittest.TestCase):
                     
       self.assertEqual(token.isSuccess(), True)
 
-    def test_simple_mapr_action_alwaysdo(self):
+    def test_simple_action_alwaysdo(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          ['Heart'], actionTag = "TestVoxelizer", alwaysDo = True)
