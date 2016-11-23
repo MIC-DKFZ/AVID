@@ -69,7 +69,7 @@ class DefaultMetric (object):
     
     evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps)
     
-    artefacts = loadArtefactList_xml(artefactFile, True, self.sessionDir)
+    artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
     
     gmeasure, imeasure = evaluator.evaluate(artefacts)
        

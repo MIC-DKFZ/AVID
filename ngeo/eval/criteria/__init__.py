@@ -107,11 +107,26 @@ class MetricCriterionBase(object):
     #calculate statistics for each value
     result = dict()
     for valueID in collectedData:
-      result[valueID+'.mean'] = mean(collectedData[valueID])
-      result[valueID+'.min'] = min(collectedData[valueID])
-      result[valueID+'.max'] = max(collectedData[valueID])
-      result[valueID+'.sd'] = sd(collectedData[valueID])
-      
+      try:
+        result[valueID + '.mean'] = mean(collectedData[valueID])
+      except:
+        result[valueID + '.mean'] = None
+
+      try:
+        result[valueID+'.min'] = min(collectedData[valueID])
+      except:
+        result[valueID + '.min'] = None
+
+      try:
+        result[valueID + '.max'] = max(collectedData[valueID])
+      except:
+        result[valueID + '.max'] = None
+
+      try:
+        result[valueID + '.sd'] = sd(collectedData[valueID])
+      except:
+        result[valueID + '.sd'] = None
+
     result[self.MID_FailedInstances] = failureCount
     
     return result

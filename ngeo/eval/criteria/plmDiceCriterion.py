@@ -34,8 +34,8 @@ class PlmDiceCriterion(MetricCriterionBase):
   MID_HausdorffBoundaryMaxAvg = 'ngeo.eval.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg'
   MID_HausdorffBoundaryP95 = 'ngeo.eval.criteria.PlmDiceCriterion.hausdorff.boundary.p95'
   
-  MAPPING_PLM_ID_2_CRITERION_ID = {PlmDiceCriterion.MID_TP: 'TP',
-                                   PlmDiceCriterion.MID_TN: 'TN'}
+  MAPPING_CRITERION_ID_2_PLM_ID = {MID_TP: 'TP',
+                                   MID_TN: 'TN'}
   
   def __init__(self, referenceSelector = ActionTagSelector('Reference'), testSelector = ActionTagSelector('Test')):
     valuesInfo = { self.MID_TP: ['True Positives','Number of true positive voxels.'],
@@ -73,7 +73,7 @@ class PlmDiceCriterion(MetricCriterionBase):
       
       plmResult = self._callPlastimatchDice(relevantArtefacts['referenceSelector'][0], relevantArtefacts['referenceSelector'][0])
       
-      result = {valueID: plmResult[self.MAPPING_PLM_ID_2_CRITERION_ID[valueID]] for valueID in self._valueNames}
+      result = {valueID: plmResult[self.MAPPING_CRITERION_ID_2_PLM_ID[valueID]] for valueID in self._valueNames}
       
     else:
       global logger

@@ -29,34 +29,51 @@ class TestSelectors(unittest.TestCase):
     
     refCriterion = PropertyCriterion('coolProp')
 
-    self.instanceResultRef = { refCriterion.MID_PropertyValue : 11}
-    self.instanceResultRef2 = { refCriterion.MID_PropertyValue : 10}
+    self.instanceResultRef = { refCriterion.MID_PropertyValueSum : 11,
+                               refCriterion.MID_PropertyValues: [1, 10]
+                               }
+    self.instanceResultRef2 = { refCriterion.MID_PropertyValueSum : 10,
+                                refCriterion.MID_PropertyValues: [10]
+                                }
     
-    self.setResultRef = { refCriterion.MID_PropertyValue+".mean" : 20.5,
-                          refCriterion.MID_PropertyValue+".min": 11.0,
-                          refCriterion.MID_PropertyValue+".max": 30.0,
-                          refCriterion.MID_PropertyValue+".sd": 9.5,
+    self.setResultRef = { refCriterion.MID_PropertyValueSum+".mean" : 20.5,
+                          refCriterion.MID_PropertyValueSum+".min": 11.0,
+                          refCriterion.MID_PropertyValueSum+".max": 30.0,
+                          refCriterion.MID_PropertyValueSum+".sd": 9.5,
+                          refCriterion.MID_PropertyValues + ".mean": 13.666666666666666,
+                          refCriterion.MID_PropertyValues + ".min": 1.0,
+                          refCriterion.MID_PropertyValues + ".max": 30.0,
+                          refCriterion.MID_PropertyValues + ".sd": 12.119772641798562,
                           MetricCriterionBase.MID_FailedInstances : 0
                         }
-    
-    self.setResultWithFailRef = { refCriterion.MID_PropertyValue+".mean" : 11.0,
-                          refCriterion.MID_PropertyValue+".min": 11.0,
-                          refCriterion.MID_PropertyValue+".max": 11.0,
-                          refCriterion.MID_PropertyValue+".sd": 0.0,
+
+    self.setResultWithFailRef = { refCriterion.MID_PropertyValueSum+".mean" : 11.0,
+                          refCriterion.MID_PropertyValueSum+".min": 11.0,
+                          refCriterion.MID_PropertyValueSum+".max": 11.0,
+                          refCriterion.MID_PropertyValueSum+".sd": 0.0,
+                          refCriterion.MID_PropertyValues + ".mean": 5.5,
+                          refCriterion.MID_PropertyValues + ".min": 1.0,
+                          refCriterion.MID_PropertyValues + ".max": 10.0,
+                          refCriterion.MID_PropertyValues + ".sd": 4.5,
                           MetricCriterionBase.MID_FailedInstances : 1
                         }
-    
-    self.setResultFailOnlyRef = { MetricCriterionBase.MID_FailedInstances : 2  }    
+
+    self.setResultFailOnlyRef = { MetricCriterionBase.MID_FailedInstances : 2  }
 
     self.setResultEmptyRef = { MetricCriterionBase.MID_FailedInstances : 0  }  
     
-    self.namesRef = { refCriterion.MID_PropertyValue: 'coolProp',
-                      refCriterion.MID_PropertyValue+".mean" : 'coolProp (mean)',
-                      refCriterion.MID_PropertyValue+".min": 'coolProp (min)',
-                      refCriterion.MID_PropertyValue+".max": 'coolProp (max)',
-                      refCriterion.MID_PropertyValue+".sd": 'coolProp (std dev)',
+    self.namesRef = { refCriterion.MID_PropertyValueSum: 'Sum of coolProp',
+                      refCriterion.MID_PropertyValueSum+".mean" : 'Sum of coolProp (mean)',
+                      refCriterion.MID_PropertyValueSum+".min": 'Sum of coolProp (min)',
+                      refCriterion.MID_PropertyValueSum+".max": 'Sum of coolProp (max)',
+                      refCriterion.MID_PropertyValueSum+".sd": 'Sum of coolProp (std dev)',
+                      refCriterion.MID_PropertyValues: 'coolProp',
+                      refCriterion.MID_PropertyValues + ".mean": 'coolProp (mean)',
+                      refCriterion.MID_PropertyValues + ".min": 'coolProp (min)',
+                      refCriterion.MID_PropertyValues + ".max": 'coolProp (max)',
+                      refCriterion.MID_PropertyValues + ".sd": 'coolProp (std dev)',
                       MetricCriterionBase.MID_FailedInstances : 'Failures' }
-                        
+
   def test_PropertyCriterion_instance(self):
     criterion = PropertyCriterion('coolProp')
     

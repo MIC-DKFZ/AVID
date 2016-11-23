@@ -39,8 +39,10 @@ class PropertyCriterion(MetricCriterionBase):
         global logger
         logger.debug('Drop property value of artefact. Cannot convert value to float. Problematic value: %s. Concerned artefact: "%s"', getArtefactProperty(artefact, self._evaluatedPropertyName), artefact)
         pass
-      
-    propsum = sum(values)
+
+    propsum = None
+    if len(values)>0:
+      propsum = sum(values)
     
     result = { self.MID_PropertyValueSum : propsum, self.MID_PropertyValues: values }
 
