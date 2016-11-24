@@ -55,7 +55,11 @@ class EvaluationResult (object):
         except:
           pass
         
-      result = result + weight * self.measurements[valueName]
+      try:
+        result = result + weight * self.measurements[valueName]
+      except TypeError:
+        pass #if we cannot weight and add an measurment (because it is None), we just ignore it.
+
       
     return result
   
@@ -88,7 +92,7 @@ XML_INFO = "avid:info"
 XML_VALUE_NAME = "avid:value_name"
 XML_VALUE_DESC = "avid:value_description"
 
-def loadEvaluationResult_xml(filePath):
+def loadEvaluationResult(filePath):
   '''Loads a evaluation result from an xml file.
   @param filePath Path where the evaluation result file is located.
   '''
@@ -187,54 +191,57 @@ def xml_indent(elem, level=0):
     if level and (not elem.tail or not elem.tail.strip()):
       elem.tail = i
 
-def saveEvaluationResult_xml(filePath, evalResult):
+def saveEvaluationResult(filePath, evalResult):
   builder = ElementTree.TreeBuilder()
  
   builder.start(XML_EVALUATION_RESULT, {XML_ATTR_VERSION : CURRENT_XML_VERSION, "xmlns:avid":XML_NAMESPACE})
   
-  builder.start(XML_NAME)
+  builder.start(XML_NAME, {})
   builder.data(str(evalResult.name))
   builder.end(XML_NAME)
   
-  builder.start(XML_WORKFLOWFILE)
+  builder.start(XML_WORKFLOWFILE, {})
   builder.data(str(evalResult.workflowFile))
   builder.end(XML_WORKFLOWFILE)
 
-  builder.start(XML_WORKFLOW_MODS)
+  builder.start(XML_WORKFLOW_MODS, {})
   for mID in evalResult.workflowModifier:
     builder.start(XML_WORKFLOW_MOD, {XML_ATTR_KEY : mID})
     builder.data(str(evalResult.workflowModifier[mID]))
     builder.end(XML_WORKFLOW_MOD)
   builder.end(XML_WORKFLOW_MODS)
 
-  builder.start(XML_ARTEFACTFILE)
+  builder.start(XML_ARTEFACTFILE, {})
   builder.data(str(evalResult.artefactFile))
   builder.end(XML_ARTEFACTFILE)
 
-  builder.start(XML_SV_MEASUREMENT)
+  builder.start(XML_SV_MEASUREMENT, {})
   builder.data(str(evalResult.svMeasure))
   builder.end(XML_SV_MEASUREMENT)
 
-  builder.start(XML_SV_WEIGHTS)
-  for mID in evalResult.svWeights:
-    builder.start(XML_SV_WEIGHT, {XML_ATTR_KEY : mID})
-    builder.data(str(evalResult.svWeights[mID]))
-    builder.end(XML_SV_WEIGHT)
+  builder.start(XML_SV_WEIGHTS, {})
+  try:
+    for mID in evalResult.svWeights:
+      builder.start(XML_SV_WEIGHT, {XML_ATTR_KEY : mID})
+      builder.data(str(evalResult.svWeights[mID]))
+      builder.end(XML_SV_WEIGHT)
+  except:
+    pass
   builder.end(XML_SV_WEIGHTS)
 
-  builder.start(XML_MEASUREMENTS)
+  builder.start(XML_MEASUREMENTS, {})
   for mID in evalResult.measurements:
     builder.start(XML_MEASUREMENT, {XML_ATTR_KEY : mID})
     builder.data(str(evalResult.measurements[mID]))
     builder.end(XML_MEASUREMENT)
   builder.end(XML_MEASUREMENTS)
 
-  builder.start(XML_INSTANCES)
+  builder.start(XML_INSTANCES, {})
   for desc in evalResult.instanceMeasurements:
-    builder.start(XML_INSTANCE)
+    builder.start(XML_INSTANCE, {})
 
-    builder.start(XML_INSTANCE_DESCRIPTOR)
-    builder.start(XML_INSTANCE_ID)
+    builder.start(XML_INSTANCE_DESCRIPTOR, {})
+    builder.start(XML_INSTANCE_ID, {})
     builder.data(str(desc.ID))
     builder.end(XML_INSTANCE_ID)
     
@@ -244,7 +251,7 @@ def saveEvaluationResult_xml(filePath, evalResult):
       builder.end(XML_DEF_VALUE)
     builder.end(XML_INSTANCE_DESCRIPTOR)
       
-    builder.start(XML_MEASUREMENTS)
+    builder.start(XML_MEASUREMENTS, {})
     for mID in evalResult.instanceMeasurements[desc]:
       builder.start(XML_MEASUREMENT, {XML_ATTR_KEY : mID})
       builder.data(str(evalResult.instanceMeasurements[desc][mID]))
@@ -255,26 +262,27 @@ def saveEvaluationResult_xml(filePath, evalResult):
 
   builder.end(XML_INSTANCES)
 
-  builder.start(XML_MEASUREMENTS_INFO)
+  builder.start(XML_MEASUREMENTS_INFO, {})
   keys = set(evalResult.valueNames.keys()+evalResult.valueDescriptions.keys())
   
   for key in keys:
     builder.start(XML_INFO, {XML_ATTR_KEY : key})
 
     if key in evalResult.valueNames:
-      builder.start(XML_VALUE_NAME)
+      builder.start(XML_VALUE_NAME, {})
       builder.data(str(evalResult.valueNames[key]))
       builder.end(XML_VALUE_NAME)
 
     if key in evalResult.valueDescriptions:
-      builder.start(XML_VALUE_DESC)
+      builder.start(XML_VALUE_DESC, {})
       builder.data(str(evalResult.valueDescriptions[key]))
       builder.end(XML_VALUE_DESC)
       
     builder.end(XML_INFO)
       
   builder.end(XML_MEASUREMENTS_INFO)
-   
+  builder.end(XML_EVALUATION_RESULT)
+
   root = builder.close()
   tree = ElementTree.ElementTree(root)
   indent(root)
