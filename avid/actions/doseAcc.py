@@ -177,7 +177,6 @@ class DoseAccBatchAction(BatchActionBase):
     self._doseSplitProperty = doseSplitProperty
     self._operator = operator
 
-        
   def _generateActions(self):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
@@ -189,7 +188,7 @@ class DoseAccBatchAction(BatchActionBase):
     splittedDoses = list()
     
     if self._doseSplitProperty is not None:
-      splitDict = demux.getSelectors(str(self._doseSplitProperty), workflowData = allDoses)
+      splitDict = demux.getSelectors(str(self._doseSplitProperty), workflowData=allDoses)
       for splitID in splitDict:
         relevantDoseSelector = splitDict[splitID]
         relevantInputs = relevantDoseSelector.getSelection(allDoses)
@@ -201,9 +200,9 @@ class DoseAccBatchAction(BatchActionBase):
        
     for doses in splittedDoses:
       doses = self._doseSorter.sortSelection(doses)
-      for (pos,dose) in enumerate(doses):
+      for (pos, dose) in enumerate(doses):
         weight2 = 1.0/len(doses)
-        linkedPlans = self._planLinker.getLinkedSelection(pos,doses,plans)
+        linkedPlans = self._planLinker.getLinkedSelection(pos, doses, plans)
   
         if len(linkedPlans) > 0:
           #deduce weight by planned fraction number
@@ -236,24 +235,24 @@ class DoseAccBatchAction(BatchActionBase):
           if self._operator is not "*":
             action = DoseAccAction(dose, dose, lReg, 0.0, weight2,
                                    operator=self._operator,
-                                   actionTag =  self._actionTag, alwaysDo = self._alwaysDo,
-                                   session = self._session,
-                                   additionalActionProps = additionalActionProps,
+                                   actionTag=self._actionTag, alwaysDo=self._alwaysDo,
+                                   session=self._session,
+                                   additionalActionProps=additionalActionProps,
                                    **self._singleActionParameters)
           else:
             action = None
         else:
           if not actions and self._operator is "*":
-            interimDoseArtefact = dose
+            interimDoseArtefact = doses[0]
           else:
             interimDoseArtefact = actions[-1]._resultArtefact #take the dose result of the last action
           if self._operator is "*":
             weight2 = 1.0
           action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2,
                                  operator=self._operator,
-                                 actionTag = self._actionTag, alwaysDo = self._alwaysDo,
-                                 session = self._session,
-                                 additionalActionProps = additionalActionProps,
+                                 actionTag=self._actionTag, alwaysDo=self._alwaysDo,
+                                 session=self._session,
+                                 additionalActionProps=additionalActionProps,
                                  **self._singleActionParameters)
 
         if action is not None:
@@ -261,4 +260,3 @@ class DoseAccBatchAction(BatchActionBase):
           actions.append(action)
     
     return actions
-  
