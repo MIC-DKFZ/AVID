@@ -37,9 +37,8 @@ with workflow.initSession_byCLIargs(expandPaths=True, autoSave=True) as session:
     lastFraction = 2
     bioModelCalc(inputSelector=ActionTagSelector("DoseAcc")+TimepointSelector(lastFraction), useDoseScaling=False, normalizeFractions=True, planSelector=ActionTagSelector("plan"),
                  modelParameterMapsSelector=ActionTagSelector("parameterMap"), modelName="LQ", actionTag="BioModelAccumulatedDose").do()
-    bioModelCalc(inputSelector=ActionTagSelector("dose")+FormatSelector(artefactProps.FORMAT_VALUE_ITK), useDoseScaling=False, normalizeFractions=False,
+    bioModelCalc(inputSelector=ActionTagSelector("DoseMap")+FormatSelector(artefactProps.FORMAT_VALUE_ITK), useDoseScaling=False, normalizeFractions=False,
                  planLinker=ActionTagSelector("plan"), modelParameterMapsSelector=ActionTagSelector("parameterMap"), modelName="LQ", actionTag="BioModelFractionDose").do()
 
-    doseAcc(doseSelector=ActionTagSelector("BioModelFractionDose"), registrationSelector=ActionTagSelector("matchR")+FormatSelector("MatchPoint"),
-            planSelector=ActionTagSelector("plan"), operator="*", actionTag="DoseAccBioModel").do()
+    doseAcc(doseSelector=ActionTagSelector("BioModelFractionDose"), planSelector=ActionTagSelector("plan"), operator="*", actionTag="DoseAccBioModel").do()
 
