@@ -1,17 +1,29 @@
+# AVID
+# Automated workflow system for cohort analysis in radiology and radiation therapy
+#
+# Copyright (c) German Cancer Research Center,
+# Software development for Integrated Diagnostic and Therapy (SIDT).
+# All rights reserved.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.
+#
+# See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+
 import csv
+import logging
 import os
 import uuid
-import logging
-import defaultProps
 import xml.etree.ElementTree as ElementTree
-from avid.common.artefact import generateArtefactEntry
-from avid.common.artefact import Artefact
 
-'''
-copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
+import defaultProps
+from avid.common.artefact import generateArtefactEntry
+
+''' copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
 it basically walks your tree and adds spaces and newlines so the tree is
-printed in a nice way
-'''
+printed in a nice way '''
+
 def indent(elem, level=0):
   i = "\n" + level*"  "
   if len(elem):

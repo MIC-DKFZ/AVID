@@ -1,18 +1,16 @@
-#===================================================================
+# AVID
+# Automated workflow system for cohort analysis in radiology and radiation therapy
 #
-#The Medical Imaging Interaction Toolkit (MITK)
+# Copyright (c) German Cancer Research Center,
+# Software development for Integrated Diagnostic and Therapy (SIDT).
+# All rights reserved.
 #
-#Copyright (c) German Cancer Research Center,
-#Division of Medical and Biological Informatics.
-#All rights reserved.
+# This software is distributed WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.
 #
-#This software is distributed WITHOUT ANY WARRANTY; without
-#even the implied warranty of MERCHANTABILITY or FITNESS FOR
-#A PARTICULAR PURPOSE.
-#
-#See LICENSE.txt or http://www.mitk.org for details.
-#
-#===================================================================
+# See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+
 
 import argparse
 from avid.common.AVIDUrlLocater import getUtilityPath
