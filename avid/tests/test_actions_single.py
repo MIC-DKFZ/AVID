@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
 
         self.a_valid = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
         self.a_NoneURL = artefactGenerator.generateArtefactEntry("Case2", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", None)
-        self.a_NoFile = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", "notexistingFile")
+        self.a_NoFile = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", "notexistingFile", None, True)
         self.a_Invalid = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), None, True)
         
         self.a_valid_new = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
@@ -73,7 +73,8 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_valid_new, self.session.inData)
-      
+      self.assertEqual(action1.callCount_generateOutputs, 1)
+
 
     def test_simelar_exisiting_alwaysOff(self):
       '''test for similar existing artefact and alwaysDo == False
@@ -90,7 +91,7 @@ class Test(unittest.TestCase):
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_valid, self.session.inData)
       self.assertFalse(self.a_valid_new in self.session.inData)
-
+      self.assertEqual(action1.callCount_generateOutputs, 0)
 
     def test_simelar_mixed_exisiting_alwaysOff(self):
       '''test if action working directly if one artefact would skip and the other one won't'''
@@ -109,7 +110,7 @@ class Test(unittest.TestCase):
       self.assertFalse(self.a_valid in self.session.inData)
       self.assertIn(self.a_NoneURL_new, self.session.inData)
       self.assertFalse(self.a_NoneURL in self.session.inData)
-
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
     def test_simelar_NoneURL_alwaysDo(self):
       '''test if action working directly if one artefact would skip and the other one won't'''
@@ -124,8 +125,8 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_NoneURL_new, self.session.inData)
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
-      
     def test_simelar_NoneURL_alwaysOff(self):
       '''test if simelar artefact with none URL is always overwritten.'''
       workflow.currentGeneratedSession = self.session
@@ -139,7 +140,7 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_NoneURL_new, self.session.inData)
-
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
     def test_simelar_not_exisiting_alwaysDo(self):
       '''test if simelar artefact with none URL is always overwritten.'''
@@ -213,8 +214,8 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_valid2_new, self.session.inData)
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
-      
     def test_new_alwaysOff(self):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid2_new],"Action1", False)
@@ -227,7 +228,7 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_valid2_new, self.session.inData)
-
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
     def test_invalidOutput(self):
       workflow.currentGeneratedSession = self.session
@@ -242,7 +243,7 @@ class Test(unittest.TestCase):
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
       self.assertIn(self.a_NoFile2, self.session.inData)
-
+      self.assertEqual(action1.callCount_generateOutputs, 1)
 
     def test_similar_but_new_misc_alwaysOff(self):
       '''Test if a new output that is not of type "result" triggers the action-
@@ -317,6 +318,23 @@ class Test(unittest.TestCase):
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
+
+
+    def test_invalid_inputs(self):
+        '''Test if always do enforces the computation/adding of an
+        artefact even if a simelar exists.'''
+        workflow.currentGeneratedSession = self.session
+        action1 = DummySingleAction([self.a_valid_new, self.a_NoFile], "Action1", True)
+
+        token = action1.do()
+
+        self.assert_(token.isFailure())
+        self.assertIn(self.a_valid_new, token.generatedArtefacts)
+        self.assertIn(self.a_NoFile, token.generatedArtefacts)
+        self.assertEqual(len(token.generatedArtefacts), 2)
+        self.assert_(token.generatedArtefacts[0].is_invalid())
+        self.assert_(token.generatedArtefacts[1].is_invalid())
+        self.assertEqual(action1.callCount_generateOutputs, 0)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

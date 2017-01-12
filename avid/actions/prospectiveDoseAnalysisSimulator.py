@@ -254,7 +254,7 @@ class ProspectiveDoseAnalysisSimulatorBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT) + FormatSelector(artefactProps.FORMAT_VALUE_CSV)
 
-    inputs = self.ensureValidArtefacts(self._inputStatsCollector, resultSelector, "input stats")
+    inputs = self.ensureRelevantArtefacts(self._inputStatsCollector, resultSelector, "input stats")
     
     global logger
     if len(inputs) == 0:

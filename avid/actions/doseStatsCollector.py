@@ -60,8 +60,8 @@ class DoseStatsCollectorAction(SingleActionBase):
     return name
 
   def indicateOutputs(self):
-    self._statsMatrix = self._generateStatsMatrix()
     if self._keys is None:
+      self._statsMatrix = self._generateStatsMatrix()
       self._keys = self._statsMatrix.keys()
 
     name = self._generateName()
@@ -114,7 +114,10 @@ class DoseStatsCollectorAction(SingleActionBase):
       aPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
       rowID = artefactHelper.getArtefactProperty(artefact, self._rowKey)
       columnID = artefactHelper.getArtefactProperty(artefact, self._columnKey)
-      valueMap = self._parseDoseStats(aPath, self._keys)
+      valueMap = dict()
+
+      if not artefact.is_invalid():
+        valueMap = self._parseDoseStats(aPath, self._keys)
 
       if keys is None:
         keys = valueMap.keys()  # user has not select keys -> take everything
@@ -181,6 +184,8 @@ class DoseStatsCollectorAction(SingleActionBase):
       raise
 
   def _generateOutputs(self):
+    if self._statsMatrix is None:
+      self._statsMatrix = self._generateStatsMatrix()
 
     for key in self._keys:
       csvPath = artefactHelper.getArtefactProperty(self._resultArtefacts[key], artefactProps.URL)

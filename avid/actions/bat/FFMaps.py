@@ -151,8 +151,8 @@ class FFMapsBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    water = self.ensureValidArtefacts(self._water, resultSelector, "FFMaps water inputs")
-    fat = self.ensureValidArtefacts(self._fat, resultSelector, "FFMaps fat inputs")
+    water = self.ensureRelevantArtefacts(self._water, resultSelector, "FFMaps water inputs")
+    fat = self.ensureRelevantArtefacts(self._fat, resultSelector, "FFMaps fat inputs")
         
     fatLinker = CaseInstanceLinker()
     actions = list()

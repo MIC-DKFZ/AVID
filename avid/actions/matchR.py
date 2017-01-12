@@ -178,10 +178,10 @@ class matchRBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    targets = self.ensureValidArtefacts(self._targetImages, resultSelector, "matchR targets")
-    movings = self.ensureValidArtefacts(self._movingImages, resultSelector, "matchR movings")
-    targetMasks = self.ensureValidArtefacts(self._targetMasks, resultSelector, "matchR target masks")
-    movingMasks = self.ensureValidArtefacts(self._movingMasks, resultSelector, "matchR moving masks")
+    targets = self.ensureRelevantArtefacts(self._targetImages, resultSelector, "matchR targets")
+    movings = self.ensureRelevantArtefacts(self._movingImages, resultSelector, "matchR movings")
+    targetMasks = self.ensureRelevantArtefacts(self._targetMasks, resultSelector, "matchR target masks")
+    movingMasks = self.ensureRelevantArtefacts(self._movingMasks, resultSelector, "matchR moving masks")
       
     global logger
     

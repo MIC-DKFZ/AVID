@@ -152,9 +152,9 @@ class ArimaBatchAction(BatchActionBase):
     # filter only type result. Other artefact types are not interesting
     resultCSVSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT) + FormatSelector(artefactProps.FORMAT_VALUE_CSV)
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    inputs = self.ensureValidArtefacts(self._doseStatsCollector, resultCSVSelector, "input stats")
+    inputs = self.ensureRelevantArtefacts(self._doseStatsCollector, resultCSVSelector, "input stats")
 
-    plans = self.ensureValidArtefacts(self._plans, resultSelector, "plans")
+    plans = self.ensureRelevantArtefacts(self._plans, resultSelector, "plans")
 
     global logger
     if len(inputs) == 0:

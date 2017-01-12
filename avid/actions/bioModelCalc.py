@@ -179,12 +179,12 @@ class BioModelCalcBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputDoses, resultSelector, "bioModelCalc doses")
+    inputs = self.ensureRelevantArtefacts(self._inputDoses, resultSelector, "bioModelCalc doses")
     if self._plan is not None:
-        aPlan = self.ensureValidArtefacts(self._plan, resultSelector, "plan")
+        aPlan = self.ensureRelevantArtefacts(self._plan, resultSelector, "plan")
 
     if self._modelParameterMaps is not None:
-      validParameterMaps = self.ensureValidArtefacts(self._modelParameterMaps, resultSelector, "parameter maps")
+      validParameterMaps = self.ensureRelevantArtefacts(self._modelParameterMaps, resultSelector, "parameter maps")
     else :
       validParameterMaps = list()
        

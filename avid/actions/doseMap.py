@@ -192,9 +192,9 @@ class DoseMapBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputDoses, resultSelector, "doseMap doses")
-    regs = self.ensureValidArtefacts(self._registrations, resultSelector, "doseMap registrations")
-    temps = self.ensureValidArtefacts(self._templateDoses, resultSelector, "doseMap templates")
+    inputs = self.ensureRelevantArtefacts(self._inputDoses, resultSelector, "doseMap doses")
+    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "doseMap registrations")
+    temps = self.ensureRelevantArtefacts(self._templateDoses, resultSelector, "doseMap templates")
        
     actions = list()
     

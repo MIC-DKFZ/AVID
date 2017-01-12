@@ -199,8 +199,8 @@ class DoseStatsWithInterpolationCollectorBatchAction(BatchActionBase):
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT) + FormatSelector(artefactProps.FORMAT_VALUE_RTTB_STATS_XML)
     planSelector =  TypeSelector(artefactProps.TYPE_VALUE_RESULT)
 
-    inputs = self.ensureValidArtefacts(self._inputStats, resultSelector, "input stats")
-    plan = self.ensureValidArtefacts(self._plan, planSelector, "plan")
+    inputs = self.ensureRelevantArtefacts(self._inputStats, resultSelector, "input stats")
+    plan = self.ensureRelevantArtefacts(self._plan, planSelector, "plan")
 
     global logger
     if len(inputs) == 0 or len (plan) == 0 :

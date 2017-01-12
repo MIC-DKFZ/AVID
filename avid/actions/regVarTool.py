@@ -145,8 +145,8 @@ class RegVarToolBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    regs = self.ensureValidArtefacts(self._regs, resultSelector, "regVarTool regs")
-    temps = self.ensureValidArtefacts(self._templateImages, resultSelector, "regVarTool templates")
+    regs = self.ensureRelevantArtefacts(self._regs, resultSelector, "regVarTool regs")
+    temps = self.ensureRelevantArtefacts(self._templateImages, resultSelector, "regVarTool templates")
       
     actions = list()
     

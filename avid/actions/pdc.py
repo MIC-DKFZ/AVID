@@ -283,9 +283,9 @@ class pdcBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    images = self.ensureValidArtefacts(self._images, resultSelector, "pdc images")
-    plans = self.ensureValidArtefacts(self._plans, resultSelector, "pdc plans")
-    structs = self.ensureValidArtefacts(self._structs, resultSelector, "pdc structs")
+    images = self.ensureRelevantArtefacts(self._images, resultSelector, "pdc images")
+    plans = self.ensureRelevantArtefacts(self._plans, resultSelector, "pdc plans")
+    structs = self.ensureRelevantArtefacts(self._structs, resultSelector, "pdc structs")
      
     actions = list()
     

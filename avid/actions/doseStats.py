@@ -193,8 +193,8 @@ class DoseStatBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputDoses, resultSelector, "doseStat doses")
-    struct = self.ensureValidArtefacts(self._structSets, resultSelector, "doseStat structSets")
+    inputs = self.ensureRelevantArtefacts(self._inputDoses, resultSelector, "doseStat doses")
+    struct = self.ensureRelevantArtefacts(self._structSets, resultSelector, "doseStat structSets")
        
     actions = list()
     

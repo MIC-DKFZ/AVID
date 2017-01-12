@@ -64,9 +64,9 @@ class ActionBase(object):
 
     def indicateOutputs(self):
         ''' Return a list of artefact entries the action will produce if do() is
-          called. Reimplement this method for derived actions. The method should
-          return complete entries. Therefore the enties should already contain the
-          url where they *will* be stored if the action is executed.'''
+          called. The method should return complete entries.
+          Therefore the entries should already contain the url where they
+          *will* be stored if the action is executed.'''
         if len(self._outputArtefacts) is 0:
             self._outputArtefacts = self._indicateOutputs()
 
@@ -287,6 +287,18 @@ class SingleActionBase(ActionBase):
 
         return (valid, result)
 
+    def _getInvalidInputs(self):
+        '''Helper function that checks if registered inputs for the action are invalid.
+          @return Returns a dict with all invalid inputs. An empty indicates that all inputs are valid.'''
+
+        invalidInputs = dict()
+
+        for key in self._inputArtefacts:
+            if not self._inputArtefacts[key] is None and self._inputArtefacts[key].is_invalid():
+                invalidInputs[key] = self._inputArtefacts[key]
+
+        return invalidInputs
+
     def _do(self):
         ''' Triggers the processing of an action. '''
         global logger
@@ -299,27 +311,28 @@ class SingleActionBase(ActionBase):
         if self._alwaysDo or isNeeded:
             isValid = False
 
-            if self._hasValidInputs():
+            invalidInputs = self._getInvalidInputs()
+            if len(invalidInputs) is 0:
                 try:
                     self._generateOutputs()
+                    (isValid, outputs) = self._checkOutputs(outputs)
                 except BaseException as e:
                     logger.warning(
                         '(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
                         str(self.__hash__()), self.actionTag, str(e))
-                    for artefact in outputs:
-                        artefact[artefactProps.INVALID] = True
                 except:
                     logger.warning(
                         '(hash: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
                         str(self.__hash__()), self.actionTag)
-                    for artefact in outputs:
-                        artefact[artefactProps.INVALID] = True
             else:
                 logger.warning("Action failed due to at least one invalid input. All outputs are marked as invalid. Invalid inputs: %s", str(self._inputArtefacts))
 
-            (isValid, outputs) = self._checkOutputs(outputs)
+            if not isValid:
+                for artefact in outputs:
+                    artefact[artefactProps.INVALID] = True
 
             token.generatedArtefacts = outputs
+
             for artefact in outputs:
                 self._session.addArtefact(artefact, True)
 
@@ -354,15 +367,14 @@ class BatchActionBase(ActionBase):
         self._actions = None
         self._scheduler = scheduler  # scheduler that should be used to execute the jobs
 
-    def ensureValidArtefacts(self, artefacts, additionalSelector=None, infoTag="none"):
-        ''' Helper function that filters the passed artefact list for valid artefacts.
-        Returns the list containing the valid artefacts. If the valid list is empty
-        it will be logged as. You may pass additionalSelectors that will also be checked.'''
-        afilter = selectors.ValiditySelector()
-        if additionalSelector is not None:
-            afilter = afilter + additionalSelector
+    def ensureRelevantArtefacts(self, artefacts, relevantSelector, infoTag="none"):
+        ''' Helper function that filters the passed artefact list by the passed relevantSelector.
+        Returns the list containing the relevant artefacts. If the valid list is empty
+        it will be logged as. This function is for batch actions that want to ensure specific
+        properties for there artefact before they are used in the batch processing (e.g. only
+        artefacts of type "result" are allowed).'''
 
-        result = afilter.getSelection(artefacts)
+        result = relevantSelector.getSelection(artefacts)
 
         if len(result) == 0:
             global logger

@@ -182,10 +182,10 @@ class doseProcessVisualizerBatchAction(BatchActionBase):
     def _generateActions(self):
         #filter only type result. Other artefact types are not interesting
         resultCsvSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT) + FormatSelector(artefactProps.FORMAT_VALUE_CSV)
-        doseStatVariations = self.ensureValidArtefacts(self._doseStatVariations, resultCsvSelector, "doseStat variations")
-        doseStatBaseline = self.ensureValidArtefacts(self._doseStatBaseline, resultCsvSelector, "doseStat baseline")
+        doseStatVariations = self.ensureRelevantArtefacts(self._doseStatVariations, resultCsvSelector, "doseStat variations")
+        doseStatBaseline = self.ensureRelevantArtefacts(self._doseStatBaseline, resultCsvSelector, "doseStat baseline")
         if self._doseStatAdditional is not None:
-            doseStatAdditional = self.ensureValidArtefacts(self._doseStatAdditional, resultCsvSelector, "doseStat additional")
+            doseStatAdditional = self.ensureRelevantArtefacts(self._doseStatAdditional, resultCsvSelector, "doseStat additional")
         else:
             doseStatAdditional = None
 

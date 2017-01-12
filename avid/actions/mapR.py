@@ -176,9 +176,9 @@ class mapRBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputImages, resultSelector, "mapR input")
-    regs = self.ensureValidArtefacts(self._registrations, resultSelector, "mapR registrations")
-    temps = self.ensureValidArtefacts(self._templateImages, resultSelector, "mapR templates")
+    inputs = self.ensureRelevantArtefacts(self._inputImages, resultSelector, "mapR input")
+    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "mapR registrations")
+    temps = self.ensureRelevantArtefacts(self._templateImages, resultSelector, "mapR templates")
     
     actions = list()
     

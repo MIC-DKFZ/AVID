@@ -116,8 +116,8 @@ class combineRBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)+FormatSelector(artefactProps.FORMAT_VALUE_MATCHPOINT)
     
-    reg1s = self.ensureValidArtefacts(self._reg1s, resultSelector, "combineR registrations 1")
-    reg2s = self.ensureValidArtefacts(self._reg2s, resultSelector, "combineR registrations 2")
+    reg1s = self.ensureRelevantArtefacts(self._reg1s, resultSelector, "combineR registrations 1")
+    reg2s = self.ensureRelevantArtefacts(self._reg2s, resultSelector, "combineR registrations 2")
 
     global logger
 

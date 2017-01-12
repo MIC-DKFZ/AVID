@@ -194,9 +194,9 @@ class DoseAccBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    allDoses = self.ensureValidArtefacts(self._doses, resultSelector, "doseAcc doses")
-    regs = self.ensureValidArtefacts(self._registrations, resultSelector, "doseAcc regs")
-    plans = self.ensureValidArtefacts(self._plans, resultSelector, "doseAcc plans")
+    allDoses = self.ensureRelevantArtefacts(self._doses, resultSelector, "doseAcc doses")
+    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "doseAcc regs")
+    plans = self.ensureRelevantArtefacts(self._plans, resultSelector, "doseAcc plans")
         
     splittedDoses = list()
     

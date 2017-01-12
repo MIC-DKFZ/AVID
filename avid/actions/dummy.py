@@ -32,6 +32,7 @@ class DummySingleAction(SingleActionBase):
       inputs['i'+str(pos)] = a
 
     self._addInputArtefacts(**inputs)
+    self.callCount_generateOutputs = 0
 
   def _generateName(self):
     name = "Dummy"
@@ -41,6 +42,7 @@ class DummySingleAction(SingleActionBase):
     return self._artefacts
 
   def _generateOutputs(self):
+    self.callCount_generateOutputs = self.callCount_generateOutputs + 1
     pass
 
 

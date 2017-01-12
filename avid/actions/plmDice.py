@@ -135,8 +135,8 @@ class plmDiceBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    refs = self.ensureValidArtefacts(self._refImages, resultSelector, "plm dice 1st input")
-    tests = self.ensureValidArtefacts(self._testImages, resultSelector, "plm dice 2nd input")
+    refs = self.ensureRelevantArtefacts(self._refImages, resultSelector, "plm dice 1st input")
+    tests = self.ensureRelevantArtefacts(self._testImages, resultSelector, "plm dice 2nd input")
     
     actions = list()
     

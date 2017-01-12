@@ -130,9 +130,9 @@ class BATCriteriaBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    ffs = self.ensureValidArtefacts(self._ff, resultSelector, "BATCriteria ff inputs")
-    masks = self.ensureValidArtefacts(self._mask, resultSelector, "BATCriteria mask inputs")
-    slopes = self.ensureValidArtefacts(self._slope, resultSelector, "BATCriteria mask inputs")
+    ffs = self.ensureRelevantArtefacts(self._ff, resultSelector, "BATCriteria ff inputs")
+    masks = self.ensureRelevantArtefacts(self._mask, resultSelector, "BATCriteria mask inputs")
+    slopes = self.ensureRelevantArtefacts(self._slope, resultSelector, "BATCriteria mask inputs")
         
     linker = CaseInstanceLinker()
     actions = list()

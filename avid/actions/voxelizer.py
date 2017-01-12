@@ -158,8 +158,8 @@ class VoxelizerBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    refs = self.ensureValidArtefacts(self._references, resultSelector, "reference images")
-    structs = self.ensureValidArtefacts(self._structSets, resultSelector, "doseStat structSets")
+    refs = self.ensureRelevantArtefacts(self._references, resultSelector, "reference images")
+    structs = self.ensureRelevantArtefacts(self._structSets, resultSelector, "doseStat structSets")
        
     actions = list()
     

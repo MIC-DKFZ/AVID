@@ -144,8 +144,8 @@ class LinearFitBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputs, resultSelector, "4D inputs")
-    masks = self.ensureValidArtefacts(self._masks, resultSelector, "Mask inputs")
+    inputs = self.ensureRelevantArtefacts(self._inputs, resultSelector, "4D inputs")
+    masks = self.ensureRelevantArtefacts(self._masks, resultSelector, "Mask inputs")
         
     actions = list()
 

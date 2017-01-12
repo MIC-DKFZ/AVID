@@ -52,7 +52,7 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
   
-  session = Session(name, rootPath, autoSave)
+  session = Session(name, rootPath, autoSave = autoSave, debug = debug)
       
   #logging setup
   logginglevel = logging.INFO
@@ -156,7 +156,7 @@ def initSession_byCLIargs( sessionPath = None, **args):
 
    
 class Session(object):
-  def __init__(self, name = None, rootPath = None, autoSave = False):
+  def __init__(self, name = None, rootPath = None, autoSave = False, debug = False):
     if name is None or rootPath is None:
       raise TypeError()
     
@@ -189,6 +189,9 @@ class Session(object):
 
     self.autoSave = autoSave
 
+    #indicates that the session runs in debug mode
+    self.debug = debug
+
 
   def __del__(self):
     if self.autoSave:
@@ -207,7 +210,12 @@ class Session(object):
       logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
       fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.inData, self.rootPath)
      
-    logging.debug("No of failed actions: %s.", len(self.getFailedActions()))
+    logging.info("Successful actions: %s.", len(self.getSuccessfulActions()))
+    logging.info("Skipped actions: %s.", len(self.getSkippedActions()))
+    if len(self.getFailedActions()) is 0:
+      logging.info("Failed actions: 0.")
+    else:
+      logging.error("FAILED ACTIONS: %s.", len(self.getFailedActions()))
     logging.info("Session finished. Feed me more...")
 
       
@@ -272,7 +280,7 @@ class Session(object):
       self.inData = artefact.addArtefactToWorkflowData(self.inData, artefactEntry, removeSimelar)
     
   def getFailedActions(self):
-      """Returns all actions of the project that have failed."""
+      """Returns all actions of the session that have failed."""
       failedActions = []
       
       for anActionID in self.actions.keys():
@@ -282,7 +290,31 @@ class Session(object):
               failedActions.append(actionToken)
       
       return failedActions
-                                    
+
+  def getSkippedActions(self):
+    """Returns all actions of the session that have been skipped."""
+    skippedActions = []
+
+    for anActionID in self.actions.keys():
+      # check each action
+      actionToken = self.actions[anActionID]
+      if actionToken.isSkipped():
+        skippedActions.append(actionToken)
+
+    return skippedActions
+
+  def getSuccessfulActions(self):
+    """Returns all actions of the session that have been successful."""
+    succActions = []
+
+    for anActionID in self.actions.keys():
+      # check each action
+      actionToken = self.actions[anActionID]
+      if actionToken.isSuccess():
+        succActions.append(actionToken)
+
+    return succActions
+
   def hasFailedActions(self):
       """An project is defined as failed, if at least on action the project depends on has failed. Retruns true if the project is assumed as failed. Returns true if all actions were successful or skipped"""
       failedActions = self.getFailedActions()

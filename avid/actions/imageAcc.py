@@ -176,8 +176,8 @@ class ImageAccBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    allImages = self.ensureValidArtefacts(self._images, resultSelector, "imageAcc images")
-    regs = self.ensureValidArtefacts(self._registrations, resultSelector, "imageAcc regs")
+    allImages = self.ensureRelevantArtefacts(self._images, resultSelector, "imageAcc images")
+    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "imageAcc regs")
         
     splittedImages = list()
     

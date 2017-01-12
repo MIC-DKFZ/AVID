@@ -120,7 +120,7 @@ class CombineDataBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    inputs = self.ensureValidArtefacts(self._inputImages, resultSelector, "combine Data inputs")
+    inputs = self.ensureRelevantArtefacts(self._inputImages, resultSelector, "combine Data inputs")
         
     actions = list()
     

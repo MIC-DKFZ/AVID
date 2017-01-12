@@ -155,28 +155,16 @@ class Test(unittest.TestCase):
       self.assert_(token.generatedArtefacts[1][artefactProps.INVALID])
 
 
-    def test_ensure_valid_artifacts(self):
-      workflow.currentGeneratedSession = self.session
-      action = BatchActionBase("Action1")
-      
-      selection = action.ensureValidArtefacts(self.session.inData)
-     
-      self.assert_(len(selection)==4)
-      self.assertIn(self.a_valid, selection)
-      self.assertIn(self.a_valid2, selection)
-      self.assertIn(self.a_NoneURL, selection)
-      self.assertIn(self.a_NoFile, selection)
-
-      
     def test_ensure_valid_artifacts_additional_selector(self):
       workflow.currentGeneratedSession = self.session
       action = BatchActionBase("Action1")
       
-      selection = action.ensureValidArtefacts(self.session.inData, CaseSelector("Case2"))
+      selection = action.ensureRelevantArtefacts(self.session.inData, CaseSelector("Case2"))
      
-      self.assert_(len(selection)==2)
+      self.assert_(len(selection)==3)
       self.assertIn(self.a_valid2, selection)
       self.assertIn(self.a_NoneURL, selection)
+      self.assertIn(self.a_Invalid, selection)
       
 
 if __name__ == "__main__":

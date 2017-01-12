@@ -114,8 +114,8 @@ class BATMaskBatchAction(BatchActionBase):
     #filter only type result. Other artefact types are not interesting
     resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
     
-    lung = self.ensureValidArtefacts(self._lung, resultSelector, "BATMask lung inputs")
-    thorax = self.ensureValidArtefacts(self._thorax, resultSelector, "BATMask thorax inputs")
+    lung = self.ensureRelevantArtefacts(self._lung, resultSelector, "BATMask lung inputs")
+    thorax = self.ensureRelevantArtefacts(self._thorax, resultSelector, "BATMask thorax inputs")
         
     thoraxLinker = CaseLinker()
     actions = list()
