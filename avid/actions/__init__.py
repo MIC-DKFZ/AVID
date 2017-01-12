@@ -299,22 +299,25 @@ class SingleActionBase(ActionBase):
         if self._alwaysDo or isNeeded:
             isValid = False
 
-            try:
-                self._generateOutputs()
-            except BaseException as e:
-                logger.warning(
-                    '(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
-                    str(self.__hash__()), self.actionTag, str(e))
-                for artefact in outputs:
-                    artefact[artefactProps.INVALID] = True
-            except:
-                logger.warning(
-                    '(hash: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
-                    str(self.__hash__()), self.actionTag)
-                for artefact in outputs:
-                    artefact[artefactProps.INVALID] = True
+            if self._hasValidInputs():
+                try:
+                    self._generateOutputs()
+                except BaseException as e:
+                    logger.warning(
+                        '(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
+                        str(self.__hash__()), self.actionTag, str(e))
+                    for artefact in outputs:
+                        artefact[artefactProps.INVALID] = True
+                except:
+                    logger.warning(
+                        '(hash: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
+                        str(self.__hash__()), self.actionTag)
+                    for artefact in outputs:
+                        artefact[artefactProps.INVALID] = True
             else:
-                (isValid, outputs) = self._checkOutputs(outputs)
+                logger.warning("Action failed due to at least one invalid input. All outputs are marked as invalid. Invalid inputs: %s", str(self._inputArtefacts))
+
+            (isValid, outputs) = self._checkOutputs(outputs)
 
             token.generatedArtefacts = outputs
             for artefact in outputs:
@@ -322,6 +325,7 @@ class SingleActionBase(ActionBase):
 
             if not isValid:
                 token.state = actionToken.ACTION_FAILUER
+
         else:
             token.generatedArtefacts = alternatives
             token.state = actionToken.ACTION_SKIPPED
