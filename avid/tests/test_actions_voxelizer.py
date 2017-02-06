@@ -17,9 +17,10 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.voxelizer import VoxelizerBatchAction as voxelizer
 from avid.selectors.keyValueSelector import ActionTagSelector
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('VoxelizerTool') is None, 'Tool VoxelizerTool not installed on the system.')
 class TestVoxelizer(unittest.TestCase):
-
 
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "voxelizerTest")

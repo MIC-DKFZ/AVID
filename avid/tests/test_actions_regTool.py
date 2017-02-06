@@ -16,10 +16,12 @@ import os
 import shutil
 import avid.common.workflow as workflow
 from avid.actions.regTool import regToolBatchAction as regTool
-from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common import AVIDUrlLocater
+from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.templateFileCustomizer as templateFileCustomizer
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('RegTool') is None, 'Tool regTool not installed on the system.')
 class TestRegTool(unittest.TestCase):
 
 

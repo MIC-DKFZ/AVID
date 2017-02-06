@@ -17,8 +17,10 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.doseMap import DoseMapBatchAction as doseMap
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.sorter import BaseSorter
 
+from avid.common.AVIDUrlLocater import getToolConfigPath
+
+@unittest.skipIf(getToolConfigPath('DoseMap') is None, 'Tool DoseMap not installed on the system.')
 class TestDoseMap(unittest.TestCase):
 
 

@@ -17,11 +17,11 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.pdc import pdcBatchAction as pdc
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.artefact import Artefact
 from avid.common.artefact import generateArtefactEntry
 import avid.common.artefact.defaultProps as defaultProps
 from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('pdc++') is None, 'Tool pdc++ not installed on the system.')
 class TestPDC(unittest.TestCase):
 
 

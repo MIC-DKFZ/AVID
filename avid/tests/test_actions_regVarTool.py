@@ -19,7 +19,9 @@ from avid.actions.regVarTool import RegVarToolBatchAction as regVarTool
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.selectors import FormatSelector
 from avid.common import AVIDUrlLocater
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('RegVarTool') is None, 'Tool RegVarTool not installed on the system.')
 class TestRegVarTool(unittest.TestCase):
 
 

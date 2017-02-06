@@ -19,6 +19,9 @@ from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.sorter import BaseSorter
 
+from avid.common.AVIDUrlLocater import getToolConfigPath
+
+@unittest.skipIf(getToolConfigPath('DoseAcc') is None, 'Tool DoseAcc not installed on the system.')
 class TestDoseAcc(unittest.TestCase):
 
 

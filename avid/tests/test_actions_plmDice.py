@@ -19,7 +19,9 @@ from avid.actions.plmDice import plmDiceBatchAction as plmDice
 from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
 class TestPlmDice(unittest.TestCase):
 
 

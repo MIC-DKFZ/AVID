@@ -16,7 +16,9 @@ import avid.common.workflow as workflow
 from avid.actions.arima import ArimaBatchAction as arima
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.selectors.keyValueSelector import DoseStatSelector
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('RScript') is None, 'Tool RScript not installed on the system.')
 class TestArima(unittest.TestCase):
   def setUp(self):
     self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "arimaTest")

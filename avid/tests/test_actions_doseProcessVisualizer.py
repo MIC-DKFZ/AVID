@@ -22,8 +22,9 @@ from avid.actions.doseProcessVisualizer import doseProcessVisualizerBatchAction 
 from avid.selectors import ActionTagSelector
 from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 import avid.common.templateFileCustomizer as templateFileCustomizer
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
-
+@unittest.skipIf(getToolConfigPath('RScript') is None, 'Tool RScript not installed on the system.')
 class TestDoseProcessVisualizer(unittest.TestCase):
 
 

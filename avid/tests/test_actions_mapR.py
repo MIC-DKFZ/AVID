@@ -18,6 +18,9 @@ import avid.common.workflow as workflow
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.selectors.keyValueSelector import ActionTagSelector
 
+from avid.common.AVIDUrlLocater import getToolConfigPath
+
+@unittest.skipIf(getToolConfigPath('mapR') is None, 'Tool mapR not installed on the system.')
 class TestMapR(unittest.TestCase):
 
 

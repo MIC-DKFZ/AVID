@@ -18,7 +18,9 @@ import avid.common.workflow as workflow
 from avid.actions.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
 from avid.selectors.keyValueSelector import ActionTagSelector
 
+from avid.common.AVIDUrlLocater import getToolConfigPath
 
+@unittest.skipIf(getToolConfigPath('BioModelCalc') is None, 'Tool BioModelCalc not installed on the system.')
 class TestBioModelCalc(unittest.TestCase):
   def setUp(self):
     self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "bioModelCalcTest")
