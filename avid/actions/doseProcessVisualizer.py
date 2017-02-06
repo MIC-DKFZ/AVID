@@ -60,20 +60,8 @@ class doseProcessVisualizerAction(CLIActionBase):
 
         name = self._generateName()
 
-        #Specify batch artefact
-        self._batchArtefact = self.generateArtefact(artefactRef)
-        self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-        self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
-        self._batchArtefact["diagram_type"] = self._diagramTitle
-
-        path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-        batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-        batName = os.path.join(path, batName)
-
-        self._batchArtefact[artefactProps.URL] = batName
-
         #Specify config artefact
-        self._configArtefact = self.generateArtefact(self._batchArtefact)
+        self._configArtefact = self.generateArtefact(self.artefactRef)
         self._configArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_CONFIG
         self._configArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_R
         self._configArtefact["diagram_type"] = self._diagramTitle
@@ -85,7 +73,7 @@ class doseProcessVisualizerAction(CLIActionBase):
         self._configArtefact[artefactProps.URL] = resName
 
         #Specify result artefact
-        self._resultArtefact = self.generateArtefact(self._batchArtefact)
+        self._resultArtefact = self.generateArtefact(self._configArtefact)
         self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
         self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_PNG
         self._resultArtefact["diagram_type"] = self._diagramTitle
@@ -96,7 +84,7 @@ class doseProcessVisualizerAction(CLIActionBase):
 
         self._resultArtefact[artefactProps.URL] = resName
 
-        return [self._batchArtefact, self._configArtefact, self._resultArtefact]
+        return [self._configArtefact, self._resultArtefact]
 
 
     def _getRelativeFilename(self, targetFilename, sourceFilename):
@@ -138,11 +126,9 @@ class doseProcessVisualizerAction(CLIActionBase):
         templateFileCustomizer.writeFileCustomized(self._rTemplateFile, RFilename, replacingDict)
 
     def _prepareCLIExecution(self):
-        batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
         configPath = artefactHelper.getArtefactProperty(self._configArtefact,artefactProps.URL)
         resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
 
-        osChecker.checkAndCreateDir(os.path.split(batPath)[0])
         osChecker.checkAndCreateDir(os.path.split(configPath)[0])
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
@@ -152,11 +138,7 @@ class doseProcessVisualizerAction(CLIActionBase):
 
         content = '"' + execURL + '"' + ' "' + configPath + '"'
 
-        with open(batPath, "w") as outputFile:
-          outputFile.write(content)
-          outputFile.close()
-
-        return batPath
+        return content
 
 class doseProcessVisualizerBatchAction(BatchActionBase):
     def __init__(self,  doseStatVariationsSelector, doseStatBaselineSelector, doseStatAdditionalSelector,

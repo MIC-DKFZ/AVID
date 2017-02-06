@@ -70,17 +70,8 @@ class mapRAction(CLIActionBase):
   def _indicateOutputs(self):
     
     name = self.instanceName                    
-    self._batchArtefact = self.generateArtefact(self._inputImage)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + ".bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(self._inputImage)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
     
@@ -90,12 +81,11 @@ class mapRAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
+    return [self._resultArtefact]
 
       
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputImage,artefactProps.URL)
     templatePath = artefactHelper.getArtefactProperty(self._templateImage,artefactProps.URL)
@@ -109,7 +99,6 @@ class mapRAction(CLIActionBase):
         registrationPath = artefactHelper.getArtefactProperty(result[1],artefactProps.URL)
         logger.debug("Converted/Wrapped given registration artefact to be MatchPoint compatible. Wrapped artefact path: "+registrationPath)
     
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "mapR", self._actionConfig)
@@ -129,11 +118,8 @@ class mapRAction(CLIActionBase):
     
     if self._outputExt.lower() =="dcm" or self._outputExt.lower() == "ima":
       content += ' --seriesReader dicom'
-    
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
 
-    return batPath
+    return content
 
 class mapRBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and

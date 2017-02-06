@@ -60,19 +60,8 @@ class VoxelizerAction(CLIActionBase):
    
   def _indicateOutputs(self):    
     name = self.instanceName
-                    
-    self._batchArtefact = self.generateArtefact(self._structSet)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
-    self._batchArtefact[artefactProps.OBJECTIVE]= self._structName
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(self._structSet)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
     self._resultArtefact[artefactProps.OBJECTIVE]= self._structName
@@ -83,17 +72,15 @@ class VoxelizerAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
+    return [self._resultArtefact]
  
                 
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     refPath = artefactHelper.getArtefactProperty(self._referenceImage,artefactProps.URL)
     structPath = artefactHelper.getArtefactProperty(self._structSet,artefactProps.URL)
     
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "VoxelizerTool", self._actionConfig)
@@ -109,13 +96,8 @@ class VoxelizerAction(CLIActionBase):
       content += ' -z'
       
     content += ' -e "'+self._getStructPattern()+'"'
-      
-    
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
-      outputFile.close()
-      
-    return batPath      
+
+    return content
   
   
   def _getStructPattern(self):

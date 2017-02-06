@@ -63,17 +63,8 @@ class plmCompareAction(CLIActionBase):
   def _indicateOutputs(self):
     
     name = self.instanceName                    
-    self._batchArtefact = self.generateArtefact(self._testImage)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(self._testImage)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_RTTB_STATS_XML
     
@@ -83,25 +74,19 @@ class plmCompareAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
+    return [self._resultArtefact]
 
       
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._refImage,artefactProps.URL)
     input2Path = artefactHelper.getArtefactProperty(self._testImage,artefactProps.URL)
-    
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
-    
+
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
     
     content = '"' + execURL + '" compare ' + ' "' + inputPath + '"' + ' "' + input2Path +'"'
-      
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
 
-    return batPath
+    return content
 
 
   def _postProcessCLIExecution(self):

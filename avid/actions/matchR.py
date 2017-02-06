@@ -77,20 +77,9 @@ class matchRAction(CLIActionBase):
       artefactRef = self._movingImage
     
     name = self._generateName()
-    
-    #Specify batch artefact                
-    self._batchArtefact = self.generateArtefact(artefactRef)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
     #Specify result artefact                
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(artefactRef)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
     
@@ -100,17 +89,13 @@ class matchRAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
-
-
+    return [self._resultArtefact]
 
         
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
 
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
       
     try:
@@ -137,16 +122,8 @@ class matchRAction(CLIActionBase):
     except:
       logger.error("Error for getExecutable.")
       raise
-    
-    try:
-      with open(batPath, "w") as outputFile:
-        outputFile.write(content)
-        outputFile.close()
-    except:
-      logger.error("Error for bat write.")
-      raise
-      
-    return batPath      
+
+    return content
 
 
 class matchRBatchAction(BatchActionBase):

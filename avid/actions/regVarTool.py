@@ -54,21 +54,9 @@ class RegVarToolAction(CLIActionBase):
     artefactRef = self._reg
     
     name = self._generateName()
-    
-    #Specify batch artefact                
-    self._batchArtefact = self.generateArtefact(artefactRef)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT#
-    self._batchArtefact[artefactProps.CASEINSTANCE] = str(self._instanceNr)
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
     #Specify result artefact                
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(artefactRef)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
     self._resultArtefact[artefactProps.CASEINSTANCE] = str(self._instanceNr)
@@ -79,16 +67,14 @@ class RegVarToolAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
+    return [self._resultArtefact]
         
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     regPath = artefactHelper.getArtefactProperty(self._reg, artefactProps.URL)
     templatePath = artefactHelper.getArtefactProperty(self._templateImage,artefactProps.URL)
     
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     if self._parameters is not None:
       parametersAsString = self._toString(self._parameters)
@@ -103,11 +89,8 @@ class RegVarToolAction(CLIActionBase):
       content += ' -p ' + parametersAsString
     if templatePath is not None:
       content += ' -i ' + '"' + templatePath + '"'
-    
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
-      
-    return batPath      
+
+    return content
 
   def _toString(self, parameters):
     parametersString = ""

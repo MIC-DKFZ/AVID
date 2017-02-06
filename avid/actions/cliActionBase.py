@@ -12,11 +12,15 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 from . import SingleActionBase
+import platform
 import subprocess
 import logging
 import os
 import time
 import avid.common.settings as AVIDSettings
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact as artefactHelper
+from avid.common import osChecker
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +45,10 @@ class CLIActionBase(SingleActionBase):
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed
     for the CLI call to run properly (e.g. the batch/bash file that should be
-    executed. Then the call should be returned as result of the method. '''
+    executed.
+     @return The returnvalue is a string/stream containing all the instructions that
+      should be executed in the command line. The CLIActionBase will store it into a shell script and
+      execute it.'''
     raise NotImplementedError("Reimplement in a derived class to function correctly.")
     #Implement: generation of all needed artefact and preperation of the cli call
     pass
@@ -51,9 +58,40 @@ class CLIActionBase(SingleActionBase):
     after the CLI call to leaf the action and its result in a proper state. '''
     #Implement: if something should be done after the execution, do it here
     pass  
-    
+
+  def _generateCLIfile(self, content):
+    '''helper function to generate the appropriated CLI file that should be executed.
+       @return Returns the path to the file.'''
+
+    #by policy the first artefact always determines the location and such.
+    cliArtefact = self.generateArtefact(self.outputArtefacts[0])
+    cliArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
+    cliArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
+
+    path = artefactHelper.generateArtefactPath(self._session, cliArtefact)
+
+    cliName = os.path.join(path, os.path.split(artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL))[1])
+
+    if platform.system() == 'Windows':
+      cliName = cliName + os.extsep + 'bat'
+    else:
+      cliName = cliName + os.extsep + 'sh'
+
+    try:
+      osChecker.checkAndCreateDir(path)
+      with open(cliName, "w") as outputFile:
+        outputFile.write(content)
+        outputFile.close()
+    except:
+      logger.error("Error when writing cli script. Location: %s.", cliName)
+      raise
+
+    return cliName
+
   def _generateOutputs(self):
-    clicall = self._prepareCLIExecution()
+    callcontent = self._prepareCLIExecution()
+    clicall = self._generateCLIfile(callcontent)
+
     global logger
     
     try:

@@ -55,18 +55,8 @@ class BioModelCalcAction(CLIActionBase):
   def _indicateOutputs(self):
     
     name = self.instanceName
-                        
-    self._batchArtefact = self.generateArtefact(self._inputDose)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID)) + os.extsep + "bat"
-    batName = os.path.join(path, batName)
-    
-    self._batchArtefact[artefactProps.URL] = batName
-    
-    self._resultArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultArtefact = self.generateArtefact(self._inputDose)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
     
@@ -76,17 +66,15 @@ class BioModelCalcAction(CLIActionBase):
     
     self._resultArtefact[artefactProps.URL] = resName
 
-    return [self._batchArtefact, self._resultArtefact]
+    return [self._resultArtefact]
  
                 
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
 
     
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._actionConfig)
@@ -108,11 +96,7 @@ class BioModelCalcAction(CLIActionBase):
         content+= str(val) + " "
     content += ' --nFractions ' + str(self._nFractions)
 
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
-      outputFile.close()
-      
-    return batPath
+    return content
 
 def _getStructLoadStyle(structArtefact):
   'deduce the load style parameter for an artefact that should be input'

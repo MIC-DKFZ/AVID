@@ -59,31 +59,20 @@ class LinearFitAction(CLIActionBase):
   def _indicateOutputs(self):
     
     name = self.instanceName
-                  
-    self._batchArtefact = self.generateArtefact(self._inputImage)
-    self._batchArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    self._batchArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
 
-    path = artefactHelper.generateArtefactPath(self._session, self._batchArtefact)
-    batName = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID))+os.extsep+"bat"
-    batName = os.path.join(path, batName)
-       
-    self._batchArtefact[artefactProps.URL] = batName
-    
-    outputTemplate = name + "." + str(artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.ID))
-    
-    self._resultSlopeArtefact = self.generateArtefact(self._batchArtefact)
+    self._resultSlopeArtefact = self.generateArtefact(self._inputImag)
     self._resultSlopeArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultSlopeArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
     self._resultSlopeArtefact[artefactProps.OBJECTIVE] = "slope"
-    
+
     path = artefactHelper.generateArtefactPath(self._session, self._resultSlopeArtefact)
+    outputTemplate = name + "." + str(artefactHelper.getArtefactProperty(self._resultSlopeArtefact,artefactProps.ID))
     resName = outputTemplate + "_slope"+os.extsep+"nrrd"
     resName = os.path.join(path, resName)
     
     self._resultSlopeArtefact[artefactProps.URL] = resName
-    
-    self._resultOffsetArtefact = self.generateArtefact(self._batchArtefact)
+
+    self._resultOffsetArtefact = self.generateArtefact(self._resultSlopeArtefact)
     self._resultOffsetArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultOffsetArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
     self._resultOffsetArtefact[artefactProps.OBJECTIVE] = "offset"
@@ -95,17 +84,15 @@ class LinearFitAction(CLIActionBase):
 
     self._outputTemplatePath = os.path.join(path, outputTemplate+os.extsep+"nrrd")
   
-    return [self._batchArtefact, self._resultSlopeArtefact, self._resultOffsetArtefact]
+    return [self._resultSlopeArtefact, self._resultOffsetArtefact]
 
       
   def _prepareCLIExecution(self):
     
-    batPath = artefactHelper.getArtefactProperty(self._batchArtefact,artefactProps.URL)
     resultPath = artefactHelper.getArtefactProperty(self._resultSlopeArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputImage,artefactProps.URL)
     maskPath = artefactHelper.getArtefactProperty(self._maskImage,artefactProps.URL)
       
-    osChecker.checkAndCreateDir(os.path.split(batPath)[0])
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "GenericFittingMiniApp", self._actionConfig)
@@ -117,12 +104,8 @@ class LinearFitAction(CLIActionBase):
       
     if self._roibased:
       content += "-r"
-             
-    with open(batPath, "w") as outputFile:
-      outputFile.write(content)
-      outputFile.close()
-      
-    return batPath      
+
+    return content
 
 
 
