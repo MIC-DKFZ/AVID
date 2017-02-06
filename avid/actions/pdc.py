@@ -270,9 +270,9 @@ class pdcBatchAction(BatchActionBase):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._images = imageSelector.getSelection(self._session.inData)
-    self._plans = planSelector.getSelection(self._session.inData)
-    self._structs = structSelector.getSelection(self._session.inData)
+    self._images = imageSelector.getSelection(self._session.artefacts)
+    self._plans = planSelector.getSelection(self._session.artefacts)
+    self._structs = structSelector.getSelection(self._session.artefacts)
    
     self._planLinker = planLinker
     self._structLinker = structLinker  

@@ -28,18 +28,18 @@ def do(workflow, doseStatAggregatedSelector, doseStatAggregatedCompareSelector, 
     try:
       for i in range(0,workflow.numberOfPatients()):
         doseStatAggregatedSelector.updateKeyValueDict({FFDE.CASE:str(i)})
-        doseStatsAggregatedList = doseStatAggregatedSelector.getFilteredContainer(workflow.inData)
+        doseStatsAggregatedList = doseStatAggregatedSelector.getFilteredContainer(workflow.artefacts)
 
         if doseStatAggregatedCompareSelector:
           doseStatAggregatedCompareSelector.updateKeyValueDict({FFDE.CASE:str(i)})
-          doseStatsAggregatedCompareList = doseStatAggregatedCompareSelector.getFilteredContainer(workflow.inData)
+          doseStatsAggregatedCompareList = doseStatAggregatedCompareSelector.getFilteredContainer(workflow.artefacts)
 
         doseStatAggregatedSelectorBaseline.updateKeyValueDict({FFDE.CASE:str(i)})
-        doseStatsAggregatedBaselineList = doseStatAggregatedSelectorBaseline.getFilteredContainer(workflow.inData)
+        doseStatsAggregatedBaselineList = doseStatAggregatedSelectorBaseline.getFilteredContainer(workflow.artefacts)
         if doseStatsAggregatedBaselineList.__len__() != 1:
           raise
         cctSelector = MultiKeyValueSelector(workflow,{FFDE.CASE:str(i), FFDE.TYPE:"CCT"})
-        cctList = cctSelector.getFilteredContainer(workflow.inData)
+        cctList = cctSelector.getFilteredContainer(workflow.artefacts)
         fractions = _getFractions(cctList)
         maxFractions = _getMax(fractions)
         for element in doseStatsAggregatedList:
@@ -79,8 +79,8 @@ def _writeRDiagramFileFromTemplate(outPath, csvDataFile, csvCompareFile, csvBase
 
 def _addToInData(workflow, case, rFilename, absolutePngFilename, nFractions):
   FFEGobj = FlatFileEntryGenerator()
-  workflow.inData = FFEGobj.addRConfigToContainer(workflow.inData, str(case), str(nFractions), CASE_INSTANCE, str(rFilename),\
+  workflow.artefacts = FFEGobj.addRConfigToContainer(workflow.artefacts, str(case), str(nFractions), CASE_INSTANCE, str(rFilename),\
                                                                  ACTION_TAG)
   #technically, the PNG file is not yet generated here, but it is much more complicated to add the file to the workflow in rScriptRunner
-  workflow.inData = FFEGobj.addPNGResultToContainer(workflow.inData, str(case), str(nFractions), CASE_INSTANCE, str(absolutePngFilename),\
+  workflow.artefacts = FFEGobj.addPNGResultToContainer(workflow.artefacts, str(case), str(nFractions), CASE_INSTANCE, str(absolutePngFilename),\
                                                                  ACTION_TAG)

@@ -116,8 +116,8 @@ class LinearFitBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputs = inputSelector.getSelection(self._session.inData)
-    self._masks = maskSelector.getSelection(self._session.inData)
+    self._inputs = inputSelector.getSelection(self._session.artefacts)
+    self._masks = maskSelector.getSelection(self._session.artefacts)
     self._actionConfig = actionConfig
     self._maskLinker = maskLinker
     self._roibased = roibased

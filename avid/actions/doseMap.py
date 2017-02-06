@@ -157,14 +157,14 @@ class DoseMapBatchAction(BatchActionBase):
                **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputDoses = inputSelector.getSelection(self._session.inData)
+    self._inputDoses = inputSelector.getSelection(self._session.artefacts)
     self._registrations = list()
     if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.inData)
+      self._registrations = registrationSelector.getSelection(self._session.artefacts)
 
     self._templateDoses = list()
     if templateSelector is not None:
-      self._templateDoses = templateSelector.getSelection(self._session.inData)
+      self._templateDoses = templateSelector.getSelection(self._session.artefacts)
     
     self._regLinker = regLinker
     self._templateLinker = templateLinker  

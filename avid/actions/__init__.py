@@ -255,7 +255,7 @@ class SingleActionBase(ActionBase):
 
         for output in outputs:
             if artefactHelper.getArtefactProperty(output, artefactProps.TYPE) == artefactProps.TYPE_VALUE_RESULT:
-                alternative = artefactHelper.findSimilarArtefact(self._session.inData, output)
+                alternative = artefactHelper.findSimilarArtefact(self._session.artefacts, output)
                 if alternative is None \
                         or alternative[artefactProps.INVALID] \
                         or alternative[artefactProps.URL] is None \

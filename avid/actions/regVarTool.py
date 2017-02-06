@@ -113,11 +113,11 @@ class RegVarToolBatchAction(BatchActionBase):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._regs = regs.getSelection(self._session.inData)
+    self._regs = regs.getSelection(self._session.artefacts)
 
     self._templateImages = list()
     if templateSelector is not None:
-      self._templateImages = templateSelector.getSelection(self._session.inData)
+      self._templateImages = templateSelector.getSelection(self._session.artefacts)
     self._templateLinker = templateLinker
     
     self._variationCount = variationCount

@@ -185,8 +185,8 @@ class DoseStatsWithInterpolationCollectorBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputStats = inputSelector.getSelection(self._session.inData)
-    self._plan = planSelector.getSelection(self._session.inData)
+    self._inputStats = inputSelector.getSelection(self._session.artefacts)
+    self._plan = planSelector.getSelection(self._session.artefacts)
 
     self._rowKey = rowKey
     self._columnKey = columnKey

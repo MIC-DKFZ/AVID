@@ -109,8 +109,8 @@ class plmCompareBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._refImages = refSelector.getSelection(self._session.inData)
-    self._testImages = testSelector.getSelection(self._session.inData)
+    self._refImages = refSelector.getSelection(self._session.artefacts)
+    self._testImages = testSelector.getSelection(self._session.artefacts)
 
     self._inputLinker = inputLinker
     self._singleActionParameters = singleActionParameters

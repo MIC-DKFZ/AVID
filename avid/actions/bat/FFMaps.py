@@ -141,8 +141,8 @@ class FFMapsBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe"), scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._water = waterSelector.getSelection(self._session.inData)
-    self._fat = fatSelector.getSelection(self._session.inData)
+    self._water = waterSelector.getSelection(self._session.artefacts)
+    self._fat = fatSelector.getSelection(self._session.artefacts)
     self._matlab = matlab
     self._scriptDirectory = scriptDirectory
 

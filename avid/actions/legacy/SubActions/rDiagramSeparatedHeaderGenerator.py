@@ -24,8 +24,8 @@ def do(workflow, DVHDoseSelector, DVHVolumeSelector, RTemplateFile, title, xAxis
     for i in range(0,workflow.numberOfPatients()):
       DVHDoseSelector.updateKeyValueDict({FFDE.CASE:str(i)})
       DVHVolumeSelector.updateKeyValueDict({FFDE.CASE:str(i)})
-      DVHDoseAggregatedList = DVHDoseSelector.getFilteredContainer(workflow.inData)
-      DVHVolumeAggregatedList = DVHVolumeSelector.getFilteredContainer(workflow.inData)
+      DVHDoseAggregatedList = DVHDoseSelector.getFilteredContainer(workflow.artefacts)
+      DVHVolumeAggregatedList = DVHVolumeSelector.getFilteredContainer(workflow.artefacts)
       for elementDose, elementVolume in itertools.izip(DVHDoseAggregatedList, DVHVolumeAggregatedList):
         csvFilename = os.path.basename(elementDose[FFDE.URL])
         iteration = int(os.path.splitext(csvFilename)[0].split("-")[1])
@@ -51,8 +51,8 @@ def _writeRDiagramFileFromTemplate(outPath, csvDataFile, csvHeaderFile, RTemplat
 
 def _addToInData(workflow, case, fraction, rFilename, absolutePngFilename):
   FFEGobj = FlatFileEntryGenerator()
-  workflow.inData = FFEGobj.addRConfigToContainer(workflow.inData, str(case), str(fraction), "", str(rFilename),\
+  workflow.artefacts = FFEGobj.addRConfigToContainer(workflow.artefacts, str(case), str(fraction), "", str(rFilename),\
                                                                  ACTION_TAG)
   #technically, the PNG file is not yet generated here, but it is much more complicated to add the file to the workflow in rScriptRunner
-  workflow.inData = FFEGobj.addPNGResultToContainer(workflow.inData, str(case), str(fraction), "", str(absolutePngFilename),\
+  workflow.artefacts = FFEGobj.addPNGResultToContainer(workflow.artefacts, str(case), str(fraction), "", str(absolutePngFilename),\
                                                                  ACTION_TAG)

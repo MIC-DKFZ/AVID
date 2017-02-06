@@ -164,8 +164,8 @@ class DoseStatBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputDoses = inputSelector.getSelection(self._session.inData)
-    self._structSets = structSetSelector.getSelection(self._session.inData)
+    self._inputDoses = inputSelector.getSelection(self._session.artefacts)
+    self._structSets = structSetSelector.getSelection(self._session.artefacts)
 
     self._structLinker = structLinker
     self._structNames = structNames

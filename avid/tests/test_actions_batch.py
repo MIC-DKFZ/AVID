@@ -38,11 +38,11 @@ class Test(unittest.TestCase):
         self.a_Invalid_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
  
         self.session = workflow.Session("session1", self.sessionDir)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a_valid)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a_valid2)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a_NoneURL)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a_NoFile)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a_Invalid)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_valid)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_valid2)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_NoneURL)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_NoFile)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_Invalid)
         
 
     def tearDown(self):
@@ -65,8 +65,8 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid_new, self.session.inData)
-      self.assertIn(self.a_valid2_new, self.session.inData)
+      self.assertIn(self.a_valid_new, self.session.artefacts)
+      self.assertIn(self.a_valid2_new, self.session.artefacts)
       
 
     def test_simelar_exisiting_alwaysOff(self):
@@ -81,10 +81,10 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid, self.session.inData)
-      self.assertIn(self.a_valid2, self.session.inData)
-      self.assertFalse(self.a_valid_new in self.session.inData)
-      self.assertFalse(self.a_valid2_new in self.session.inData)
+      self.assertIn(self.a_valid, self.session.artefacts)
+      self.assertIn(self.a_valid2, self.session.artefacts)
+      self.assertFalse(self.a_valid_new in self.session.artefacts)
+      self.assertFalse(self.a_valid2_new in self.session.artefacts)
 
 
     def test_simelar_mixed_alwaysDo(self):
@@ -99,8 +99,8 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid_new, self.session.inData)
-      self.assertIn(self.a_Invalid_new, self.session.inData)
+      self.assertIn(self.a_valid_new, self.session.artefacts)
+      self.assertIn(self.a_Invalid_new, self.session.artefacts)
 
 
     def test_simelar_mixed_alwaysOff(self):
@@ -115,10 +115,10 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid, self.session.inData)
-      self.assertIn(self.a_Invalid_new, self.session.inData)
-      self.assertFalse(self.a_valid_new in self.session.inData)
-      self.assertFalse(self.a_Invalid in self.session.inData)
+      self.assertIn(self.a_valid, self.session.artefacts)
+      self.assertIn(self.a_Invalid_new, self.session.artefacts)
+      self.assertFalse(self.a_valid_new in self.session.artefacts)
+      self.assertFalse(self.a_Invalid in self.session.artefacts)
 
 
     def test_failure_mixed_alwaysOn(self):
@@ -133,8 +133,8 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid_new, self.session.inData)
-      self.assertIn(self.a_NoFile, self.session.inData)
+      self.assertIn(self.a_valid_new, self.session.artefacts)
+      self.assertIn(self.a_NoFile, self.session.artefacts)
       self.assert_(token.generatedArtefacts[1][artefactProps.INVALID])
 
     
@@ -150,8 +150,8 @@ class Test(unittest.TestCase):
       self.assertEqual(len(token.generatedArtefacts), 2)
       self.assertEqual(token.actionTag, action.actionTag)
       self.assertEqual(self.session.actions[action.actionTag], token)
-      self.assertIn(self.a_valid, self.session.inData)
-      self.assertIn(self.a_NoFile, self.session.inData)
+      self.assertIn(self.a_valid, self.session.artefacts)
+      self.assertIn(self.a_NoFile, self.session.artefacts)
       self.assert_(token.generatedArtefacts[1][artefactProps.INVALID])
 
 
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action = BatchActionBase("Action1")
       
-      selection = action.ensureRelevantArtefacts(self.session.inData, CaseSelector("Case2"))
+      selection = action.ensureRelevantArtefacts(self.session.artefacts, CaseSelector("Case2"))
      
       self.assert_(len(selection)==3)
       self.assertIn(self.a_valid2, selection)

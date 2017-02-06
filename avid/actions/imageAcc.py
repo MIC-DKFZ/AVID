@@ -145,11 +145,11 @@ class ImageAccBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
-    self._images = imageSelector.getSelection(self._session.inData)
+    self._images = imageSelector.getSelection(self._session.artefacts)
 
     self._registrations = list()
     if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.inData)
+      self._registrations = registrationSelector.getSelection(self._session.artefacts)
  
     self._regLinker = regLinker
     self._imageSorter = imageSorter

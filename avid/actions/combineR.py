@@ -89,8 +89,8 @@ class combineRBatchAction(BatchActionBase):
                additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._reg1s = reg1Selector.getSelection(self._session.inData)
-    self._reg2s = reg2Selector.getSelection(self._session.inData)
+    self._reg1s = reg1Selector.getSelection(self._session.artefacts)
+    self._reg2s = reg2Selector.getSelection(self._session.artefacts)
 
     self._regLinker = regLinker
     self._singleActionParameters = singleActionParameters

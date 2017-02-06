@@ -33,12 +33,12 @@ def do(workflow, DVHSelector, DoseStatsSelector, actionTag="DVHCollector"):
     checkAndCreateDir(xmlEntryOutPath)
     FFEGobj = FlatFileEntryGenerator()
 
-    allDVHSelections = DVHSelector.getFilteredContainer(workflow.inData)
+    allDVHSelections = DVHSelector.getFilteredContainer(workflow.artefacts)
     fractions = _getFractions(allDVHSelections)
 
     for i in range(0,workflow.numberOfPatients()):
       DoseStatsSelector.updateKeyValueDict({FFDE.CASE:str(i)})
-      DoseStatsList = DoseStatsSelector.getFilteredContainer(workflow.inData)
+      DoseStatsList = DoseStatsSelector.getFilteredContainer(workflow.artefacts)
 
       if DoseStatsList:
         firstDoseStat = DoseStatsList[0]
@@ -48,7 +48,7 @@ def do(workflow, DVHSelector, DoseStatsSelector, actionTag="DVHCollector"):
 
       for fraction in range(_getMin(fractions),_getMax(fractions)+1):
         DVHSelector.updateKeyValueDict({FFDE.CASE:str(i), FFDE.TIMEPOINT:fraction})
-        DVHList = DVHSelector.getFilteredContainer(workflow.inData)
+        DVHList = DVHSelector.getFilteredContainer(workflow.artefacts)
         doseAllVariations = []
         volumeAllVariations = []
         DVHType = "cum"
@@ -67,13 +67,13 @@ def do(workflow, DVHSelector, DoseStatsSelector, actionTag="DVHCollector"):
 
         DVHDoseFilename = os.path.join(xmlEntryOutPath, "DVHDose_"+DVHType+"-"+str(fraction)+".csv")
         _writeToCSV(doseAllVariations, None, DVHDoseFilename)
-        workflow.inData = FFEGobj.addCSVResultToContainer(workflow.inData, str(i), str(fraction), "DVHDose_"+DVHType,\
+        workflow.artefacts = FFEGobj.addCSVResultToContainer(workflow.artefacts, str(i), str(fraction), "DVHDose_"+DVHType,\
                                                                  DVHDoseFilename, ACTION_TAG)
 
         DVHVolumeFilename = os.path.join(xmlEntryOutPath, "DVHVolume_"+DVHType+"-"+str(fraction)+".csv")
         _writeToCSV(volumeAllVariations, None, DVHVolumeFilename)
 
-        workflow.inData = FFEGobj.addCSVResultToContainer(workflow.inData, str(i), str(fraction), "DVHVolume_"+DVHType,\
+        workflow.artefacts = FFEGobj.addCSVResultToContainer(workflow.artefacts, str(i), str(fraction), "DVHVolume_"+DVHType,\
                                                                  DVHVolumeFilename, ACTION_TAG)
 
 def _parseDVH(filename):

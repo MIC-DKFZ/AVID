@@ -147,10 +147,10 @@ class doseProcessVisualizerBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, rScriptExe = "Rscript.exe", scheduler = SimpleScheduler()):
         BatchActionBase.__init__(self,actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-        self._doseStatVariations = doseStatVariationsSelector.getSelection(self._session.inData)
-        self._doseStatBaseline = doseStatBaselineSelector.getSelection(self._session.inData)
+        self._doseStatVariations = doseStatVariationsSelector.getSelection(self._session.artefacts)
+        self._doseStatBaseline = doseStatBaselineSelector.getSelection(self._session.artefacts)
         if doseStatAdditionalSelector is not None:
-            self._doseStatAdditional = doseStatAdditionalSelector.getSelection(self._session.inData)
+            self._doseStatAdditional = doseStatAdditionalSelector.getSelection(self._session.artefacts)
         else :
             self._doseStatAdditional = None
 

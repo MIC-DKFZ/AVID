@@ -55,7 +55,7 @@ class cleanWorkflowAction(ActionBase):
                 self._removeWriteProtection(dirToDelete, files)
               shutil.rmtree(dirToDelete)
           else:
-            self._session.inData.remove(self._deleteArtefact)
+            self._session.artefacts.remove(self._deleteArtefact)
             os.remove(delURL)
         else:
           logger.info("nothing deleted!")
@@ -87,7 +87,7 @@ class cleanWorkflowBatchAction(BatchActionBase):
                actionTag = "clean", session = None, additionalActionProps = None, scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, True, scheduler, session, additionalActionProps)
 
-    self._deleteArtefacts = deleteSelector.getSelection(self._session.inData)
+    self._deleteArtefacts = deleteSelector.getSelection(self._session.artefacts)
     
     self._deleteWholeDirectory = deleteWholeDirectory
     self._removeWriteProtection = removeWriteProtection

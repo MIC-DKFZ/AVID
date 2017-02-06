@@ -104,8 +104,8 @@ class BATMaskBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe"), scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._lung = lungSelector.getSelection(self._session.inData)
-    self._thorax = thoraxSelector.getSelection(self._session.inData)
+    self._lung = lungSelector.getSelection(self._session.artefacts)
+    self._thorax = thoraxSelector.getSelection(self._session.artefacts)
     self._matlab = matlab
     self._scriptDirectory = scriptDirectory
 

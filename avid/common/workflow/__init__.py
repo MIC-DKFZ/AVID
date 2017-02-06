@@ -100,7 +100,7 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
     rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(artefacts))
 
     
-  session.inData.extend(artefacts)
+  session.artefacts.extend(artefacts)
   
   #other setup stuff
   
@@ -183,7 +183,7 @@ class Session(object):
     self.structureDefinitions = dict()
 
     self.actions = dict()
-    self.inData = list()
+    self.artefacts = list()
     
     self.numberOfPatients = self.getNumberOfPatientsDecorator(patientNumber.getNumberOfPatients)
 
@@ -195,7 +195,7 @@ class Session(object):
 
   def __del__(self):
     if self.autoSave:
-      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.inData, self.rootPath)
+      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
     
     global currentGeneratedSession
     currentGeneratedSession = None
@@ -208,7 +208,7 @@ class Session(object):
   def __exit__(self, exc_type, exc_value, traceback):
     if self.autoSave:
       logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
-      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.inData, self.rootPath)
+      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
      
     logging.info("Successful actions: %s.", len(self.getSuccessfulActions()))
     logging.info("Skipped actions: %s.", len(self.getSkippedActions()))
@@ -249,7 +249,7 @@ class Session(object):
   
   def getNumberOfPatientsDecorator(self, patNoFunc):
     def inner():
-      return patNoFunc(self.inData)
+      return patNoFunc(self.artefacts)
     return inner
                          
                          
@@ -277,7 +277,7 @@ class Session(object):
         a simelar entry. If yes the simelar entry will be removed.      
     ''' 
     with self.lock:
-      self.inData = artefact.addArtefactToWorkflowData(self.inData, artefactEntry, removeSimelar)
+      self.artefacts = artefact.addArtefactToWorkflowData(self.artefacts, artefactEntry, removeSimelar)
     
   def getFailedActions(self):
       """Returns all actions of the session that have failed."""

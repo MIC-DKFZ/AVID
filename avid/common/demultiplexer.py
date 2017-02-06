@@ -22,7 +22,7 @@ class Demultiplexer:
     if workflowData is None:
       #check if we have a current generated global session we can use
       if workflow.currentGeneratedSession is not None:
-        self._workflowData = workflow.currentGeneratedSession.inData
+        self._workflowData = workflow.currentGeneratedSession.artefacts
       else:
         raise ValueError("Session passed to the action is invalid. Session is None.")
     else: 

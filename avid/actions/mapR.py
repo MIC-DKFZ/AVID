@@ -142,14 +142,14 @@ class mapRBatchAction(BatchActionBase):
     template.'''
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputImages = inputSelector.getSelection(self._session.inData)
+    self._inputImages = inputSelector.getSelection(self._session.artefacts)
     self._registrations = list()
     if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.inData)
+      self._registrations = registrationSelector.getSelection(self._session.artefacts)
 
     self._templateImages = list()
     if templateSelector is not None:
-      self._templateImages = templateSelector.getSelection(self._session.inData)
+      self._templateImages = templateSelector.getSelection(self._session.artefacts)
     
     self._regLinker = regLinker
     self._templateLinker = templateLinker

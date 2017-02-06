@@ -30,13 +30,13 @@ class Test(unittest.TestCase):
         self.a4 = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", "misc", "dummy", os.path.join(self.testDataDir, "artefact2.txt"), invalid = True)
         
         self.session = workflow.Session("session1", self.sessionDir)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a1)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a2)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a3)
-        artefact.addArtefactToWorkflowData(self.session.inData,self.a4)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a1)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a2)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a3)
+        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a4)
         
         self.session2 = workflow.Session("session2", self.sessionDir)
-        artefact.addArtefactToWorkflowData(self.session2.inData,self.a1)
+        artefact.addArtefactToWorkflowData(self.session2.artefacts,self.a1)
 
 
     def tearDown(self):

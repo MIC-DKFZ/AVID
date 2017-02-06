@@ -157,15 +157,15 @@ class DoseAccBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
-    self._doses = doseSelector.getSelection(self._session.inData)
+    self._doses = doseSelector.getSelection(self._session.artefacts)
 
     self._registrations = list()
     if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.inData)
+      self._registrations = registrationSelector.getSelection(self._session.artefacts)
 
     self._plans = list()
     if planSelector is not None:
-      self._plans = planSelector.getSelection(self._session.inData)
+      self._plans = planSelector.getSelection(self._session.artefacts)
     
     self._regLinker = regLinker
     self._planLinker = planLinker

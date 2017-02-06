@@ -7,6 +7,6 @@ def do(workflow, selector, RScriptExe):
       Adds the config files generated in the inData container.
       Adds the result files to the inData container.
   """
-  rFileList = selector.getFilteredContainer(workflow.inData)
+  rFileList = selector.getFilteredContainer(workflow.artefacts)
   for rFile in rFileList:
     subprocess.call([RScriptExe, rFile[FFDE.URL]])

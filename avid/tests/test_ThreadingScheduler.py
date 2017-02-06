@@ -51,12 +51,12 @@ class TestThreadingScheduler(unittest.TestCase):
     
     tokens = scheduler.execute(self.actionList)
     
-    self.assertIn(self.a1, self.session.inData)
-    self.assertIn(self.a2, self.session.inData)
-    self.assertIn(self.a3, self.session.inData)
-    self.assertIn(self.a4, self.session.inData)
-    self.assertIn(self.a5, self.session.inData)
-    self.assertIn(self.a6, self.session.inData)
+    self.assertIn(self.a1, self.session.artefacts)
+    self.assertIn(self.a2, self.session.artefacts)
+    self.assertIn(self.a3, self.session.artefacts)
+    self.assertIn(self.a4, self.session.artefacts)
+    self.assertIn(self.a5, self.session.artefacts)
+    self.assertIn(self.a6, self.session.artefacts)
     
     self.assertEqual(len(tokens), 6)
     self.assertFalse(self.session.hasFailedActions())

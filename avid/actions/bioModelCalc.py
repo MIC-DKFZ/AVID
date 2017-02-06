@@ -140,9 +140,9 @@ class BioModelCalcBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputDoses = inputSelector.getSelection(self._session.inData)
+    self._inputDoses = inputSelector.getSelection(self._session.artefacts)
     if planSelector is not None:
-        self._plan = planSelector.getSelection(self._session.inData)
+        self._plan = planSelector.getSelection(self._session.artefacts)
     else:
         self._plan=None
     self._planLinker = planLinker
@@ -150,7 +150,7 @@ class BioModelCalcBatchAction(BatchActionBase):
     self._useDoseScaling = useDoseScaling
 
     if modelParameterMapsSelector is not None:
-      self._modelParameterMaps = modelParameterMapsSelector.getSelection(self._session.inData)
+      self._modelParameterMaps = modelParameterMapsSelector.getSelection(self._session.artefacts)
       self._modelParameters = list()
     else:
       self._modelParameterMaps = None

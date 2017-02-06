@@ -123,10 +123,10 @@ class ArimaBatchAction(BatchActionBase):
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._doseStatsCollector = doseStatsSelector.getSelection(self._session.inData)
+    self._doseStatsCollector = doseStatsSelector.getSelection(self._session.artefacts)
 
     if planSelector is not None:
-      self._plans = planSelector.getSelection(self._session.inData)
+      self._plans = planSelector.getSelection(self._session.artefacts)
     self._planLinker = planLinker
     self._singleActionParameters = singleActionParameters
 

@@ -17,12 +17,12 @@ with workflow.initSession_byCLIargs(expandPaths = True, autoSave = True) as sess
   #populating dummy artefacts
   for i in range(1,10000):
     entry = generateArtefactEntry('entry_%s'%i, None, 0, 'Input', artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT_VALUE_CSV, 'dummy_%s.txt'%i)
-    session.inData.append(entry)
+    session.artefacts.append(entry)
 
   for i in range(1,10000):
     entry = generateArtefactEntry('entry_all', None, 0, 'Input', artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT_VALUE_CSV, 'dummy_%s.txt'%i)
-    session.inData.append(entry)
+    session.artefacts.append(entry)
 
     
-  #dummy(session.inData, scheduler = ThreadingScheduler(10)).do()
-  dummyCLI(session.inData, scheduler = ThreadingScheduler(10)).do()
+  #dummy(session.artefacts, scheduler = ThreadingScheduler(10)).do()
+  dummyCLI(session.artefacts, scheduler = ThreadingScheduler(10)).do()

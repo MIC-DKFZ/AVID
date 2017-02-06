@@ -119,9 +119,9 @@ class BATCriteriaBatchAction(BatchActionBase):
                session = None, additionalActionProps = None, matlab = os.path.join("matlab","matlab.exe"), scheduler = SimpleScheduler()):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._ff = ffSelector.getSelection(self._session.inData)
-    self._mask = maskSelector.getSelection(self._session.inData)
-    self._slope = slopeSelector.getSelection(self._session.inData)
+    self._ff = ffSelector.getSelection(self._session.artefacts)
+    self._mask = maskSelector.getSelection(self._session.artefacts)
+    self._slope = slopeSelector.getSelection(self._session.artefacts)
     self._matlab = matlab
     self._scriptDirectory = scriptDirectory
 

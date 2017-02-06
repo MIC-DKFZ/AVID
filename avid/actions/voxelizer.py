@@ -126,8 +126,8 @@ class VoxelizerBatchAction(BatchActionBase):
     '''
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._references = referenceSelector.getSelection(self._session.inData)
-    self._structSets = structSetSelector.getSelection(self._session.inData)
+    self._references = referenceSelector.getSelection(self._session.artefacts)
+    self._structSets = structSetSelector.getSelection(self._session.artefacts)
 
     self._refLinker = referenceLinker
     self._structNames = structNames

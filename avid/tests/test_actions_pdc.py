@@ -38,11 +38,11 @@ class TestPDC(unittest.TestCase):
       
       pdcDataPath = os.path.join(os.path.dirname(getToolConfigPath('pdc++')),'Resources', 'TestData','data','2000_TEST_B')
       plan = generateArtefactEntry('case1', None, 0, 'Plan', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B108.pln'))
-      self.session.inData.append(plan)
+      self.session.artefacts.append(plan)
       ct = generateArtefactEntry('case1', None, 0, 'BPLCT', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B000.ctx.gz'))
-      self.session.inData.append(ct)
+      self.session.artefacts.append(ct)
       structurset = generateArtefactEntry('case1', None, 0, 'Struct', defaultProps.TYPE_VALUE_RESULT, defaultProps.FORMAT_VALUE_VIRTUOS, os.path.join(pdcDataPath, '2000_TEST_B000.vdx'))
-      self.session.inData.append(structurset)
+      self.session.artefacts.append(structurset)
 
               
     def tearDown(self):

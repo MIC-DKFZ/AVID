@@ -241,15 +241,15 @@ class regToolBatchAction(BatchActionBase):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._targetImages = targetSelector.getSelection(self._session.inData)
+    self._targetImages = targetSelector.getSelection(self._session.artefacts)
     self._targetMasks = list()
     if targetMaskSelector is not None:
-      self._targetMasks = targetMaskSelector.getSelection(self._session.inData)
+      self._targetMasks = targetMaskSelector.getSelection(self._session.artefacts)
 
-    self._movingImages = movingSelector.getSelection(self._session.inData)
+    self._movingImages = movingSelector.getSelection(self._session.artefacts)
     self._movingMasks = list()
     if movingMaskSelector is not None:
-      self._movingMasks = movingMaskSelector.getSelection(self._session.inData)
+      self._movingMasks = movingMaskSelector.getSelection(self._session.artefacts)
     
     self._movingLinker = movingLinker
     self._targetMaskLinker = targetMaskLinker  
