@@ -66,3 +66,4 @@ from keyValueSelector import TypeSelector
 from keyValueSelector import ObjectiveSelector
 from keyValueSelector import DoseStatSelector
 from validitySelector import ValiditySelector
+from keyMulitValueSelector import KeyMultiValueSelector
