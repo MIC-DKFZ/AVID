@@ -5,7 +5,7 @@
 		<avid:property key="actionTag">Target</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">itk</avid:property>
-		<avid:property key="url">..\mapRTest\MatchPointLogo.mhd</avid:property>
+		<avid:property key="url">../mapRTest/MatchPointLogo.mhd</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
@@ -13,7 +13,7 @@
 		<avid:property key="actionTag">Moving</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">itk</avid:property>
-		<avid:property key="url">..\mapRTest\MatchPointLogo.mhd</avid:property>
+		<avid:property key="url">../mapRTest/MatchPointLogo.mhd</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
@@ -21,6 +21,6 @@
 		<avid:property key="actionTag">Moving</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">itk</avid:property>
-		<avid:property key="url">..\mapRTest\MatchPointLogoShifted10x-16y-5z.mhd</avid:property>
+		<avid:property key="url">../mapRTest/MatchPointLogoShifted10x-16y-5z.mhd</avid:property>
 	</avid:artefact>
 </avid:artefacts>

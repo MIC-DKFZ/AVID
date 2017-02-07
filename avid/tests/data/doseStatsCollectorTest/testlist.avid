@@ -7,7 +7,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_0_0.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_0_0.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
@@ -17,7 +17,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_0_1.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_0_1.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
@@ -27,7 +27,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_0_2.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_0_2.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
@@ -37,7 +37,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_1_0.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_1_0.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
@@ -47,7 +47,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_1_1.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_1_1.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
@@ -57,7 +57,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_0_1_2.xml</avid:property>
+		<avid:property key="url">./dose_stat_0_1_2.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_2</avid:property>
@@ -67,7 +67,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_1_0_0.xml</avid:property>
+		<avid:property key="url">./dose_stat_1_0_0.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_2</avid:property>
@@ -77,7 +77,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_1_0_1.xml</avid:property>
+		<avid:property key="url">./dose_stat_1_0_1.xml</avid:property>
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_2</avid:property>
@@ -87,7 +87,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_1_0_2.xml</avid:property>
+		<avid:property key="url">./dose_stat_1_0_2.xml</avid:property>
 	</avid:artefact>	
 	<avid:artefact>
 		<avid:property key="case">case_2</avid:property>
@@ -96,7 +96,7 @@
 		<avid:property key="objective">RO_1</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">rttb_stats_xml</avid:property>
-		<avid:property key="url">.\dose_stat_baseLine.xml</avid:property>
+		<avid:property key="url">./dose_stat_baseLine.xml</avid:property>
 	</avid:artefact>
 
 </avid:artefacts>

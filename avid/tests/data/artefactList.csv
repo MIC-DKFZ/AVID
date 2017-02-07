@@ -1,3 +1,3 @@
-NA;0;0;;Tag1;result;virtuos;.\artefact1.txt
-NA;Case2;2;NA;Tag2;misc;dcm;.\artefact1.txt;ownProp1;ownProp2
+NA;0;0;;Tag1;result;virtuos;./artefact1.txt
+NA;Case2;2;NA;Tag2;misc;dcm;./artefact1.txt;ownProp1;ownProp2
 NA;Case3;TP_3;Instance_1;Tag3;config;bat;unkownFile.dummy

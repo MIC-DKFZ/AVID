@@ -86,7 +86,7 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[0][artefactProps.CASEINSTANCE], "")
       self.assertEqual(artefacts[0][artefactProps.TYPE], "result")
       self.assertEqual(artefacts[0][artefactProps.FORMAT], "virtuos")
-      self.assertEqual(artefacts[0][artefactProps.URL], ".\\artefact1.txt")
+      self.assertEqual(artefacts[0][artefactProps.URL], "./artefact1.txt")
       self.assertEqual(artefacts[0][artefactProps.ACTIONTAG], "Tag1")
       self.assertEqual(artefacts[0][artefactProps.OBJECTIVE], None)
       self.assertEqual(artefacts[0][artefactProps.INVALID], True)

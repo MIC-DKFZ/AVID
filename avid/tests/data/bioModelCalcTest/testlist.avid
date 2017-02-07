@@ -5,6 +5,6 @@
 		<avid:property key="actionTag">Dose</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">itk</avid:property>
-		<avid:property key="url">.\MatchPointLogo.mhd</avid:property>
+		<avid:property key="url">./MatchPointLogo.mhd</avid:property>
 	</avid:artefact>
 </avid:artefacts>
