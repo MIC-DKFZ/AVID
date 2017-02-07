@@ -27,7 +27,7 @@ class TestRegVarTool(unittest.TestCase):
 
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "regVarToolTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "maprTest", "testlist.avid")
+      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_regVarTool")
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
