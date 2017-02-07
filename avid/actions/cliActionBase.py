@@ -12,11 +12,12 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 from . import SingleActionBase
-import platform
 import subprocess
 import logging
 import os
 import time
+import stat
+
 import avid.common.settings as AVIDSettings
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
@@ -72,7 +73,7 @@ class CLIActionBase(SingleActionBase):
 
     cliName = os.path.join(path, os.path.split(artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL))[1])
 
-    if platform.system() == 'Windows':
+    if osChecker.isWindows():
       cliName = cliName + os.extsep + 'bat'
     else:
       cliName = cliName + os.extsep + 'sh'
@@ -82,6 +83,11 @@ class CLIActionBase(SingleActionBase):
       with open(cliName, "w") as outputFile:
         outputFile.write(content)
         outputFile.close()
+
+      if not osChecker.isWindows():
+        st = os.stat(cliName)
+        os.chmod(cliName,st.st_mode | stat.S_IXUSR )
+
     except:
       logger.error("Error when writing cli script. Location: %s.", cliName)
       raise
@@ -137,11 +143,12 @@ class CLIActionBase(SingleActionBase):
                 logger.debug('"%s" is not accessible. Wait and try again.', clicall)
               else:
                 break
-      
+
+        useShell = not osChecker.isWindows()
         if self._cwd is None:
-          subprocess.call(clicall, stdout = logfile, stderr = errlogfile)
+          subprocess.call(clicall, stdout = logfile, stderr = errlogfile, shell=useShell)
         else:
-          subprocess.call(clicall, cwd = self._cwd, stdout = logfile, stderr = errlogfile)
+          subprocess.call(clicall, cwd = self._cwd, stdout = logfile, stderr = errlogfile, shell=useShell)
 
 
         if returnValue == 0:
