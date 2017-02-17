@@ -31,7 +31,7 @@ class TestMatchR(unittest.TestCase):
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_matchR")
 
       self.dllPath = os.path.join(getUtilityPath(), "matchR")
-      self.itkAlgorithm = os.path.join(self.dllPath, "mdra-0-12_ITKEuler3DMattesMIMultiRes.dll")
+      self.itkAlgorithm = os.path.join(self.dllPath, "mdra-0-13_ITKEuler3DMattesMIMultiRes.dll")
       
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 

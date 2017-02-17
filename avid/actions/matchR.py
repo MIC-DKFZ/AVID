@@ -36,17 +36,21 @@ class matchRAction(CLIActionBase):
   '''Class that wrapps the single action for the tool mapR.'''
 
   def __init__(self, targetImage, movingImage, algorithm, algorithmParameters=dict(), targetMask = None,  movingMask = None,
+               targetPointSet = None, movingPointSet = None,
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
        
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
-    self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask, movingMask = movingMask)
+    self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask,
+                            movingMask = movingMask, targetPointSet = targetPointSet, movingPointSet = movingPointSet)
 
     self._targetImage = targetImage
     self._targetMask = targetMask
+    self._targetPointSet = targetPointSet
     self._movingImage = movingImage
     self._movingMask = movingMask
+    self._movingPointSet = movingPointSet
     self._algorithm = algorithm
     self._algorithmParameters = algorithmParameters
     self._targetIsReference = targetIsReference
@@ -118,6 +122,12 @@ class matchRAction(CLIActionBase):
       if self._targetMask:
         targetMaskURL = artefactHelper.getArtefactProperty(self._targetMask, artefactProps.URL)
         content += ' --target-mask ' + targetMaskURL
+      if self._movingPointSet:
+        movingPSURL = artefactHelper.getArtefactProperty(self._movingPointSetMask, artefactProps.URL)
+        content += ' --moving-pointset ' + movingPSURL
+      if self._targetPointSet:
+        targetPSURL = artefactHelper.getArtefactProperty(self._targetPointSetMask, artefactProps.URL)
+        content += ' --target-pointset ' + targetPSURL
 
     except:
       logger.error("Error for getExecutable.")
@@ -130,8 +140,10 @@ class matchRBatchAction(BatchActionBase):
   '''Action for batch processing of the matchR.'''
   
   def __init__(self,  targetSelector, movingSelector, targetMaskSelector = None, movingMaskSelector = None,
+               targetPointSetSelector=None, movingPointSetSelector=None,
                movingLinker = CaseLinker(), targetMaskLinker = FractionLinker(), 
-               movingMaskLinker = FractionLinker(), actionTag = "matchR", alwaysDo = False,
+               movingMaskLinker = FractionLinker(), targetPSLinker = FractionLinker(),
+               movingPSLinker = FractionLinker(), actionTag = "matchR", alwaysDo = False,
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
@@ -140,15 +152,23 @@ class matchRBatchAction(BatchActionBase):
     self._targetMasks = list()
     if targetMaskSelector is not None:
       self._targetMasks = targetMaskSelector.getSelection(self._session.artefacts)
+    self._targetPSs = list()
+    if targetPointSetSelector is not None:
+      self._targetPSs = targetPointSetSelector.getSelection(self._session.artefacts)
 
     self._movingImages = movingSelector.getSelection(self._session.artefacts)
     self._movingMasks = list()
     if movingMaskSelector is not None:
       self._movingMasks = movingMaskSelector.getSelection(self._session.artefacts)
-    
+    self._movingPSs = list()
+    if movingPointSetSelector is not None:
+      self._movingPSs = movingPointSetSelector.getSelection(self._session.artefacts)
+
     self._movingLinker = movingLinker
     self._targetMaskLinker = targetMaskLinker  
     self._movingMaskLinker = movingMaskLinker
+    self._targetPSLinker = targetPSLinker
+    self._movingPSLinker = movingPSLinker
     self._singleActionParameters = singleActionParameters
 
   def _generateActions(self):
@@ -159,7 +179,9 @@ class matchRBatchAction(BatchActionBase):
     movings = self.ensureRelevantArtefacts(self._movingImages, resultSelector, "matchR movings")
     targetMasks = self.ensureRelevantArtefacts(self._targetMasks, resultSelector, "matchR target masks")
     movingMasks = self.ensureRelevantArtefacts(self._movingMasks, resultSelector, "matchR moving masks")
-      
+    targetPSs = self.ensureRelevantArtefacts(self._targetPSs, resultSelector, "matchR target point sets")
+    movingPSs = self.ensureRelevantArtefacts(self._movingPSs, resultSelector, "matchR moving point sets")
+
     global logger
     
     actions = list()
@@ -171,18 +193,29 @@ class matchRBatchAction(BatchActionBase):
       if len(linkedTargetMasks) == 0:
         linkedTargetMasks = [None]
 
+      linkedTargetPSs = self._targetPSLinker.getLinkedSelection(pos, targets, targetPSs)
+      if len(linkedTargetPSs) == 0:
+        linkedTargetPSs = [None]
+
       for (pos2,lm) in enumerate(linkedMovings):
         linkedMovingMasks = self._movingMaskLinker.getLinkedSelection(pos2, linkedMovings, movingMasks)
         if len(linkedMovingMasks) == 0:
           linkedMovingMasks = [None]
 
+        linkedMovingPSs = self._movingMaskLinker.getLinkedSelection(pos2, linkedMovings, movingPSs)
+        if len(linkedMovingPSs) == 0:
+          linkedMovingPSs = [None]
+
         for ltm in linkedTargetMasks:
           for lmm in linkedMovingMasks:
-            action = matchRAction(target, movingImage = lm, targetMask = ltm, movingMask = lmm,
-                                  actionTag=self._actionTag,
-                                  alwaysDo = self._alwaysDo, session = self._session,
-                                  additionalActionProps = self._additionalActionProps,
-                                  **self._singleActionParameters)
+            for ltps in linkedTargetPSs:
+              for lmps in linkedMovingPSs:
+                action = matchRAction(target, movingImage = lm, targetMask = ltm, movingMask = lmm,
+                                      movingPointSet = lmps, targetPointSet = ltps,
+                                      actionTag=self._actionTag,
+                                      alwaysDo = self._alwaysDo, session = self._session,
+                                      additionalActionProps = self._additionalActionProps,
+                                      **self._singleActionParameters)
             actions.append(action)
     
     return actions
