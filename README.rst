@@ -5,6 +5,11 @@ Description
 -----------
 TODO
 
+Python requirements
+-----------------
+Add Python directory and python/scripts to your Windows PATH as otherwise, neither python,
+nor avidconfig will be found!
+
 ## install dependencies
 either use:
 ```
@@ -35,6 +40,8 @@ or
 make install_develop
 ```
 
+Please have in mind that python directory has to be in PATH!
+
 ### "normal" install
 either use:
 ```
@@ -50,6 +57,7 @@ use
 ```
   avidconfig settings avid.toolspath <your_desired_tools_path>
 ```
+Please have in mind that python/scripts has to be in PATH!
 
 ## Get the tools (for the AVID actions)
 You have two choices:
@@ -62,10 +70,16 @@ repository. This is interesting for developers or if you will often update the a
 and you want to have an easy possibility to update the tools accordingly.
 
 ###install all tools specified by your AVID distribution
+requirement is an installed SVN (accessible via commandline, e.g. https://tortoisesvn.net.
+Be sure to enable command line support in installation) and Visual Studio 2013
+redistributable installer for x64 (https://www.microsoft.com/de-de/download/details.aspx?id=40784)
+
 use
 ```
   avidconfig tools install
 ```
+
+
 
 ###update all tools specified by your AVID distribution
 use
