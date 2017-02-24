@@ -1,0 +1,159 @@
+<avid:evaluation_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+  <avid:name>TestEvaluation</avid:name>
+  <avid:workflow_file>C:\Dev\AVID\source\ngeo\tests\data\metricsTest\testworkflow.py</avid:workflow_file>
+  <avid:workflow_modifiers>
+    <avid:modifier key="modifier1">42</avid:modifier>
+  </avid:workflow_modifiers>
+  <avid:artefact_file>C:\Dev\AVID\source\ngeo\tests\data\metricsTest\testlist.avid</avid:artefact_file>
+  <avid:sv_measurement>1748.704</avid:sv_measurement>
+  <avid:sv_weights />
+  <avid:measurements>
+    <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration.max">2.01600003242</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.min">84.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.max">222.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.max">84.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.min">22.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.max">42.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.mean">84.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.min">42.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.max">444.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sd">0.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.MetricCriterionBase.FailedInstances">0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.mean">233.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.mean">116.5</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.sd">0.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration.min">1.67199993134</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.mean">42.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.sd">211.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration.sd">0.172000050542</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.min">11.0</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sd">105.5</avid:measurement>
+    <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration.mean">1.84399998188</avid:measurement>
+  </avid:measurements>
+  <avid:measurement_instances>
+    <avid:measurement_instance>
+      <avid:instance_descriptor>
+        <avid:id>8d937b9b-c0d5-4f44-801f-fc4d840cd47d</avid:id>
+        <avid:defining_value key="case">case2</avid:defining_value>
+      </avid:instance_descriptor>
+      <avid:measurements>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp">
+          <avid:value>222.0</avid:value>
+          <avid:value>222.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum">84.0</avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1">
+          <avid:value>42.0</avid:value>
+          <avid:value>42.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum">444.0</avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration">1.67199993134</avid:measurement>
+      </avid:measurements>
+    </avid:measurement_instance>
+    <avid:measurement_instance>
+      <avid:instance_descriptor>
+        <avid:id>e6316775-0c94-40ce-b4cd-0fb0ae92f71f</avid:id>
+        <avid:defining_value key="case">case1</avid:defining_value>
+      </avid:instance_descriptor>
+      <avid:measurements>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp">
+          <avid:value>11.0</avid:value>
+          <avid:value>11.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum">84.0</avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.modifier1">
+          <avid:value>42.0</avid:value>
+          <avid:value>42.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.PropertyCriterion.myProp.sum">22.0</avid:measurement>
+        <avid:measurement key="ngeo.eval.criteria.DurationCriterion.duration">2.01600003242</avid:measurement>
+      </avid:measurements>
+    </avid:measurement_instance>
+  </avid:measurement_instances>
+  <avid:measurements_info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.max">
+      <avid:value_name>myProp (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.min">
+      <avid:value_name>Sum of myProp (min)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.mean">
+      <avid:value_name>Sum of modifier1 (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum">
+      <avid:value_name>Sum of modifier1</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.max">
+      <avid:value_name>Sum of myProp (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.mean">
+      <avid:value_name>Sum of myProp (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sd">
+      <avid:value_name>myProp (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.sd">
+      <avid:value_name>Sum of modifier1 (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.DurationCriterion.duration.min">
+      <avid:value_name>Duration (min)</avid:value_name>
+      <avid:value_description>Minimum ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.mean">
+      <avid:value_name>modifier1 (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sum">
+      <avid:value_name>Sum of myProp</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.DurationCriterion.duration">
+      <avid:value_name>Duration</avid:value_name>
+      <avid:value_description>Duration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.DurationCriterion.duration.max">
+      <avid:value_name>Duration (max)</avid:value_name>
+      <avid:value_description>Maximum ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.min">
+      <avid:value_name>Sum of modifier1 (min)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sum.max">
+      <avid:value_name>Sum of modifier1 (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1">
+      <avid:value_name>modifier1</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.min">
+      <avid:value_name>modifier1 (min)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp">
+      <avid:value_name>myProp</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.sd">
+      <avid:value_name>modifier1 (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.MetricCriterionBase.FailedInstances">
+      <avid:value_name>Failures</avid:value_name>
+      <avid:value_description>Number of failed instances in the evaluated set.</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.mean">
+      <avid:value_name>myProp (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.sum.sd">
+      <avid:value_name>Sum of myProp (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.modifier1.max">
+      <avid:value_name>modifier1 (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.DurationCriterion.duration.mean">
+      <avid:value_name>Duration (mean)</avid:value_name>
+      <avid:value_description>Mean ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.DurationCriterion.duration.sd">
+      <avid:value_name>Duration (std dev)</avid:value_name>
+      <avid:value_description>Standard deviation ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="ngeo.eval.criteria.PropertyCriterion.myProp.min">
+      <avid:value_name>myProp (min)</avid:value_name>
+    </avid:info>
+  </avid:measurements_info>
+</avid:evaluation_result>

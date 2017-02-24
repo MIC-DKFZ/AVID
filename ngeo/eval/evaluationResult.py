@@ -91,6 +91,7 @@ XML_MEASUREMENTS_INFO = "avid:measurements_info"
 XML_INFO = "avid:info"
 XML_VALUE_NAME = "avid:value_name"
 XML_VALUE_DESC = "avid:value_description"
+XML_VALUE = "avid:value"
 
 def loadEvaluationResult(filePath):
   '''Loads a evaluation result from an xml file.
@@ -107,38 +108,41 @@ def loadEvaluationResult(filePath):
   if root.tag != "{"+XML_NAMESPACE+"}evaluation_result":
     raise ValueError("XML has not the correct root element. Must be 'evaluation_result', but is: "+root.tag)
   
-  node = root.find(XML_EVALUATION_RESULT+'/'+XML_NAME, XML_NAMESPACE_DICT)
+  node = root.find(XML_NAME, namespaces = XML_NAMESPACE_DICT)
   try:
     result.name = node.text
   except:
     raise ValueError('XML has no valid name element')
 
-  node = root.find(XML_EVALUATION_RESULT+'/'+XML_WORKFLOWFILE, XML_NAMESPACE_DICT)
+  node = root.find(XML_WORKFLOWFILE, XML_NAMESPACE_DICT)
   try:
     result.workflowFile = node.text
   except:
     raise ValueError('XML has no valid workflow file element')
   
   result.workflowModifier = {}
-  for modNode in root.findall(XML_EVALUATION_RESULT+'/'+XML_WORKFLOW_MODS+'/'+XML_WORKFLOW_MOD, XML_NAMESPACE_DICT):
+  for modNode in root.findall(XML_WORKFLOW_MODS+'/'+XML_WORKFLOW_MOD, XML_NAMESPACE_DICT):
     try:
       result.workflowModifier[modNode.attrib[XML_ATTR_KEY]] = modNode.text
     except:
       raise ValueError('XML has an invalid workflow modifier.')
     
-  node = root.find(XML_EVALUATION_RESULT+'/'+XML_ARTEFACTFILE, XML_NAMESPACE_DICT)
+  node = root.find(XML_ARTEFACTFILE, XML_NAMESPACE_DICT)
   try:
     result.artefactFile = node.text
   except:
     raise ValueError('XML has no valid artefact file element')
  
-  for mNode in root.findall(XML_EVALUATION_RESULT+'/'+XML_MEASUREMENTS+'/'+XML_MEASUREMENT, XML_NAMESPACE_DICT):
+  for mNode in root.findall(XML_MEASUREMENTS+'/'+XML_MEASUREMENT, XML_NAMESPACE_DICT):
     try:
       result.measurements[mNode.attrib[XML_ATTR_KEY]] = float(mNode.text)
     except:
-      raise ValueError('XML has an invalid measurement.')
+      if mNode.text is None:
+        result.measurements[mNode.attrib[XML_ATTR_KEY]] = None
+      else:
+        raise ValueError('XML has an invalid measurement.')
 
-  for iNode in root.findall(XML_EVALUATION_RESULT+'/'+XML_INSTANCES+'/'+XML_INSTANCE, XML_NAMESPACE_DICT):
+  for iNode in root.findall(XML_INSTANCES+'/'+XML_INSTANCE, XML_NAMESPACE_DICT):
     defValues = dict()
     for dNode in iNode.findall(XML_INSTANCE_DESCRIPTOR+'/'+XML_DEF_VALUE, XML_NAMESPACE_DICT):
       try:
@@ -149,14 +153,22 @@ def loadEvaluationResult(filePath):
     
     measures = dict()
     for mNode in iNode.findall(XML_MEASUREMENTS+'/'+XML_MEASUREMENT, XML_NAMESPACE_DICT):
-      try:
-        measures[mNode.attrib[XML_ATTR_KEY]] = float(mNode.text)
-      except:
-        raise ValueError('XML has an invalid instance measurement.')
+      vNodes = mNode.findall(XML_VALUE, XML_NAMESPACE_DICT)
+      if vNodes is None:
+        try:
+          measures[mNode.attrib[XML_ATTR_KEY]] = float(mNode.text)
+        except:
+          raise ValueError('XML has an invalid instance measurement value.')
+      else:
+        for vNode in vNodes:
+          try:
+            measures[mNode.attrib[XML_ATTR_KEY]] = float(vNode.text)
+          except:
+            raise ValueError('XML has an invalid instance measurement list value.')
     
     result.instanceMeasurements[desc] = measures
 
-  for iNode in root.findall(XML_EVALUATION_RESULT+'/'+XML_MEASUREMENTS_INFO+'/'+XML_INFO, XML_NAMESPACE_DICT):  
+  for iNode in root.findall(XML_MEASUREMENTS_INFO+'/'+XML_INFO, XML_NAMESPACE_DICT):
     node = iNode.find(XML_VALUE_NAME, XML_NAMESPACE_DICT)
     try:
       result.valueNames[node.attrib[XML_ATTR_KEY]] = node.text
@@ -232,7 +244,10 @@ def saveEvaluationResult(filePath, evalResult):
   builder.start(XML_MEASUREMENTS, {})
   for mID in evalResult.measurements:
     builder.start(XML_MEASUREMENT, {XML_ATTR_KEY : mID})
-    builder.data(str(evalResult.measurements[mID]))
+    if not evalResult.measurements[mID] is None:
+      builder.data(str(evalResult.measurements[mID]))
+    else:
+      builder.data('')
     builder.end(XML_MEASUREMENT)
   builder.end(XML_MEASUREMENTS)
 
@@ -254,7 +269,16 @@ def saveEvaluationResult(filePath, evalResult):
     builder.start(XML_MEASUREMENTS, {})
     for mID in evalResult.instanceMeasurements[desc]:
       builder.start(XML_MEASUREMENT, {XML_ATTR_KEY : mID})
-      builder.data(str(evalResult.instanceMeasurements[desc][mID]))
+      if not evalResult.instanceMeasurements[desc][mID] is None:
+        try:
+          for value in evalResult.instanceMeasurements[desc][mID]:
+            builder.start(XML_VALUE, {})
+            builder.data(str(value))
+            builder.end(XML_VALUE)
+        except:
+          builder.data(str(evalResult.instanceMeasurements[desc][mID]))
+      else:
+        builder.data('')
       builder.end(XML_MEASUREMENT)
     builder.end(XML_MEASUREMENTS)
 

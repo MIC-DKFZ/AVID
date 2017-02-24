@@ -7,6 +7,7 @@ from avid.selectors.keyValueSelector import CaseSelector, ActionTagSelector
 from ngeo.eval.criteria import MetricCriterionBase
 from ngeo.eval import EvaluationStrategy
 from ngeo.eval.evaluationResult import saveEvaluationResult
+from ngeo.eval.evaluationResult import loadEvaluationResult
 from ngeo.eval.metrics import DefaultMetric
 from ngeo.eval.criteria.durationCriterion import DurationCriterion
 
@@ -35,14 +36,16 @@ class TestEvaluationStrategy(unittest.TestCase):
 
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile)
 
-    saveEvaluationResult(os.path.join( self.sessionDir, 'result.eval'),result)
 
+  def test_Evaluation_withModifier(self):
+    strat = DummyStrategy(self.sessionDir)
+
+    result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile, workflowModifier={'modifier1':42})
+
+    savePath = os.path.join( self.sessionDir, 'result.eval')
+    saveEvaluationResult(savePath, result)
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile)
 
-    
-  def test_PropertyCriterion_set(self):
-      pass
-#workflowModifier = {'modifier1': 42}
 
 if __name__ == '__main__':
     unittest.main()

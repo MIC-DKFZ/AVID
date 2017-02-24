@@ -39,7 +39,7 @@ class MetricCriterionBase(object):
 
 
   def evaluateInstance(self, instaceArtefacts):
-    '''evaluates an instance/case resembled by the passed artefact list.
+    '''evaluates an instance/case represented by the passed artefact list.
     @note: The selection of the artefacts is handled by derived criterion classes 
     @param instanceArtefacts: List of avid artefacts that should/could be used for the evaluation.
     @return: Returns a dictionary with the criterion measurements. Key is the

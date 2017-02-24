@@ -15,23 +15,15 @@
 #===================================================================
 
 import argparse
-from avid.common.AVIDUrlLocater import getUtilityPath
-from avid.common.AVIDUrlLocater import getAVIDConfigPath
-from avid.common.AVIDUrlLocater import getToolConfigPath
-from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
-from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
-
-from avid.common.osChecker import checkAndCreateDir
-
 import os
-import ConfigParser
-import subprocess
 import imp
 import inspect
 from ngeo.eval import EvaluationStrategy
-from inspect import isclass
-    
+
+
 def main():
+  from ngeo.eval.evaluationResult import saveEvaluationResult
+
   mainDesc = "Avid workflow evaluation tool."
   parser = argparse.ArgumentParser(description = mainDesc)
 
@@ -51,7 +43,9 @@ def main():
   
   for stratClass in stratClasses:
     result = stratClass(args_dict['sessionPath'], args_dict['keepArtefacts']).evaluate('foo','bar')
-  
+    savePath = args_dict['sessionPath']
+    saveEvaluationResult(savePath, result)
+
 
 def predicateEvaluationStrategy(member):
   return inspect.isclass(member) and issubclass(member, EvaluationStrategy) and not member.__module__ == "ngeo.eval"
