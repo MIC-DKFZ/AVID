@@ -42,8 +42,6 @@ class TestEvaluationStrategy(unittest.TestCase):
 
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile, workflowModifier={'modifier1':42})
 
-    savePath = os.path.join( self.sessionDir, 'result.eval')
-    saveEvaluationResult(savePath, result)
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile)
 
 

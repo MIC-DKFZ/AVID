@@ -149,7 +149,14 @@ def loadEvaluationResult(filePath):
         defValues[dNode.attrib[XML_ATTR_KEY]] = dNode.text
       except:
         raise ValueError('XML has an invalid instance descriptor element')
-    desc = EvalInstanceDescriptor(defValues)
+    ID = None
+    node = iNode.find(XML_INSTANCE_ID, XML_NAMESPACE_DICT)
+    try:
+      ID = node.text
+    except:
+      pass
+
+    desc = EvalInstanceDescriptor(defValues, ID = ID)
     
     measures = dict()
     for mNode in iNode.findall(XML_MEASUREMENTS+'/'+XML_MEASUREMENT, XML_NAMESPACE_DICT):

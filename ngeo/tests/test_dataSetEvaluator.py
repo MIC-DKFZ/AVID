@@ -3,6 +3,7 @@
 import unittest
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
+from ngeo.eval import EvalInstanceDescriptor
 from ngeo.eval.criteria.durationCriterion import DurationCriterion
 from ngeo.eval.criteria.propertyCriterion import PropertyCriterion
 from ngeo.eval.criteria import MetricCriterionBase
@@ -29,88 +30,75 @@ class TestSelectors(unittest.TestCase):
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
     self.data = artefact.addArtefactToWorkflowData(self.data, self.a7)
     
-    self.instanceResultRef = { DurationCriterion.MID_Duration : 11}
-    self.instanceResultRef2 = { DurationCriterion.MID_Duration : 10}
-    
-    self.setResultRef = { DurationCriterion.MID_Duration+".mean" : 20.5,
-                          DurationCriterion.MID_Duration+".min": 11.0,
-                          DurationCriterion.MID_Duration+".max": 30.0,
-                          DurationCriterion.MID_Duration+".sd": 9.5,
+    self.instanceResultRef = {EvalInstanceDescriptor({'case': 'Case3'}): {'ngeo.eval.criteria.DurationCriterion.duration': 300.0},
+                              EvalInstanceDescriptor({'case': 'Case2'}): {'ngeo.eval.criteria.DurationCriterion.duration': 30.0},
+                              EvalInstanceDescriptor({'case': 'Case1'}): {'ngeo.eval.criteria.DurationCriterion.duration': 3.0}}
+
+    self.instanceResultRef_2Criteria = {EvalInstanceDescriptor({'case': 'Case3'}): {'ngeo.eval.criteria.PropertyCriterion.timePoint.sum': 3.0,
+                                                                                    'ngeo.eval.criteria.PropertyCriterion.timePoint': [1.0, 2.0],
+                                                                                    'ngeo.eval.criteria.DurationCriterion.duration': 300.0},
+                                        EvalInstanceDescriptor({'case': 'Case2'}): {'ngeo.eval.criteria.PropertyCriterion.timePoint.sum': 3.0,
+                                                                                    'ngeo.eval.criteria.PropertyCriterion.timePoint': [1.0, 2.0],
+                                                                                    'ngeo.eval.criteria.DurationCriterion.duration': 30.0},
+                                        EvalInstanceDescriptor({'case': 'Case1'}): {'ngeo.eval.criteria.PropertyCriterion.timePoint.sum': 3.0,
+                                                                                    'ngeo.eval.criteria.PropertyCriterion.timePoint': [1.0, 2.0],
+                                                                                    'ngeo.eval.criteria.DurationCriterion.duration': 3.0}}
+
+    self.instanceResultRef_split = {EvalInstanceDescriptor({'case': 'Case1', 'timePoint': 1}): {'ngeo.eval.criteria.DurationCriterion.duration': 1.0},
+                                    EvalInstanceDescriptor({'case': 'Case1', 'timePoint': 2}): {'ngeo.eval.criteria.DurationCriterion.duration': 2.0},
+                                    EvalInstanceDescriptor({'case': 'Case2', 'timePoint': 2}): {'ngeo.eval.criteria.DurationCriterion.duration': 20.0},
+                                    EvalInstanceDescriptor({'case': 'Case3', 'timePoint': 2}): {'ngeo.eval.criteria.DurationCriterion.duration': 200.0},
+                                    EvalInstanceDescriptor({'case': 'Case3', 'timePoint': 1}): {'ngeo.eval.criteria.DurationCriterion.duration': 100.0},
+                                    EvalInstanceDescriptor({'case': 'Case3', 'timePoint': 4}): None,
+                                    EvalInstanceDescriptor({'case': 'Case2', 'timePoint': 1}): {'ngeo.eval.criteria.DurationCriterion.duration': 10.0}}
+
+    self.resultRef = { DurationCriterion.MID_Duration+".mean" : 111.0,
+                          DurationCriterion.MID_Duration+".min": 3.0,
+                          DurationCriterion.MID_Duration+".max": 300.0,
+                          DurationCriterion.MID_Duration+".sd": 134.09697983176207,
                           MetricCriterionBase.MID_FailedInstances : 0
                         }
-    
-    self.setResultWithFailRef = { DurationCriterion.MID_Duration+".mean" : 11.0,
-                          DurationCriterion.MID_Duration+".min": 11.0,
-                          DurationCriterion.MID_Duration+".max": 11.0,
-                          DurationCriterion.MID_Duration+".sd": 0.0,
-                          MetricCriterionBase.MID_FailedInstances : 1
-                        }
-    
-    self.setResultFailOnlyRef = { MetricCriterionBase.MID_FailedInstances : 2  }    
 
-    self.setResultEmptyRef = { MetricCriterionBase.MID_FailedInstances : 0  }  
-    
-    self.namesRef = { DurationCriterion.MID_Duration: 'Duration',
-                      DurationCriterion.MID_Duration+".mean" : 'Duration (mean)',
-                      DurationCriterion.MID_Duration+".min": 'Duration (min)',
-                      DurationCriterion.MID_Duration+".max": 'Duration (max)',
-                      DurationCriterion.MID_Duration+".sd": 'Duration (std dev)',
-                      MetricCriterionBase.MID_FailedInstances : 'Failures' }
-                        
+    self.resultRef_2Criteria = {'ngeo.eval.criteria.DurationCriterion.duration.max': 300.0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.min': 1.0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.sum.min': 3.0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.sd': 0.5,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.mean': 1.5,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.max': 2.0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.sum.sd': 0.0,
+                                'ngeo.eval.criteria.MetricCriterionBase.FailedInstances': 0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.sum.max': 3.0,
+                                'ngeo.eval.criteria.DurationCriterion.duration.min': 3.0,
+                                'ngeo.eval.criteria.PropertyCriterion.timePoint.sum.mean': 3.0,
+                                'ngeo.eval.criteria.DurationCriterion.duration.sd': 134.09697983176207,
+                                'ngeo.eval.criteria.DurationCriterion.duration.mean': 111.0}
+
+    self.resultRef_split = {'ngeo.eval.criteria.DurationCriterion.duration.max': 200.0,
+                            'ngeo.eval.criteria.DurationCriterion.duration.min': 1.0,
+                            'ngeo.eval.criteria.DurationCriterion.duration.mean': 55.5,
+                            'ngeo.eval.criteria.DurationCriterion.duration.sd': 73.05648499620003,
+                            'ngeo.eval.criteria.MetricCriterionBase.FailedInstances': 1}
+
+
   def test_DataSetEvaluator(self):
     evaluator = DataSetEvaluator([DurationCriterion()])
     
-    result = evaluator.evaluate(self.data)
-  #  self.assertDictEqual(self.instanceResultRef, result)
+    result, instResult = evaluator.evaluate(self.data)
+    self.assertDictEqual(self.resultRef, result)
+    self.assertDictEqual(self.instanceResultRef, instResult)
 
     evaluator = DataSetEvaluator([DurationCriterion(), PropertyCriterion(defaultProps.TIMEPOINT)])
-    
-    result = evaluator.evaluate(self.data)
-#    self.assertDictEqual(self.instanceResultRef, result)    
-    
+    result, instResult = evaluator.evaluate(self.data)
+    self.assertDictEqual(self.resultRef_2Criteria, result)
+    self.assertDictEqual(self.instanceResultRef_2Criteria, instResult)
+
   def test_DataSetEvaluator_multiSplit(self):
     evaluator = DataSetEvaluator([DurationCriterion()],[defaultProps.CASE, defaultProps.TIMEPOINT])
     
-    result = evaluator.evaluate(self.data)
-  #  self.assertDictEqual(self.instanceResultRef, result)
+    result, instResult = evaluator.evaluate(self.data)
+    self.assertDictEqual(self.resultRef_split, result)
+    self.assertDictEqual(self.instanceResultRef_split, instResult)
 
-    evaluator = DataSetEvaluator([DurationCriterion(), PropertyCriterion(defaultProps.TIMEPOINT)],[defaultProps.CASE, defaultProps.TIMEPOINT])
-    
-    result = evaluator.evaluate(self.data)
- #   self.assertDictEqual(self.instanceResultRef, result) 
-        
-#===============================================================================
-#   def test_DurationCriterion_set(self):
-#     criterion = DurationCriterion()
-#     
-#     instanceMeasurements = list()
-#     instanceMeasurements.append(criterion.evaluateInstance(self.data))
-#     instanceMeasurements.append(criterion.evaluateInstance(self.data2))
-# 
-#     result = criterion.compileSetEvaluation(instanceMeasurements)
-#     self.assertDictEqual(self.setResultRef, result, 'Check compileSetEvaluation() with normal usage')
-#     
-#     instanceMeasurements[1] = None
-# 
-#     result = criterion.compileSetEvaluation(instanceMeasurements)
-#     self.assertDictEqual(self.setResultWithFailRef, result, 'Check compileSetEvaluation() with failure')
-# 
-#     result = criterion.compileSetEvaluation([None, None])
-#     self.assertDictEqual(self.setResultFailOnlyRef, result, 'Check compileSetEvaluation() with failures only')
-#  
-#     result = criterion.compileSetEvaluation([])
-#     self.assertDictEqual(self.setResultEmptyRef, result, 'Check compileSetEvaluation() with empty list')
-# 
-#   
-#   def test_DurationCriterion_names(self):
-#     names = DurationCriterion().valueNames
-#     
-#     self.assertDictEqual(names, self.namesRef)
-# 
-#     descs = DurationCriterion().valueDescriptions
-#     
-#     self.assertListEqual(names.keys(), descs.keys())
-#===============================================================================
 
 if __name__ == '__main__':
     unittest.main()

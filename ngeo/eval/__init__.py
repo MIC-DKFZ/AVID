@@ -7,7 +7,7 @@ class EvalInstanceDescriptor (object):
     artefact that have certain values for eval instance defining properties.
     It use used to lable/identify the evaluation measurments for instances'''
   
-  def __init__(self, definingValues):
+  def __init__(self, definingValues, ID = None):
     self._definingValues = definingValues
     
     self._definingStr = str()
@@ -15,7 +15,9 @@ class EvalInstanceDescriptor (object):
     for item in sorted(definingValues.items()):
       self._definingStr = self._definingStr+"'"+str(item[0])+"':'"+str(item[1])+"',"
       
-    self.ID = str(uuid.uuid4())
+    self.ID = ID
+    if self.ID is None:
+      self.ID = str(uuid.uuid4())
     
   def __missing__(self, key):
     return None
