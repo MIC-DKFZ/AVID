@@ -16,7 +16,8 @@ import os
 import xml.etree.ElementTree as ElementTree
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
+from pointset import PointRepresentation
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -130,4 +131,53 @@ def ensureMAPRegistrationArtefact(regArtefact, templateArtefact, session):
     conversion = True
     result = templateArtefact
     
-  return (conversion, result)   
+  return (conversion, result)
+
+def load_simple_pointset(filePath):
+    '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
+    While loaded the points are converted from RAS (slicer) to LPS (DICOM, itk).
+    @param filePath Path where the fcsv file is located.
+    '''
+    points = list()
+
+    if not os.path.isfile(filePath):
+        raise ValueError( "Cannot load point set file. File does not exist. File path: " +str(filePath))
+
+    with open(filePath, "rb", newline='') as csvfile:
+        pointreader = csv.reader(csvfile, delimiter = " ")
+
+        for row in pointreader:
+            point = PointRepresentation(label = None)
+            for no ,entry in enumerate(row):
+                if no == 0:
+                    try:
+                        point.x = float(entry)
+                    except:
+                        ValueError("Cannot convert x element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+                elif no == 1:
+                    try:
+                        point.y = float(entry)
+                    except:
+                        ValueError("Cannot convert y element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+                elif no == 2:
+                    try:
+                        point.z = float(entry)
+                    except:
+                        ValueError("Cannot convert z element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+
+    return points
+
+
+def write_simple_pointset(filePath, pointset):
+    from avid.common import osChecker
+    osChecker.checkAndCreateDir(os.path.split(filePath)[0])
+    with open(filePath, 'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter=' ', lineterminator='\n')
+
+        '''write given values'''
+        for point in pointset:
+            row = list()
+            row.append(point.x)
+            row.append(point.y)
+            row.append(point.z)
+            writer.writerow(row)

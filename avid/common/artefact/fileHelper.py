@@ -56,7 +56,7 @@ def loadArtefactList_csv(filePath, expandPaths = False, rootPath = None):
   if not os.path.isfile(filePath):
     raise ValueError("Cannot load artefact list from file. File does not exist. File path: "+str(filePath))
   
-  with open(filePath, "rb") as csvfile:
+  with open(filePath, "rb", newline='') as csvfile:
     artefactreader = csv.reader(csvfile, delimiter = ";")
     
     for row in artefactreader:
