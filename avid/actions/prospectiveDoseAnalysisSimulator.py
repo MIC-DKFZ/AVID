@@ -120,7 +120,7 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
 
   def _readCSV(self, filename):
     matrix = list()
-    with open(filename, 'r', newline='') as csvFile:
+    with open(filename, 'r') as csvFile:
       reader = csv.reader(csvFile, delimiter=';')
       for row in reader:
         matrix.append(row)

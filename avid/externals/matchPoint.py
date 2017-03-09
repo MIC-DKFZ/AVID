@@ -10,16 +10,21 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import csv
 import logging
 import os
 import xml.etree.ElementTree as ElementTree
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from pointset import PointRepresentation
-import csv
 
 logger = logging.getLogger(__name__)
+
+'''Formate type value. Indicating the artefact is stored as a MatchPoint registration object.'''
+FORMAT_VALUE_MATCHPOINT = "MatchPoint"
+'''Formate type value. Indicating the artefact is stored as a MatchPoint simple point set file.'''
+FORMAT_VALUE_MATCHPOINT_POINTSET = "MatchPoint_pointset"
+
 
 def _addNullKernelToXML(builder, kernelID, dimension):
   builder.start("Kernel", {"ID": str(kernelID), "InputDimensions": str(dimension), "OutputDimensions": str(dimension)})
@@ -110,7 +115,7 @@ def ensureMAPRegistrationArtefact(regArtefact, templateArtefact, session):
   result = None
   conversion = True
   
-  if regArtefact is None or registrationType == artefactProps.FORMAT_VALUE_MATCHPOINT:
+  if regArtefact is None or registrationType == FORMAT_VALUE_MATCHPOINT:
     #no conversion needed
     result = regArtefact
     conversion = False
@@ -119,7 +124,7 @@ def ensureMAPRegistrationArtefact(regArtefact, templateArtefact, session):
     logging.debug("Conversion of registration artefact needed. Given format is ITK. Generate MatchPoint wrapper. Assume that itk image specifies the deformation field for the inverse kernel.")
     
     templateArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    templateArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
+    templateArtefact[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
 
     path = artefactHelper.generateArtefactPath(session, templateArtefact)
     wrappedFile = os.path.split(registrationPath)[1] + "." + str(artefactHelper.getArtefactProperty(templateArtefact,artefactProps.ID)) + ".mapr"
@@ -143,27 +148,26 @@ def load_simple_pointset(filePath):
     if not os.path.isfile(filePath):
         raise ValueError( "Cannot load point set file. File does not exist. File path: " +str(filePath))
 
-    with open(filePath, "rb", newline='') as csvfile:
-        pointreader = csv.reader(csvfile, delimiter = " ")
+    with open(filePath, "rb") as csvfile:
+        lines = csvfile.readlines()
 
-        for row in pointreader:
-            point = PointRepresentation(label = None)
-            for no ,entry in enumerate(row):
-                if no == 0:
-                    try:
-                        point.x = float(entry)
-                    except:
-                        ValueError("Cannot convert x element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
-                elif no == 1:
-                    try:
-                        point.y = float(entry)
-                    except:
-                        ValueError("Cannot convert y element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
-                elif no == 2:
-                    try:
-                        point.z = float(entry)
-                    except:
-                        ValueError("Cannot convert z element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+        for line in lines:
+            values = line.split()
+            point = PointRepresentation()
+            try:
+                point.x = float(values[0])
+            except:
+                ValueError("Cannot convert x element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+            try:
+                point.y = float(values[1])
+            except:
+                ValueError("Cannot convert y element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+            try:
+                point.z = float(values[2])
+            except:
+                ValueError("Cannot convert z element of point in fcsv point set. Invalid point #: {}; invalid value: {}".format(row, entry))
+
+            points.append(point)
 
     return points
 

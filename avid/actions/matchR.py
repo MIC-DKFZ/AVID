@@ -19,6 +19,8 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
+from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
+
 from . import BatchActionBase
 from cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
@@ -85,7 +87,7 @@ class matchRAction(CLIActionBase):
     #Specify result artefact                
     self._resultArtefact = self.generateArtefact(artefactRef)
     self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
+    self._resultArtefact[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
     
     path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
     resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "mapr"

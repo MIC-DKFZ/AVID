@@ -15,6 +15,10 @@ import csv
 import os
 from pointset import PointRepresentation
 
+'''Formate type value. Indicating the artefact is stored as a MatchPoint simple point set file.'''
+FORMAT_VALUE_SLICER_POINTSET = "3Dslicer_pointset"
+
+
 def load_fcsv(filePath):
     '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
     While loaded the points are converted from RAS (slicer) to LPS (DICOM, itk).
@@ -25,7 +29,7 @@ def load_fcsv(filePath):
     if not os.path.isfile(filePath):
         raise ValueError( "Cannot load fcsv point set file. File does not exist. File path: " +str(filePath))
 
-    with open(filePath, "rb", newline='') as csvfile:
+    with open(filePath, "rb") as csvfile:
         pointreader = csv.reader(csvfile, delimiter = ",")
 
         for row in pointreader:

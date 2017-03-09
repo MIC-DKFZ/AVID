@@ -17,6 +17,8 @@ import logging
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.common import osChecker
+import avid.externals.matchPoint as matchpoint
+import avid.externals.fcsv as fcsv
 
 from . import BatchActionBase
 from . import SingleActionBase
@@ -30,205 +32,89 @@ logger = logging.getLogger(__name__)
 class PointSetConversionAction(SingleActionBase):
   '''Class that convert point sets from one formate to another.'''
 
-  def __init__(self, doseSelections, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
-               columnKey=artefactProps.TIMEPOINT,
-               withHeaders=True, actionTag="DoseStatCollector",
+  def __init__(self, pointset, targetformat, actionTag="PointSetConversion",
                alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = dict()):
     SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
-    self._doseSelections = doseSelections
+    self._pointset = pointset
 
-    self._statsMatrix = None
-    self._baseLineValues = None
-    self._keys = selectedStats
-    self._rowKey = rowKey
-    self._columnKey = columnKey
-    self._rowValues = sorted(set([d[rowKey] for d in doseSelections]))
-    self._columnValues = sorted(set([d[columnKey] for d in doseSelections]))
-    self._resultArtefacts = dict()
-    self._withHeaders = withHeaders
-
-    inputStats = dict();
-    for pos, aInput in enumerate(doseSelections):
-      inputStats['Stat_' + str(pos)] = aInput
-    self._addInputArtefacts(**inputStats)
+    self._targetformat = targetformat
+    self._addInputArtefacts(pointset=self._pointset)
 
   def _generateName(self):
-    name = "stat_collection_" + self._rowKey + "_x_" + self._columnKey
+    return "Conversion_to_{}".format(self._targetformat)
 
-    return name
+  def _getExtension(self, format):
+    '''returns the extension used for a certain format'''
+    if format == matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET:
+      return 'txt'
+    elif format == fcsv.FORMAT_VALUE_SLICER_POINTSET:
+      return 'fcsv'
 
   def indicateOutputs(self):
-    if self._keys is None:
-      self._statsMatrix = self._generateStatsMatrix()
-      self._keys = self._statsMatrix.keys()
 
     name = self._generateName()
 
-    for key in self._keys:
-      if len(self._doseSelections) > 0:
-        artefact = self.generateArtefact(self._doseSelections[0])
-        artefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-        artefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_CSV
-        artefact[artefactProps.DOSE_STAT] = str(key)
+    artefact = self.generateArtefact(self._pointset)
+    artefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
+    artefact[artefactProps.FORMAT] = self._targetformat
 
-        path = artefactHelper.generateArtefactPath(self._session, artefact)
-        resName = artefactHelper.ensureValidPath(name + "_" + str(key) + "." + str(
-          artefactHelper.getArtefactProperty(artefact, artefactProps.ID))) + os.extsep + "csv"
-        resName = os.path.join(path, resName)
+    path = artefactHelper.generateArtefactPath(self._session, artefact)
+    resName = artefactHelper.ensureValidPath(name + "." + str(
+      artefactHelper.getArtefactProperty(artefact, artefactProps.ID))) + os.extsep + self._getExtension(self._targetformat)
+    resName = os.path.join(path, resName)
 
-        artefact[artefactProps.URL] = resName
+    artefact[artefactProps.URL] = resName
 
-        self._resultArtefacts[key] = artefact
+    self._resultArtefact = artefact
 
-    return self._resultArtefacts.values()
-
-  def _parseDoseStats(self, filename, statsOfInterest):
-    """get relevant values from file (DoseStatistics)"""
-    resultContainer = doseTool.loadResult(filename)
-
-    doseMapOneFraction = {}
-    if statsOfInterest is None:
-      statsOfInterest = resultContainer.results.keys()  # if user hasn't defined something we take all
-
-    for key in statsOfInterest:
-      if key in resultContainer.results:
-        doseMapOneFraction[key] = resultContainer.results[key].value
-      else:
-        logger.warning("Stat key '%s' selected by user, was not found in parsed statistic file. File: %s", key,
-                       filename)
-
-    return doseMapOneFraction
-
-  def _generateStatsMatrix(self):
-    '''generates and returns a n-dimensional value matrix.
-    1st dim is indexed by the dose state key values
-    2nd dim is indexed by the rowKey values
-    3rd dim is indexed by the columnKey values'''
-    matrix = dict()
-
-    keys = self._keys
-
-    for artefact in self._doseSelections:
-      aPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
-      rowID = artefactHelper.getArtefactProperty(artefact, self._rowKey)
-      columnID = artefactHelper.getArtefactProperty(artefact, self._columnKey)
-      valueMap = dict()
-
-      if not artefact.is_invalid():
-        valueMap = self._parseDoseStats(aPath, self._keys)
-
-      if keys is None:
-        keys = valueMap.keys()  # user has not select keys -> take everything
-
-      for key in keys:
-        if key in valueMap:
-          if key not in matrix:
-            matrix[key] = dict()
-
-          if rowID not in matrix[key]:
-            matrix[key][rowID] = dict()
-
-          matrix[key][rowID][columnID] = valueMap[key]
-
-    return matrix
-
-
-  def _generateRow(self, rowValueDict, columnHeaderValues):
-    '''ensures that a row covers a certain key range. missing keys will be filled with None.
-       the row will be returned as list of values'''
-    result = list()
-
-    for key in columnHeaderValues:
-      if key in rowValueDict:
-        result.append(rowValueDict[key])
-      else:
-        result.append(None)
-
-    # @TODO Interpolation of missing values. Is this feature still needed?
-
-    return result
-
-
-  def _getColumnHeaderValues(self, matrix):
-    headers = list()
-
-    for key in matrix:
-      rowMatrix = matrix[key]
-      columnKeys = rowMatrix.keys()
-      headers.extend(columnKeys)
-
-    # ensure everything is unique and sorted
-    uniqueHeaders = set(headers)
-    return sorted(uniqueHeaders)
-
-  def _writeToCSV(self, key, columnHeaders, content, filename):
-    try:
-      osChecker.checkAndCreateDir(os.path.split(filename)[0])
-      with open(filename, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=';', lineterminator='\n')
-
-        if self._withHeaders:
-          writer.writerow([self._rowKey + "/" + self._columnKey] + columnHeaders)
-
-        '''write given values'''
-        for rowID in sorted(content):
-          row = content[rowID]
-          if self._withHeaders:
-            row = [str(rowID)] + row
-          writer.writerow(row)
-
-    except:
-      print "CSV file writing error. Aborting..."
-      raise
+    return [self._resultArtefact]
 
   def _generateOutputs(self):
-    if self._statsMatrix is None:
-      self._statsMatrix = self._generateStatsMatrix()
 
-    for key in self._keys:
-      csvPath = artefactHelper.getArtefactProperty(self._resultArtefacts[key], artefactProps.URL)
-      keyMatrix = self._statsMatrix[key]
-      columnHeaderValues = self._getColumnHeaderValues(keyMatrix)
-      csvContent = dict()
-      for rowID in sorted(keyMatrix):
-        values = keyMatrix[rowID]
-        row = self._generateRow(values, columnHeaderValues)
+    sourcePath = artefactHelper.getArtefactProperty(self._pointset, artefactProps.URL)
+    sformat = artefactHelper.getArtefactProperty(self._pointset, artefactProps.FORMAT)
+    destPath = artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.URL)
 
-        csvContent[rowID] = row
+    ps = None
 
-      self._writeToCSV(key, columnHeaderValues, csvContent, csvPath)
+    if sformat is None:
+      raise ValueError('Format of source cannot be identified. Source file: {}'.format(sourcePath))
+    elif sformat == matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET:
+      ps = matchpoint.load_simple_pointset(sourcePath)
+    elif sformat == fcsv.FORMAT_VALUE_SLICER_POINTSET:
+      ps = fcsv.load_fcsv(sourcePath)
+    else:
+      raise ValueError('Format of source is not supported. Unsupported format: {}; source file: {}'.format(sformat, sourcePath))
 
+    if self._targetformat == matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET:
+      matchpoint.write_simple_pointset(destPath,ps)
+    else:
+      raise ValueError(
+        'Target format is not supported. Unsupported format: {}; source file: {}'.format(self._targetformat,
+                                                                                            sourcePath))
 
-class DoseStatsCollectorBatchAction(BatchActionBase):
-  '''Batch class for the dose collection actions.'''
+class PointSetConversionBatchAction(BatchActionBase):
+  '''Batch class for the point set conversion action.'''
 
-  def __init__(self, inputSelector, selectedStats=None, actionTag="doseStatCollector", alwaysDo=True,
+  def __init__(self, pointsetSelector, actionTag="PointSetConversion", alwaysDo=False,
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputStats = inputSelector.getSelection(self._session.artefacts)
-    self._selectedStats = selectedStats
+    self._inputPSs = pointsetSelector.getSelection(self._session.artefacts)
 
     self._singleActionParameters = singleActionParameters
 
   def _generateActions(self):
-    # filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT) + FormatSelector(artefactProps.FORMAT_VALUE_RTTB_STATS_XML)
-
-    inputs = resultSelector.getSelection(self._inputStats)
-
-    global logger
-    if len(inputs) == 0:
-      logger.debug("Input selection contains no usable artefacts (type = result).")
+    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+    pss = self.ensureRelevantArtefacts(self._inputPSs, resultSelector, "point set input")
 
     actions = list()
 
-    action = DoseStatsCollectorAction(inputs, self._selectedStats,
-                                      actionTag=self._actionTag,
-                                      alwaysDo=self._alwaysDo,
-                                      session=self._session,
-                                      additionalActionProps=self._additionalActionProps,
-                                      **self._singleActionParameters)
-    actions.append(action)
+    for (pos, ps) in enumerate(pss):
+      action = PointSetConversionAction(ps, actionTag = self._actionTag, alwaysDo=self._alwaysDo,
+                             session=self._session,
+                             additionalActionProps=self._additionalActionProps,
+                             **self._singleActionParameters)
+      actions.append(action)
 
     return actions

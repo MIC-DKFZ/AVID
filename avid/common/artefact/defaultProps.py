@@ -83,8 +83,6 @@ FORMAT_VALUE_VIRTUOS_PLAN = "virtuos_plan"
 FORMAT_VALUE_VIRTUOS_HEAD = "virtuos_head"
 '''Standard type value. Indicating the artefact is stored as a comma seperated value file.'''
 FORMAT_VALUE_CSV = "csv"
-'''Standard type value. Indicating the artefact is stored as a MatchPoint registration object.'''
-FORMAT_VALUE_MATCHPOINT = "MatchPoint"
 '''Standard type value. Indicating the artefact is stored as a bat file/batch script.'''
 FORMAT_VALUE_BAT = "bat"
 '''Standard type value. Indicating the artefact is stored as a avid tools xml format (legacy).'''

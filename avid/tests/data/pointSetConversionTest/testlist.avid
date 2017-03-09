@@ -1,0 +1,18 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">MatchPoint</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">SourcePS</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">MatchPoint_pointset</avid:property>
+		<avid:property key="url">./simpleMatchPoint.txt</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">FCSV</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">SourcePS</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">3Dslicer_pointset</avid:property>
+		<avid:property key="url">./3dslicer.fcsv</avid:property>
+	</avid:artefact>
+</avid:artefacts>
