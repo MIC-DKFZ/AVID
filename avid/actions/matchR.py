@@ -125,10 +125,10 @@ class matchRAction(CLIActionBase):
         targetMaskURL = artefactHelper.getArtefactProperty(self._targetMask, artefactProps.URL)
         content += ' --target-mask ' + targetMaskURL
       if self._movingPointSet:
-        movingPSURL = artefactHelper.getArtefactProperty(self._movingPointSetMask, artefactProps.URL)
+        movingPSURL = artefactHelper.getArtefactProperty(self._movingPointSet, artefactProps.URL)
         content += ' --moving-pointset ' + movingPSURL
       if self._targetPointSet:
-        targetPSURL = artefactHelper.getArtefactProperty(self._targetPointSetMask, artefactProps.URL)
+        targetPSURL = artefactHelper.getArtefactProperty(self._targetPointSet, artefactProps.URL)
         content += ' --target-pointset ' + targetPSURL
 
     except:
@@ -204,7 +204,7 @@ class matchRBatchAction(BatchActionBase):
         if len(linkedMovingMasks) == 0:
           linkedMovingMasks = [None]
 
-        linkedMovingPSs = self._movingMaskLinker.getLinkedSelection(pos2, linkedMovings, movingPSs)
+        linkedMovingPSs = self._movingPSLinker.getLinkedSelection(pos2, linkedMovings, movingPSs)
         if len(linkedMovingPSs) == 0:
           linkedMovingPSs = [None]
 
