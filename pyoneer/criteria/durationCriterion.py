@@ -1,0 +1,55 @@
+# AVID - pyoneer
+# AVID based tool for algorithmic evaluation and optimization
+#
+# Copyright (c) German Cancer Research Center,
+# Software development for Integrated Diagnostic and Therapy (SIDT).
+# All rights reserved.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.
+#
+# See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+
+
+from ..criteria import MetricCriterionBase
+from avid.selectors import SelectorBase, AndSelector, ValidResultSelector
+from avid.common.artefact import getArtefactProperty, defaultProps
+
+
+class DurationCriterion(MetricCriterionBase):
+  '''Criterion that evaluates the execution duration of workflow results.
+     When evaluating an instance, it will sum up all execution duration properties
+     of the input artefacts.
+  '''
+
+  '''Measurement value ID for the duration.'''
+  MID_Duration = 'pyoneer.criteria.DurationCriterion.duration'
+  
+  def __init__(self, inputSelector = SelectorBase()):
+    MetricCriterionBase.__init__(self, valuesInfo = { self.MID_Duration: ['Duration','Duration of execution ( in [s])']})
+    self.setSelectors(inputSelector = inputSelector)  
+
+  def _evaluateInstance(self, relevantArtefacts):
+    '''Internal method that really does the evaluation regaring the passed list
+    of relevant artefacts. It will be called by evaluateInstance(), which generates
+    the passed dictionary.
+    @param relevantArtefacts: dictionary of relevant artefacts (may be lists).
+    The used keys are defined by the derived classes and are the variable names
+    used in the setSelectors call.
+    @return: Returns a dictionary with the criterion measurements. Key is the
+    value ID. The dict value is the measurement value(s). 
+     '''
+
+    duration = 0
+    
+    for artefact in relevantArtefacts['inputSelector']:
+      try:
+        duration = duration + getArtefactProperty(artefact, defaultProps.EXECUTION_DURATION)
+
+      except:
+        pass
+      
+    result = { self.MID_Duration : duration }
+
+    return result

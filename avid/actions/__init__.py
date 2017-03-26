@@ -13,6 +13,7 @@
 
 import os
 import logging
+import time
 
 from ..common import actionToken
 from ..common.artefact.generator import generateArtefactEntry
@@ -310,11 +311,16 @@ class SingleActionBase(ActionBase):
 
         if self._alwaysDo or isNeeded:
             isValid = False
-
+      
+            starttime = time.time()
+            endtime = None
+            
             invalidInputs = self._getInvalidInputs()
             if len(invalidInputs) is 0:
+
                 try:
                     self._generateOutputs()
+                    endtime = time.time()
                     (isValid, outputs) = self._checkOutputs(outputs)
                 except BaseException as e:
                     logger.warning(
@@ -332,8 +338,13 @@ class SingleActionBase(ActionBase):
                     artefact[artefactProps.INVALID] = True
 
             token.generatedArtefacts = outputs
-
+      
             for artefact in outputs:
+                try:
+                    artefact[artefactProps.EXECUTION_DURATION] = endtime - starttime
+                except:
+                    pass
+        
                 self._session.addArtefact(artefact, True)
 
             if not isValid:

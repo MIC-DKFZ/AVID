@@ -63,7 +63,14 @@ from keyValueSelector import CaseInstanceSelector
 from keyValueSelector import FormatSelector
 from keyValueSelector import TimepointSelector
 from keyValueSelector import TypeSelector
+from keyValueSelector import ResultSelector
 from keyValueSelector import ObjectiveSelector
 from keyValueSelector import DoseStatSelector
 from validitySelector import ValiditySelector
 from keyMulitValueSelector import KeyMultiValueSelector
+
+class ValidResultSelector(AndSelector):
+  ''' Convenience selector to select all valid (!) artefacts of type result.'''
+  def __init__(self):
+    ''' init '''
+    AndSelector.__init__(self, ValiditySelector(), ResultSelector())

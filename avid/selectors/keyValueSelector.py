@@ -84,6 +84,11 @@ class TypeSelector(KeyValueSelector):
     ''' init '''
     KeyValueSelector.__init__(self, artefactProps.TYPE, keyValue, negate, True)
 
+class ResultSelector(TypeSelector):
+  ''' Convenience selector to select all artefacts of type result.'''
+  def __init__(self, negate = False):
+    ''' init '''
+    TypeSelector.__init__(self, artefactProps.TYPE_VALUE_RESULT, negate)
 
 class FormatSelector(KeyValueSelector):
   ''' Convenience selector to select by the format of the artefact file.'''
