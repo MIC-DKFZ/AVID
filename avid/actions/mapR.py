@@ -68,19 +68,10 @@ class mapRAction(CLIActionBase):
     return name
    
   def _indicateOutputs(self):
-    
-    name = self.instanceName                    
-
-    self._resultArtefact = self.generateArtefact(self._inputImage)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
-    
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + self._outputExt
-    resName = os.path.join(path, resName)
-    
-    self._resultArtefact[artefactProps.URL] = resName
-
+    self._resultArtefact = self.generateArtefact(self._inputImage,
+                                                 userDefinedProps = {artefactProps.TYPE : artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension=self._outputExt)
     return [self._resultArtefact]
 
       
