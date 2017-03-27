@@ -58,31 +58,23 @@ class doseProcessVisualizerAction(CLIActionBase):
     def _indicateOutputs(self):
         artefactRef = self._doseStatVariations
 
-        name = self._generateName()
-
         #Specify config artefact
-        self._configArtefact = self.generateArtefact(self.artefactRef)
-        self._configArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_CONFIG
-        self._configArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_R
-        self._configArtefact["diagram_type"] = self._diagramTitle
-
-        path = artefactHelper.generateArtefactPath(self._session, self._configArtefact)
-        resName = name + "." + str(artefactHelper.getArtefactProperty(self._configArtefact,artefactProps.ID)) + os.extsep + "r"
-        resName = os.path.join(path, resName)
-
-        self._configArtefact[artefactProps.URL] = resName
+        self._configArtefact = self.generateArtefact(self.artefactRef,
+                                                     userDefinedProps={
+                                                         artefactProps.TYPE: artefactProps.TYPE_VALUE_CONFIG,
+                                                         artefactProps.FORMAT: artefactProps.FORMAT_VALUE_R,
+                                                         "diagram_type":self._diagramTitle},
+                                                     urlHumanPrefix=self.instanceName,
+                                                     urlExtension='r')
 
         #Specify result artefact
-        self._resultArtefact = self.generateArtefact(self._configArtefact)
-        self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-        self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_PNG
-        self._resultArtefact["diagram_type"] = self._diagramTitle
-
-        path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-        resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "png"
-        resName = os.path.join(path, resName)
-
-        self._resultArtefact[artefactProps.URL] = resName
+        self._resultArtefact = self.generateArtefact(self._configArtefact,
+                                                     userDefinedProps={
+                                                         artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                                                         artefactProps.FORMAT: artefactProps.FORMAT_VALUE_PNG,
+                                                         "diagram_type":self._diagramTitle},
+                                                     urlHumanPrefix=self.instanceName,
+                                                     urlExtension='png')
 
         return [self._configArtefact, self._resultArtefact]
 

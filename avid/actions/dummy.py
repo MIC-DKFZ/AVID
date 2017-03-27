@@ -79,18 +79,11 @@ class DummyCLIAction(CLIActionBase):
 
   def _indicateOutputs(self):
 
-    name = self.instanceName
-
-    self._result = self.generateArtefact(self._input)
-    self._result[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._result[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_CSV
-
-    path = artefactHelper.generateArtefactPath(self._session, self._result)
-    resName = name + os.extsep+"txt"
-    resName = os.path.join(path, resName)
-
-    self._result[artefactProps.URL] = resName
-
+    self._resultArtefact = self.generateArtefact(self._input,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension='txt')
     return [self._result]
 
 

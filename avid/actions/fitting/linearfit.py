@@ -58,28 +58,23 @@ class LinearFitAction(CLIActionBase):
    
   def _indicateOutputs(self):
     
-    name = self.instanceName
-
-    self._resultSlopeArtefact = self.generateArtefact(self._inputImag)
-    self._resultSlopeArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultSlopeArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
-    self._resultSlopeArtefact[artefactProps.OBJECTIVE] = "slope"
+    self._resultSlopeArtefact = self.generateArtefact(self._inputImag,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+                                                                   artefactProps.OBJECTIVE:"slope"})
 
     path = artefactHelper.generateArtefactPath(self._session, self._resultSlopeArtefact)
-    outputTemplate = name + "." + str(artefactHelper.getArtefactProperty(self._resultSlopeArtefact,artefactProps.ID))
+    outputTemplate = self.instanceName + "." + str(artefactHelper.getArtefactProperty(self._resultSlopeArtefact,artefactProps.ID))
     resName = outputTemplate + "_slope"+os.extsep+"nrrd"
     resName = os.path.join(path, resName)
-    
     self._resultSlopeArtefact[artefactProps.URL] = resName
 
-    self._resultOffsetArtefact = self.generateArtefact(self._resultSlopeArtefact)
-    self._resultOffsetArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultOffsetArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
-    self._resultOffsetArtefact[artefactProps.OBJECTIVE] = "offset"
-    
+    self._resultOffsetArtefact = self.generateArtefact(self._resultSlopeArtefact,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+                                                                   artefactProps.OBJECTIVE:"offset"})
     resName = outputTemplate + "_offset"+os.extsep+"nrrd"
     resName = os.path.join(path, resName)
-    
     self._resultOffsetArtefact[artefactProps.URL] = resName    
 
     self._outputTemplatePath = os.path.join(path, outputTemplate+os.extsep+"nrrd")

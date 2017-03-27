@@ -65,12 +65,8 @@ class CLIActionBase(SingleActionBase):
        @return Returns the path to the file.'''
 
     #by policy the first artefact always determines the location and such.
-    cliArtefact = self.generateArtefact(self.outputArtefacts[0])
-    cliArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_MISC
-    cliArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_BAT
-
+    cliArtefact = self.generateArtefact(self.outputArtefacts[0], userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_MISC, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_BAT})
     path = artefactHelper.generateArtefactPath(self._session, cliArtefact)
-
     cliName = os.path.join(path, os.path.split(artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL))[1])
 
     if osChecker.isWindows():

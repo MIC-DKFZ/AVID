@@ -52,17 +52,10 @@ class combineRAction(CLIActionBase):
    
   def _indicateOutputs(self):
     
-    name = self.instanceName
-
-    self._resultArtefact = self.generateArtefact(self._reg1)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
-    
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "mapr"
-    resName = os.path.join(path, resName)
-    
-    self._resultArtefact[artefactProps.URL] = resName
+    self._resultArtefact = self.generateArtefact(self._reg1,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_MATCHPOINT},
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension='mapr')
 
     return [self._resultArtefact]
 

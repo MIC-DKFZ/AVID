@@ -52,20 +52,11 @@ class PointSetConversionAction(SingleActionBase):
 
   def indicateOutputs(self):
 
-    name = self._generateName()
-
-    artefact = self.generateArtefact(self._pointset)
-    artefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    artefact[artefactProps.FORMAT] = self._targetformat
-
-    path = artefactHelper.generateArtefactPath(self._session, artefact)
-    resName = artefactHelper.ensureValidPath(name + "." + str(
-      artefactHelper.getArtefactProperty(artefact, artefactProps.ID))) + os.extsep + self._getExtension(self._targetformat)
-    resName = os.path.join(path, resName)
-
-    artefact[artefactProps.URL] = resName
-
-    self._resultArtefact = artefact
+    self._resultArtefact = self.generateArtefact(self._pointset,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: self._targetformat},
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension=self._getExtension(self._targetformat))
 
     return [self._resultArtefact]
 

@@ -59,29 +59,21 @@ class DoseStatAction(CLIActionBase):
    
   def _indicateOutputs(self):    
     name = self.instanceName
-                    
-    self._resultArtefact = self.generateArtefact(self._inputDose)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_RTTB_STATS_XML
-    self._resultArtefact[artefactProps.OBJECTIVE]= self._structName
-    
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "xml"
-    resName = os.path.join(path, resName)
-    
-    self._resultArtefact[artefactProps.URL] = resName
 
-    self._resultDVHArtefact = self.generateArtefact(self._inputDose)
-    self._resultDVHArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultDVHArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_RTTB_CUM_DVH_XML
-    self._resultDVHArtefact[artefactProps.OBJECTIVE]= self._structName
+    self._resultArtefact = self.generateArtefact(self._inputDose,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML,
+                                                                   artefactProps.OBJECTIVE: self._structName},
+                                                 urlHumanPrefix=self.name,
+                                                 urlExtension='xml')
 
     name = name.replace("doseStat", "cumDVH")
-    path = artefactHelper.generateArtefactPath(self._session, self._resultDVHArtefact)
-    resDVHName = name + "." + str(artefactHelper.getArtefactProperty(self._resultDVHArtefact,artefactProps.ID)) + os.extsep + "xml"
-    resDVHName = os.path.join(path, resDVHName)
-
-    self._resultDVHArtefact[artefactProps.URL] = resDVHName
+    self._resultDVHArtefact = self.generateArtefact(self._inputDose,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_CUM_DVH_XML,
+                                                                   artefactProps.OBJECTIVE: self._structName},
+                                                 urlHumanPrefix=name,
+                                                 urlExtension='xml')
 
     return [self._resultArtefact, self._resultDVHArtefact]
  

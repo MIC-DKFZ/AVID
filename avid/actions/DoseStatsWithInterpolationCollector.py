@@ -62,17 +62,13 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
 
     for key in self._keys:
       if len(self._doseSelection)>0:
-        artefact = self.generateArtefact(self._doseSelection[0])
-        artefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-        artefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_CSV
-        artefact[artefactProps.DOSE_STAT] = str(key)
-
-        path = artefactHelper.generateArtefactPath(self._session, artefact)
-        resName = artefactHelper.ensureValidPath(name + "_"+str(key)+"." + str(artefactHelper.getArtefactProperty(artefact,artefactProps.ID))) + os.extsep + "csv"
-        resName = os.path.join(path, resName)
-
-        artefact[artefactProps.URL] = resName
-
+        artefact = self.generateArtefact(self._doseSelections[0],
+                                                     userDefinedProps={
+                                                       artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                                                       artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
+                                                       artefactProps.DOSE_STAT: str(key)},
+                                                     urlHumanPrefix=self.instanceName,
+                                                     urlExtension='csv')
         self._resultArtefacts[key] = artefact
 
     return self._resultArtefacts.values()

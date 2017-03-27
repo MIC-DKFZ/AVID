@@ -62,17 +62,17 @@ class pdcAction(CLIActionBase):
     artefactRef = self._image
 
     name = self._generateName()
-    
-    #Specify result dose artefact                
+
+    #Specify result dose artefact
     self._resultDoseArtefact = self.generateArtefact(artefactRef)
     self._resultDoseArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
     self._resultDoseArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_VIRTUOS
-    
+
     path = artefactHelper.generateArtefactPath(self._session, self._resultDoseArtefact)
     resultID = str(artefactHelper.getArtefactProperty(self._resultDoseArtefact,artefactProps.ID))
     resName = name + "." + resultID + "_"+ DEFAULT_PLAN_NR + os.extsep + "dos.gz"
     resName = os.path.join(path, resName)
-    
+
     self._resultDoseArtefact[artefactProps.URL] = resName
         
     #Specify result plan artefact                

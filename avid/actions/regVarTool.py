@@ -52,23 +52,12 @@ class RegVarToolAction(CLIActionBase):
     return name
     
   def _indicateOutputs(self):
-    
-    artefactRef = self._reg
-    
-    name = self._generateName()
-
-    #Specify result artefact                
-    self._resultArtefact = self.generateArtefact(artefactRef)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
-    self._resultArtefact[artefactProps.CASEINSTANCE] = str(self._instanceNr)
-    
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + "mapr"
-    resName = os.path.join(path, resName)
-    
-    self._resultArtefact[artefactProps.URL] = resName
-
+    self._resultArtefact = self.generateArtefact(self._reg,
+                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT,
+                                                                   artefactProps.CASEINSTANCE: str(self._instanceNr)},
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension='mapr')
     return [self._resultArtefact]
         
   def _prepareCLIExecution(self):
