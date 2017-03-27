@@ -183,7 +183,7 @@ class SingleActionBase(ActionBase):
 
         self._caseInstance = stubArtefact[artefactProps.CASEINSTANCE]
 
-    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True):
+    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = dict(), urlHumanPrefix = None, urlExtension = None):
         '''Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
@@ -191,19 +191,33 @@ class SingleActionBase(ActionBase):
         2) Other properties will be taken from the reference (if given).
         3) If a self._propInheritanceDict is specified it will be used to inherit property values.
         4) self._additionalActionProps will be transferd.
-        Remark: URL will always be None. ActionTag will always be of this action.
+        5) the property values defined in userDefinedProps will be transfered.
+        Remark: ActionTag will always be of this action.
+        Remark: As default the URL will be None. If parameter urlHumanPrefix or urlExtension are not None, an artefact
+        URL will be created. In this case the following pattern will be used:
+        <artefact_path>[<urlHumanPrefix>.]<artefact_id>[<><urlExtension>]
+        artefact_path: Return of artefactHelper.generateArtefactPath using the configured new artefact.
+        urlHumanPrefix: Parameter of the call
+        artefact_id: ID of the new artefact
+        extension_seperator: OS specific file extension seperator
+        urlExtension: Parameter of the call
         @param reference An other artefact as reference. If given, the following
         properties will be copied to the new artefact: Case, case instance, timepoint,
-        type, format, objective.'''
-
+        type, format, objective.
+        @param copyAdditionalPropsFromReference Indicates if also the additional properties should be
+        transfered from the reference to the new artefact (only relevant of reference is not None).
+        @param userDefinedProps Properties specified by the user that should be set for the new artefact.
+        Parameter is a dictionary. The keys are the property ids and the dict values their value.
+        @urlHumanPrefix: specifies the humand readable prefix of the artefact url. If set a URL will be generated.
+        @urlExtension: specifies the file extension of the artefact url. If set a URL will be generated.'''
         result = artefactGenerator.generateArtefactEntry(
-            artefactHelper.getArtefactProperty(reference, artefactProps.CASE), \
-            self._caseInstance, \
-            artefactHelper.getArtefactProperty(reference, artefactProps.TIMEPOINT), \
-            self._actionTag, \
-            artefactHelper.getArtefactProperty(reference, artefactProps.TYPE), \
-            artefactHelper.getArtefactProperty(reference, artefactProps.FORMAT), \
-            None, \
+            artefactHelper.getArtefactProperty(reference, artefactProps.CASE),
+            self._caseInstance,
+            artefactHelper.getArtefactProperty(reference, artefactProps.TIMEPOINT),
+            self._actionTag,
+            artefactHelper.getArtefactProperty(reference, artefactProps.TYPE),
+            artefactHelper.getArtefactProperty(reference, artefactProps.FORMAT),
+            None,
             artefactHelper.getArtefactProperty(reference, artefactProps.OBJECTIVE))
 
         for propID in self._propInheritanceDict:
@@ -230,7 +244,27 @@ class SingleActionBase(ActionBase):
             for k in additionalKs:
                 result[k] = reference[k]
 
-        return result;
+        for propID in userDefinedProps:
+            try:
+                result[propID] = userDefinedProps[propID]
+            except:
+                pass
+
+        if urlHumanPrefix is not None or urlExtension is not None:
+            path = artefactHelper.generateArtefactPath(self._session, result)
+            name = ""
+            if urlHumanPrefix is not None:
+                name = urlHumanPrefix + "."
+            name = name + str(artefactHelper.getArtefactProperty(result, artefactProps.ID))
+
+            if urlExtension is not None:
+                name = name + os.extsep + urlExtension
+
+            name = os.path.join(path, name)
+
+            result[artefactProps.URL] = name
+
+        return result
 
     def _generateOutputs(self):
         ''' Internal execution method of any action. This method should be

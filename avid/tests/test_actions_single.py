@@ -319,6 +319,37 @@ class Test(unittest.TestCase):
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
 
+        #test auto url generation only prefix
+        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName")
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', 'HumanReadableFileName.')
+        refURL = refURL + a[artefactProps.ID]
+        self.assertEqual(a[artefactProps.URL], refURL)
+
+        #test auto url generation only extension
+        a = action.generateArtefact(self.a_3, urlExtension='txt')
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', a[artefactProps.ID])
+        refURL = refURL + os.extsep + 'txt'
+        self.assertEqual(a[artefactProps.URL], refURL)
+
+        #test auto url generation all
+        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName", urlExtension='txt')
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', 'HumanReadableFileName.')
+        refURL = refURL + a[artefactProps.ID] + os.extsep + 'txt'
+        self.assertEqual(a[artefactProps.URL], refURL)
+
+        #test user defined props (overwritting everything
+        action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test3",
+                                   additionalActionProps={artefactProps.OBJECTIVE: 'newO'},
+                                   propInheritanceDict={artefactProps.OBJECTIVE: 'i1', 'myCoolProp': 'i0', 'notExistingProp': 'i0',
+                                                        artefactProps.TIMEPOINT: 'InexistingInput'})
+        a = action.generateArtefact(self.a_3, userDefinedProps={artefactProps.OBJECTIVE: 'userO', 'myUserProp': 'user1',
+                                                        artefactProps.TIMEPOINT: 42})
+        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
+                  'timePoint': 42, 'actionTag': 'Test3', 'invalid': False, 'objective': 'userO', 'type': 'Type3',
+                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be'}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'i0', 'myUserProp':'user1'})
+        self.assert_(ref.is_similar(a))
+        self.assertEqual(a['myUserProp'], ref['myUserProp'])
+
 
     def test_invalid_inputs(self):
         '''Test if always do enforces the computation/adding of an
