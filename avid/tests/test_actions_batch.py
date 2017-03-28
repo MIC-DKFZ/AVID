@@ -10,7 +10,7 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import shutil
 import unittest
 import avid.common.workflow as workflow
 import os
@@ -24,7 +24,7 @@ from avid.selectors.keyValueSelector import CaseSelector
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_actions")
+        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_actions")
         self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
 
         self.a_valid = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
@@ -46,7 +46,10 @@ class Test(unittest.TestCase):
         
 
     def tearDown(self):
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
 
     def testName(self):

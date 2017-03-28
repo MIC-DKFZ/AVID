@@ -10,7 +10,7 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import shutil
 import unittest
 import os
 from avid.actions import ActionBase
@@ -21,7 +21,7 @@ import avid.common.workflow as workflow
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_actions")
+        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_actions")
         self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
 
         self.a1 = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
@@ -40,7 +40,10 @@ class Test(unittest.TestCase):
 
 
     def tearDown(self):
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
 
     def testName(self):

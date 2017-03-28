@@ -31,7 +31,7 @@ class TestDoseProcessVisualizer(unittest.TestCase):
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "doseProcessVisualizerTest")
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "doseProcessVisualizerTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_doseProcessVisualizer")
+      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_doseProcessVisualizer")
       self.tempRoot = os.path.join(os.path.split(__file__)[0],"temporary")
       self.rTemplateFile = os.path.join(getAVIDProjectRootPath(),"templates", "diagramCSVSource.R")
       self.rTemplateAdditionalFile = os.path.join(getAVIDProjectRootPath(),"templates", "deltaDiagramWithQuantilAndAdditionalDataCSVSource.R")

@@ -27,7 +27,7 @@ class TestMapR(unittest.TestCase):
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_mapr")
+      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_mapr")
       
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 

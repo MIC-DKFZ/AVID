@@ -20,7 +20,7 @@ from avid.actions.threadingScheduler import ThreadingScheduler
 
 class TestThreadingScheduler(unittest.TestCase):
   def setUp(self):
-    self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary","test_actions")
+    self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_actions")
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
        
     self.session = workflow.Session("session1", self.sessionDir)
