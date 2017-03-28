@@ -19,7 +19,6 @@ from avid.actions.plmDice import plmDiceBatchAction as plmDice
 from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as doseStatsCollector
 from avid.actions.threadingScheduler import ThreadingScheduler
 
-
 __this__ = sys.modules[__name__]
 
 #command line parsing
@@ -32,8 +31,8 @@ plmDIRConfigPath = cliargs.plmTemplate
 multiTaskCount = cliargs.parallel
 
 plmPath = os.path.split(getToolConfigPath('plastimatch'))[0]
-regDIPP_rigid_multimodal = os.path.join(os.path.split(getToolConfigPath('matchR'))[0], 'mdra-0-12_DIPP_MultiModal_rigid_default.dll')
-regPlm_CLI = os.path.join(os.path.split(getToolConfigPath('matchR'))[0], 'mdra-0-12_PlmParameterFileCLI3DRegistration.dll')
+regDIPP_rigid_multimodal = os.path.join(os.path.split(getToolConfigPath('matchR'))[0], 'mdra-0-13_DIPP_MultiModal_rigid_default.dll')
+regPlm_CLI = os.path.join(os.path.split(getToolConfigPath('matchR'))[0], 'mdra-0-13_PlmParameterFileCLI3DRegistration.dll')
 
 ###############################################################################
 # general setup selectors for a more readable script
@@ -46,6 +45,9 @@ BPLCTStructSetSelector = ATS("BPLCT_struct")
 BPLMRStructSetSelector = ATS("BPLMR_struct")
 fxMRStructSetSelector = ATS("fxMR_struct")
 
+BPLMRPointsSelector = ATS("BPLMR_points")
+fxMRPointsSelector = ATS("fxMR_points")
+
 StructsSelector = ATS("Structs")
 ControlDoseSelector = ATS("ControlDose")
 MappedDoseSelector = ATS("MappedDose")
@@ -57,8 +59,9 @@ RegSelector = ATS("Registration")
 with workflow.initSession_byCLIargs(expandPaths=True, autoSave=True) as session:
     reg_MR2CTSelector = matchR(BPLCTSelector, BPLMRSelector, algorithm=regDIPP_rigid_multimodal, actionTag = 'reg_MR2CT', scheduler = ThreadingScheduler(multiTaskCount)).do().tagSelector
     mappedMR2CTSelector = mapR(BPLMRSelector, reg_MR2CTSelector, BPLCTSelector, actionTag="MappedMR2CT", scheduler = ThreadingScheduler(multiTaskCount)).do().tagSelector
+    mappedMRPoints2CTSelector = mapR(BPLMRPointsSelector, reg_MR2CTSelector, actionTag="MappedMRPoints2CT", scheduler = ThreadingScheduler(multiTaskCount)).do().tagSelector
 
-    reg_MR2CT2fxMRSelector = matchR(fxMRSelector, mappedMR2CTSelector, algorithm=regPlm_CLI, algorithmParameters={'PlastimatchDirectory':plmPath, 'ParameterFilePath': plmDIRConfigPath}, actionTag = 'reg_MR2CT2fxMR', scheduler = ThreadingScheduler(multiTaskCount)).do().tagSelector
+    reg_MR2CT2fxMRSelector = matchR(fxMRSelector, mappedMR2CTSelector, targetPointSetSelector=fxMRPointsSelector, movingPointSetSelector=mappedMRPoints2CTSelector, algorithm=regPlm_CLI, algorithmParameters={'PlastimatchDirectory':plmPath, 'ParameterFilePath': plmDIRConfigPath}, actionTag = 'reg_MR2CT2fxMR', scheduler = ThreadingScheduler(multiTaskCount)).do().tagSelector
     mapR(mappedMR2CTSelector, reg_MR2CT2fxMRSelector, fxMRSelector, regLinker = CaseLinker(), templateRegLinker = FractionLinker(), actionTag="MappedMR2CT2fxMR", propInheritanceDict = {artefactProps.TIMEPOINT:'templateImage'}, scheduler = ThreadingScheduler(multiTaskCount)).do()
     mapR(BPLCTSelector, reg_MR2CT2fxMRSelector, fxMRSelector, regLinker = CaseLinker(), templateRegLinker = FractionLinker(), actionTag="MappedCT2fxMR", propInheritanceDict = {artefactProps.TIMEPOINT:'templateImage'}, scheduler = ThreadingScheduler(multiTaskCount)).do()
 

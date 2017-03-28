@@ -8,6 +8,8 @@ from avid.common.artefact.crawler import DirectoryCrawler
 import avid.common.artefact.defaultProps as artefactProps
 from avid.common.artefact.generator import generateArtefactEntry
 from avid.common.artefact.fileHelper import saveArtefactList_xml as saveArtefactList
+import avid.externals.fcsv as fcsv
+import avid.externals.matchPoint as matchpoint
 
 def determineFraction(name):
     matches = re.search('_frac(\d+)_', name, flags=re.MULTILINE)
@@ -23,8 +25,9 @@ def mrgrtFileFunction(pathParts, fileName, fullPath):
     name, ext = os.path.splitext(fileName)
     case = pathParts[0]
 
+    timepoint = determineFraction(pathParts[-1])
+
     if ext ==".dcm":
-        timepoint = determineFraction(pathParts[-1])
         if not timepoint is None:
             #fraction directory
             if name.startswith('RS_'):
@@ -49,6 +52,19 @@ def mrgrtFileFunction(pathParts, fileName, fullPath):
             else:
               result = generateArtefactEntry(case, None, 0, 'BPLMR', artefactProps.TYPE_VALUE_RESULT,
                                            artefactProps.FORMAT_VALUE_DCM, fullPath)
+    elif ext == ".fcsv":
+        ps = fcsv.load_fcsv(fullPath)
+        newPath = fullPath + '.txt'
+        matchpoint.write_simple_pointset(newPath, ps)
+        if not timepoint is None:
+            #fraction directory
+            result = generateArtefactEntry(case, None, timepoint, 'fxMR_points', artefactProps.TYPE_VALUE_RESULT,
+                                             matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET, newPath)
+
+        if pathParts[-1] == 'BPL_MR':
+            result = generateArtefactEntry(case, None, timepoint, 'BPLMR_points', artefactProps.TYPE_VALUE_RESULT,
+                                             matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET, newPath)
+	
 
     return result
   
