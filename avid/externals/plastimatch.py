@@ -18,6 +18,9 @@ import re
 
 logger = logging.getLogger(__name__)
 
+'''Formate type value. Indicating the artefact is stored as a MatchPoint simple point set file.'''
+FORMAT_VALUE_PLM_CXT = "Plastimatch_cxt"
+
 COMPARE_KEYS = ['MIN','AVE','MAX','MAE', 'MSE', 'DIF', 'NUM', 'RATIO']
 
 def parseCompareResult(outputStr):

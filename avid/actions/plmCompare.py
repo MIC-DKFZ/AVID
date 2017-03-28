@@ -29,7 +29,7 @@ from avid.externals.doseTool import saveSimpleDictAsResultXML
 logger = logging.getLogger(__name__)
 
 class plmCompareAction(CLIActionBase):
-  '''Class that wraps the single action for the tool mapR.'''
+  '''Class that wraps the single action for the tool plastimatch compare.'''
 
   def __init__(self, refImage, testImage, 
                actionTag = "plmCompare", alwaysDo = False, 

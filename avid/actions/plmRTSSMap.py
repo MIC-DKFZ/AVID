@@ -18,82 +18,93 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
+from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT, getDeformationFieldPath
 from . import BatchActionBase
 from cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
 from simpleScheduler import SimpleScheduler
-from avid.externals.plastimatch import parseDiceResult
+from avid.externals.plastimatch import parseDiceResult, FORMAT_VALUE_PLM_CXT
 from avid.externals.doseTool import saveSimpleDictAsResultXML
 
 logger = logging.getLogger(__name__)
 
-class plmDiceAction(CLIActionBase):
-  '''Class that wraps the single action for the tool plastimatch dice.'''
+class plmRTSSMap(CLIActionBase):
+  '''Class that wraps the single action for the tool plastimatch convert in order to map DICOM RT SS via a registration.'''
 
-  def __init__(self, refImage, testImage, 
-               actionTag = "plmDice", alwaysDo = False, 
+  def __init__(self, rtss, reg, outputFormat = artefactProps.FORMAT_VALUE_DCM,
+               actionTag = "plmRTSSMap", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
-    self._addInputArtefacts(refImage=refImage, testImage = testImage)
-    self._refImage = refImage
-    self._testImage = testImage
-    
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", actionConfig))
-    self._cwd = cwd    
+    self._addInputArtefacts(rtss=rtss, reg = reg)
+    self._rtts = rtss
+    self._reg = reg
+    self._outputFormat = outputFormat
+
+    self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", actionConfig))
     
   def _generateName(self):
-    name = "plmDice_"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.ACTIONTAG))
+    name = "plmRTSSMap_"+str(artefactHelper.getArtefactProperty(self._rtss,artefactProps.ACTIONTAG))
 
-    objective = artefactHelper.getArtefactProperty(self._refImage,artefactProps.OBJECTIVE)
+    objective = artefactHelper.getArtefactProperty(self._rtss,artefactProps.OBJECTIVE)
     if not objective is None:
         name += '-%s'%objective
 
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.TIMEPOINT))\
-            +"_vs_"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.ACTIONTAG))
+    name += "_#"+str(artefactHelper.getArtefactProperty(self._rtss,artefactProps.TIMEPOINT))\
+            +"_by_"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.ACTIONTAG))
 
-    objective = artefactHelper.getArtefactProperty(self._testImage,artefactProps.OBJECTIVE)
+    objective = artefactHelper.getArtefactProperty(self._reg,artefactProps.OBJECTIVE)
     if not objective is None:
         name += '-%s'%objective
 
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.TIMEPOINT))
+    name += "_#"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.TIMEPOINT))
 
     return name
-   
+
+  def _getOutputExtension(self):
+    if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+      return 'dcm'
+    elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
+      return 'cxt'
+    else:
+      raise ValueError('Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
+
   def _indicateOutputs(self):
     
-    self._resultArtefact = self.generateArtefact(self._testImage,
+    self._resultArtefact = self.generateArtefact(self._rtss,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML},
+                                                                   artefactProps.FORMAT: self._outputFormat},
                                                  urlHumanPrefix=self.instanceName,
-                                                 urlExtension='xml')
+                                                 urlExtension=self._getOutputExtension())
 
     return [self._resultArtefact]
 
       
   def _prepareCLIExecution(self):
     
-    inputPath = artefactHelper.getArtefactProperty(self._refImage,artefactProps.URL)
-    input2Path = artefactHelper.getArtefactProperty(self._testImage,artefactProps.URL)
-    
+    rtssPath = artefactHelper.getArtefactProperty(self._rtss,artefactProps.URL)
+    regPath = artefactHelper.getArtefactProperty(self._reg,artefactProps.URL)
+    regFormat = artefactHelper.getArtefactProperty(self._reg,artefactProps.FORMAT)
+    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+
+    if regFormat == FORMAT_VALUE_MATCHPOINT:
+      regPath = getDeformationFieldPath(regPath)
+
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
     
-    content = '"' + execURL + '" dice ' + ' "' + inputPath + '"' + ' "' + input2Path +'" --all'
+    content = '"' + execURL + '" convert ' + ' --input "' + rtssPath + '"' + ' --xf "' + regPath
+
+    if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+      content = content + ' --output-dicom "'+resultPath+'"'
+    elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
+      content = content + ' --output-cxt "'+resultPath+'"'
+    else:
+      raise ValueError('Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
       
     return content
-  
-  
-  def _postProcessCLIExecution(self):
-    
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
-    
-    result = parseDiceResult(open(self._logFilePath).read())
-     
-    saveSimpleDictAsResultXML(result, resultPath)
-   
 
-class plmDiceBatchAction(BatchActionBase):    
+
+class plmRTSSMapBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and
     should therefore able to process a batch of SingleActionBased actions.'''
   

@@ -96,7 +96,6 @@ def generateSimpleMAPRegistrationWrapper(deformationFieldPath, wrapperPath, dime
   tree.write(wrapperPath, xml_declaration = True)
  
   
-
 def ensureMAPRegistrationArtefact(regArtefact, templateArtefact, session):
   """Helper function that ensures that the returned registration artefact is stored
   in a format that is supported by MatchPoint. If the passed artefact is valid
@@ -137,6 +136,31 @@ def ensureMAPRegistrationArtefact(regArtefact, templateArtefact, session):
     result = templateArtefact
     
   return (conversion, result)
+
+
+def getDeformationFieldPath(regPath, getInverseKernel = True):
+    """Helper function that retrieves the deformation field specified in a kernel from a matchpoint registration file.
+    @param regPath Path to the registration file from where to extract the information.
+    @getInverseKernel Indicates if the field file of the inverse kernel (True) or the direct kernel (False) should be
+    extracted.
+    @return File path to the deformation field. If kernel is not defined by a registration field or registration does
+    not exist the return will be None."""
+    if not os.path.isfile(regPath):
+        raise ValueError("Cannot load evaluation result from file. File does not exist. File path: {}".format(regPath))
+
+    tree = ElementTree.parse(regPath)
+    root = tree.getroot()
+
+    searchPath = "./Registration/Kernel/FieldPath[@ID='inverse']"
+    if not getInverseKernel:
+        searchPath = "./Registration/Kernel/FieldPath[@ID='direct']"
+
+    node = root.find(searchPath, namespaces=None)
+    try:
+        return node.text
+    except:
+        return None
+
 
 def load_simple_pointset(filePath):
     '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
