@@ -42,7 +42,7 @@ class DoseStatAction(CLIActionBase):
     self._structSet = structSet
     self._structName = structName
        
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", actionConfig))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseTool", actionConfig))
     self._cwd = cwd    
     
   def _generateName(self):
@@ -64,7 +64,7 @@ class DoseStatAction(CLIActionBase):
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML,
                                                                    artefactProps.OBJECTIVE: self._structName},
-                                                 urlHumanPrefix=self.name,
+                                                 urlHumanPrefix=name,
                                                  urlExtension='xml')
 
     name = name.replace("doseStat", "cumDVH")
@@ -87,7 +87,7 @@ class DoseStatAction(CLIActionBase):
     
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseTool", self._actionConfig)
     
     content = '"' + execURL + '"' + ' -d "' + inputPath + '" -s "' + structPath + '" --doseStatistics "' + resultPath + '"'
 
