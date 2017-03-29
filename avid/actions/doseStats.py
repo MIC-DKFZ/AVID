@@ -64,7 +64,7 @@ class DoseStatAction(CLIActionBase):
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML,
                                                                    artefactProps.OBJECTIVE: self._structName},
-                                                 urlHumanPrefix=name,
+                                                 urlHumanPrefix=self.instanceName,
                                                  urlExtension='xml')
 
     name = name.replace("doseStat", "cumDVH")
