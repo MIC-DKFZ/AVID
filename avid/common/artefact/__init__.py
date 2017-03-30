@@ -22,256 +22,263 @@ import platform
 import uuid
 import time
 import logging
+
+import collections
+
 import defaultProps
 import threading
 
 logger = logging.getLogger(__name__)
 
 '''List of properties that should be checked to determine the similarity of two artifacts.'''
-similarityRelevantProperties = [defaultProps.CASE, defaultProps.CASEINSTANCE, defaultProps.TIMEPOINT, defaultProps.ACTIONTAG, defaultProps.TYPE, defaultProps.FORMAT, defaultProps.OBJECTIVE, defaultProps.DOSE_STAT, defaultProps.DIAGRAM_TYPE, defaultProps.ONLY_ESTIMATOR, defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT ]
+similarityRelevantProperties = [defaultProps.CASE, defaultProps.CASEINSTANCE, defaultProps.TIMEPOINT,
+                                defaultProps.ACTIONTAG, defaultProps.TYPE, defaultProps.FORMAT, defaultProps.OBJECTIVE,
+                                defaultProps.DOSE_STAT, defaultProps.DIAGRAM_TYPE, defaultProps.ONLY_ESTIMATOR,
+                                defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT]
+
 
 class Artefact(object):
-    
-  def __init__(self, defaultP = None, additionalP = None):
-    
-    self.lock = threading.RLock()    
+    def __init__(self, defaultP=None, additionalP=None):
 
-    self._defaultProps = dict()
-    if defaultP is None:
-      self._defaultProps[defaultProps.CASE] = None
-      self._defaultProps[defaultProps.CASEINSTANCE] = None
-      self._defaultProps[defaultProps.TIMEPOINT] = 0
-      self._defaultProps[defaultProps.ACTIONTAG] = "unkown_tag"
-      self._defaultProps[defaultProps.TYPE] = None
-      self._defaultProps[defaultProps.FORMAT] = None
-      self._defaultProps[defaultProps.URL] = None
-      self._defaultProps[defaultProps.OBJECTIVE] = None
-      self._defaultProps[defaultProps.INVALID] = None
-    else:
-      for key in defaultP:
-        self._defaultProps[key] = defaultP[key]
+        self.lock = threading.RLock()
 
-    if not defaultProps.ID in self._defaultProps:
-      self._defaultProps[defaultProps.ID] = str(uuid.uuid1())
-    if not defaultProps.TIMESTAMP in self._defaultProps:
-      self._defaultProps[defaultProps.TIMESTAMP] = str(time.time())
-    if not defaultProps.EXECUTION_DURATION in self._defaultProps:
-      self._defaultProps[defaultProps.EXECUTION_DURATION] = None
-      
-    self._additionalProps = dict()
-    if not additionalP is None:
-      for key in additionalP:
-        self._additionalProps[key] = additionalP[key]
-
-    
-  def is_similar(self, other):
-   
-    mykeys = self.keys()
-    okeys = other.keys()
-
-    for key in similarityRelevantProperties:
-      if key in mykeys and key in okeys:
-        if not (self[key] == other[key]):
-          #Both have defined the property but values differ -> false
-          return False
-      elif key in mykeys or key in okeys:
-        #Only one has defined the property -> false
-        return False
-      
-    return True
-      
-    
-  def keys(self):  
-    return self._defaultProps.keys() + self._additionalProps.keys()
-  
-    
-  def is_invalid(self):   
-    return self._defaultProps[defaultProps.INVALID]
-    
-    
-  def __getitem__(self,key):
-    
-    if key in self._defaultProps:
-      return self._defaultProps[key]
-    elif key in self._additionalProps:
-      return self._additionalProps[key]
-    
-    raise KeyError()
-  
-  
-  def __setitem__(self, key, value):
-    with self.lock:
-      if value is not None:
-        value = str(value)
-      
-      if key == defaultProps.TIMEPOINT:
-        try:
-          #If timepoint can be converted into a number, do so
-          value = int(value)
-        except:
-          pass
-      elif key == defaultProps.EXECUTION_DURATION:
-        try:
-          value = float(value)
-        except:
-          pass
-      elif key == defaultProps.INVALID:
-        if value in ["True", "true", "TRUE"]:
-          value = True
+        self._defaultProps = dict()
+        if defaultP is None:
+            self._defaultProps[defaultProps.CASE] = None
+            self._defaultProps[defaultProps.CASEINSTANCE] = None
+            self._defaultProps[defaultProps.TIMEPOINT] = 0
+            self._defaultProps[defaultProps.ACTIONTAG] = "unkown_tag"
+            self._defaultProps[defaultProps.TYPE] = None
+            self._defaultProps[defaultProps.FORMAT] = None
+            self._defaultProps[defaultProps.URL] = None
+            self._defaultProps[defaultProps.OBJECTIVE] = None
+            self._defaultProps[defaultProps.INVALID] = None
+            self._defaultProps[defaultProps.INPUT_IDS] = None
         else:
-          value = False
-   
-  
-      if key in self._defaultProps:
-        self._defaultProps[key] = value
-      else:
-        self._additionalProps[key] = value
-       
-  
-  def __missing__(self, key):
-    logger.warning("Unkown artefact property was requested. Unknown key: %s", str(key))
-    return None
-  
-  
-  def __len__(self):
-    return len(self._defaultProps) + len(self._additionalProps)
-  
-  
-  def __contains__(self, key):
-    if key in self._defaultProps or key in self._additionalProps:
-      return True
+            for key in defaultP:
+                self._defaultProps[key] = defaultP[key]
 
-    return False
-  
+        if not defaultProps.ID in self._defaultProps:
+            self._defaultProps[defaultProps.ID] = str(uuid.uuid1())
+        if not defaultProps.TIMESTAMP in self._defaultProps:
+            self._defaultProps[defaultProps.TIMESTAMP] = str(time.time())
+        if not defaultProps.EXECUTION_DURATION in self._defaultProps:
+            self._defaultProps[defaultProps.EXECUTION_DURATION] = None
 
-  def __eq__(self,other):
-    if isinstance(other, self.__class__):
-      return self._defaultProps == other._defaultProps and self._additionalProps == other._additionalProps
-    else:
-      return False  
- 
+        self._additionalProps = dict()
+        if not additionalP is None:
+            for key in additionalP:
+                self._additionalProps[key] = additionalP[key]
 
-  def __ne__(self,other):
-    return not self.__eq__(other)
+    def is_similar(self, other):
 
-  def __repr__(self):
-    return 'Artefact(%s, %s)' % (self._defaultProps, self._additionalProps)
+        mykeys = self.keys()
+        okeys = other.keys()
+
+        for key in similarityRelevantProperties:
+            if key in mykeys and key in okeys:
+                if not (self[key] == other[key]):
+                    # Both have defined the property but values differ -> false
+                    return False
+            elif key in mykeys or key in okeys:
+                # Only one has defined the property -> false
+                return False
+
+        return True
+
+    def keys(self):
+        return self._defaultProps.keys() + self._additionalProps.keys()
+
+    def is_invalid(self):
+        return self._defaultProps[defaultProps.INVALID]
+
+    def __getitem__(self, key):
+
+        if key in self._defaultProps:
+            return self._defaultProps[key]
+        elif key in self._additionalProps:
+            return self._additionalProps[key]
+
+        raise KeyError()
+
+    def __setitem__(self, key, value):
+        with self.lock:
+            if value is not None and not key == defaultProps.INPUT_IDS:
+                value = str(value)
+
+            if key == defaultProps.TIMEPOINT:
+                try:
+                    # If timepoint can be converted into a number, do so
+                    value = int(value)
+                except:
+                    pass
+            elif key == defaultProps.EXECUTION_DURATION:
+                try:
+                    value = float(value)
+                except:
+                    pass
+            elif key == defaultProps.INVALID:
+                if value in ["True", "true", "TRUE"]:
+                    value = True
+                else:
+                    value = False
+            elif key == defaultProps.INPUT_IDS:
+                if isinstance(value, collections.Mapping):
+                    value = dict(value)
+                elif value is not None:
+                    raise ValueError(
+                        'Cannot set INPUT_IDS property of artefact. Value is no dict. Value: {}'.format(value))
+
+            if key in self._defaultProps:
+                self._defaultProps[key] = value
+            else:
+                self._additionalProps[key] = value
+
+    def __missing__(self, key):
+        logger.warning("Unkown artefact property was requested. Unknown key: %s", str(key))
+        return None
+
+    def __len__(self):
+        return len(self._defaultProps) + len(self._additionalProps)
+
+    def __contains__(self, key):
+        if key in self._defaultProps or key in self._additionalProps:
+            return True
+
+        return False
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self._defaultProps == other._defaultProps and self._additionalProps == other._additionalProps
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        return 'Artefact(%s, %s)' % (self._defaultProps, self._additionalProps)
 
 
 def getArtefactProperty(artefact, key):
-  '''Helper function that returns the value of an artefact property indicated by
-  key. If the artefact is None or the key does not exist it returns None.
-  @param artefact Reference to the artefact entity that contains the wanted property value
-  @param key Key of the value that is wanted.'''
-  result = None;
-  if artefact is not None and key in artefact:
-    result = artefact[key]
-  
-  return result
+    '''Helper function that returns the value of an artefact property indicated by
+    key. If the artefact is None or the key does not exist it returns None.
+    @param artefact Reference to the artefact entity that contains the wanted property value
+    @param key Key of the value that is wanted.'''
+    result = None;
+    if artefact is not None and key in artefact:
+        result = artefact[key]
+
+    return result
 
 
 def ensureCaseInstanceValidity(checkedArtefact, *otherArtefacts):
-  '''Checks if the checkedArtefact has a valid case instance compared to all
-     other artefacts. The case instance is valid if checkedArtefact has the value
-     None or the same value then all other artefacts. If the other artifacts
-     have a value, checkedArtefact gets the same value.
-     @pre otherArtefacts must have amongst other the same instance value or none
-     @pre checkedArtefact must have the same instance value or none
-     @return Returns false if there was a conflict (failed precondition) while
-     ensuring the validity.'''
-  result = True
-  masterInstance = None
-  for oa in otherArtefacts:
-    oInstance = getArtefactProperty(oa,defaultProps.CASEINSTANCE)
-    if oInstance is not None:
-      if masterInstance is None:
-        masterInstance = oInstance
-      elif not masterInstance == oInstance:
-        result = False
-    
-  if masterInstance is not None:
-    checkedInstance = getArtefactProperty(checkedArtefact,defaultProps.CASEINSTANCE)
-    if checkedInstance is None:
-      checkedArtefact[defaultProps.CASEINSTANCE] = masterInstance
-    elif not masterInstance == checkedInstance:
-      result = False
+    '''Checks if the checkedArtefact has a valid case instance compared to all
+       other artefacts. The case instance is valid if checkedArtefact has the value
+       None or the same value then all other artefacts. If the other artifacts
+       have a value, checkedArtefact gets the same value.
+       @pre otherArtefacts must have amongst other the same instance value or none
+       @pre checkedArtefact must have the same instance value or none
+       @return Returns false if there was a conflict (failed precondition) while
+       ensuring the validity.'''
+    result = True
+    masterInstance = None
+    for oa in otherArtefacts:
+        oInstance = getArtefactProperty(oa, defaultProps.CASEINSTANCE)
+        if oInstance is not None:
+            if masterInstance is None:
+                masterInstance = oInstance
+            elif not masterInstance == oInstance:
+                result = False
 
-  return result
-     
-     
-def addArtefactToWorkflowData(workflowData, artefactEntry, removeSimelar = False):
-  ''' 
-      This method adds an arbitrary artefact entry to the workflowData list.
-      @param removeSimelar If True the method checks if the session data contains
-      a simelar entry. If yes the simelar entry will be removed.      
-  ''' 
-  if removeSimelar:
-    simelar = findSimilarArtefact(workflowData, artefactEntry)
-    if simelar is not None:
-      workflowData.remove(simelar)
-      
-  workflowData.append(artefactEntry)
-  return workflowData
+    if masterInstance is not None:
+        checkedInstance = getArtefactProperty(checkedArtefact, defaultProps.CASEINSTANCE)
+        if checkedInstance is None:
+            checkedArtefact[defaultProps.CASEINSTANCE] = masterInstance
+        elif not masterInstance == checkedInstance:
+            result = False
+
+    return result
+
+
+def addArtefactToWorkflowData(workflowData, artefactEntry, removeSimelar=False):
+    '''
+        This method adds an arbitrary artefact entry to the workflowData list.
+        @param removeSimelar If True the method checks if the session data contains
+        a simelar entry. If yes the simelar entry will be removed.
+    '''
+    if removeSimelar:
+        simelar = findSimilarArtefact(workflowData, artefactEntry)
+        if simelar is not None:
+            workflowData.remove(simelar)
+
+    workflowData.append(artefactEntry)
+    return workflowData
+
 
 def findSimilarArtefact(workflowData, artefactEntry):
-  '''
-      Checks if a passed artefact has already an entry in the workflow data and
-      returns this entry. Returns None if no entry was found. Remark: URL is
-      not check because it is not relevant for an artefact to be simelar.
-  '''
-  for entry in (workflowData):
-    if artefactEntry.is_similar(entry):
-      return entry
-  
-  return None
+    '''
+        Checks if a passed artefact has already an entry in the workflow data and
+        returns this entry. Returns None if no entry was found. Remark: URL is
+        not check because it is not relevant for an artefact to be simelar.
+    '''
+    for entry in (workflowData):
+        if artefactEntry.is_similar(entry):
+            return entry
+
+    return None
 
 
 def artefactExists(workflowData, artefactEntry):
-  '''
-      Checks if a passed artefact has already an entry in the workflow data.
-      Remark: It only ensures that the standard key (CASE, CASEINSTANCE,
-      TIMEPOINT, ACTIONTAG, TYPE and FORMAT) are equal. Differences in URL are
-      ignored. As well as custom properties of the artefact.
-  '''
-  return findSimilarArtefact(workflowData, artefactEntry) is not None
+    '''
+        Checks if a passed artefact has already an entry in the workflow data.
+        Remark: It only ensures that the standard key (CASE, CASEINSTANCE,
+        TIMEPOINT, ACTIONTAG, TYPE and FORMAT) are equal. Differences in URL are
+        ignored. As well as custom properties of the artefact.
+    '''
+    return findSimilarArtefact(workflowData, artefactEntry) is not None
+
 
 def _verboseGenerateArtefactPath(workflow, workflowArtefact):
-  """ Generates the path derived from the workflow informations and the
-      properties of the artefact. This default style will generate the following
-      path:
-      [workflow.outputpath]+[workflow.name]+[artefact.actiontag]+[artefact.type]
-      +[artefact.case]+[artefact.caseinstance]+[artefact.timepoint]
-      The case, caseinstance and timepoint parts are skipped if the respective
-      value is NONE. """
-  artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG], workflowArtefact[defaultProps.TYPE])
-  if workflowArtefact[defaultProps.CASE] is not None:
-    artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
-  if workflowArtefact[defaultProps.CASEINSTANCE] is not None:
-    artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASEINSTANCE]))
-  if workflowArtefact[defaultProps.TIMEPOINT] is not None:
-    artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.TIMEPOINT]))
-    
-  return artefactPath
+    """ Generates the path derived from the workflow informations and the
+        properties of the artefact. This default style will generate the following
+        path:
+        [workflow.outputpath]+[workflow.name]+[artefact.actiontag]+[artefact.type]
+        +[artefact.case]+[artefact.caseinstance]+[artefact.timepoint]
+        The case, caseinstance and timepoint parts are skipped if the respective
+        value is NONE. """
+    artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG],
+                                workflowArtefact[defaultProps.TYPE])
+    if workflowArtefact[defaultProps.CASE] is not None:
+        artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
+    if workflowArtefact[defaultProps.CASEINSTANCE] is not None:
+        artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASEINSTANCE]))
+    if workflowArtefact[defaultProps.TIMEPOINT] is not None:
+        artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.TIMEPOINT]))
+
+    return artefactPath
 
 
 def _defaultGenerateArtefactPath(workflow, workflowArtefact):
-  """ Generates the path derived from the workflow informations and the
-      properties of the artefact. This default style will generate the following
-      path:
-      [workflow.outputpath]+[workflow.name]+[artefact.actiontag]+[artefact.type]
-      +[artefact.case]+[artefact.caseinstance]
-      The case and caseinstance parts are skipped if the respective
-      value is NONE. """
-  artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG], workflowArtefact[defaultProps.TYPE])
-  if workflowArtefact[defaultProps.CASE] is not None:
-    artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
-  if workflowArtefact[defaultProps.CASEINSTANCE] is not None:
-    artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASEINSTANCE]))
-    
-  return artefactPath
-   
-   
+    """ Generates the path derived from the workflow informations and the
+        properties of the artefact. This default style will generate the following
+        path:
+        [workflow.outputpath]+[workflow.name]+[artefact.actiontag]+[artefact.type]
+        +[artefact.case]+[artefact.caseinstance]
+        The case and caseinstance parts are skipped if the respective
+        value is NONE. """
+    artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG],
+                                workflowArtefact[defaultProps.TYPE])
+    if workflowArtefact[defaultProps.CASE] is not None:
+        artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
+    if workflowArtefact[defaultProps.CASEINSTANCE] is not None:
+        artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASEINSTANCE]))
+
+    return artefactPath
+
+
 pathGenerationDelegate = _defaultGenerateArtefactPath
+
 
 def ensureValidPath(unsafePath):
     """
@@ -283,19 +290,19 @@ def ensureValidPath(unsafePath):
     validPathChars = ":-_.() %s%s" % (string.ascii_letters, string.digits)
     validPathChars += os.sep
     if platform.system() is 'Windows':
-      #also add unix version because windows can handle it to.
-      validPathChars += '/'
+        # also add unix version because windows can handle it to.
+        validPathChars += '/'
     cleanedFilename = unicodedata.normalize('NFKD', unicode(unsafePath, "utf-8")).encode('ASCII', 'ignore')
     result = ''.join(c for c in cleanedFilename if c in validPathChars)
     return result
 
 
 def generateArtefactPath(workflow, workflowArtefact):
-  """ Public method that should be used to get an artefact path.
-     Uses the path generation delegate to generate an artefact path.
-     Ensures that the path is valid."""
-  artefactPath = pathGenerationDelegate(workflow, workflowArtefact)
-  return ensureValidPath(artefactPath)
+    """ Public method that should be used to get an artefact path.
+       Uses the path generation delegate to generate an artefact path.
+       Ensures that the path is valid."""
+    artefactPath = pathGenerationDelegate(workflow, workflowArtefact)
+    return ensureValidPath(artefactPath)
+
 
 from generator import generateArtefactEntry
-

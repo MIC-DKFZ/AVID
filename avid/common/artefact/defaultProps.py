@@ -40,6 +40,8 @@ URL = "url"
 INVALID = "invalid"
 '''Creation time of an artefact.'''
 TIMESTAMP = "timestamp"
+'''Dict with the IDs of the infput artefact used to generate the artefact.'''
+INPUT_IDS = "input_ids"
 '''Duration of the action execution that generated the artefact (in [s]).'''
 EXECUTION_DURATION = "execution_duration"
 '''Defines a reference to a plan file the artefact is associated with. Normaly

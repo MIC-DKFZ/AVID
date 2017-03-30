@@ -268,35 +268,40 @@ class Test(unittest.TestCase):
         workflow.currentGeneratedSession = workflow.Session("test_artefact_generation", self.sessionDir)
 
         action = DummySingleAction([self.a_1, self.a_2, self.a_3],"Test1")
+        input_ids = {'i0': self.a_1[artefactProps.ID],'i1': self.a_2[artefactProps.ID],'i2': self.a_3[artefactProps.ID]}
 
         a = action.generateArtefact()
         ref = Artefact({'case': None, 'caseInstance': None, 'format': None, 'url': None, 'timestamp': '1479379069.53',
                   'timePoint': None, 'actionTag': 'Test1', 'invalid': False, 'objective': None, 'type': None,
-                  'id': 'e2c810cf-acb1-11e6-83b8-7054d2ab75be'}, {})
+                  'id': 'e2c810cf-acb1-11e6-83b8-7054d2ab75be', 'input_ids':input_ids}, {})
         self.assert_(ref.is_similar(a))
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379250.0',
                   'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3',
-                  'id': '4e599a30-acb2-11e6-a3a0-7054d2ab75be'}, {'myCoolProp3': 'Prop3'})
+                  'id': '4e599a30-acb2-11e6-a3a0-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         a = action.generateArtefact(self.a_3, False)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379309.88',
                   'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3',
-                  'id': '720a1b80-acb2-11e6-85a5-7054d2ab75be'}, {})
+                  'id': '720a1b80-acb2-11e6-85a5-7054d2ab75be', 'input_ids':input_ids}, {})
         self.assert_(ref.is_similar(a))
         self.assert_(not 'myCoolProp3' in a)
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test additionalActionProps working
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test2", additionalActionProps={artefactProps.OBJECTIVE: 'newO'})
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380425.43',
                   'timePoint': 3, 'actionTag': 'Test2', 'invalid': False, 'objective': 'newO', 'type': 'Type3',
-                  'id': '0af4eb21-acb5-11e6-be37-7054d2ab75be'}, {'myCoolProp3': 'Prop3'})
+                  'id': '0af4eb21-acb5-11e6-be37-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test propInheritanceDict working
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test3",
@@ -304,10 +309,11 @@ class Test(unittest.TestCase):
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380822.18',
                   'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'Objctive2', 'type': 'Type3',
-                  'id': 'f771898f-acb5-11e6-b4db-7054d2ab75be'}, {'myCoolProp': 'Prop1', 'myCoolProp3': 'Prop3'})
+                  'id': 'f771898f-acb5-11e6-b4db-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp': 'Prop1', 'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test additionalActionProps overwrites propInheritanceDict
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test3",
@@ -317,10 +323,11 @@ class Test(unittest.TestCase):
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
                   'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'newO', 'type': 'Type3',
-                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be'}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'Prop1'})
+                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'Prop1'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
+        self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test auto url generation only prefix
         a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName")
