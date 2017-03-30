@@ -23,19 +23,31 @@ from pyoneer.criteria.propertyCriterion import PropertyCriterion
 from pyoneer.evaluation import EvaluationStrategy, detectEvaluationStrategies
 from pyoneer.evaluationResult import loadEvaluationResult
 from pyoneer.metrics import DefaultMetric
+from pyoneer.opitmizers.exhaustiveSearch import ExhaustiveSearchOptimizer
+from pyoneer.optimization import OptimizationStrategy, detectOptimizationStrategies
 
 
-class DummyStrategy(EvaluationStrategy):
+class DummyEvalStrategy(EvaluationStrategy):
 
     def defineMetric(self):
         '''This method must be implemented and return an metric instance.'''
         return DefaultMetric([DurationCriterion(), PropertyCriterion('myValue', ActionTagSelector('Result'))],
-                             self.sessionDir, clearSessionDir=self.clearSessionDir)
-
+                             self.sessionDir,
+                             measureWeights={'pyoneer.criteria.PropertyCriterion.myValue.mean':1, 'pyoneer.criteria.DurationCriterion.duration.mean':1},
+                             clearSessionDir=self.clearSessionDir)
     def defineName(self):
         return "TestEvaluation"
 
-class TestEvaluationStrategy(unittest.TestCase):
+class DummyOptimizationStrategy(OptimizationStrategy):
+
+    def defineOptimizer(self):
+        '''This method must be implemented and return an metric instance.'''
+        return ExhaustiveSearchOptimizer(['x','delay'], [-200,-10], [200,10],[4,4])
+
+    def defineName(self):
+        return "TestOptimization"
+
+class TestOptimizationStrategy(unittest.TestCase):
   def setUp(self):
 
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "workflow")
@@ -43,7 +55,6 @@ class TestEvaluationStrategy(unittest.TestCase):
     self.tempDir = os.path.join(os.path.split(__file__)[0],"temporary")
     self.sessionDir = os.path.join(self.tempDir, "test_EvaluationStrategy")
     self.testWorkflowFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "testworkflow"+os.extsep+"py")
-    self.maxDiff = None
 
   def tearDown(self):
     try:
@@ -51,35 +62,25 @@ class TestEvaluationStrategy(unittest.TestCase):
     except:
       pass
 
-  def assertDictEqual(self, d1, d2, msg=None):
-    '''special implementation to compare with assertAlmostEqual, because measurements might differ slightly.'''
-    for k,v1 in d1.iteritems():
-      self.assertIn(k, d2, msg)
-      v2 = d2[k]
-      self.assertAlmostEquals(v1, v2, 5, msg)
-    return True
+  def test_Optimization(self):
+    strat = DummyOptimizationStrategy(__file__, self.sessionDir)
 
-  def test_Evaluation(self):
-    strat = DummyStrategy(self.sessionDir)
+    results = strat.optimize(workflowFile=self.testWorkflowFile, artefactFile=self.testArtefactFile)
 
-    result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile)
-    ref = loadEvaluationResult(os.path.join(self.testDataDir,'result.eval'))
-    self.assertDictEqual(result.measurements, ref.measurements)
-
-  def test_Evaluation_withModifier(self):
-    strat = DummyStrategy(self.sessionDir)
-
-    result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile, workflowModifier={'x':50,'delay':42})
-    ref = loadEvaluationResult(os.path.join(self.testDataDir,'result_with_modifier.eval'))
-    self.assertDictEqual(result.measurements, ref.measurements)
+    self.assert_(not results is None)
+    result = results.itervalues().next()
+    refParameter = {'delay': 0, 'x': 100}
+    refSVMeasure = 0.0
+    self.assertEqual(refParameter, result[0])
+    self.assertAlmostEquals(refSVMeasure, result[1].svMeasure, 6)
 
   def test_StrategyDetection(self):
-    stratClasses = detectEvaluationStrategies(__file__)
+    stratClasses = detectOptimizationStrategies(__file__)
 
     self.assertEqual(len(stratClasses), 1)
-    self.assertEqual(stratClasses[0].__name__, 'DummyStrategy')
-    strat = stratClasses[0](self.sessionDir)
-    self.assertEqual(strat.defineName(), 'TestEvaluation')
+    self.assertEqual(stratClasses[0].__name__, 'DummyOptimizationStrategy')
+    strat = stratClasses[0](__file__, self.sessionDir)
+    self.assertEqual(strat.defineName(), 'TestOptimization')
 
 
 if __name__ == '__main__':

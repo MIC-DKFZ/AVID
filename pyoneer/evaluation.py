@@ -10,7 +10,7 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import inspect
 import uuid
 
 class EvalInstanceDescriptor (object):
@@ -105,3 +105,24 @@ class EvaluationStrategy(object):
     result = metric.evaluate(workflowFile, artefactFile, workflowModifier=workflowModifier, label=label)
     
     return result
+
+
+def _predicateEvaluationStrategy(member):
+  return inspect.isclass(member) and issubclass(member,
+                                                EvaluationStrategy) and not member.__module__ == "pyoneer.evaluation"
+
+
+def detectEvaluationStrategies(relevantFile):
+  '''searches for all EvaluationStrategy derivates in the given file and passes
+  back a list of the found class objects.'''
+
+  result = list()
+
+  import imp
+  import os
+  stratModule = imp.load_source(os.path.splitext(os.path.split(relevantFile)[1])[0], relevantFile)
+
+  for member in inspect.getmembers(stratModule, _predicateEvaluationStrategy):
+    result.append(member[1])
+
+  return result

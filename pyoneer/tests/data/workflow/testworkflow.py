@@ -36,13 +36,13 @@ if __name__ == "__main__":
     __this__ = sys.modules[__name__]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--delay', type=int)
-    parser.add_argument('--x', type=int)
+    parser.add_argument('--delay', type=float)
+    parser.add_argument('--x', type=float)
     cliargs, unknown = parser.parse_known_args()
 
     delay = 0
     if cliargs.delay is not None:
-      delay = cliargs.delay
+      delay = abs(cliargs.delay)
 
     x = 0
     if cliargs.x is not None:

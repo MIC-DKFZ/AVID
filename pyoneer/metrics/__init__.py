@@ -132,7 +132,7 @@ class DefaultMetric (object):
     
     
   def _generateSessionPath(self, label = None):
-    '''Helper function that returns a tuple (<path to the session file>, <session directory>)'''
+    '''Helper function that returns a tuple (<path to the session file>, <session name>)'''
     name = label
     if label is None:
       name = datetime.datetime.now().strftime("EvalSession_%Y-%m-%d_%H-%M-%S")
