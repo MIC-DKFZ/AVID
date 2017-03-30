@@ -1,0 +1,123 @@
+<avid:evaluation_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+  <avid:name>TestEvaluation</avid:name>
+  <avid:workflow_file>C:\Dev\AVID\source\pyoneer\tests\data\workflow\testworkflow.py</avid:workflow_file>
+  <avid:workflow_modifiers>
+    <avid:modifier key="delay">42</avid:modifier>
+    <avid:modifier key="x">5</avid:modifier>
+  </avid:workflow_modifiers>
+  <avid:artefact_file>C:\Dev\AVID\source\pyoneer\tests\data\workflow\testworkflow_artefacts.avid</avid:artefact_file>
+  <avid:sv_measurement>2761.5636658</avid:sv_measurement>
+  <avid:measure_weights />
+  <avid:measurements>
+    <avid:measurement key="pyoneer.criteria.DurationCriterion.duration.min">42.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.max">710.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.DurationCriterion.duration.max">42.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum.sd">304.448499567</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.DurationCriterion.duration.mean">42.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum.min">20.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.min">20.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.DurationCriterion.duration.sd">0.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum.max">710.0</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sd">304.448499567</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.mean">283.333333333</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum.mean">283.333333333</avid:measurement>
+    <avid:measurement key="pyoneer.criteria.MetricCriterionBase.FailedInstances">0</avid:measurement>
+  </avid:measurements>
+  <avid:measurement_instances>
+    <avid:measurement_instance>
+      <avid:instance_descriptor>
+        <avid:id>eacccce0-66d9-415d-a63f-91e945c35a28</avid:id>
+        <avid:defining_value key="case">case3</avid:defining_value>
+      </avid:instance_descriptor>
+      <avid:measurements>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue">
+          <avid:value>20.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="pyoneer.criteria.DurationCriterion.duration">42.0</avid:measurement>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum">20.0</avid:measurement>
+      </avid:measurements>
+    </avid:measurement_instance>
+    <avid:measurement_instance>
+      <avid:instance_descriptor>
+        <avid:id>3fa68ccf-42fa-463e-a5ff-f5b1576b35da</avid:id>
+        <avid:defining_value key="case">case2</avid:defining_value>
+      </avid:instance_descriptor>
+      <avid:measurements>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue">
+          <avid:value>710.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="pyoneer.criteria.DurationCriterion.duration">42.0</avid:measurement>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum">710.0</avid:measurement>
+      </avid:measurements>
+    </avid:measurement_instance>
+    <avid:measurement_instance>
+      <avid:instance_descriptor>
+        <avid:id>adda7e63-a8f9-47b8-9fcf-3d74bb897066</avid:id>
+        <avid:defining_value key="case">case1</avid:defining_value>
+      </avid:instance_descriptor>
+      <avid:measurements>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue">
+          <avid:value>120.0</avid:value>
+        </avid:measurement>
+        <avid:measurement key="pyoneer.criteria.DurationCriterion.duration">42.0</avid:measurement>
+        <avid:measurement key="pyoneer.criteria.PropertyCriterion.myValue.sum">120.0</avid:measurement>
+      </avid:measurements>
+    </avid:measurement_instance>
+  </avid:measurement_instances>
+  <avid:measurements_info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sum.min">
+      <avid:value_name>Sum of myValue (min)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.DurationCriterion.duration.min">
+      <avid:value_name>Duration (min)</avid:value_name>
+      <avid:value_description>Minimum ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.max">
+      <avid:value_name>myValue (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sd">
+      <avid:value_name>myValue (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sum">
+      <avid:value_name>Sum of myValue</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.DurationCriterion.duration">
+      <avid:value_name>Duration</avid:value_name>
+      <avid:value_description>Duration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.min">
+      <avid:value_name>myValue (min)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.DurationCriterion.duration.sd">
+      <avid:value_name>Duration (std dev)</avid:value_name>
+      <avid:value_description>Standard deviation ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.DurationCriterion.duration.max">
+      <avid:value_name>Duration (max)</avid:value_name>
+      <avid:value_description>Maximum ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sum.max">
+      <avid:value_name>Sum of myValue (max)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue">
+      <avid:value_name>myValue</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sum.sd">
+      <avid:value_name>Sum of myValue (std dev)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.DurationCriterion.duration.mean">
+      <avid:value_name>Duration (mean)</avid:value_name>
+      <avid:value_description>Mean ofDuration of execution ( in [s])</avid:value_description>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.mean">
+      <avid:value_name>myValue (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.PropertyCriterion.myValue.sum.mean">
+      <avid:value_name>Sum of myValue (mean)</avid:value_name>
+    </avid:info>
+    <avid:info key="pyoneer.criteria.MetricCriterionBase.FailedInstances">
+      <avid:value_name>Failures</avid:value_name>
+      <avid:value_description>Number of failed instances in the evaluated set.</avid:value_description>
+    </avid:info>
+  </avid:measurements_info>
+</avid:evaluation_result>

@@ -4,7 +4,7 @@
   <avid:workflow_modifiers />
   <avid:artefact_file />
   <avid:sv_measurement>1.5</avid:sv_measurement>
-  <avid:sv_weights />
+  <avid:measure_weights />
   <avid:measurements>
     <avid:measurement key="crit1">1</avid:measurement>
     <avid:measurement key="crit2">0.5</avid:measurement>

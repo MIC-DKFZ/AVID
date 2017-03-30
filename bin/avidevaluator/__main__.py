@@ -14,6 +14,7 @@
 import argparse
 import imp
 import inspect
+import os
 
 from pyoneer.evaluation import EvaluationStrategy
 
@@ -28,24 +29,29 @@ def main():
   parser.add_argument('resultPath', help = "Path where the evaluation result should be stored to.")
   parser.add_argument('--artefacts', help = 'Specifies the artefact file that should be used to make the evaluations.')
   parser.add_argument('--workflow', help = 'Specifies the workflow file that should be used to make the evaluations.')
-  parser.add_argument('--sessionPath', help = "It defines the root location where all the evaluation data is stored (temporarily).")
-  parser.add_argument('--name', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it will be "<sessionFile name>_session".')
+  parser.add_argument('--sessionPath', help = "It defines the root directory where all the evaluation data is stored (temporarily). If not set it is <resultPath>/session")
+  parser.add_argument('--label', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it is the name of the used evaluation strategy".')
   parser.add_argument('--expandPaths', help = 'Indicates if relative artefact path should be expanded when loading the data.')
   parser.add_argument('--debug', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
-  parser.add_argument('--keepArtefacts', action='store_true', help = 'Indicates that the artefacts of the evaluation sessions should be stored and not be removed.')
+  parser.add_argument('--keepArtefacts', action='store_true', help = 'Indicates that the artefacts of the evaluation sessions should be kept and not be removed.')
 
   args_dict = vars(parser.parse_args())
 
   stratClasses = getEvaluationStrategies(args_dict['evaluation'])
-  
+  resultPath = args_dict['resultPath']
+  sessionPath = args_dict['sessionPath']
+  label = args_dict['label']
+
+  if sessionPath is None:
+    sessionPath = os.path.join(resultPath, 'session')
+
   for stratClass in stratClasses:
-    result = stratClass(args_dict['sessionPath'], args_dict['keepArtefacts']).evaluate('foo','bar')
-    savePath = args_dict['sessionPath']
-    saveEvaluationResult(savePath, result)
+    result = stratClass(sessionPath, args_dict['keepArtefacts']).evaluate('foo','bar', label=label)
+    saveEvaluationResult(resultPath, result)
 
 
 def predicateEvaluationStrategy(member):
-  return inspect.isclass(member) and issubclass(member, EvaluationStrategy) and not member.__module__ == "pyoneer.eval"
+  return inspect.isclass(member) and issubclass(member, EvaluationStrategy) and not member.__module__ == "pyoneer.evaluation"
 
 def getEvaluationStrategies(relevantFiles):
   '''searches for all EvaluationStrategy derivates in the given files and passes

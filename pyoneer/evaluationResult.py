@@ -20,7 +20,7 @@ class EvaluationResult (object):
   
   def __init__(self, measurements, instanceMeasurements, name = 'unknown_evaluation',
                workflowFile = '', artefactFile = '', workflowModifier = {},
-               svWeights = None, valueNames = {}, valueDescriptions = {}):
+               measureWeights = None, valueNames = {}, valueDescriptions = {}):
     '''Init of a EvaluationResult instance.
     @param measurements: Dictionary containing the overall measurements for the
     whole test set.  
@@ -31,38 +31,37 @@ class EvaluationResult (object):
     @param workflowFile: Path to the workflow script that was evaluated.  
     @param artefactFile: Path to the artefact file that used to evaluated the workflow.  
     @param workflowModifier: Dictionary of the workflow modifier used for the evaluation.
-    @param svWeights: Dictionary of the weights used to calculate the single
-    value measure of the evaluation.
+    @param measureWeights: Dictionary of the weights used to calculate the single
+    value measure and the weightes measures of the evaluation.
     @param valueNames: Dictionary of the display names of used measurements.  
     @param valueDescriptions: Dictionary of the descriptions of used measurements.  
     '''  
     self.measurements = measurements
     self.instanceMeasurements = instanceMeasurements
-    self.svWeights = dict()
     self.name = name
     self.workflowFile = workflowFile
     self.artefactFile = artefactFile
     self.workflowModifier = workflowModifier
-    self.svWeights = svWeights
+    self.measureWeights = measureWeights
     self.valueNames = valueNames
     self.valueDescriptions = valueDescriptions
     
   @property
   def svMeasure(self):
     '''Convinience property that computes the single value measure usgin the
-       measurements and the svWeights. If svWeights is None a weight of 1 for
-       all measurements is assumed. If svWeights is defined, all measurements
+       measurements and the measureWeights. If measureWeights is None a weight of 1 for
+       all measurements is assumed. If measureWeights is defined, all measurements
        not explicitly weighted will have the weight 0.'''
     
     result = 0.0
     
     for valueName in self.measurements:
       weight = 0.0
-      if self.svWeights is None:
+      if self.measureWeights is None:
         weight = 1.0
       else:
         try:
-          weight = self.svWeights[valueName]
+          weight = self.measureWeights[valueName]
         except:
           pass
         
@@ -73,7 +72,33 @@ class EvaluationResult (object):
 
       
     return result
-  
+
+  @property
+  def measurements_weighted(self):
+    '''Convinience property that returns the measurment dictionary but with weighted results. It uses the
+       measureWeights. If measureWeights is None a weight of 1 for
+       all measurements is assumed. If measureWeights is defined, all measurements
+       not explicitly weighted will have the weight 0.'''
+
+    result = dict()
+
+    for valueName in self.measurements:
+      weight = 0.0
+      if self.measureWeights is None:
+        weight = 1.0
+      else:
+        try:
+          weight = self.measureWeights[valueName]
+        except:
+          pass
+
+      try:
+        result[valueName] = weight * self.measurements[valueName]
+      except TypeError:
+        result[valueName] = None # if we cannot weight an measurment (because it is None), we just add it as None.
+
+    return result
+
 
 XML_NAMESPACE = "http://www.dkfz.de/en/sidt/avid"
 XML_NAMESPACE_DICT = {"avid":XML_NAMESPACE}
@@ -86,8 +111,8 @@ XML_NAME = "avid:name"
 XML_WORKFLOWFILE = "avid:workflow_file"
 XML_ARTEFACTFILE = "avid:artefact_file"
 XML_SV_MEASUREMENT = "avid:sv_measurement"
-XML_SV_WEIGHTS = "avid:sv_weights"
-XML_SV_WEIGHT = "avid:sv_weight"
+XML_MEASURE_WEIGHTS = "avid:measure_weights"
+XML_MEASURE_WEIGHT = "avid:measure_weight"
 XML_WORKFLOW_MODS = "avid:workflow_modifiers"
 XML_WORKFLOW_MOD = "avid:modifier"
 XML_WORKFLOWFILE = "avid:workflow_file"
@@ -249,15 +274,15 @@ def saveEvaluationResult(filePath, evalResult):
   builder.data(str(evalResult.svMeasure))
   builder.end(XML_SV_MEASUREMENT)
 
-  builder.start(XML_SV_WEIGHTS, {})
+  builder.start(XML_MEASURE_WEIGHTS, {})
   try:
-    for mID in evalResult.svWeights:
-      builder.start(XML_SV_WEIGHT, {XML_ATTR_KEY : mID})
-      builder.data(str(evalResult.svWeights[mID]))
-      builder.end(XML_SV_WEIGHT)
+    for mID in evalResult.measureWeights:
+      builder.start(XML_MEASURE_WEIGHT, {XML_ATTR_KEY : mID})
+      builder.data(str(evalResult.measureWeights[mID]))
+      builder.end(XML_MEASURE_WEIGHT)
   except:
     pass
-  builder.end(XML_SV_WEIGHTS)
+  builder.end(XML_MEASURE_WEIGHTS)
 
   builder.start(XML_MEASUREMENTS, {})
   for mID in evalResult.measurements:
@@ -339,3 +364,129 @@ def saveEvaluationResult(filePath, evalResult):
   
   tree.write(filePath, xml_declaration = True)
 
+
+def exportHTLMEvaluationResult(filePath, evalResult):
+  builder = ElementTree.TreeBuilder()
+
+  builder.start('html')
+  builder.start('head')
+  builder.start('title')
+  builder.data('AVID pythoneer - Evaluation result protocol')
+  builder.end('title')
+  builder.end('head')
+
+  builder.start('body')
+  builder.start(XML_NAME, {})
+  builder.data(str(evalResult.name))
+  builder.end(XML_NAME)
+
+  builder.start(XML_WORKFLOWFILE, {})
+  builder.data(str(evalResult.workflowFile))
+  builder.end(XML_WORKFLOWFILE)
+
+  builder.start(XML_WORKFLOW_MODS, {})
+  for mID in evalResult.workflowModifier:
+    builder.start(XML_WORKFLOW_MOD, {XML_ATTR_KEY: mID})
+    builder.data(str(evalResult.workflowModifier[mID]))
+    builder.end(XML_WORKFLOW_MOD)
+  builder.end(XML_WORKFLOW_MODS)
+
+  builder.start(XML_ARTEFACTFILE, {})
+  builder.data(str(evalResult.artefactFile))
+  builder.end(XML_ARTEFACTFILE)
+
+  builder.start(XML_SV_MEASUREMENT, {})
+  builder.data(str(evalResult.svMeasure))
+  builder.end(XML_SV_MEASUREMENT)
+
+  builder.start(XML_MEASURE_WEIGHTS, {})
+  try:
+    for mID in evalResult.measureWeights:
+      builder.start(XML_MEASURE_WEIGHT, {XML_ATTR_KEY: mID})
+      builder.data(str(evalResult.measureWeights[mID]))
+      builder.end(XML_MEASURE_WEIGHT)
+  except:
+    pass
+  builder.end(XML_MEASURE_WEIGHTS)
+
+  builder.start(XML_MEASUREMENTS, {})
+  for mID in evalResult.measurements:
+    builder.start(XML_MEASUREMENT, {XML_ATTR_KEY: mID})
+    if not evalResult.measurements[mID] is None:
+      builder.data(str(evalResult.measurements[mID]))
+    else:
+      builder.data('')
+    builder.end(XML_MEASUREMENT)
+  builder.end(XML_MEASUREMENTS)
+
+  builder.start(XML_INSTANCES, {})
+  for desc in evalResult.instanceMeasurements:
+    builder.start(XML_INSTANCE, {})
+
+    builder.start(XML_INSTANCE_DESCRIPTOR, {})
+    builder.start(XML_INSTANCE_ID, {})
+    builder.data(str(desc.ID))
+    builder.end(XML_INSTANCE_ID)
+
+    for defValue in desc._definingValues:
+      builder.start(XML_DEF_VALUE, {XML_ATTR_KEY: defValue})
+      builder.data(str(desc._definingValues[defValue]))
+      builder.end(XML_DEF_VALUE)
+    builder.end(XML_INSTANCE_DESCRIPTOR)
+
+    builder.start(XML_MEASUREMENTS, {})
+    for mID in evalResult.instanceMeasurements[desc]:
+      builder.start(XML_MEASUREMENT, {XML_ATTR_KEY: mID})
+      if not evalResult.instanceMeasurements[desc][mID] is None:
+        try:
+          for value in evalResult.instanceMeasurements[desc][mID]:
+            builder.start(XML_VALUE, {})
+            builder.data(str(value))
+            builder.end(XML_VALUE)
+        except:
+          builder.data(str(evalResult.instanceMeasurements[desc][mID]))
+      else:
+        builder.data('')
+      builder.end(XML_MEASUREMENT)
+    builder.end(XML_MEASUREMENTS)
+
+    builder.end(XML_INSTANCE)
+
+  builder.end(XML_INSTANCES)
+
+  builder.start(XML_MEASUREMENTS_INFO, {})
+  keys = set(evalResult.valueNames.keys() + evalResult.valueDescriptions.keys())
+
+  for key in keys:
+    builder.start(XML_INFO, {XML_ATTR_KEY: key})
+
+    if key in evalResult.valueNames:
+      builder.start(XML_VALUE_NAME, {})
+      builder.data(str(evalResult.valueNames[key]))
+      builder.end(XML_VALUE_NAME)
+
+    if key in evalResult.valueDescriptions:
+      builder.start(XML_VALUE_DESC, {})
+      builder.data(str(evalResult.valueDescriptions[key]))
+      builder.end(XML_VALUE_DESC)
+
+    builder.end(XML_INFO)
+
+  builder.end(XML_MEASUREMENTS_INFO)
+  builder.end(XML_EVALUATION_RESULT)
+  builder.end('body')
+  builder.end('html')
+
+  root = builder.close()
+  tree = ElementTree.ElementTree(root)
+  indent(root)
+
+  try:
+    os.makedirs(os.path.split(filePath)[0])
+  except:
+    pass
+
+  if os.path.isfile(filePath):
+    os.remove(filePath)
+
+  tree.write(filePath, method='html')

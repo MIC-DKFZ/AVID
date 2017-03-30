@@ -11,72 +11,32 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-import uuid
-
-class EvalInstanceDescriptor (object):
-  '''Descriptor that defines an evaluation instance (so basically all workflow
-    artefact that have certain values for eval instance defining properties.
-    It use used to lable/identify the evaluation measurments for instances'''
+class OptimizationHelper (object):
+  '''Helper class to run an optimization.'''
   
-  def __init__(self, definingValues, ID = None):
-    self._definingValues = definingValues
-    
-    self._definingStr = str()
-    
-    for item in sorted(definingValues.items()):
-      self._definingStr = self._definingStr+"'"+str(item[0])+"':'"+str(item[1])+"',"
-      
-    self.ID = ID
-    if self.ID is None:
-      self.ID = str(uuid.uuid4())
-    
-  def __missing__(self, key):
-    return None
-   
-  def __len__(self):
-    return len(self._definingValues)
-   
-  def __contains__(self, key):
-    return key in self._definingValues
-  
-  def __eq__(self,other):
-    if isinstance(other, self.__class__):
-      return self._definingValues == other._definingValues
-    else:
-      return False  
-
-  def __hash__(self):
-    return hash(self._definingStr)
-  
-  def __ne__(self,other):
-    return not self.__eq__(other)
-
-  def __repr__(self):
-    return 'EvalInstanceDescriptor(%s)' % (self._definingValues)
-
-  def __str__(self):
-    return '(%s)' % (self._definingValues)
+  def __init__(self):
 
 
-class EvaluationStrategy(object):
-  ''' Helper object to define a EvaluationStrategy that can be used by
-  execution scripts like avid evaluation or optimization. It is simelar to 
+
+class OptimizationStrategy(object):
+  ''' Helper object to define a OptimizatoinStrategy that can be used by
+  execution scripts like avid optimization. It is simelar to
   the TestCase class of the unittest package. pyoneer execution scripts will search
-  for classes based on EvaluationStrategy and will use instances of them.
+  for classes based on OptimizationStrategy and will use instances of them.
   '''
   def __init__(self, sessionDir, clearSessionDir = True):
     self.sessionDir = sessionDir
     self.clearSessionDir = clearSessionDir
 
-  def defineMetric(self):
-    '''This method must be implemented and return an metric instance.'''
+  def defineOptimizer(self):
+    '''This method must be implemented and return an optimizer instance.'''
     raise NotImplementedError("Reimplement in a derived class to function correctly.")
     pass    
 
   def defineName(self):
-    '''This method returns the name of the evaluation strategy. It can be
+    '''This method returns the name of the optimization strategy. It can be
      reimplemented to specify the name of the strategy.'''
-    return "Unnamed Evaluation"
+    return "Unnamed Optimization"
 
   def optimumIsMinimum(self):
     '''This method indicates if the optimum is a minimum(return True) and therefore lesser values (sv measurement or

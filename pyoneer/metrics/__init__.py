@@ -30,7 +30,7 @@ class DefaultMetric (object):
   evaluate an avid workflow according to result artefacts it produces. In
   order to evaluate, the metric uses the specified criteria.'''
   
-  def __init__(self, metricCriteria, sessionDir, svWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
+  def __init__(self, metricCriteria, sessionDir, measureWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
     '''Initialization of the metric.
     @param metricCriteria: list of criterion instances that should be used to
     evaluate.
@@ -38,9 +38,9 @@ class DefaultMetric (object):
     @param instanceDefiningProps: List of artefact properties that discriminate
     evaluation instances. E.g. as a default, the case property will be used to
     discriminate evaluation instances, thus one instance evaluation per case.
-    @param svWeights: Weights that should be used when computing the single value
-    measurement by summing up the measurements of all criteria. It is a dictionary
-    with the measurement value IDs as keys and the weights as values. All
+    @param measureWeights: Weights that should be used when computing the single value
+    measurement (by summing up the measurements of all criteria) or the weighted measurements.
+    It is a dictionary with the measurement value IDs as keys and the weights as values. All
     measurement values not declared in the dict are assumed to have a weight of 0.
     Passing None implies that everything has a weight of 1.
     @param cleareSessionDir: Indicates of the metric should remove all artefacts
@@ -49,7 +49,7 @@ class DefaultMetric (object):
     self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
     self.sessionDir = sessionDir
-    self._svWeights = svWeights
+    self._measureWeights = measureWeights
     self._clearSessionDir = clearSessionDir
     
     
@@ -96,7 +96,7 @@ class DefaultMetric (object):
       except:
         logger.debug('Unkown error when clearing the session dir.')       
     
-    result = EvaluationResult(gmeasure, imeasure, sessionName, workflowFile, artefactFile, workflowModifier, self._svWeights, self.valueNames, self.valueDescriptions)
+    result = EvaluationResult(gmeasure, imeasure, sessionName, workflowFile, artefactFile, workflowModifier, self._measureWeights, self.valueNames, self.valueDescriptions)
       
     return result
 
@@ -119,9 +119,11 @@ class DefaultMetric (object):
     
     callStr = 'python "'+workflowFile\
       +'" --sessionPath "'+sessionFile\
-      +'" --name "'+sessionName\
-      +'" --bootstrapArtefacts "'+artefactFile\
-      +'" --overwriteExistingSession --autoSave'
+      +'" --name "'+sessionName
+    if artefactFile is not None:
+      callStr += '" --bootstrapArtefacts "'+artefactFile
+
+    callStr += '" --overwriteExistingSession --autoSave'
       
     for modKey in workflowModifier:
       callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'     
