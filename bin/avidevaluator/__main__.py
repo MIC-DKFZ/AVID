@@ -16,7 +16,7 @@ import imp
 import inspect
 import os
 
-from pyoneer.evaluation import EvaluationStrategy
+from pyoneer.evaluation import detectEvaluationStrategies
 
 
 def main():
@@ -37,35 +37,28 @@ def main():
 
   args_dict = vars(parser.parse_args())
 
-  stratClasses = getEvaluationStrategies(args_dict['evaluation'])
+  stratClasses = detectEvaluationStrategies(args_dict['evaluation'])
   resultPath = args_dict['resultPath']
   sessionPath = args_dict['sessionPath']
-  label = args_dict['label']
+  artefactPath = None
+  if 'artefacts' in args_dict:
+    artefactPath = args_dict['artefacts']
+
+  workflowPath = None
+  if 'workflow' in args_dict:
+    workflowPath = args_dict['workflow']
+
+  label = None
+  if 'label' in args_dict:
+    label = args_dict['label']
 
   if sessionPath is None:
     sessionPath = os.path.join(resultPath, 'session')
 
   for stratClass in stratClasses:
-    result = stratClass(sessionPath, args_dict['keepArtefacts']).evaluate('foo','bar', label=label)
+    result = stratClass(sessionPath, args_dict['keepArtefacts']).evaluate(workflowFile=workflowPath, artefactFile=artefactPath, label=label)
     saveEvaluationResult(resultPath, result)
 
-
-def predicateEvaluationStrategy(member):
-  return inspect.isclass(member) and issubclass(member, EvaluationStrategy) and not member.__module__ == "pyoneer.evaluation"
-
-def getEvaluationStrategies(relevantFiles):
-  '''searches for all EvaluationStrategy derivates in the given files and passes
-  back a list of the found class objects.'''
-  
-  result = list()
-  
-  stratModule = imp.load_source('candidate', relevantFiles)
-    
-  for member in inspect.getmembers(stratModule, predicateEvaluationStrategy):
-    result.append(member[1])
-
-  return result  
-    
 
 if __name__ == "__main__":
   main()
