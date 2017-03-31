@@ -69,8 +69,8 @@ def main():
   if len(args_dict['commands']) == 0:
     #default mode
 
-    format_str = '{:4} | {a['+defaultProps.CASE+']:20.20} | {a['+defaultProps.CASEINSTANCE+']:10.10} | {a['+defaultProps.TIMEPOINT+']:10} | {a['+defaultProps.INVALID+']:5} | {a['+defaultProps.URL+']}'
-    header = {defaultProps.CASE:'Case',defaultProps.CASEINSTANCE:'Instance', defaultProps.TIMEPOINT: 'Time', defaultProps.INVALID: 'Fail', defaultProps.URL: 'URL'}
+    format_str = '{:4} | {a['+defaultProps.CASE+']:20.20} | {a['+defaultProps.ACTIONTAG+']:20.20} | {a['+defaultProps.TIMEPOINT+']:10} | {a['+defaultProps.INVALID+']:5} | {a['+defaultProps.URL+']}'
+    header = {defaultProps.CASE:'Case',defaultProps.ACTIONTAG:'Action tag', defaultProps.TIMEPOINT: 'Timepoint', defaultProps.INVALID: 'Fail', defaultProps.URL: 'URL'}
     print(format_str.format('#', a=header))
     for pos, artefact in enumerate(selected_artefacts):
       print(format_str.format(pos, a=artefact))
