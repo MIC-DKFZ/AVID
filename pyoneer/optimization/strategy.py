@@ -103,7 +103,11 @@ class OptimizationStrategy(object):
     def defineOptimizer(self):
         '''This method must be implemented and return an optimizer instance.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
-        pass
+
+    def defineSearchParameters(self):
+        '''This method must be implmented and return a parameter descriptor. The descriptor
+        specifies the search parameter used by the optimizer.'''
+        raise NotImplementedError("Reimplement in a derived class to function correctly.")
 
     def defineName(self):
         '''This method returns the name of the optimization strategy. It can be
@@ -148,8 +152,7 @@ class OptimizationStrategy(object):
 
 
 def _predicateOptimizationStrategy(member):
-    return inspect.isclass(member) and issubclass(member,
-                                                  OptimizationStrategy) and not member.__module__ == "pyoneer.optimization"
+    return inspect.isclass(member) and issubclass(member, OptimizationStrategy)
 
 
 def detectOptimizationStrategies(relevantFile):
@@ -158,9 +161,12 @@ def detectOptimizationStrategies(relevantFile):
 
     result = list()
 
-    stratModule = imp.load_source(os.path.splitext(os.path.split(relevantFile)[1])[0], relevantFile)
+    moduleName = 'relevant_pyoneer_strategy_search_module' #search_msearchos.path.splitext(os.path.split(relevantFile)[1])[0]
+    stratModule = imp.load_source(moduleName, relevantFile)
 
     for member in inspect.getmembers(stratModule, _predicateOptimizationStrategy):
-        result.append(member[1])
+        if member[1].__module__ == moduleName:
+            #ensures that we only get members that very originaly defined in the relevant file.
+            result.append(member[1])
 
     return result

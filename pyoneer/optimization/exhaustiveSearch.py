@@ -13,7 +13,7 @@
 
 import logging
 
-from pyoneer.opitmizers import OptimizerBase
+from pyoneer.optimization import OptimizerBase
 
 logger = logging.getLogger(__name__)
 

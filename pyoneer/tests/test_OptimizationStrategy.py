@@ -12,20 +12,17 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 import os
+import shutil
 import unittest
 
-import shutil
-
-from pyoneer.criteria.durationCriterion import DurationCriterion
-
 from avid.selectors.keyValueSelector import ActionTagSelector
+from pyoneer.criteria.durationCriterion import DurationCriterion
 from pyoneer.criteria.propertyCriterion import PropertyCriterion
-from pyoneer.evaluation import EvaluationStrategy, detectEvaluationStrategies
-from pyoneer.evaluationResult import loadEvaluationResult
+from pyoneer.evaluation import EvaluationStrategy
 from pyoneer.metrics import DefaultMetric
-from pyoneer.opitmizers.exhaustiveSearch import ExhaustiveSearchOptimizer
-from pyoneer.optimization import OptimizationStrategy, detectOptimizationStrategies
-
+from pyoneer.optimization.exhaustiveSearchStrategy import ExhaustiveSearchStrategy
+from pyoneer.optimization.strategy import detectOptimizationStrategies
+import pyoneer.optimization.parameters as param_helper
 
 class DummyEvalStrategy(EvaluationStrategy):
 
@@ -38,11 +35,17 @@ class DummyEvalStrategy(EvaluationStrategy):
     def defineName(self):
         return "TestEvaluation"
 
-class DummyOptimizationStrategy(OptimizationStrategy):
+class DummyOptimizationStrategy(ExhaustiveSearchStrategy):
 
-    def defineOptimizer(self):
-        '''This method must be implemented and return an metric instance.'''
-        return ExhaustiveSearchOptimizer(['x','delay'], [-200,-10], [200,10],[4,4])
+    def defineSearchParameters(self):
+        desc = param_helper.generateDescriptor(['x','delay'])
+        param_helper.decorateMinimum(desc, 'x', -200)
+        param_helper.decorateMinimum(desc, 'delay', -10)
+        param_helper.decorateMaximum(desc, 'x', 200)
+        param_helper.decorateMaximum(desc, 'delay', 10)
+        param_helper.decorateParameter(desc, 'x', 'frequency', 4)
+        param_helper.decorateParameter(desc, 'delay', 'frequency', 4)
+        return desc
 
     def defineName(self):
         return "TestOptimization"
