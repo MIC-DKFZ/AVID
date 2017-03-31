@@ -40,7 +40,14 @@ class TestValiditySelector(unittest.TestCase):
     self.assertIn(self.a1, selection)
     self.assertIn(self.a2, selection)
     self.assertIn(self.a3, selection)
-    self.assertIn(self.a5, selection) 
+    self.assertIn(self.a5, selection)
+
+  def test_ValiditySelector_negate(self):
+    sel = ValiditySelector(negate=True)
+    selection = sel.getSelection(self.data)
+    self.assertEqual(len(selection), 2)
+    self.assertIn(self.a4, selection)
+    self.assertIn(self.a6, selection)
 
 if __name__ == '__main__':
     unittest.main()
