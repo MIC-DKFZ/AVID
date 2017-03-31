@@ -151,13 +151,16 @@ def getDeformationFieldPath(regPath, getInverseKernel = True):
     tree = ElementTree.parse(regPath)
     root = tree.getroot()
 
-    searchPath = "./Registration/Kernel/FieldPath[@ID='inverse']"
+    searchPath = "./Kernel[@ID='inverse']/FieldPath"
     if not getInverseKernel:
-        searchPath = "./Registration/Kernel/FieldPath[@ID='direct']"
+        searchPath = "./Kernel[@ID='direct']/FieldPath"
 
     node = root.find(searchPath, namespaces=None)
     try:
-        return node.text
+        fieldPath = node.text
+        if not os.path.isabs(fieldPath):
+            fieldPath = os.path.join(os.path.split(regPath)[0], fieldPath)
+        return fieldPath
     except:
         return None
 
