@@ -53,7 +53,7 @@ def mrgrtFileFunction(pathParts, fileName, fullPath):
               result = generateArtefactEntry(case, None, 0, 'BPLMR', artefactProps.TYPE_VALUE_RESULT,
                                            artefactProps.FORMAT_VALUE_DCM, fullPath)
     elif ext == ".fcsv":
-        ps = fcsv.load_fcsv(fullPath)
+        ps = fcsv.read_fcsv(fullPath)
         newPath = fullPath + '.txt'
         matchpoint.write_simple_pointset(newPath, ps)
         if not timepoint is None:

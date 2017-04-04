@@ -165,7 +165,7 @@ def getDeformationFieldPath(regPath, getInverseKernel = True):
         return None
 
 
-def load_simple_pointset(filePath):
+def read_simple_pointset(filePath):
     '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
     While loaded the points are converted from RAS (slicer) to LPS (DICOM, itk).
     @param filePath Path where the fcsv file is located.

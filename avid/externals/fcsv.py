@@ -19,7 +19,7 @@ from pointset import PointRepresentation
 FORMAT_VALUE_SLICER_POINTSET = "3Dslicer_pointset"
 
 
-def load_fcsv(filePath):
+def read_fcsv(filePath):
     '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
     While loaded the points are converted from RAS (slicer) to LPS (DICOM, itk).
     @param filePath Path where the fcsv file is located.
@@ -27,7 +27,7 @@ def load_fcsv(filePath):
     points = list()
 
     if not os.path.isfile(filePath):
-        raise ValueError( "Cannot load fcsv point set file. File does not exist. File path: " +str(filePath))
+        raise ValueError( "Cannot read fcsv point set file. File does not exist. File path: " +str(filePath))
 
     with open(filePath, "rb") as csvfile:
         pointreader = csv.reader(csvfile, delimiter = ",")
@@ -59,3 +59,24 @@ def load_fcsv(filePath):
             points.append(point)
 
     return points
+
+def write_fcsv(filePath, pointset):
+    '''Loads a point set stored in slicer fcsv format. The points stored in a list as PointRepresentation instances.
+    While loaded the points are converted from RAS (slicer) to LPS (DICOM, itk).
+    @param filePath Path where the fcsv file is located.
+    '''
+    from avid.common import osChecker
+    osChecker.checkAndCreateDir(os.path.split(filePath)[0])
+    with open(filePath, "wb") as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+
+        for pos, point in enumerate(pointset):
+            row = list()
+            if point.label is None:
+                row.append(str(pos+1))
+            else:
+                row.append(point.label)
+            row.append(-1*point.x)
+            row.append(-1*point.y)
+            row.append(point.z)
+            writer.writerow(row)
