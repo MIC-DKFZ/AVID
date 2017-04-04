@@ -110,6 +110,7 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[0][artefactProps.ACTIONTAG], "tag_1")
       self.assertEqual(artefacts[0][artefactProps.OBJECTIVE], "obj_1")
       self.assertEqual(artefacts[0][artefactProps.INVALID], False)
+      self.assertEqual(artefacts[0][artefactProps.INPUT_IDS], None)
 
       self.assert_(artefacts[1][artefactProps.ID] is not None)
       self.assertEqual(artefacts[1][artefactProps.CASE], "case_2")
@@ -122,6 +123,7 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[1][artefactProps.OBJECTIVE], None)
       self.assertEqual(artefacts[1][artefactProps.INVALID], True)
       self.assertEqual(artefacts[1]["customProp"], "custom_1")
+      self.assertEqual(artefacts[1][artefactProps.INPUT_IDS], None)
       
       #Check if auto check of url existance works properly: invalidation
       self.assertEqual(artefacts[2][artefactProps.CASE], "case_3")
@@ -133,6 +135,7 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[2][artefactProps.ACTIONTAG], "UnkownAction")
       self.assertEqual(artefacts[2][artefactProps.OBJECTIVE], None)
       self.assertEqual(artefacts[2][artefactProps.INVALID], True)      
+      self.assertDictEqual(artefacts[2][artefactProps.INPUT_IDS], {"input1":"ID_1"})
 
 
     def test_save_xml(self):

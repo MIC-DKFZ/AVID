@@ -95,7 +95,11 @@ class plmRTSSMapAction(CLIActionBase):
 
     if self._reg is not  None:
       if regFormat == FORMAT_VALUE_MATCHPOINT:
-        regPath = getDeformationFieldPath(regPath)
+        fieldPath = getDeformationFieldPath(regPath)
+        if fieldPath is None:
+          raise RuntimeError("Cannot extract deformation field path from the given registration. Reg File: {}".format(regPath))
+        else:
+          regPath = fieldPath
       content += ' --xf "' + regPath + '"'
 
     if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:

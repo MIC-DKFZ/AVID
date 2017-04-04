@@ -40,6 +40,7 @@ class TestArtefactGeneration(unittest.TestCase):
     self.assertEqual(self.a1[artefactProps.URL], "myCoolFile.any")
     self.assertEqual(self.a1[artefactProps.OBJECTIVE], None)
     self.assertEqual(self.a1[artefactProps.INVALID], False)
+    self.assertEqual(self.a1[artefactProps.INPUT_IDS], None)
 
     self.assertEqual(self.a2["customProp1"], "nice")
     self.assertEqual(self.a2["customProp2"], "42")

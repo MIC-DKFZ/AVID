@@ -16,6 +16,7 @@ from avid.actions.mapR import mapRBatchAction as mapR
 from avid.actions.matchR import matchRBatchAction as matchR
 from avid.actions.voxelizer import VoxelizerBatchAction as Voxelizer
 from avid.actions.plmDice import plmDiceBatchAction as plmDice
+from avid.actions.plmRTSSMap import plmRTSSMapBatchAction as plmRTSSMap
 from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as doseStatsCollector
 from avid.actions.threadingScheduler import ThreadingScheduler
 
@@ -25,10 +26,12 @@ __this__ = sys.modules[__name__]
 parser = argparse.ArgumentParser()
 parser.add_argument('--plmTemplate', default="D:/ISILib/KimKraus_MRgRT_AVID_TestData/plm_commands.txt")
 parser.add_argument('--parallel', type=int, default=1)
+parser.add_argument('--usePoints', action='store_true')
 cliargs, unknown = parser.parse_known_args()
 
 plmDIRConfigPath = cliargs.plmTemplate
 multiTaskCount = cliargs.parallel
+usePoints = cliargs.usePoints
 
 plmPath = os.path.split(getToolConfigPath('plastimatch'))[0]
 regDIPP_rigid_multimodal = os.path.join(os.path.split(getToolConfigPath('matchR'))[0], 'mdra-0-13_DIPP_MultiModal_rigid_default.dll')
@@ -47,6 +50,10 @@ fxMRStructSetSelector = ATS("fxMR_struct")
 
 BPLMRPointsSelector = ATS("BPLMR_points")
 fxMRPointsSelector = ATS("fxMR_points")
+if not usePoints:
+    #setting tags to values that do not exist. Same result as defining no selector at all, but keeps the workflow itself simple.
+    BPLMRPointsSelector = ATS("NoneExistingBPLMR_points")
+    fxMRPointsSelector = ATS("NoneExistingfxMR_points")
 
 StructsSelector = ATS("Structs")
 ControlDoseSelector = ATS("ControlDose")
@@ -88,3 +95,5 @@ with workflow.initSession_byCLIargs(expandPaths=True, autoSave=True) as session:
     for structID in structSelectors:
         doseStatsCollector(structSelectors[structID], ['DICE', 'Hausdorff distance'], rowKey=artefactProps.TIMEPOINT,
                            columnKey=artefactProps.CASE, actionTag='Stats_MR_' + structID, alwaysDo=True).do()
+
+    plmRTSSMap(BPLCTStructSetSelector, reg_MR2CT2fxMRSelector, actionTag="MappedCTstruct2fxMR", propInheritanceDict = {artefactProps.TIMEPOINT:'reg'}, scheduler = ThreadingScheduler(multiTaskCount)).do()

@@ -21,5 +21,6 @@
 		<avid:property key="timePoint">2</avid:property>
 		<avid:property key="url">./artefact2.txt</avid:property>
 		<avid:property key="invalid">True</avid:property>
+		<avid:property key="input_ids"><avid:input_id key="input1">ID_1</avid:input_id></avid:property>
 	</avid:artefact>
 </avid:artefacts>

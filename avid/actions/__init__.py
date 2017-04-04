@@ -264,6 +264,14 @@ class SingleActionBase(ActionBase):
 
             result[artefactProps.URL] = name
 
+        inputs = dict()
+        for inputName in self._inputArtefacts:
+          inputs[inputName] = artefactHelper.getArtefactProperty(self._inputArtefacts[inputName],artefactProps.ID)
+        if len(inputs)>0:
+            result[artefactProps.INPUT_IDS] = inputs
+        else:
+            result[artefactProps.INPUT_IDS] = None
+
         return result
 
     def _generateOutputs(self):
