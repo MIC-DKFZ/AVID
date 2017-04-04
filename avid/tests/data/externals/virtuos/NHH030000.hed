@@ -1,0 +1,21 @@
+version 1.4
+modality ct
+created_by Nora
+creation_info
+primary_view transversal
+data_type integer
+num_bytes 2
+byte_order vms
+patient_name NHH030
+slice_dimension 256
+pixel_size 1
+slice_distance 2
+slice_number 165
+xoffset 0
+dimx 256
+yoffset 0
+dimy 256
+zoffset 0
+dimz 165
+z_table no
+
