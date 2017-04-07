@@ -20,7 +20,7 @@ from pyoneer.evaluation import detectEvaluationStrategies
 
 
 def main():
-  from pyoneer.evaluationResult import saveEvaluationResult
+  from pyoneer.evaluationResult import writeEvaluationResult
 
   mainDesc = "Avid workflow evaluation tool."
   parser = argparse.ArgumentParser(description = mainDesc)
@@ -57,7 +57,7 @@ def main():
 
   for stratClass in stratClasses:
     result = stratClass(sessionPath, args_dict['keepArtefacts']).evaluate(workflowFile=workflowPath, artefactFile=artefactPath, label=label)
-    saveEvaluationResult(resultPath, result)
+    writeEvaluationResult(resultPath, result)
 
 
 if __name__ == "__main__":

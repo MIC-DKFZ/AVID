@@ -11,17 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-import datetime
 import logging
-import os
-import shutil
-import subprocess
-
-from pyoneer.evaluationResult import EvaluationResult
-
-from avid.common.artefact import defaultProps
-from avid.common.artefact.fileHelper import loadArtefactList_xml
-from pyoneer.dataSetEvaluator import DataSetEvaluator
 
 logger = logging.getLogger(__name__)
 

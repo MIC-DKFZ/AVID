@@ -21,7 +21,7 @@ from pyoneer.criteria.durationCriterion import DurationCriterion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from pyoneer.criteria.propertyCriterion import PropertyCriterion
 from pyoneer.evaluation import EvaluationStrategy, detectEvaluationStrategies
-from pyoneer.evaluationResult import loadEvaluationResult
+from pyoneer.evaluationResult import readEvaluationResult
 from pyoneer.metrics import DefaultMetric
 
 
@@ -63,14 +63,14 @@ class TestEvaluationStrategy(unittest.TestCase):
     strat = DummyStrategy(self.sessionDir)
 
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile)
-    ref = loadEvaluationResult(os.path.join(self.testDataDir,'result.eval'))
+    ref = readEvaluationResult(os.path.join(self.testDataDir, 'result.eval'))
     self.assertDictEqual(result.measurements, ref.measurements)
 
   def test_Evaluation_withModifier(self):
     strat = DummyStrategy(self.sessionDir)
 
     result = strat.evaluate(artefactFile=self.testArtefactFile, workflowFile=self.testWorkflowFile, workflowModifier={'x':50,'delay':42})
-    ref = loadEvaluationResult(os.path.join(self.testDataDir,'result_with_modifier.eval'))
+    ref = readEvaluationResult(os.path.join(self.testDataDir, 'result_with_modifier.eval'))
     self.assertDictEqual(result.measurements, ref.measurements)
 
   def test_StrategyDetection(self):

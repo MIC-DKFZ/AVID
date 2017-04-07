@@ -17,7 +17,7 @@ import os
 import shutil
 import subprocess
 
-from pyoneer.evaluationResult import EvaluationResult
+from pyoneer.evaluationResult import EvaluationResult, MeasurementResult
 
 from avid.common.artefact import defaultProps
 from avid.common.artefact.fileHelper import loadArtefactList_xml
@@ -95,8 +95,10 @@ class DefaultMetric (object):
         os.remove(sessionFile+os.extsep+'log')
       except:
         logger.debug('Unkown error when clearing the session dir.')       
-    
-    result = EvaluationResult(gmeasure, imeasure, sessionName, workflowFile, artefactFile, workflowModifier, self._measureWeights, self.valueNames, self.valueDescriptions)
+
+    result = EvaluationResult(measurements=gmeasure, instanceMeasurements=imeasure, workflowModifier=workflowModifier,
+                              measureWeights=self._measureWeights, name=sessionName, workflowFile=workflowFile,
+                              artefactFile=artefactFile, valueNames=self.valueNames, valueDescriptions=self.valueDescriptions)
       
     return result
 

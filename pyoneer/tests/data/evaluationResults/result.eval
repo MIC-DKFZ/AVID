@@ -1,11 +1,19 @@
 <avid:evaluation_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
   <avid:name>TestEval</avid:name>
   <avid:workflow_file>myWorkflow</avid:workflow_file>
+  <avid:artefact_file>myArtefacts</avid:artefact_file>
+  <avid:measurements_info>
+    <avid:info key="vd1">
+      <avid:value_description>description</avid:value_description>
+    </avid:info>
+    <avid:info key="vn1">
+      <avid:value_name>a</avid:value_name>
+    </avid:info>
+  </avid:measurements_info>
   <avid:workflow_modifiers>
     <avid:modifier key="mod1">m1</avid:modifier>
     <avid:modifier key="mod2">m2</avid:modifier>
   </avid:workflow_modifiers>
-  <avid:artefact_file>myArtefacts</avid:artefact_file>
   <avid:sv_measurement>0.85</avid:sv_measurement>
   <avid:measure_weights>
     <avid:measure_weight key="crit1">0.5</avid:measure_weight>
@@ -27,12 +35,4 @@
       </avid:measurements>
     </avid:measurement_instance>
   </avid:measurement_instances>
-  <avid:measurements_info>
-    <avid:info key="vd1">
-      <avid:value_description>description</avid:value_description>
-    </avid:info>
-    <avid:info key="vn1">
-      <avid:value_name>a</avid:value_name>
-    </avid:info>
-  </avid:measurements_info>
 </avid:evaluation_result>

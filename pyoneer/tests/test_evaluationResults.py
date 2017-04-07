@@ -32,10 +32,11 @@ class TestEvaluationResults(unittest.TestCase):
     self.refInstanceMeasurements = { EvalInstanceDescriptor({'case':'C1'}, 'testID'): {'crit1.1': 0.1, 'crit2.1': 0.2}}
     self.refWeights = {'crit1': 0.5, 'crit2':0.7}
 
-    self.refResult = EvalResults.EvaluationResult(self.refMeasurements, self.refInstanceMeasurements, 'TestEval',
-                                                  'myWorkflow', 'myArtefacts', {'mod1': 'm1', 'mod2':'m2'},
-                                                  self.refWeights, {'vn1':'a'}, {'vd1':'description'})
-    self.refResultDefaults = EvalResults.EvaluationResult(self.refMeasurements, self.refInstanceMeasurements)
+    self.refResult = EvalResults.EvaluationResult(self.refMeasurements, self.refInstanceMeasurements,
+                                                  workflowModifier={'mod1': 'm1', 'mod2':'m2'},
+                                                  measureWeights = self.refWeights, name='TestEval',
+                                                  workflowFile='myWorkflow', artefactFile='myArtefacts',
+                                                  valueNames={'vn1':'a'}, valueDescriptions={'vd1':'description'})
 
   def tearDown(self):
     try:
@@ -43,7 +44,7 @@ class TestEvaluationResults(unittest.TestCase):
     except:
       pass
 
-  def assert_file_conten(self, filePathTest, filePathRef):
+  def assert_file_content(self, filePathTest, filePathRef):
     with open(filePathRef) as refF:
       with open(filePathTest) as testF:
         ref = refF.read()
@@ -53,18 +54,25 @@ class TestEvaluationResults(unittest.TestCase):
 
   def test_EvaluationResult_load(self):
 
-    loadedResult = EvalResults.loadEvaluationResult(self.testResultFile)
-    self.assert_(self.refResult, loadedResult)
+    loadedResult = EvalResults.readEvaluationResult(self.testResultFile)
+    self.assertEqual(self.refResult.artefactFile, loadedResult.artefactFile)
+    self.assertEqual(self.refResult.workflowFile, loadedResult.workflowFile)
+    self.assertEqual(self.refResult.valueDescriptions, loadedResult.valueDescriptions)
+    self.assertEqual(self.refResult.valueNames, loadedResult.valueNames)
+    self.assertEqual(self.refResult.measurements, loadedResult.measurements)
+    self.assertEqual(self.refResult.workflowModifier, loadedResult.workflowModifier)
+    self.assertEqual(self.refResult.measureWeights, loadedResult.measureWeights)
 
   def test_EvaluationResult_save(self):
     testFilePath = os.path.join(self.sessionDir, 'result'+os.extsep+'eval')
     testFileDefaultPath = os.path.join(self.sessionDir, 'result_default'+os.extsep+'eval')
 
-    EvalResults.saveEvaluationResult(testFilePath, self.refResult)
-    self.assert_file_conten(testFilePath, self.testResultFile)
+    EvalResults.writeEvaluationResult(testFilePath, self.refResult)
+    self.assert_file_content(testFilePath, self.testResultFile)
 
-    EvalResults.saveEvaluationResult(testFileDefaultPath, self.refResultDefaults)
-    self.assert_file_conten(testFileDefaultPath, self.testResultDefaultFile)
+    refResultDefaults = EvalResults.EvaluationResult(dict(),dict())
+    EvalResults.writeEvaluationResult(testFileDefaultPath, refResultDefaults)
+    self.assert_file_content(testFileDefaultPath, self.testResultDefaultFile)
 
 
 if __name__ == '__main__':
