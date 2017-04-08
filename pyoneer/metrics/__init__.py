@@ -53,7 +53,7 @@ class DefaultMetric (object):
     self._clearSessionDir = clearSessionDir
     
     
-  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None):
     '''Function is called to evaluate a workflow used the passed artfact definitions
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -103,7 +103,7 @@ class DefaultMetric (object):
     return result
 
 
-  def _generateWorkflowCall(self, workflowFile, sessionFile, sessionName, artefactFile, workflowModifier = {}):
+  def _generateWorkflowCall(self, workflowFile, sessionFile, sessionName, artefactFile, workflowModifier = None):
     '''Helper function generating the cl call that runs the workflow
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -127,8 +127,9 @@ class DefaultMetric (object):
 
     callStr += '" --overwriteExistingSession --autoSave'
       
-    for modKey in workflowModifier:
-      callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'     
+    if workflowModifier is not None:
+      for modKey in workflowModifier:
+        callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'
       
     return callStr
     

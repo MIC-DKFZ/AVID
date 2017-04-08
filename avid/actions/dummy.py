@@ -23,7 +23,7 @@ from avid.common import osChecker, AVIDUrlLocater
 
 class DummySingleAction(SingleActionBase):
 
-  def __init__(self, artefacts, actionTag, alwaysDo = False, session = None, additionalActionProps = None, propInheritanceDict = dict()):
+  def __init__(self, artefacts, actionTag, alwaysDo = False, session = None, additionalActionProps = None, propInheritanceDict = None):
     SingleActionBase.__init__(self, actionTag,alwaysDo,session, additionalActionProps = additionalActionProps, propInheritanceDict = propInheritanceDict )
     self._artefacts = artefacts
 

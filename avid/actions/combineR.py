@@ -34,7 +34,7 @@ class combineRAction(CLIActionBase):
 
   def __init__(self, reg1, reg2, combOperation = "+", 
                actionTag = "combineR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(reg1=reg1,reg2=reg2)

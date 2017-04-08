@@ -35,7 +35,7 @@ class CLIActionBase(SingleActionBase):
   for the CLI call to run properly. Then the call should be returned as result of
   the method.'''
 
-  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionConfig = None, propInheritanceDict = dict()):
+  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionConfig = None, propInheritanceDict = None):
     '''@param cwd Specifies the current working directory that should be used for the cli call'''
     SingleActionBase.__init__(self, actionTag,alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._cwd = cwd

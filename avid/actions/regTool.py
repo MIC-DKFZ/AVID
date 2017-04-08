@@ -39,7 +39,7 @@ class regToolAction(CLIActionBase):
 
   def __init__(self, targetImage, movingImage, configTemplate, targetMask = None,  movingMask = None, 
                targetIsReference = True, actionTag = "regTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
        
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask, movingMask = movingMask)

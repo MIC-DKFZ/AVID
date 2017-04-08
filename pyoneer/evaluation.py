@@ -84,7 +84,7 @@ class EvaluationStrategy(object):
      True. Reimplment the method for a strategy if you want to change it.'''
     return True
 
-  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None):
     '''Function is called to evaluate a workflow used the passed artfact definitions
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.

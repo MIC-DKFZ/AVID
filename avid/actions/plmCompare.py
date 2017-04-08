@@ -33,7 +33,7 @@ class plmCompareAction(CLIActionBase):
 
   def __init__(self, refImage, testImage, 
                actionTag = "plmCompare", alwaysDo = False, 
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
                            propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(refImage = refImage, testImage = testImage)

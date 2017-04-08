@@ -31,10 +31,12 @@ class DataSetEvaluator (object):
     self._instanceDefiningProps = instanceDefiningProps
     
     
-  def _doRecursiveEvaluateInstance(self, resultData, level = 0, idValues = dict()):
+  def _doRecursiveEvaluateInstance(self, resultData, level = 0, idValues = None):
     '''helper method that goes through all instances and collects the results.'''
     results = dict()
-    
+    if idValues is None:
+      idValues = dict()
+
     if level < len(self._instanceDefiningProps):
       splitSelectorsDict = getSelectors(self._instanceDefiningProps[level], workflowData = resultData)
       

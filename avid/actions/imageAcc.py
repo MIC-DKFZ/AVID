@@ -36,7 +36,7 @@ class ImageAccAction(CLIActionBase):
   def __init__(self, image1, image2, registration = None, weight1 = None,
                weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(image1 = image1, image2 = image2, registration=registration)

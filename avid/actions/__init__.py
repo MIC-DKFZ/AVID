@@ -137,7 +137,7 @@ class ActionBase(object):
 class SingleActionBase(ActionBase):
     '''Base class for action that directly will work on artefact and generate them.'''
 
-    def __init__(self, actionTag, alwaysDo=False, session=None, additionalActionProps=None, propInheritanceDict=dict()):
+    def __init__(self, actionTag, alwaysDo=False, session=None, additionalActionProps=None, propInheritanceDict=None):
         '''init the action and setting the workflow session, the action is working
           in.
           @param session: Session object of the workflow the action is working in
@@ -162,6 +162,8 @@ class SingleActionBase(ActionBase):
         self._inputArtefacts = dict()
 
         self._propInheritanceDict = propInheritanceDict
+        if self._propInheritanceDict is None:
+            self._propInheritanceDict = dict()
 
     def _addInputArtefacts(self, **inputs):
         '''This function should be used in the init of derived actions to register
@@ -183,7 +185,7 @@ class SingleActionBase(ActionBase):
 
         self._caseInstance = stubArtefact[artefactProps.CASEINSTANCE]
 
-    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = dict(), urlHumanPrefix = None, urlExtension = None):
+    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None, urlHumanPrefix = None, urlExtension = None):
         '''Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
@@ -207,7 +209,8 @@ class SingleActionBase(ActionBase):
         @param copyAdditionalPropsFromReference Indicates if also the additional properties should be
         transfered from the reference to the new artefact (only relevant of reference is not None).
         @param userDefinedProps Properties specified by the user that should be set for the new artefact.
-        Parameter is a dictionary. The keys are the property ids and the dict values their value.
+        Parameter is a dictionary. The keys are the property ids and the dict values their value. Passing None indicates
+        that there are no props
         @urlHumanPrefix: specifies the humand readable prefix of the artefact url. If set a URL will be generated.
         @urlExtension: specifies the file extension of the artefact url. If set a URL will be generated.'''
         result = artefactGenerator.generateArtefactEntry(
@@ -244,11 +247,12 @@ class SingleActionBase(ActionBase):
             for k in additionalKs:
                 result[k] = reference[k]
 
-        for propID in userDefinedProps:
-            try:
-                result[propID] = userDefinedProps[propID]
-            except:
-                pass
+        if userDefinedProps is not None:
+            for propID in userDefinedProps:
+                try:
+                    result[propID] = userDefinedProps[propID]
+                except:
+                    pass
 
         if urlHumanPrefix is not None or urlExtension is not None:
             path = artefactHelper.generateArtefactPath(self._session, result)
