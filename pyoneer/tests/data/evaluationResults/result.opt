@@ -1,0 +1,98 @@
+<avid:optimization_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+  <avid:name>test_optimization</avid:name>
+  <avid:workflow_file>myWorkflow</avid:workflow_file>
+  <avid:artefact_file>myArtefacts</avid:artefact_file>
+  <avid:measurements_info>
+    <avid:info key="vd1">
+      <avid:value_description>description</avid:value_description>
+    </avid:info>
+    <avid:info key="vn1">
+      <avid:value_name>a</avid:value_name>
+    </avid:info>
+  </avid:measurements_info>
+  <avid:best>
+    <avid:candidate label="winner">
+      <avid:workflow_modifiers>
+        <avid:modifier key="mod1">m111</avid:modifier>
+        <avid:modifier key="mod2">m222</avid:modifier>
+      </avid:workflow_modifiers>
+      <avid:sv_measurement>0.101</avid:sv_measurement>
+      <avid:measure_weights>
+        <avid:measure_weight key="crit1">1</avid:measure_weight>
+        <avid:measure_weight key="crit2">1</avid:measure_weight>
+      </avid:measure_weights>
+      <avid:measurements>
+        <avid:measurement key="crit1">0.1</avid:measurement>
+        <avid:measurement key="crit2">0.001</avid:measurement>
+      </avid:measurements>
+      <avid:measurement_instances>
+        <avid:measurement_instance>
+          <avid:instance_descriptor>
+            <avid:id>testID</avid:id>
+            <avid:defining_value key="case">C1</avid:defining_value>
+          </avid:instance_descriptor>
+          <avid:measurements>
+            <avid:measurement key="crit2.1">22.2</avid:measurement>
+            <avid:measurement key="crit1.1">11.1</avid:measurement>
+          </avid:measurements>
+        </avid:measurement_instance>
+      </avid:measurement_instances>
+    </avid:candidate>
+  </avid:best>
+  <avid:candidates>
+    <avid:candidate label="TestEval">
+      <avid:workflow_modifiers>
+        <avid:modifier key="mod1">m1</avid:modifier>
+        <avid:modifier key="mod2">m2</avid:modifier>
+      </avid:workflow_modifiers>
+      <avid:sv_measurement>0.85</avid:sv_measurement>
+      <avid:measure_weights>
+        <avid:measure_weight key="crit1">0.5</avid:measure_weight>
+        <avid:measure_weight key="crit2">0.7</avid:measure_weight>
+      </avid:measure_weights>
+      <avid:measurements>
+        <avid:measurement key="crit1">1</avid:measurement>
+        <avid:measurement key="crit2">0.5</avid:measurement>
+      </avid:measurements>
+      <avid:measurement_instances>
+        <avid:measurement_instance>
+          <avid:instance_descriptor>
+            <avid:id>testID</avid:id>
+            <avid:defining_value key="case">C1</avid:defining_value>
+          </avid:instance_descriptor>
+          <avid:measurements>
+            <avid:measurement key="crit2.1">0.2</avid:measurement>
+            <avid:measurement key="crit1.1">0.1</avid:measurement>
+          </avid:measurements>
+        </avid:measurement_instance>
+      </avid:measurement_instances>
+    </avid:candidate>
+    <avid:candidate label="Cand2">
+      <avid:workflow_modifiers>
+        <avid:modifier key="mod1">m11</avid:modifier>
+        <avid:modifier key="mod2">m22</avid:modifier>
+      </avid:workflow_modifiers>
+      <avid:sv_measurement>84.6</avid:sv_measurement>
+      <avid:measure_weights>
+        <avid:measure_weight key="crit1">0.2</avid:measure_weight>
+        <avid:measure_weight key="crit2">2</avid:measure_weight>
+      </avid:measure_weights>
+      <avid:measurements>
+        <avid:measurement key="crit1">3</avid:measurement>
+        <avid:measurement key="crit2">42</avid:measurement>
+      </avid:measurements>
+      <avid:measurement_instances>
+        <avid:measurement_instance>
+          <avid:instance_descriptor>
+            <avid:id>testID</avid:id>
+            <avid:defining_value key="case">C1</avid:defining_value>
+          </avid:instance_descriptor>
+          <avid:measurements>
+            <avid:measurement key="crit2.1">2.2</avid:measurement>
+            <avid:measurement key="crit1.1">1.1</avid:measurement>
+          </avid:measurements>
+        </avid:measurement_instance>
+      </avid:measurement_instances>
+    </avid:candidate>
+  </avid:candidates>
+</avid:optimization_result>

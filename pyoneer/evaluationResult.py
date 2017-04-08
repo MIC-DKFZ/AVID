@@ -20,7 +20,7 @@ class MeasurementResult(object):
     '''Class represents the measurement results of a workflow session with a set
     of workflow modifiers.'''
     def __init__(self, measurements, instanceMeasurements, label=None,
-                 workflowModifier={}, measureWeights=None):
+                 workflowModifier=None, measureWeights=None):
         '''Init of a MeasurmentResult instance.
         @param label: label for the measurements (e.g. used to indicate the optimization
         candidates.
@@ -37,6 +37,8 @@ class MeasurementResult(object):
         self.instanceMeasurements = instanceMeasurements
         self.label = label
         self.workflowModifier = workflowModifier
+        if self.workflowModifier is None:
+            self.workflowModifier = dict()
         self.measureWeights = measureWeights
 
     @property
@@ -109,7 +111,7 @@ class MeasurementResult(object):
 class ResultBase(object):
     '''Base class for representing evaluation or optimization results of an workflow.'''
     def __init__(self, name='unknown_evaluation',
-                 workflowFile='', artefactFile='', valueNames=dict(), valueDescriptions=dict()):
+                 workflowFile='', artefactFile='', valueNames=None, valueDescriptions=None):
         '''Init of a ResultBase instance.
         @param name: Name/lable of this evaluation.
         @param workflowFile: Path to the workflow script that was evaluated.
@@ -121,13 +123,17 @@ class ResultBase(object):
         self.workflowFile = workflowFile
         self.artefactFile = artefactFile
         self.valueNames = valueNames
+        if self.valueNames is None:
+            self.valueNames = dict()
         self.valueDescriptions = valueDescriptions
+        if self.valueDescriptions is None:
+            self.valueDescriptions = dict()
 
 class EvaluationResult(ResultBase, MeasurementResult):
     '''Class that represents the results of an evaluation or optimization of an workflow.'''
     def __init__(self, measurements, instanceMeasurements,
-                 workflowModifier={}, measureWeights=None, name='unknown_evaluation',
-                 workflowFile='', artefactFile='', valueNames={}, valueDescriptions={}):
+                 workflowModifier=None, measureWeights=None, name='unknown_evaluation',
+                 workflowFile='', artefactFile='', valueNames=None, valueDescriptions=None):
         '''Init of a EvaluationResult instance.
         @param candidateResults: List of of results of evaluation candidates.
         @param name: Name/lable of this evaluation.
@@ -144,8 +150,8 @@ class EvaluationResult(ResultBase, MeasurementResult):
 
 class OptimizationResult(ResultBase):
     '''Class that represents the results of an evaluation or optimization of an workflow.'''
-    def __init__(self, best = list(), candidates = list(), name='unknown_evaluation',
-                 workflowFile='', artefactFile='', valueNames={}, valueDescriptions={}):
+    def __init__(self, best = None, candidates = None, name='unknown_evaluation',
+                 workflowFile='', artefactFile='', valueNames=None, valueDescriptions=None):
         '''Init of a OptimizationResult instance.
         @param best List of best candidates indicated by the optimization
         @param list of all candidates evaluated in the optimization
@@ -159,7 +165,12 @@ class OptimizationResult(ResultBase):
         ResultBase.__init__(self, name=name, workflowFile=workflowFile,artefactFile=artefactFile,valueNames=valueNames,
                             valueDescriptions=valueDescriptions)
         self.best = best
+        if self.best is None:
+            self.best = list()
+
         self.candidates = candidates
+        if self.candidates is None:
+            self.candidates = list()
 
     def append(self, evalResult, label = None, asBest = False):
         '''This method adds the measuremnts result to the optimization result.
@@ -169,7 +180,7 @@ class OptimizationResult(ResultBase):
         '''
 
         mResult = MeasurementResult(evalResult.measurements.copy(), evalResult.instanceMeasurements.copy(),
-                                    workflowModifier=evalResult.workflowModifier.copy(), measureWeights=evalResult.measureWeigths.copy())
+                                    workflowModifier=evalResult.workflowModifier.copy(), measureWeights=evalResult.measureWeights.copy())
         if label is not None:
             mResult.label = label
         elif hasattr(evalResult, 'label') and evalResult.label is not None:
@@ -182,8 +193,10 @@ class OptimizationResult(ResultBase):
         else:
             self.candidates.append(mResult)
 
-        self.valueNames.update(evalResult.valueNames)
-        self.valueDescriptions.update(evalResult.valueDescriptions)
+        if hasattr(evalResult, 'valueNames'):
+            self.valueNames.update(evalResult.valueNames)
+        if hasattr(evalResult, 'valueDescriptions'):
+            self.valueDescriptions.update(evalResult.valueDescriptions)
 
 
 
