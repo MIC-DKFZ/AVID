@@ -18,6 +18,7 @@ import inspect
 from avid.common.artefact import ensureValidPath
 
 from pyoneer.evaluation import detectEvaluationStrategies
+from pyoneer.evaluationResult import OptimizationResult
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class EvaluationSchedulingBase(object):
         self._evaluationFile = evaluationFile
         self._workflowFile = workflowFile
         self._artefactFile = artefactFile
+        self.reportCandidateResultFunctor = None
 
     def getEvaluationStrategyInstance(self):
         evalclasses = detectEvaluationStrategies(self._evaluationFile)
@@ -49,12 +51,28 @@ class EvaluationSchedulingBase(object):
 
     def evaluate(self, candidates):
         '''Function is called by the optimizer to evaluate the passed candidates.
+        The concrete scheduling implementation can use reportCandidate() and reportCandidateResult()
+        To communicate the current status.
         @param candidates: Dictionary containing the candidates. Keys are the string labels/IDs of the candidates. The values
         are dictionaries containing the parameters of the candidate. Keys of the parameter dict are the parameter IDs.
         @return: Returns a dict containing the EvaluationResult instances for the candidates. Keys of the result dict are
         the same as the candidates dict. Values are the corresponding EvaluationResult instances.'''
 
         raise ImportError('Implement this methods in derived classes.')
+
+    def reportCandidate(self, label, candidateParam):
+        '''Function may be called by evaluate to indicate the evaluation of an candidate.
+        @param candidateParam dictionary with the param used to evaluate the candidate.
+        @label label of the candidate.'''
+        pass
+
+    def reportCandidateResult(self, label, evalResult):
+        '''Function may be called by evaluate to indicate the evaluation of an candidate.
+        @param evalResult EvaluationResult candidate of the candidate.
+        @label label of the candidate.'''
+
+        if self.reportCandidateResultFunctor is not None:
+            self.reportCandidateResultFunctor(label, evalResult)
 
 
 class SimpleEvaluationScheduling(EvaluationSchedulingBase):
@@ -78,11 +96,34 @@ class SimpleEvaluationScheduling(EvaluationSchedulingBase):
         results = dict()
         for candidateKey in candidates:
             logger.info("Evaluate candidate: {}".format(candidateKey))
+            self.reportCandidate(candidateKey, candidates[candidateKey])
             result = self.evalStrategy.evaluate(workflowFile=self._workflowFile, artefactFile=self._artefactFile, workflowModifier=candidates[candidateKey], label=candidateKey)
             results[candidateKey] = result
+            self.reportCandidateResult(candidateKey, result)
             logger.info("Evaluation finisched. Candidate: {}".format(candidateKey))
 
         return results
+
+
+class OptimizationReportFunctor(object):
+    '''Helper functor to communicate candidate evaluations  and append it to the result instance
+    of the current optimization run.'''
+    def __init__(self, result,  callback):
+        self._result = result
+        self._callback = callback
+
+    def __call__(self, label, evalResult):
+
+        try:
+            self._result.append(evalResult, label=label)
+        except:
+            pass
+
+        try:
+            self._callback(label, evalResult)
+        except:
+            pass
+
 
 class OptimizationStrategy(object):
     ''' Base class for Optimization strategies.
@@ -115,7 +156,9 @@ class OptimizationStrategy(object):
         return "Unnamed Optimization"
 
     def defineEvaluationScheduling(self, workflowFile, artefactFile, label=None):
-        '''This methos returns the scheduling strategy that should be used to evaluate candidates of an optimization step.'''
+        '''This methos returns the scheduling strategy that should be used to evaluate candidates of an optimization
+         step. Default implementation is a simple serial evaluation scheduling. Reimplement this method to change
+         the scheduling of the strategy'''
         if label is None:
             label = self.defineName()
         currentsessionDir = os.path.join(self.sessionDir,ensureValidPath(label))
@@ -123,32 +166,34 @@ class OptimizationStrategy(object):
         return SimpleEvaluationScheduling(sessionDir=currentsessionDir, evaluationFile=self.evaluationFile,
                                           workflowFile=workflowFile, artefactFile=artefactFile)
 
-    def _evaluate(self, candidates, singleValue=True):
-        '''Function is called by the optimizer to evaluate the passed candidates.
-        @param candidates: Dictionary containing the candidates. Keys are the string labels/IDs of the candidates. The values
-        are dictionaries containing the parameters of the candidate. Keys of the parameter dict are the parameter IDs.
-        @return: Returns a dict containing the measurements for the candidates. Keys of the result dict are the same as the
-        candidates dict. Values depend on the parameter singleValue. If singleValue is True the result dict value is the
-        single value measurement. If singleValue is False, values are the weightes measurment dict of the candidates.'''
-
-        return self._evaluationCallBack(candidates, singleValue)
-
     def optimize(self, workflowFile, artefactFile, label=None):
         '''Function is called to evaluate a workflow used the passed artfact definitions
         @param workflowFile: String defining the path to the avid workflow that should
         be executed.
         @param artefactFile: String defining the path to the artefact bootstrap file
          for the workflow session that will be evaluated.
-        @param label Label that should be used by the metric when evaluating the workflow file.
+        @param label Label that should be used by the optimization strategy for the optimization run.
+        @return An OptimizationResult instance resembling the optimization run.
         '''
+        if label is None:
+            label = self.defineName()
+
+        result = OptimizationResult(name=label, workflowFile=workflowFile, artefactFile=artefactFile)
+
         optimizer = self.defineOptimizer()
-        evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile)
+        evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile,
+                                                        label=label)
+        evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, None)
 
         optimizer.evaluationCallBack = evalScheduler.evaluate
 
-        results = optimizer.optimize();
+        bestresults = optimizer.optimize()
 
-        return results
+        for bestLabel in bestresults:
+            bestparameter, bestresult = bestresults[bestLabel]
+            result.append(bestresult,label=bestLabel,asBest=True)
+
+        return result
 
 
 def _predicateOptimizationStrategy(member):

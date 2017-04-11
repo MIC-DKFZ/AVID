@@ -19,6 +19,7 @@ from avid.selectors.keyValueSelector import ActionTagSelector
 from pyoneer.criteria.durationCriterion import DurationCriterion
 from pyoneer.criteria.propertyCriterion import PropertyCriterion
 from pyoneer.evaluation import EvaluationStrategy
+from pyoneer.evaluationResult import readOptimizationResult
 from pyoneer.metrics import DefaultMetric
 from pyoneer.optimization.exhaustiveSearchStrategy import ExhaustiveSearchStrategy
 from pyoneer.optimization.strategy import detectOptimizationStrategies
@@ -58,6 +59,7 @@ class TestOptimizationStrategy(unittest.TestCase):
     self.tempDir = os.path.join(os.path.split(__file__)[0],"temporary")
     self.sessionDir = os.path.join(self.tempDir, "test_EvaluationStrategy")
     self.testWorkflowFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "testworkflow"+os.extsep+"py")
+    self.testResultFile = os.path.join(os.path.split(__file__)[0],"data", "optimizationStrategy", "result"+os.extsep+"opt")
 
   def tearDown(self):
     try:
@@ -68,14 +70,27 @@ class TestOptimizationStrategy(unittest.TestCase):
   def test_Optimization(self):
     strat = DummyOptimizationStrategy(__file__, self.sessionDir)
 
-    results = strat.optimize(workflowFile=self.testWorkflowFile, artefactFile=self.testArtefactFile)
+    result = strat.optimize(workflowFile=self.testWorkflowFile, artefactFile=self.testArtefactFile)
 
-    self.assert_(not results is None)
-    result = results.itervalues().next()
+    self.assert_(not result is None)
+    self.assertEquals(strat.defineName(), result.name)
+
+    best = result.best[0]
+    self.assertEqual('Best',best.label)
     refParameter = {'delay': 0, 'x': 100}
     refSVMeasure = 0.0
-    self.assertEqual(refParameter, result[0])
-    self.assertAlmostEquals(refSVMeasure, result[1].svMeasure, 6)
+    self.assertEqual(refParameter, best.workflowModifier)
+    self.assertAlmostEquals(refSVMeasure, best.svMeasure, 6)
+
+    loadedResult = readOptimizationResult(self.testResultFile)
+    self.assertEqual(loadedResult.artefactFile, result.artefactFile)
+    self.assertEqual(loadedResult.workflowFile, result.workflowFile)
+    self.assertEqual(loadedResult.valueDescriptions, result.valueDescriptions)
+    self.assertEqual(loadedResult.valueNames, result.valueNames)
+    self.assertEqual(loadedResult.name, result.name)
+    self.assertEqual(len(loadedResult.best), len(result.best))
+    self.assertEqual(len(loadedResult.candidates), len(result.candidates))
+
 
   def test_StrategyDetection(self):
     stratClasses = detectOptimizationStrategies(__file__)
