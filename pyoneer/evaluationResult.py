@@ -383,12 +383,12 @@ def readOptimizationResult(filePath):
     for candidateNode in root.findall(XML_CANDIDATES+'/'+XML_CANDIDATE, XML_NAMESPACE_DICT):
         mResult = MeasurementResult({},{})
         _initMeasurementResult(mResult, candidateNode)
-        result.candidateResults.append(mResult)
+        result.append(mResult)
 
     for candidateNode in root.findall(XML_BEST+'/'+XML_CANDIDATE, XML_NAMESPACE_DICT):
         mResult = MeasurementResult({},{})
         _initMeasurementResult(mResult, candidateNode)
-        result.candidateResults.append(mResult,asBest=True)
+        result.append(mResult,asBest=True)
 
     return result
 
