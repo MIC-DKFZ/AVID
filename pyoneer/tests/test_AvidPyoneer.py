@@ -15,11 +15,13 @@ import os
 import shutil
 import unittest
 
+import subprocess
+
 from avid.selectors.keyValueSelector import ActionTagSelector
 from pyoneer.criteria.durationCriterion import DurationCriterion
 from pyoneer.criteria.propertyCriterion import PropertyCriterion
 from pyoneer.evaluation import EvaluationStrategy
-from pyoneer.evaluationResult import readOptimizationResult
+from pyoneer.evaluationResult import readOptimizationResult, readEvaluationResult
 from pyoneer.metrics import DefaultMetric
 from pyoneer.optimization.exhaustiveSearchStrategy import ExhaustiveSearchStrategy
 from pyoneer.optimization.strategy import detectOptimizationStrategies
@@ -30,9 +32,11 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "workflow")
     self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "testworkflow_artefacts"+os.extsep+"avid")
-    self.tempDir = os.path.join(os.path.split(__file__)[0],"temporary")
-    self.sessionDir = os.path.join(self.tempDir, "test_EvaluationStrategy")
     self.testWorkflowFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "testworkflow"+os.extsep+"py")
+    self.testEvalStratFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "test_eval_strategy"+os.extsep+"py")
+    self.testOptStratFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "test_opt_strategy"+os.extsep+"py")
+    self.tempDir = os.path.join(os.path.split(__file__)[0],"temporary")
+    self.sessionDir = os.path.join(self.tempDir, "test_AvidPyoneer")
     self.testResultFile = os.path.join(os.path.split(__file__)[0],"data", "optimizationStrategy", "result"+os.extsep+"opt")
 
   def tearDown(self):
@@ -41,17 +45,20 @@ class TestOptimizationStrategy(unittest.TestCase):
     except:
       pass
 
-  def test_Optimization(self):
-    strat = DummyOptimizationStrategy(__file__, self.sessionDir)
+  def test_Optimize(self):
+    resultPath = os.path.join(self.tempDir, "test_AvidPyoneer", "result"+os.extsep+"opt")
 
-    result = strat.optimize(workflowFile=self.testWorkflowFile, artefactFile=self.testArtefactFile)
+    clicall = 'avidpyoneer optimize "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
+    self.assertEquals(0, subprocess.call(clicall))
+
+    result = readOptimizationResult(resultPath)
     self.assert_(not result is None)
-    self.assertEquals(strat.defineName(), result.name)
+    self.assertEquals('AvidPyoneer_Test', result.name)
 
     best = result.best[0]
     self.assertEqual('Best',best.label)
-    refParameter = {'delay': 0, 'x': 100}
+    refParameter = {'delay': '0', 'x': '100'}
     refSVMeasure = 0.0
     self.assertEqual(refParameter, best.workflowModifier)
     self.assertAlmostEquals(refSVMeasure, best.svMeasure, 6)
@@ -61,18 +68,19 @@ class TestOptimizationStrategy(unittest.TestCase):
     self.assertEqual(loadedResult.workflowFile, result.workflowFile)
     self.assertEqual(loadedResult.valueDescriptions, result.valueDescriptions)
     self.assertEqual(loadedResult.valueNames, result.valueNames)
-    self.assertEqual(loadedResult.name, result.name)
     self.assertEqual(len(loadedResult.best), len(result.best))
     self.assertEqual(len(loadedResult.candidates), len(result.candidates))
 
+  def test_Evaluate(self):
+    resultPath = os.path.join(self.tempDir, "test_AvidPyoneer", "result"+os.extsep+"eval")
 
-  def test_StrategyDetection(self):
-    stratClasses = detectOptimizationStrategies(__file__)
+    clicall = 'avidpyoneer evaluate "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
-    self.assertEqual(len(stratClasses), 1)
-    self.assertEqual(stratClasses[0].__name__, 'DummyOptimizationStrategy')
-    strat = stratClasses[0](__file__, self.sessionDir)
-    self.assertEqual(strat.defineName(), 'TestOptimization')
+    self.assertEquals(0, subprocess.call(clicall))
+
+    result = readEvaluationResult(resultPath)
+    self.assert_(not result is None)
+    self.assertEquals('AvidPyoneer_Test', result.name)
 
 
 if __name__ == '__main__':
