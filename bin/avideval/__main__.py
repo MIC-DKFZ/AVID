@@ -12,28 +12,24 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 import argparse
-import imp
-import inspect
 import os
 
 from pyoneer.evaluation import detectEvaluationStrategies
-
+from pyoneer.evaluationResult import writeEvaluationResult
 
 def main():
-  from pyoneer.evaluationResult import writeEvaluationResult
-
   mainDesc = "Avid workflow evaluation tool."
   parser = argparse.ArgumentParser(description = mainDesc)
 
   parser.add_argument('evaluation', help = "File specifing the evaluation strategy.")
   parser.add_argument('resultPath', help = "Path where the evaluation result should be stored to.")
-  parser.add_argument('--artefacts', help = 'Specifies the artefact file that should be used to make the evaluations.')
-  parser.add_argument('--workflow', help = 'Specifies the workflow file that should be used to make the evaluations.')
-  parser.add_argument('--sessionPath', help = "It defines the root directory where all the evaluation data is stored (temporarily). If not set it is <resultPath>/session")
-  parser.add_argument('--label', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it is the name of the used evaluation strategy".')
-  parser.add_argument('--expandPaths', help = 'Indicates if relative artefact path should be expanded when loading the data.')
-  parser.add_argument('--debug', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
-  parser.add_argument('--keepArtefacts', action='store_true', help = 'Indicates that the artefacts of the evaluation sessions should be kept and not be removed.')
+  parser.add_argument('--artefacts', '-a', help = 'Specifies the artefact file that should be used to make the evaluations.')
+  parser.add_argument('--workflow', '-w', help = 'Specifies the workflow file that should be used to make the evaluations.')
+  parser.add_argument('--sessionPath', '-s', help = "It defines the root directory where all the evaluation data is stored (temporarily). If not set it is <resultPath>/session")
+  parser.add_argument('--name', '-n', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it is the name of the used evaluation strategy".')
+  parser.add_argument('--expandPaths','-x', help = 'Indicates if relative artefact path should be expanded when loading the data.')
+  parser.add_argument('--debug', '-d', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
+  parser.add_argument('--keepArtefacts', '-k', action='store_true', help = 'Indicates that the artefacts of the evaluation sessions should be kept and not be removed.')
 
   args_dict = vars(parser.parse_args())
 
