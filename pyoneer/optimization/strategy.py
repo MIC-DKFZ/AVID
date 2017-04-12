@@ -100,7 +100,7 @@ class SimpleEvaluationScheduling(EvaluationSchedulingBase):
             result = self.evalStrategy.evaluate(workflowFile=self._workflowFile, artefactFile=self._artefactFile, workflowModifier=candidates[candidateKey], label=candidateKey)
             results[candidateKey] = result
             self.reportCandidateResult(candidateKey, result)
-            logger.info("Evaluation finisched. Candidate: {}".format(candidateKey))
+            logger.info("Evaluation finisched. Candidate {} SV Measure: {}".format(candidateKey, str(result.svMeasure)))
 
         return results
 
