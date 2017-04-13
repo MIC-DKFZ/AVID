@@ -37,7 +37,7 @@ class pdcAction(CLIActionBase):
 
   def __init__(self, image, plan, struct, 
                actionTag = "pdc", executionBat = None, alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(image = image, plan = plan, struct = struct)

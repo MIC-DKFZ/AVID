@@ -37,10 +37,10 @@ logger = logging.getLogger(__name__)
 class matchRAction(CLIActionBase):
   '''Class that wrapps the single action for the tool mapR.'''
 
-  def __init__(self, targetImage, movingImage, algorithm, algorithmParameters=dict(), targetMask = None,  movingMask = None,
+  def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None, targetMask = None,  movingMask = None,
                targetPointSet = None, movingPointSet = None,
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
        
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
@@ -55,6 +55,9 @@ class matchRAction(CLIActionBase):
     self._movingPointSet = movingPointSet
     self._algorithm = algorithm
     self._algorithmParameters = algorithmParameters
+    if self._algorithmParameters is None:
+      self._algorithmParameters = dict()
+
     self._targetIsReference = targetIsReference
 
     cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", actionConfig))

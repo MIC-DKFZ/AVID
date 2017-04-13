@@ -46,7 +46,9 @@ setup(
     # from the console as if it was a normal binary. It will call the function
     # main in bin/samplepackage_exe.py
     entry_points={
-        'console_scripts': ['avidconfig=bin.avidconfig.__main__:main','aviddiag=bin.aviddiag.__main__:main'],
+        'console_scripts': ['avidconfig=bin.avidconfig.__main__:main',
+                            'aviddiag=bin.aviddiag.__main__:main',
+                            'avidpyoneer=bin.avidpyoneer.__main__:main'],
     },
 )
 

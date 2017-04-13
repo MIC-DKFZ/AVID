@@ -1,4 +1,15 @@
-
+# AVID - pyoneer
+# AVID based tool for algorithmic evaluation and optimization
+#
+# Copyright (c) German Cancer Research Center,
+# Software development for Integrated Diagnostic and Therapy (SIDT).
+# All rights reserved.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.
+#
+# See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 import sys
 import os

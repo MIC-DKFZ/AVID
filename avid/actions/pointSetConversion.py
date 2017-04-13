@@ -33,7 +33,7 @@ class PointSetConversionAction(SingleActionBase):
   '''Class that convert point sets from one formate to another.'''
 
   def __init__(self, pointset, targetformat, actionTag="PointSetConversion",
-               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = dict()):
+               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = None):
     SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._pointset = pointset
 

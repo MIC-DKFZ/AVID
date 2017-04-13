@@ -33,7 +33,7 @@ class BioModelCalcAction(CLIActionBase):
 
   def __init__(self, inputDose, weight=1.0, nFractions=1, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputDose=inputDose)

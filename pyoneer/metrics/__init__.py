@@ -17,7 +17,7 @@ import os
 import shutil
 import subprocess
 
-from pyoneer.evaluationResult import EvaluationResult
+from pyoneer.evaluationResult import EvaluationResult, MeasurementResult
 
 from avid.common.artefact import defaultProps
 from avid.common.artefact.fileHelper import loadArtefactList_xml
@@ -30,7 +30,7 @@ class DefaultMetric (object):
   evaluate an avid workflow according to result artefacts it produces. In
   order to evaluate, the metric uses the specified criteria.'''
   
-  def __init__(self, metricCriteria, sessionDir, svWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
+  def __init__(self, metricCriteria, sessionDir, measureWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
     '''Initialization of the metric.
     @param metricCriteria: list of criterion instances that should be used to
     evaluate.
@@ -38,9 +38,9 @@ class DefaultMetric (object):
     @param instanceDefiningProps: List of artefact properties that discriminate
     evaluation instances. E.g. as a default, the case property will be used to
     discriminate evaluation instances, thus one instance evaluation per case.
-    @param svWeights: Weights that should be used when computing the single value
-    measurement by summing up the measurements of all criteria. It is a dictionary
-    with the measurement value IDs as keys and the weights as values. All
+    @param measureWeights: Weights that should be used when computing the single value
+    measurement (by summing up the measurements of all criteria) or the weighted measurements.
+    It is a dictionary with the measurement value IDs as keys and the weights as values. All
     measurement values not declared in the dict are assumed to have a weight of 0.
     Passing None implies that everything has a weight of 1.
     @param cleareSessionDir: Indicates of the metric should remove all artefacts
@@ -49,11 +49,11 @@ class DefaultMetric (object):
     self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
     self.sessionDir = sessionDir
-    self._svWeights = svWeights
+    self._measureWeights = measureWeights
     self._clearSessionDir = clearSessionDir
     
     
-  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}, label = None):
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None):
     '''Function is called to evaluate a workflow used the passed artfact definitions
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -75,7 +75,7 @@ class DefaultMetric (object):
     logger.debug('Evaluate workflow. workflow file: "%s"; artefact file: "%s"; workflow modifier: "%s"; session: "%s"', workflowFile, artefactFile, workflowModifier, sessionFile)
     logger.debug('Starting workflow processing... Call: "%s"', callStr)
 
-    subprocess.call(callStr)
+    subprocess.call(callStr, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     logger.debug('Evaluating workflow results...')
     
@@ -95,13 +95,15 @@ class DefaultMetric (object):
         os.remove(sessionFile+os.extsep+'log')
       except:
         logger.debug('Unkown error when clearing the session dir.')       
-    
-    result = EvaluationResult(gmeasure, imeasure, sessionName, workflowFile, artefactFile, workflowModifier, self._svWeights, self.valueNames, self.valueDescriptions)
+
+    result = EvaluationResult(measurements=gmeasure, instanceMeasurements=imeasure, workflowModifier=workflowModifier,
+                              measureWeights=self._measureWeights, name=sessionName, workflowFile=workflowFile,
+                              artefactFile=artefactFile, valueNames=self.valueNames, valueDescriptions=self.valueDescriptions)
       
     return result
 
 
-  def _generateWorkflowCall(self, workflowFile, sessionFile, sessionName, artefactFile, workflowModifier = {}):
+  def _generateWorkflowCall(self, workflowFile, sessionFile, sessionName, artefactFile, workflowModifier = None):
     '''Helper function generating the cl call that runs the workflow
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -119,18 +121,21 @@ class DefaultMetric (object):
     
     callStr = 'python "'+workflowFile\
       +'" --sessionPath "'+sessionFile\
-      +'" --name "'+sessionName\
-      +'" --bootstrapArtefacts "'+artefactFile\
-      +'" --overwriteExistingSession --autoSave'
+      +'" --name "'+sessionName
+    if artefactFile is not None:
+      callStr += '" --bootstrapArtefacts "'+artefactFile
+
+    callStr += '" --overwriteExistingSession --autoSave'
       
-    for modKey in workflowModifier:
-      callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'     
+    if workflowModifier is not None:
+      for modKey in workflowModifier:
+        callStr = callStr+' --'+str(modKey)+' "'+str(workflowModifier[modKey])+'"'
       
     return callStr
     
     
   def _generateSessionPath(self, label = None):
-    '''Helper function that returns a tuple (<path to the session file>, <session directory>)'''
+    '''Helper function that returns a tuple (<path to the session file>, <session name>)'''
     name = label
     if label is None:
       name = datetime.datetime.now().strftime("EvalSession_%Y-%m-%d_%H-%M-%S")

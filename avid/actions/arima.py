@@ -35,7 +35,7 @@ class ArimaAction(CLIActionBase):
 
   def __init__(self, doseStatsCollector, selectedStats=None, nPlannedFractions=25, rTemplateFile = os.path.join(getAVIDProjectRootPath(), "templates", "arima.R"), rowKey='Fractions',
                columnKey='Percentil', withHeaders=True, actionTag="Arima",
-               alwaysDo=False, session=None, additionalActionProps=None, actionConfig = None, propInheritanceDict = dict()):
+               alwaysDo=False, session=None, additionalActionProps=None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._doseStatsCollector = doseStatsCollector
 
