@@ -17,6 +17,7 @@ import unittest
 
 import subprocess
 
+from avid.common import osChecker
 from avid.selectors.keyValueSelector import ActionTagSelector
 from pyoneer.criteria.durationCriterion import DurationCriterion
 from pyoneer.criteria.propertyCriterion import PropertyCriterion
@@ -29,6 +30,7 @@ import pyoneer.optimization.parameters as param_helper
 
 class TestOptimizationStrategy(unittest.TestCase):
   def setUp(self):
+    self.useShell = not osChecker.isWindows()
 
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "workflow")
     self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "workflow", "testworkflow_artefacts"+os.extsep+"avid")
@@ -50,7 +52,7 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     clicall = 'avidpyoneer optimize "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
-    self.assertEquals(0, subprocess.call(clicall))
+    self.assertEquals(0, subprocess.call(clicall, shell= self.useShell))
 
     result = readOptimizationResult(resultPath)
     self.assert_(not result is None)
@@ -76,7 +78,7 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     clicall = 'avidpyoneer evaluate "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
-    self.assertEquals(0, subprocess.call(clicall))
+    self.assertEquals(0, subprocess.call(clicall, shell= self.useShell))
 
     result = readEvaluationResult(resultPath)
     self.assert_(not result is None)

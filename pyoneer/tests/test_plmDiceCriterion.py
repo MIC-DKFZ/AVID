@@ -17,10 +17,12 @@ import unittest
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.generator as artefactGenerator
+from avid.common.AVIDUrlLocater import getToolConfigPath
 from pyoneer.criteria.plmDiceCriterion import PlmDiceCriterion as DiceCriterion
 
 
-class TestSelectors(unittest.TestCase):
+@unittest.skipIf(getToolConfigPath('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
+class TestDiceCriterion(unittest.TestCase):
   def setUp(self):
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "metricsTest")
     self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_metrics")

@@ -17,6 +17,7 @@ import os
 import shutil
 import subprocess
 
+from avid.common import osChecker
 from pyoneer.evaluationResult import EvaluationResult, MeasurementResult
 
 from avid.common.artefact import defaultProps
@@ -79,7 +80,8 @@ class DefaultMetric (object):
     logger.debug('Evaluate workflow. workflow file: "%s"; artefact file: "%s"; workflow modifier: "%s"; session: "%s"', workflowFile, artefactFile, workflowModifier, sessionFile)
     logger.debug('Starting workflow processing... Call: "%s"', callStr)
 
-    subprocess.call(callStr, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    useShell = not osChecker.isWindows()
+    subprocess.call(callStr, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=useShell)
     
     logger.debug('Evaluating workflow results...')
     
