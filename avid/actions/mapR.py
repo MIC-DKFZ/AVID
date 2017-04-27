@@ -33,7 +33,7 @@ class mapRAction(CLIActionBase):
 
   def __init__(self, inputImage, registration = None, templateImage = None, 
                interpolator = "linear", outputExt = "nrrd", paddingValue = None,
-               actionTag = "mapR", alwaysDo = False,
+               actionTag = "mapR", inputIsReference = True, alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
@@ -43,6 +43,7 @@ class mapRAction(CLIActionBase):
     self._interpolator = interpolator
     self._outputExt = outputExt
     self._paddingValue = paddingValue
+    self._inputIsReference = inputIsReference
     
     cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", actionConfig))
     self._cwd = cwd    
@@ -125,7 +126,7 @@ class mapRBatchAction(BatchActionBase):
   
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
                regLinker = FractionLinker(), templateLinker = CaseLinker(), 
-               actionTag = "mapR", alwaysDo = False,
+               actionTag = "mapR", inputIsReference=True, alwaysDo = False,
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), templateRegLinker = LinkerBase(),
                **singleActionParameters):
     '''@param inputSelector Selector for the artefacts that should be mapped.
@@ -152,6 +153,8 @@ class mapRBatchAction(BatchActionBase):
     self._regLinker = regLinker
     self._templateLinker = templateLinker
     self._templateRegLinker = templateRegLinker
+
+    self._inputIsReference = inputIsReference
 
     self._singleActionParameters = singleActionParameters
 
@@ -183,6 +186,7 @@ class mapRBatchAction(BatchActionBase):
                               actionTag = self._actionTag,
                               alwaysDo = self._alwaysDo,
                               session = self._session,
+                              inputIsReference=self._inputIsReference,
                               additionalActionProps = self._additionalActionProps,
                               **self._singleActionParameters)
           actions.append(action)
