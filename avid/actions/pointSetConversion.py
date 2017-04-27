@@ -33,7 +33,7 @@ class PointSetConversionAction(SingleActionBase):
   '''Class that convert point sets from one formate to another.'''
 
   def __init__(self, pointset, targetformat, actionTag="PointSetConversion",
-               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = dict()):
+               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = None):
     SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._pointset = pointset
 
@@ -71,14 +71,16 @@ class PointSetConversionAction(SingleActionBase):
     if sformat is None:
       raise ValueError('Format of source cannot be identified. Source file: {}'.format(sourcePath))
     elif sformat == matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET:
-      ps = matchpoint.load_simple_pointset(sourcePath)
+      ps = matchpoint.read_simple_pointset(sourcePath)
     elif sformat == fcsv.FORMAT_VALUE_SLICER_POINTSET:
-      ps = fcsv.load_fcsv(sourcePath)
+      ps = fcsv.read_fcsv(sourcePath)
     else:
       raise ValueError('Format of source is not supported. Unsupported format: {}; source file: {}'.format(sformat, sourcePath))
 
     if self._targetformat == matchpoint.FORMAT_VALUE_MATCHPOINT_POINTSET:
       matchpoint.write_simple_pointset(destPath,ps)
+    elif self._targetformat == fcsv.FORMAT_VALUE_SLICER_POINTSET:
+      fcsv.write_fcsv(destPath,ps)
     else:
       raise ValueError(
         'Target format is not supported. Unsupported format: {}; source file: {}'.format(self._targetformat,

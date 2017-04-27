@@ -96,7 +96,7 @@ class TestSelectors(unittest.TestCase):
       pass
                         
   def test_DefaultMetricEvaluate(self):
-    metric = DefaultMetric([DurationCriterion(ActionTagSelector('Result')), PropertyCriterion('myProp', ActionTagSelector('Result'))], self.sessionDir, svWeights = {'pyoneer.criteria.PropertyCriterion.myProp': 0.5})
+    metric = DefaultMetric([DurationCriterion(ActionTagSelector('Result')), PropertyCriterion('myProp', ActionTagSelector('Result'))], self.sessionDir, measureWeights = {'pyoneer.criteria.PropertyCriterion.myProp': 0.5})
     
     result = metric.evaluate(self.testWorkflowFile, self.testArtefactFile)
     
@@ -108,7 +108,7 @@ class TestSelectors(unittest.TestCase):
     self.assertDictEqual(result.valueNames, metric.valueNames)
     self.assertDictEqual(result.valueDescriptions, metric.valueDescriptions)
       
-    self.assertDictEqual(result.svWeights, {'pyoneer.criteria.PropertyCriterion.myProp': 0.5})
+    self.assertDictEqual(result.measureWeights, {'pyoneer.criteria.PropertyCriterion.myProp': 0.5})
     self.assertEqual(result.workflowFile, self.testWorkflowFile)
     self.assertEqual(result.artefactFile, self.testArtefactFile)
     self.assertEqual(result.workflowModifier, dict())
@@ -142,7 +142,7 @@ class TestSelectors(unittest.TestCase):
     self.assertDictEqual(result.valueNames, metric.valueNames)
     self.assertDictEqual(result.valueDescriptions, metric.valueDescriptions)
       
-    self.assertEqual(result.svWeights, None)
+    self.assertEqual(result.measureWeights, None)
     self.assertEqual(result.workflowFile, self.testWorkflowFile)
     self.assertEqual(result.artefactFile, self.testArtefactFile)
     self.assertEqual(result.workflowModifier, dict())

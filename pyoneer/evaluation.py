@@ -10,7 +10,7 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import inspect
 import uuid
 
 class EvalInstanceDescriptor (object):
@@ -78,7 +78,13 @@ class EvaluationStrategy(object):
      reimplemented to specify the name of the strategy.'''
     return "Unnamed Evaluation"
 
-  def evaluate(self, workflowFile, artefactFile, workflowModifier = {}):
+  def optimumIsMinimum(self):
+    '''This method indicates if the optimum is a minimum(return True) and therefore lesser values (sv measurement or
+     weighted measurements) are better. If it returns False the optimum is a maximum. The default implementation returns
+     True. Reimplment the method for a strategy if you want to change it.'''
+    return True
+
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None):
     '''Function is called to evaluate a workflow used the passed artfact definitions
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -90,10 +96,33 @@ class EvaluationStrategy(object):
     generate an cl argument signature like --<key> <value>. Thus {'a':120} will
     be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
     @return: Returns a EvaluationResult instance with everything you want to know.
+    @param label Label that should be used by the metric when evaluating the workflow file.
     '''
     metric = self.defineMetric()
-    name = self.defineName()
+    if label is None:
+      label = self.defineName()
     
-    result = metric.evaluate(workflowFile, artefactFile, workflowModifier, name)
+    result = metric.evaluate(workflowFile, artefactFile, workflowModifier=workflowModifier, label=label)
     
     return result
+
+
+def _predicateEvaluationStrategy(member):
+  return inspect.isclass(member) and issubclass(member,
+                                                EvaluationStrategy) and not member.__module__ == "pyoneer.evaluation"
+
+
+def detectEvaluationStrategies(relevantFile):
+  '''searches for all EvaluationStrategy derivates in the given file and passes
+  back a list of the found class objects.'''
+
+  result = list()
+
+  import imp
+  import os
+  stratModule = imp.load_source(os.path.splitext(os.path.split(relevantFile)[1])[0], relevantFile)
+
+  for member in inspect.getmembers(stratModule, _predicateEvaluationStrategy):
+    result.append(member[1])
+
+  return result

@@ -35,7 +35,7 @@ class DoseStatAction(CLIActionBase):
 
   def __init__(self, inputDose, structSet, structName,
                actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputDose=inputDose, structSet=structSet)
     self._inputDose = inputDose

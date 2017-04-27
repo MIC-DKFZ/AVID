@@ -1,0 +1,8 @@
+<avid:optimization_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+  <avid:name>unknown_evaluation</avid:name>
+  <avid:workflow_file />
+  <avid:artefact_file />
+  <avid:measurements_info />
+  <avid:best />
+  <avid:candidates />
+</avid:optimization_result>

@@ -34,7 +34,7 @@ class plmRTSSMapAction(CLIActionBase):
 
   def __init__(self, rtss, reg, outputFormat = artefactProps.FORMAT_VALUE_DCM,
                actionTag = "plmRTSSMap", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = dict()):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(rtss=rtss, reg = reg)
     self._rtss = rtss

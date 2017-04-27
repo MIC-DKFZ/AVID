@@ -27,7 +27,7 @@ class MetricCriterionBase(object):
   '''Measurement value ID for the failed instances.'''
   MID_FailedInstances = 'pyoneer.criteria.MetricCriterionBase.FailedInstances'
   
-  def __init__(self, valuesInfo = dict()):
+  def __init__(self, valuesInfo = None):
     '''
     @param valuesInfo: dict specifying the measurement values the criterion creates.
     Key of the dict is the ID of the value. The dict value may be a string (value name)
@@ -36,17 +36,18 @@ class MetricCriterionBase(object):
     self._selectors = dict()
     self._valueNames = dict()
     self._valueDescs = dict()
-            
-    for id in valuesInfo:
-      try:
-        self._valueNames[id] = str(valuesInfo[id][0])
-      except:
-        self._valueNames[id] = str(valuesInfo[id])
-        
-      try:
-        self._valueDescs[id] = str(valuesInfo[id][1])
-      except:
-        pass
+
+    if valuesInfo is not None:
+      for id in valuesInfo:
+        try:
+          self._valueNames[id] = str(valuesInfo[id][0])
+        except:
+          self._valueNames[id] = str(valuesInfo[id])
+
+        try:
+          self._valueDescs[id] = str(valuesInfo[id][1])
+        except:
+          pass
 
 
   def evaluateInstance(self, instaceArtefacts):

@@ -59,6 +59,25 @@ class TestPointSetConversion(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
+    def test_to_fcsv(self):
+        action = psConversion(ActionTagSelector("SourcePS"), targetformat=FORMAT_VALUE_SLICER_POINTSET,
+                              actionTag="TestToFCSV")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+
+        refFile = os.path.join(self.testDataDir, "refMatchPoint" + os.extsep + "fcsv")
+        resultFile = artefactHelper.getArtefactProperty(action._actions[0]._resultArtefact,
+                                                        artefactProps.URL)
+        self.assertEqual(open(refFile).read(), open(resultFile).read())
+
+        refFile = os.path.join(self.testDataDir, "ref3dslicer" + os.extsep + "fcsv")
+        resultFile = artefactHelper.getArtefactProperty(action._actions[1]._resultArtefact,
+                                                        artefactProps.URL)
+        self.assertEqual(open(refFile).read(), open(resultFile).read())
+
+        token = action.do()
+        self.assertEqual(token.isSkipped(), True)
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,1 @@
+dummy artefact that is referenced by testworkflow_artefact.avid

@@ -35,7 +35,7 @@ class DoseStatsCollectorAction(SingleActionBase):
   def __init__(self, doseSelections, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
                columnKey=artefactProps.TIMEPOINT,
                withHeaders=True, actionTag="DoseStatCollector",
-               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = dict()):
+               alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict = None):
     SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._doseSelections = doseSelections
 
