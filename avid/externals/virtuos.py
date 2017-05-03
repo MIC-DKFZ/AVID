@@ -63,7 +63,7 @@ def isVirtuosFile(path):
   ext = getFileExtensions(path)
 
   result = False  
-  if ext in [os.extsep+"ctx", os.extsep+"dos", os.extsep+"pln",
+  if ext in [os.extsep+"ctx", os.extsep+"dos", os.extsep+"pln", os.extsep+"vdx",
              os.extsep+"ctx"+os.extsep+"gz", os.extsep+"dos"+os.extsep+"gz"]:
     result = True
   

@@ -71,7 +71,7 @@ class DoseStatsCollectorAction(SingleActionBase):
                                                        artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                        artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
                                                        artefactProps.DOSE_STAT: str(key)},
-                                                     urlHumanPrefix=self.instanceName,
+                                                     urlHumanPrefix=self.instanceName+"_"+str(key),
                                                      urlExtension='csv')
         self._resultArtefacts[key] = artefact
 

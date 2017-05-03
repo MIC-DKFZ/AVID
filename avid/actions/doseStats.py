@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class DoseStatAction(CLIActionBase):
   '''Class that wraps the single action for the tool doseMap.'''
 
-  def __init__(self, inputDose, structSet, structName,
+  def __init__(self, inputDose, structSet, structName, computeDVH=True,
                actionTag = "DoseStat", alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
@@ -41,8 +41,9 @@ class DoseStatAction(CLIActionBase):
     self._inputDose = inputDose
     self._structSet = structSet
     self._structName = structName
+    self._computeDVH = computeDVH
        
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", actionConfig))
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseTool", actionConfig))
     self._cwd = cwd    
     
   def _generateName(self):
@@ -56,44 +57,46 @@ class DoseStatAction(CLIActionBase):
 
     return name
 
-   
-  def _indicateOutputs(self):    
+  def _indicateOutputs(self):
     name = self.instanceName
 
     self._resultArtefact = self.generateArtefact(self._inputDose,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML,
                                                                    artefactProps.OBJECTIVE: self._structName},
-                                                 urlHumanPrefix=self.name,
+                                                 urlHumanPrefix=self.instanceName,
                                                  urlExtension='xml')
 
-    name = name.replace("doseStat", "cumDVH")
-    self._resultDVHArtefact = self.generateArtefact(self._inputDose,
+    if self._computeDVH is True:
+      name = name.replace("doseStat", "cumDVH")
+      self._resultDVHArtefact = self.generateArtefact(self._inputDose,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_CUM_DVH_XML,
                                                                    artefactProps.OBJECTIVE: self._structName},
                                                  urlHumanPrefix=name,
                                                  urlExtension='xml')
-
-    return [self._resultArtefact, self._resultDVHArtefact]
+      return [self._resultArtefact, self._resultDVHArtefact]
+    else:
+      return [self._resultArtefact]
  
                 
   def _prepareCLIExecution(self):
     
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    resultDVHPath = artefactHelper.getArtefactProperty(self._resultDVHArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
     structPath = artefactHelper.getArtefactProperty(self._structSet,artefactProps.URL)
     
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseStats", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseTool", self._actionConfig)
     
-    content = '"' + execURL + '"' + ' -d "' + inputPath + '" -s "' + structPath + '" --doseStatistics "' + resultPath + '"'
+    content = '"' + execURL + '"' + ' --doseFile "' + inputPath + '" --structFile "' + structPath + '" --doseStatistics "' + resultPath + '"'
 
-    content += ' --DVH "' + resultDVHPath + '"'
+    if self._computeDVH is True:
+      resultDVHPath = artefactHelper.getArtefactProperty(self._resultDVHArtefact, artefactProps.URL)
+      content += ' --DVH "' + resultDVHPath + '"'
 
-    content += ' -n "'+self._getStructPattern()+'"'
+    content += ' --structName "'+self._getStructPattern()+'"'
       
     content += ' --doseLoadStyle ' + _getArtefactLoadStyle(self._inputDose)
     content += ' --structLoadStyle ' + _getStructLoadStyle(self._structSet)
@@ -151,7 +154,7 @@ class DoseStatBatchAction(BatchActionBase):
     should therefore able to process a batch of SingleActionBased actions.'''
   
   def __init__(self,  inputSelector, structSetSelector, structNames,
-               structLinker = CaseLinker()+CaseInstanceLinker(), 
+               structLinker = CaseLinker()+CaseInstanceLinker(), computeDVH=True,
                actionTag = "doseStat", alwaysDo = False,
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
@@ -162,6 +165,8 @@ class DoseStatBatchAction(BatchActionBase):
     self._structLinker = structLinker
     self._structNames = structNames
     self._singleActionParameters = singleActionParameters
+
+    self._computeDVH = computeDVH
 
       
   def _generateActions(self):
@@ -180,7 +185,7 @@ class DoseStatBatchAction(BatchActionBase):
         
       for ls in linkedStructs:
         for name in self._structNames:
-          action = DoseStatAction(inputDose, ls, name,
+          action = DoseStatAction(inputDose, ls, name, self._computeDVH,
                               self._actionTag, alwaysDo = self._alwaysDo,
                               session = self._session,
                               additionalActionProps = self._additionalActionProps,
