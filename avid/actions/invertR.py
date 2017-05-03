@@ -59,15 +59,13 @@ class invertRAction(CLIActionBase):
     name = self._generateName()
 
     # Specify result artefact
-    self._resultArtefact = self.generateArtefact(artefactRef)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_MATCHPOINT
+    userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                        artefactProps.FORMAT: artefactProps.FORMAT_VALUE_MATCHPOINT}
 
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.ID)) + os.extsep + "mapr"
-    resName = os.path.join(path, resName)
-
-    self._resultArtefact[artefactProps.URL] = resName
+    self._resultArtefact = self.generateArtefact(artefactRef,
+                                                 userDefinedProps = userDefinedProps,
+                                                 urlHumanPrefix=name,
+                                                 urlExtension='mapr')
 
     return [self._resultArtefact]
 
