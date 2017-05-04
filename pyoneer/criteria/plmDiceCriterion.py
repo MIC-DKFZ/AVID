@@ -10,16 +10,20 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+import logging
 
-
+from avid.common import AVIDUrlLocater
+from avid.externals.plastimatch import parseDiceResult
 from ..criteria import MetricCriterionBase
-from avid.common.artefact import getArtefactProperty, defaultProps
+from avid.common.artefact import getArtefactProperty
+from avid.common.artefact import defaultProps as artefactProps
 from avid.selectors.keyValueSelector import ActionTagSelector
 import subprocess
 from StringIO import StringIO
 
 
 logger = logging.getLogger(__name__)
+
 
 class PlmDiceCriterion(MetricCriterionBase):
   '''Criterion that evaluates the difference between to masks using the
@@ -46,9 +50,28 @@ class PlmDiceCriterion(MetricCriterionBase):
   MID_HausdorffBoundaryMaxAvg = 'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg'
   MID_HausdorffBoundaryP95 = 'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.p95'
   
+  DICE_KEYS = ['FN', 'FP', 'DICE', 'SE', 'SP',
+               'Hausdorff distance', 'Avg average Hausdorff distance',
+               'Max average Hausdorff distance', 'Percent (0.95) Hausdorff distance',
+               'Hausdorff distance (boundary)', 'Avg average Hausdorff distance (boundary)',
+               'Max average Hausdorff distance (boundary)', 'Percent (0.95) Hausdorff distance (boundary)']
+
   MAPPING_CRITERION_ID_2_PLM_ID = {MID_TP: 'TP',
-                                   MID_TN: 'TN'}
-  
+                                   MID_TN: 'TN',
+                                   MID_FN: 'FN',
+                                   MID_FP: 'FP',
+                                   MID_DICE: 'DICE',
+                                   MID_SE: 'SE',
+                                   MID_SP: 'SP',
+                                   MID_Hausdorff: 'Hausdorff distance',
+                                   MID_HausdorffAvg: 'Avg average Hausdorff distance',
+                                   MID_HausdorffMaxAvg: 'Max average Hausdorff distance',
+                                   MID_HausdorffP95: 'Percent (0.95) Hausdorff distance',
+                                   MID_HausdorffBoundary: 'Hausdorff distance (boundary)',
+                                   MID_HausdorffBoundaryAvg: 'Avg average Hausdorff distance (boundary)',
+                                   MID_HausdorffBoundaryMaxAvg: 'Max average Hausdorff distance (boundary)',
+                                   MID_HausdorffBoundaryP95: 'Percent (0.95) Hausdorff distance (boundary)'}
+
   def __init__(self, referenceSelector = ActionTagSelector('Reference'), testSelector = ActionTagSelector('Test')):
     valuesInfo = { self.MID_TP: ['True Positives','Number of true positive voxels.'],
                    self.MID_TN: ['True Negatives','Number of true negative voxels.'],
@@ -108,6 +131,12 @@ class PlmDiceCriterion(MetricCriterionBase):
       global logger
       logger.error("Error in plmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
     else:
-      result = parseDiceResult(output.getvalue())
+        plmresult = parseDiceResult(output.getvalue())
+        result = dict()
+        for key in self.MAPPING_CRITERION_ID_2_PLM_ID:
+            try:
+                result[key] = plmresult[self.MAPPING_CRITERION_ID_2_PLM_ID[key]]
+            except:
+                result[key] = None
     
     return result
