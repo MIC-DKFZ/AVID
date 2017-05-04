@@ -83,8 +83,8 @@ class TestOptimizationStrategy(unittest.TestCase):
     self.assertAlmostEquals(refSVMeasure, best.svMeasure, 6)
 
     loadedResult = readOptimizationResult(self.testResultFile)
-    self.assertEqual(loadedResult.artefactFile, result.artefactFile)
-    self.assertEqual(loadedResult.workflowFile, result.workflowFile)
+    self.assertEqual(self.testArtefactFile, result.artefactFile)
+    self.assertEqual(self.testWorkflowFile, result.workflowFile)
     self.assertEqual(loadedResult.valueDescriptions, result.valueDescriptions)
     self.assertEqual(loadedResult.valueNames, result.valueNames)
     self.assertEqual(loadedResult.name, result.name)
