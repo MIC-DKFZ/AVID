@@ -119,13 +119,20 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
   '''
   returnURL = None
 
-  if actionID in workflow.actionTools:
-    #option 1
-    returnURL = workflow.actionTools[actionID]
+  try:
+    if actionID in workflow.actionTools:
+      #option 1
+      returnURL = workflow.actionTools[actionID]
+  except:
+    pass
 
   if returnURL is None:
     #option 2-4
-    toolconfigPath = getToolConfigPath(actionID, workflow.rootPath)
+    try:
+      toolconfigPath = getToolConfigPath(actionID, workflow.rootPath)
+    except:
+      toolconfigPath = getToolConfigPath(actionID)
+
     if os.path.isfile(str(toolconfigPath)):
       config = ConfigParser.ConfigParser()
       config.read(toolconfigPath)

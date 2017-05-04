@@ -104,12 +104,16 @@ class PlmDiceCriterion(MetricCriterionBase):
      '''
     result = None
     
-    if len(relevantArtefacts['referenceSelector']) == 1 and len(relevantArtefacts['referenceSelector']) == 1:
+    if len(relevantArtefacts['referenceSelector']) == 1 and len(relevantArtefacts['testSelector']) == 1:
       
-      plmResult = self._callPlastimatchDice(relevantArtefacts['referenceSelector'][0], relevantArtefacts['referenceSelector'][0])
-      
-      result = {valueID: plmResult[self.MAPPING_CRITERION_ID_2_PLM_ID[valueID]] for valueID in self._valueNames}
-      
+      plmResult = self._callPlastimatchDice(relevantArtefacts['referenceSelector'][0], relevantArtefacts['testSelector'][0])
+
+      result = dict()
+      for key in self.MAPPING_CRITERION_ID_2_PLM_ID:
+          try:
+              result[key] = plmResult[self.MAPPING_CRITERION_ID_2_PLM_ID[key]]
+          except:
+              result[key] = None
     else:
       global logger
       logger.error("Error in plmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
@@ -120,23 +124,18 @@ class PlmDiceCriterion(MetricCriterionBase):
     refPath = getArtefactProperty(reference,artefactProps.URL)
     testPath = getArtefactProperty(test,artefactProps.URL)
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(None, "plastimatch")
     
-    callStr = '"' + execURL + '" dice ' + ' "' + refPath + '"' + ' "' + testPath +'" --all'
+    call = [execURL, 'dice', refPath, testPath,'--all']
     
-    output = StringIO
-    errors = StringIO
     result = None
-    if not subprocess.call(callStr,stdout = output, stderr = errors) == 0:
+    p = subprocess.Popen(call, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, err = p.communicate()
+
+    if err == 0:
       global logger
       logger.error("Error in plmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
     else:
-        plmresult = parseDiceResult(output.getvalue())
-        result = dict()
-        for key in self.MAPPING_CRITERION_ID_2_PLM_ID:
-            try:
-                result[key] = plmresult[self.MAPPING_CRITERION_ID_2_PLM_ID[key]]
-            except:
-                result[key] = None
-    
+        result = parseDiceResult(output)
+
     return result
