@@ -284,27 +284,31 @@ def _initMeasurementResult(result, xmlNode):
 
         desc = EvalInstanceDescriptor(defValues, ID=ID)
 
-        measures = dict()
-        for mNode in iNode.findall(XML_MEASUREMENTS + '/' + XML_MEASUREMENT, XML_NAMESPACE_DICT):
-            vNodes = mNode.findall(XML_VALUE, XML_NAMESPACE_DICT)
-            if len(vNodes) > 0:
-                values = list()
-                for vNode in vNodes:
+        mNodes = iNode.findall(XML_MEASUREMENTS + '/' + XML_MEASUREMENT, XML_NAMESPACE_DICT)
+        if len(mNodes)>0:
+            measures = dict()
+            for mNode in iNode.findall(XML_MEASUREMENTS + '/' + XML_MEASUREMENT, XML_NAMESPACE_DICT):
+                vNodes = mNode.findall(XML_VALUE, XML_NAMESPACE_DICT)
+                if len(vNodes) > 0:
+                    values = list()
+                    for vNode in vNodes:
+                        try:
+                            values.append(float(vNode.text))
+                        except:
+                            raise ValueError('XML has an invalid instance measurement list value.')
+                    measures[mNode.attrib[XML_ATTR_KEY]] = values
+                else:
                     try:
-                        values.append(float(vNode.text))
+                        measures[mNode.attrib[XML_ATTR_KEY]] = float(mNode.text)
                     except:
-                        raise ValueError('XML has an invalid instance measurement list value.')
-                measures[mNode.attrib[XML_ATTR_KEY]] = values
-            else:
-                try:
-                    measures[mNode.attrib[XML_ATTR_KEY]] = float(mNode.text)
-                except:
-                    if len(mNode.text) == 0:
-                        measures[mNode.attrib[XML_ATTR_KEY]] = None
-                    else:
-                        raise ValueError('XML has an invalid instance measurement value.')
+                        if len(mNode.text) == 0:
+                            measures[mNode.attrib[XML_ATTR_KEY]] = None
+                        else:
+                            raise ValueError('XML has an invalid instance measurement value.')
 
-        result.instanceMeasurements[desc] = measures
+            result.instanceMeasurements[desc] = measures
+        else:
+            result.instanceMeasurements[desc] = None
 
 def _initResultBase(base, xmlNode):
     '''Loads a evaluation result from an xml file.
@@ -461,19 +465,22 @@ def _writeMeasurmentResult(result, builder):
         builder.end(XML_INSTANCE_DESCRIPTOR)
 
         builder.start(XML_MEASUREMENTS, {})
-        for mID in result.instanceMeasurements[desc]:
-            builder.start(XML_MEASUREMENT, {XML_ATTR_KEY: mID})
-            if not result.instanceMeasurements[desc][mID] is None:
-                try:
-                    for value in result.instanceMeasurements[desc][mID]:
-                        builder.start(XML_VALUE, {})
-                        builder.data(str(value))
-                        builder.end(XML_VALUE)
-                except:
-                    builder.data(str(result.instanceMeasurements[desc][mID]))
-            else:
-                builder.data('')
-            builder.end(XML_MEASUREMENT)
+        try:
+            for mID in result.instanceMeasurements[desc]:
+                builder.start(XML_MEASUREMENT, {XML_ATTR_KEY: mID})
+                if not result.instanceMeasurements[desc][mID] is None:
+                    try:
+                        for value in result.instanceMeasurements[desc][mID]:
+                            builder.start(XML_VALUE, {})
+                            builder.data(str(value))
+                            builder.end(XML_VALUE)
+                    except:
+                        builder.data(str(result.instanceMeasurements[desc][mID]))
+                else:
+                    builder.data('')
+                builder.end(XML_MEASUREMENT)
+        except:
+            pass
         builder.end(XML_MEASUREMENTS)
 
         builder.end(XML_INSTANCE)
