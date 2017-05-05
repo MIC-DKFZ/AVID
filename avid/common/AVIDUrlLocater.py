@@ -77,11 +77,13 @@ def getUtilityPath(checkExistance = True):
   else:
     return None
   
-def getToolConfigPath(actionID, workflowRootPath = None):
+def getToolConfigPath(actionID, workflowRootPath = None, checkExistance = True):
   ''' Helper functions that gets the path to the config file for the passed actionID
       If workflowRootPath is set it will be also checked 
      @param actionID of the action that requests the URL
      @param workflowRootPath Path of the workflow. If none it will be ignored.
+     @param checkExistance Indicates if only existing paths should be returned. If True and config path
+     does not exist or can be determined, None will be returned.
      The following rules will used to determine the tool config path.
      1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
      2. check the path:<AVID toolspath>/<actionID>/avidtool.config. If it is valid, return it else 2. 
@@ -98,7 +100,7 @@ def getToolConfigPath(actionID, workflowRootPath = None):
   if configPath is None:
     try:
       testPath = os.path.join(getUtilityPath(), actionID, "avidtool.config")
-      if os.path.isfile(testPath):
+      if os.path.isfile(testPath) or not checkExistance:
         configPath = testPath
     except:
       pass
