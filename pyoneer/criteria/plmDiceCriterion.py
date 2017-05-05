@@ -82,11 +82,11 @@ class PlmDiceCriterion(MetricCriterionBase):
                    self.MID_SP: ['Specificity','Specificity of the test covering the reference.'],
                    self.MID_Hausdorff: ['Hausdorff distance','Hausdorff distance between the masks.'],
                    self.MID_HausdorffAvg: ['Average Hausdorff distance','Average Hausdorff distance between the masks.'],
-                   self.MID_HausdorffMaxAvg: ['Average Hausdorff distance','Average Hausdorff distance between the masks.'],
+                   self.MID_HausdorffMaxAvg: ['Maximum average Hausdorff distance','Maximum average Hausdorff distance between the masks.'],
                    self.MID_HausdorffP95: ['P95 Hausdorff distance','95-Percentile of Hausdorff distance between the masks.'],
                    self.MID_HausdorffBoundary: ['Hausdorff distance boundary','Hausdorff distance between the boundaries of the the masks.'],
                    self.MID_HausdorffBoundaryAvg: ['Average Hausdorff distance boundary','Average Hausdorff distance between the boundaries of the masks.'],
-                   self.MID_HausdorffBoundaryMaxAvg: ['Average Hausdorff distance boundary','Average Hausdorff distance between the boundaries of the the masks.'],
+                   self.MID_HausdorffBoundaryMaxAvg: ['Maximum average Hausdorff distance boundary','Maximum average Hausdorff distance between the boundaries of the the masks.'],
                    self.MID_HausdorffBoundaryP95: ['P95 Hausdorff distance boundary','95-Percentile of Hausdorff distance between the boundaries of the the masks.']}
 
     MetricCriterionBase.__init__(self, valuesInfo = valuesInfo)
