@@ -14,6 +14,7 @@
 import logging
 from avid.common.artefact import defaultProps
 from avid.common.demultiplexer import getSelectors
+from avid.selectors import SelectorBase
 from pyoneer.evaluation import EvalInstanceDescriptor
 
 logger = logging.getLogger(__name__)
@@ -26,9 +27,10 @@ class DataSetEvaluator (object):
   that instances will be defined by the 'case' property, so each case will be evaluated
   as an instance.'''
   
-  def __init__(self, metricCriteria, instanceDefiningProps = [defaultProps.CASE]):
+  def __init__(self, metricCriteria, instanceDefiningProps = [defaultProps.CASE], instanceDefiningSelector = SelectorBase()):
     self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
+    self._instanceDefiningSelector = instanceDefiningSelector
     
     
   def _doRecursiveEvaluateInstance(self, resultData, level = 0, idValues = None):
@@ -38,7 +40,7 @@ class DataSetEvaluator (object):
       idValues = dict()
 
     if level < len(self._instanceDefiningProps):
-      splitSelectorsDict = getSelectors(self._instanceDefiningProps[level], workflowData = resultData)
+      splitSelectorsDict = getSelectors(self._instanceDefiningProps[level], workflowData = self._instanceDefiningSelector.getSelection(resultData))
       
       for splitValue in splitSelectorsDict:
         #go deeper
