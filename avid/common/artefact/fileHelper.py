@@ -185,9 +185,10 @@ def saveArtefactList_xml(filePath, artefacts, rootPath=None):
                 value = artefact[key]
                 if key is defaultProps.INPUT_IDS:
                     for sourceName in value:
-                        builder.start(XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
-                        builder.data(value[sourceName])
-                        builder.end(XML_INPUT_ID)
+                        if value[sourceName] is not None:
+                            builder.start(XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
+                            builder.data(value[sourceName])
+                            builder.end(XML_INPUT_ID)
                 else:
                     if key is defaultProps.URL:
                         # make all paths relative

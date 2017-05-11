@@ -21,6 +21,7 @@ from pyoneer.evaluationResult import EvaluationResult, MeasurementResult
 
 from avid.common.artefact import defaultProps
 from avid.common.artefact.fileHelper import loadArtefactList_xml
+from avid.selectors import SelectorBase
 from pyoneer.dataSetEvaluator import DataSetEvaluator
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class DefaultMetric (object):
   evaluate an avid workflow according to result artefacts it produces. In
   order to evaluate, the metric uses the specified criteria.'''
   
-  def __init__(self, metricCriteria, sessionDir, measureWeights = None, instanceDefiningProps = [defaultProps.CASE], clearSessionDir = True):
+  def __init__(self, metricCriteria, sessionDir, measureWeights = None, instanceDefiningProps = [defaultProps.CASE], instanceDefiningSelector = SelectorBase(), clearSessionDir = True):
     '''Initialization of the metric.
     @param metricCriteria: list of criterion instances that should be used to
     evaluate.
@@ -38,6 +39,8 @@ class DefaultMetric (object):
     @param instanceDefiningProps: List of artefact properties that discriminate
     evaluation instances. E.g. as a default, the case property will be used to
     discriminate evaluation instances, thus one instance evaluation per case.
+    @param instanceDefiningSelector: Selector that is used to select the artefacts that are used to discriminate the
+    evaluation instances. As default all artefacts of the evaluated workflow will be used.
     @param measureWeights: Weights that should be used when computing the single value
     measurement (by summing up the measurements of all criteria) or the weighted measurements.
     It is a dictionary with the measurement value IDs as keys and the weights as values. All
@@ -48,6 +51,7 @@ class DefaultMetric (object):
     ''' 
     self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
+    self._instanceDefiningSelector = instanceDefiningSelector
     self.sessionDir = sessionDir
     self._measureWeights = measureWeights
     self._clearSessionDir = clearSessionDir
@@ -79,7 +83,7 @@ class DefaultMetric (object):
     
     logger.debug('Evaluating workflow results...')
     
-    evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps)
+    evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps, self._instanceDefiningSelector)
     
     artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
     

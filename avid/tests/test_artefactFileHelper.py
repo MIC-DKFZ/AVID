@@ -29,6 +29,7 @@ class TestArtefactFileHelper(unittest.TestCase):
               
       self.a1 = artefactGenerator.generateArtefactEntry("case1", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), "obj_1", True)
       self.a2 = artefactGenerator.generateArtefactEntry("case2", None, 0, "action2", "result2", "dummy2", os.path.join(self.testDataDir, "artefact2.txt"), None, False, customProp1 = "nice", customProp2 = "42")
+      self.a3 = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), input_ids = {'source':'source_id', 'source2':None} )
       self.data = list()
       self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
       self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
@@ -139,6 +140,7 @@ class TestArtefactFileHelper(unittest.TestCase):
 
 
     def test_save_xml(self):
+
       fileHelper.saveArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"),self.data, rootPath = self.testDataDir)
       artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
       

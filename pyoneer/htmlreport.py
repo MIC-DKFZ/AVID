@@ -17,7 +17,10 @@ import pyhtml as html
 def getAllInstanceMeasurementValueKeys(ims):
     vkeys = set()
     for imkey in ims:
-        vkeys = vkeys | set(ims[imkey].keys())
+        try:
+            vkeys = vkeys | set(ims[imkey].keys())
+        except:
+            pass
     return list(sorted(vkeys))
 
 def getMeasurementValueKeys(ms, onlyWeigted = False):
@@ -144,7 +147,7 @@ def generateEvaluationReport(result):
                 _generateResultBase(result)),
             html.section(
                 html.header(html.h2('Evaluation results')),
-                _generateMeasuremntResult(result, detailed = True)),
+                _generateMeasuremntResult(result)),
             html.section(
                 html.header(html.h2('Legend:')),
                 _generateValueDescriptions(result)))))

@@ -27,7 +27,7 @@ import webbrowser
 def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessionPath, args_dict):
     stratClasses = detectEvaluationStrategies(stratFile)
     for stratClass in stratClasses:
-        result = stratClass(sessionPath, args_dict['keepArtefacts']).evaluate(workflowFile=workflowPath,
+        result = stratClass(sessionPath, not args_dict['keepArtefacts']).evaluate(workflowFile=workflowPath,
                                                                               artefactFile=artefactPath, label=label)
         writeEvaluationResult(resultPath, result)
 

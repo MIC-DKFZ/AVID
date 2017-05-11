@@ -92,6 +92,7 @@ def main():
   parser.add_argument('command', help = "Specifies the type of configuration that should be done. tools", choices = ['tools', 'settings', 'tool-settings'])
   parser.add_argument('subcommands', nargs= '*', help = "Optional sub commands.")
   parser.add_argument('--toolspath', help = 'Specifies the tools path root that should be used by avid. In mode "tools" this path will directly by used. In mode "settings" the file avid.config will be altered.')
+  parser.add_argument('--force', action='store_true', help = 'Used in conjunction with the sub command "tool-settings". Forces the tools config file to be generated if it is not existing.')
 
   args_dict = vars(parser.parse_args())
 
@@ -99,7 +100,7 @@ def main():
   if args_dict['command'] == "tools":
     if len(args_dict['subcommands']) == 0:
       print("Error. Command 'tools' has to specify a subcommand ('update', 'install').")
-      exit
+      return
     else:
       if args_dict['subcommands'][0] == "install" or args_dict['subcommands'][0] == "update":
         doInstall = args_dict['subcommands'][0] == "install"
@@ -124,27 +125,40 @@ def main():
 
   elif args_dict['command'] == "tool-settings":
     if len(args_dict['subcommands'])<3:
-      print("Error. Command 'settings' needs two additional positional arguments (tool id, settings name and value).")
-      exit
+      print("Error. Command 'settings' needs three additional positional arguments (tool id, settings name and value).")
+      return
     else:
       actionID = args_dict['subcommands'][0]
       name = args_dict['subcommands'][1]
       value = args_dict['subcommands'][2]
-      section, name = name.split('.',1)
+
+      try:
+        section, name = name.split('.',1)
+      except:
+        section = ''
+
+      if section.lower() == 'default':
+        section = ''
 
       if section is None or name is None or value is None:
         print("Error. Cannot save settings for tool %s. Specified setting name or value is invalid. (section: %s; name: %s; value: %s" % (actionID, section, name, value))
-        exit
+        return
         
       configFilePath = getToolConfigPath(actionID)
 
       if configFilePath is None:
-        print("Error. Cannot save settings for tool %s. Config file of tool cannot be found." % (actionID))
-        exit
+        if not args_dict['force']:
+          print('Error. Cannot save settings for tool %s. Config file of tool cannot be found. If you want to generate/enforce a config file, use the flag "--force".' % (actionID))
+          return
+        else:
+          configFilePath = getToolConfigPath(actionID, checkExistance=False)
+          checkAndCreateDir(os.path.split(configFilePath)[0])
+          with open(configFilePath, 'w') as configFile:
+            pass
       
       config = ConfigParser.ConfigParser()
       config.read(configFilePath)
-      if not section in config.sections() and not section == 'default':
+      if not section in config.sections() and not section == '':
         config.add_section(section)
       config.set(section, name, value)
       with open(configFilePath, 'w') as configFile:
@@ -155,7 +169,7 @@ def main():
   elif args_dict['command'] == "settings":
     if len(args_dict['subcommands'])<2:
       print("Error. Command 'settings' needs two additional positional arguments (settings name and value).")
-      exit
+      return
     else:
       name = args_dict['subcommands'][0]
       value = args_dict['subcommands'][1]
@@ -163,7 +177,7 @@ def main():
       
       if section is None or name is None or value is None:
         print("Error. Cannot save settings. Specified setting name or value is invalid. (section: %s; name: %s; value: %s)" % (section, name, value))
-        exit
+        return
         
       configFilePath = getAVIDConfigPath()
       config = ConfigParser.ConfigParser()
