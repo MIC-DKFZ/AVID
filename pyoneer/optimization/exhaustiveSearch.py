@@ -68,19 +68,19 @@ class ExhaustiveSearchOptimizer (OptimizerBase):
         parameters[self._parameterIDs[pos]] = position[pos]
 
       label = str(position)
-      result = self._evaluate(candidates={label:parameters})
+      results = self._evaluate(candidates={label:parameters})
 
       finding = False
 
       if self._searchMinimum:
-        finding = result[label].svMeasure<self._bestSV
+        finding = results[label].svMeasure<self._bestSV
       else:
-        finding = result[label].svMeasure>self._bestSV
+        finding = results[label].svMeasure>self._bestSV
 
       if finding:
-        self._bestSV = result[label].svMeasure
+        self._bestSV = results[label].svMeasure
         self._best = parameters
-        self._bestResult = result[label]
+        self._bestResult = results[label]
 
 
   def _optimize(self):

@@ -19,22 +19,27 @@ from avid.common.artefact import ensureValidPath
 
 from pyoneer.evaluation import detectEvaluationStrategies
 from pyoneer.evaluationResult import OptimizationResult
+from pyoneer.optimization.parameters import getScalingFromOpt
 
 logger = logging.getLogger(__name__)
 
 class EvaluationSchedulingBase(object):
     '''Helper class to run the evaluation of optimization candidates.'''
 
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
+          @param workflowFile: Path to the file that specifies the workflow.
+          @param artefactFile: Path to the artefact file.
+          @param searchParameters: Search parameter descriptor defined by the strategy for the current optimization.
         '''
         self._sessionDir = sessionDir
         self._evaluationFile = evaluationFile
         self._workflowFile = workflowFile
         self._artefactFile = artefactFile
         self.reportCandidateResultFunctor = None
+        self._searchParameters = searchParameters
 
     def getEvaluationStrategyInstance(self):
         evalclasses = detectEvaluationStrategies(self._evaluationFile)
@@ -58,6 +63,30 @@ class EvaluationSchedulingBase(object):
         @return: Returns a dict containing the EvaluationResult instances for the candidates. Keys of the result dict are
         the same as the candidates dict. Values are the corresponding EvaluationResult instances.'''
 
+        scaledCandidates = dict()
+
+        for candKey in candidates:
+            params = candidates[candKey]
+            scaledParams = dict()
+            try:
+                for paramKey in params:
+                    scaler = getScalingFromOpt(self._searchParameters,paramKey)
+                    scaledParams[paramKey] = scaler(params[paramKey])
+            except:
+                raise RuntimeError('Cannot evalute. Failed to scale evaluation candidates. No scaler available for parameter ({}).'.format(paramKey))
+
+            scaledCandidates[candKey] = scaledParams
+
+        return self._evaluate(scaledCandidates)
+
+    def _evaluate(self, candidates):
+        '''Function is called by self.evaluate() and should be implemented to do the scheduling.
+        @param candidates: Dictionary containing the candidates. Keys are the string labels/IDs of the candidates. The values
+        are dictionaries containing the parameters of the candidate. Keys of the parameter dict are the parameter IDs.
+        The passed candidates have been transformed in the value space of the evaluation domain.
+        @return: Returns a dict containing the EvaluationResult instances for the candidates. Keys of the result dict are
+        the same as the candidates dict. Values are the corresponding EvaluationResult instances.'''
+
         raise ImportError('Implement this methods in derived classes.')
 
     def reportCandidate(self, label, candidateParam):
@@ -76,17 +105,19 @@ class EvaluationSchedulingBase(object):
 
 
 class SimpleEvaluationScheduling(EvaluationSchedulingBase):
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
         '''
-        EvaluationSchedulingBase.__init__(self, evaluationFile=evaluationFile,sessionDir=sessionDir, workflowFile=workflowFile, artefactFile=artefactFile)
+        EvaluationSchedulingBase.__init__(self, evaluationFile=evaluationFile,sessionDir=sessionDir,
+                                          workflowFile=workflowFile, artefactFile=artefactFile,
+                                          searchParameters=searchParameters)
 
         self.evalStrategy = self.getEvaluationStrategyInstance()
 
 
-    def evaluate(self, candidates):
+    def _evaluate(self, candidates):
         '''Function is called by the optimizer to evaluate the passed candidates.
         @param candidates: Dictionary containing the candidates. Keys are the string labels/IDs of the candidates. The values
         are dictionaries containing the parameters of the candidate. Keys of the parameter dict are the parameter IDs.
@@ -109,6 +140,11 @@ class OptimizationReportFunctor(object):
     '''Helper functor to communicate candidate evaluations  and append it to the result instance
     of the current optimization run.'''
     def __init__(self, result,  callback):
+        '''
+        @param result: OptimizationResult instance that should be used to report/document evaluations candidates
+        of the optimization process.
+        @param callback: function that is used by the fuctor to inform about a new result. Function must have the signature
+        (x, y). x is the current interim OptimizationResult; y is the new candidate evaluation result'''
         self._result = result
         self._callback = callback
 
@@ -120,7 +156,7 @@ class OptimizationReportFunctor(object):
             pass
 
         try:
-            self._callback(label, evalResult)
+            self._callback(label, self._result, evalResult)
         except:
             pass
 
@@ -133,13 +169,16 @@ class OptimizationStrategy(object):
     for classes based on OptimizationStrategy and will use instances of them.
     '''
 
-    def __init__(self, evaluationFile, sessionDir):
+    def __init__(self, evaluationFile, sessionDir, reportCallback = None):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
+          @param reportCallback: function that is used by to inform about a new result. Function must have the signature
+          (x, y). x is the current interim OptimizationResult; y is the new candidate evaluation result
         '''
         self.sessionDir = sessionDir
         self.evaluationFile = evaluationFile
+        self._reportCallback = reportCallback
 
     def defineOptimizer(self):
         '''This method must be implemented and return an optimizer instance.'''
@@ -164,7 +203,7 @@ class OptimizationStrategy(object):
         currentsessionDir = os.path.join(self.sessionDir,ensureValidPath(label))
 
         return SimpleEvaluationScheduling(sessionDir=currentsessionDir, evaluationFile=self.evaluationFile,
-                                          workflowFile=workflowFile, artefactFile=artefactFile)
+                                          workflowFile=workflowFile, artefactFile=artefactFile, searchParameters = self.defineSearchParameters())
 
     def optimize(self, workflowFile, artefactFile, label=None):
         '''Function is called to evaluate a workflow used the passed artfact definitions
@@ -183,7 +222,7 @@ class OptimizationStrategy(object):
         optimizer = self.defineOptimizer()
         evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile,
                                                         label=label)
-        evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, None)
+        evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, self._reportCallback)
 
         optimizer.evaluationCallBack = evalScheduler.evaluate
 

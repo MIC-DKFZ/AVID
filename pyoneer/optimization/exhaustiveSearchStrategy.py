@@ -33,9 +33,9 @@ class ExhaustiveSearchStrategy(OptimizationStrategy):
 
         for param in paramdesc:
             names.append(param)
-            minimas.append(param_helper.getMinimum(paramdesc,param,True))
-            maximas.append(param_helper.getMaximum(paramdesc,param,True))
-            freqs.append(param_helper.getDecoration(paramdesc, param, 'frequency',True))
+            minimas.append(param_helper.getMinimum(paramdesc,param,True, scaleToOpt=True))
+            maximas.append(param_helper.getMaximum(paramdesc,param,True, scaleToOpt=True))
+            freqs.append(param_helper.getDecoration(paramdesc, param, 'frequency',True, scaleToOpt=True))
 
         return ExhaustiveSearchOptimizer(names, minimas, maximas,freqs)
 
