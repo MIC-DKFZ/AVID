@@ -44,21 +44,40 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
             if args_dict['noDisplay'] is not True:
                 webbrowser.open('file:///'+reportPath)
 
+class InterimReporter:
+    def __init__(self, resultPath, reportPath = None):
+        self._resultPath = resultPath
+        self._reportPath = reportPath
+
+    def __call__(self, *args, **kwargs):
+        writeOptimizationResult(self._resultPath, args[1])
+
+        if self._reportPath is not None:
+            report = htmlreport.generateOptimizationReport(args[1])
+
+            with open(self._reportPath, 'w') as fileHandle:
+                fileHandle.write(report)
 
 def doOptimization(stratFile, resultPath, workflowPath, artefactPath, label, sessionPath, evalStratFile, args_dict):
 
     optStratClasses = detectOptimizationStrategies(stratFile)
 
+    reportPath = None
+    if args_dict['report'] is not None:
+        reportPath = resultPath + os.extsep + 'html'
+        if len(args_dict['report']) > 0:
+            reportPath = args_dict['report']
+
     for stratClass in optStratClasses:
-        strat = stratClass(evalStratFile, sessionPath)
+        reportCallBack = None
+        if args_dict['interim'] is not None:
+            reportCallBack = InterimReporter(resultPath, reportPath)
+
+        strat = stratClass(evalStratFile, sessionPath, reportCallBack)
         result = strat.optimize(workflowPath,artefactPath, label=label)
         writeOptimizationResult(resultPath, result)
 
         if args_dict['report'] is not None:
-            reportPath = resultPath + os.extsep + 'html'
-            if len(args_dict['report'])>0:
-                reportPath = args_dict['report']
-
             report = htmlreport.generateOptimizationReport(result)
 
             with open(reportPath, 'w') as fileHandle:
@@ -112,6 +131,7 @@ def main():
     parser.add_argument('--keepArtefacts', '-k', action='store_true', help = 'Indicates that the artefacts of the evaluation sessions should be kept and not be removed. (Only relevant for evaluations)')
     parser.add_argument('--report', '-r', nargs='?', const='', default=None, help = 'Generates and displays an html report out of the result. If no explicit path is specified it will use the result path with an added html extension.')
     parser.add_argument('--noDisplay', '-y', action='store_true', help = 'Indicates that generated html report should just be stored and not displayed (e.g. when AVID pyoneer runs on a server terminal).')
+    parser.add_argument('--interim', '-i', action='store_true', help = 'Indicates already interim results of the optimization process should be reported. Meaning results will be stored also after each candidate evaluation.')
 
     args_dict = vars(parser.parse_args())
 

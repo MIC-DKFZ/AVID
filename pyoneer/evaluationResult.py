@@ -135,7 +135,13 @@ class EvaluationResult(ResultBase, MeasurementResult):
                  workflowModifier=None, measureWeights=None, name='unknown_evaluation',
                  workflowFile='', artefactFile='', valueNames=None, valueDescriptions=None):
         '''Init of a EvaluationResult instance.
-        @param candidateResults: List of of results of evaluation candidates.
+        @param measurements: Dictionary containing the overall measurements for the
+        whole test set.
+        @param instanceMeasurements: Result dictionary with measurements for each
+        instance. The key of the dict is a EvalInstanceDescriptor instance,
+        the value is dictionary of measurements of one instance.
+        @param workflowModifier: Dictionary of the workflow modifier used for the evaluation.
+        @param measureWeights: Dictionary of the weights used to calculate the single
         @param name: Name/lable of this evaluation.
         @param workflowFile: Path to the workflow script that was evaluated.
         @param artefactFile: Path to the artefact file that used to evaluated the workflow.
