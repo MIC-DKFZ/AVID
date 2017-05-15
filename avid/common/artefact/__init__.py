@@ -54,6 +54,8 @@ class Artefact(object):
             self._defaultProps[defaultProps.OBJECTIVE] = None
             self._defaultProps[defaultProps.INVALID] = None
             self._defaultProps[defaultProps.INPUT_IDS] = None
+            self._defaultProps[defaultProps.ACTION_CLASS] = None
+            self._defaultProps[defaultProps.ACTION_INSTANCE_UID] = None
         else:
             for key in defaultP:
                 self._defaultProps[key] = defaultP[key]

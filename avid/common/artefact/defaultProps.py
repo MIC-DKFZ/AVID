@@ -44,6 +44,10 @@ TIMESTAMP = "timestamp"
 INPUT_IDS = "input_ids"
 '''Duration of the action execution that generated the artefact (in [s]).'''
 EXECUTION_DURATION = "execution_duration"
+'''Name of the action class that used to do/represent the action.'''
+ACTION_CLASS = "action_class"
+'''UID of the actoin instance that generated the artefact'''
+ACTION_INSTANCE_UID = "action_instance_uid"
 '''Defines a reference to a plan file the artefact is associated with. Normaly
 this could be found as optional property for virtuos dose artefacts.'''
 VIRTUOS_PLAN_REF = "virtuos_plan_ref"

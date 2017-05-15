@@ -14,6 +14,7 @@
 import os
 import logging
 import time
+import uuid
 
 from ..common import actionToken
 from ..common.artefact.generator import generateArtefactEntry
@@ -38,6 +39,8 @@ class ActionBase(object):
           @param additionalActionProps: Dictionary that can be used to define additional
           properties that should be added to any artefact that are produced by the action.
         '''
+
+        self._instanceUID = uuid.uuid4()
         if session is None:
             # check if we have a current generated global session we can use
             if workflow.currentGeneratedSession is not None:
@@ -58,6 +61,10 @@ class ActionBase(object):
     @property
     def actionTag(self):
         return self._actionTag
+
+    @property
+    def actionInstanceUID(self):
+        return str(self._instanceUID)
 
     @property
     def outputArtefacts(self):
@@ -111,7 +118,7 @@ class ActionBase(object):
         an action within an other action. See the schedulers of batch actions for
         example.'''
         global logger
-        logger.info("Starting action: " + self.instanceName + " (hash: " + str(self.__hash__()) + ") ...")
+        logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 
         token = self._do()
 
@@ -123,7 +130,7 @@ class ActionBase(object):
             status = "SKIPPED"
         elif token.isFailure():
             status = "FAILURE"
-        logger.info("Finished action: " + self.instanceName + " (hash: " + str(self.__hash__()) + ") -> " + status)
+        logger.info("Finished action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") -> " + status)
         return token
 
     def generateActionToken(self, state=actionToken.ACTION_SUCCESS):
@@ -221,7 +228,10 @@ class SingleActionBase(ActionBase):
             artefactHelper.getArtefactProperty(reference, artefactProps.TYPE),
             artefactHelper.getArtefactProperty(reference, artefactProps.FORMAT),
             None,
-            artefactHelper.getArtefactProperty(reference, artefactProps.OBJECTIVE))
+            artefactHelper.getArtefactProperty(reference, artefactProps.OBJECTIVE),
+            action_class = self.__class__.__name__,
+            action_instance_uid = self.actionInstanceUID
+        )
 
         for propID in self._propInheritanceDict:
             if not propID == artefactProps.ACTIONTAG \
@@ -370,12 +380,12 @@ class SingleActionBase(ActionBase):
                     (isValid, outputs) = self._checkOutputs(outputs)
                 except BaseException as e:
                     logger.warning(
-                        '(hash: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
-                        str(self.__hash__()), self.actionTag, str(e))
+                        '(Action instance UID: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
+                        self.actionInstanceUID, self.actionTag, str(e))
                 except:
                     logger.warning(
-                        '(hash: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
-                        str(self.__hash__()), self.actionTag)
+                        '(Action instance UID: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
+                        self.actionInstanceUID, self.actionTag)
             else:
                 logger.warning("Action failed due to at least one invalid input. All outputs are marked as invalid. Invalid inputs: %s", str(self._inputArtefacts))
 
