@@ -238,6 +238,9 @@ def _generateCandidatesOverview(result, showBest = True):
         genStr += "]]"
     genStr += "}, axis: { x: {type: 'category'}}"
 
+    if not showBest:
+        genStr += ", subchart: {show: true}"
+
     genStr += '})'
 
     return html.div(html.script(type = "text/javascript", src = "http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.js"),
