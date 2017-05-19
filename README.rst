@@ -107,6 +107,11 @@ or
 make test
 ```
 
+## optional: download workflow scripts
+```
+git clone https://phabricator.mitk.org/source/avid-workflows.git AVID-workflows
+```
+
 ## Have fun
 
 ## run scripts
