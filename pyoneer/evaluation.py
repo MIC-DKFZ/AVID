@@ -102,7 +102,7 @@ class EvaluationStrategy(object):
     if label is None:
       label = self.defineName()
     
-    result = metric.evaluate(workflowFile, artefactFile, workflowModifier=workflowModifier, label=label)
+    result = metric.evaluate(workflowFile, artefactFile, workflowModifier=workflowModifier, label=label, silent = False)
     
     return result
 

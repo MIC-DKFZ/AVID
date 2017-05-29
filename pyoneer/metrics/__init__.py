@@ -58,7 +58,7 @@ class DefaultMetric (object):
     self._clearSessionDir = clearSessionDir
     
     
-  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None):
+  def evaluate(self, workflowFile, artefactFile, workflowModifier = None, label = None, silent = True):
     '''Function is called to evaluate a workflow used the passed artfact definitions
     @param workflowFile: String defining the path to the avid workflow that should
     be executed.
@@ -71,6 +71,7 @@ class DefaultMetric (object):
     be "--a 120". To change this behavior, override DefaultMetric._generateWorkflowCall(...)
     @param label: You can specify a label that is used by the metric when defining
     the workflow session path. If not specified a unique label will be generated.
+    @param silent: Indicates if the workflow should be executed silently (no direct stdout) or not.
     @return: Returns a EvaluationResult instance with everything you want to know.
     '''
     sessionFile,sessionName = self._generateSessionPath(label)
@@ -81,8 +82,12 @@ class DefaultMetric (object):
     logger.debug('Starting workflow processing... Call: "%s"', callStr)
 
     useShell = not osChecker.isWindows()
-    subprocess.call(callStr, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=useShell)
-    
+
+    if silent:
+      subprocess.call(callStr, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=useShell)
+    else:
+      subprocess.call(callStr, shell=useShell)
+
     logger.debug('Evaluating workflow results...')
     
     evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps, self._instanceDefiningSelector)
@@ -131,7 +136,7 @@ class DefaultMetric (object):
     if artefactFile is not None:
       callStr += '" --bootstrapArtefacts "'+artefactFile
 
-    callStr += '" --overwriteExistingSession --autoSave'
+    callStr += '" --overwriteExistingSession --autoSave --debug'
       
     if workflowModifier is not None:
       for modKey in workflowModifier:
