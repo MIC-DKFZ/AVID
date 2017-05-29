@@ -185,8 +185,20 @@ def main():
 
     #do the job
     if args_dict['command'] == "evaluate":
+        if not os.path.exists(workflowPath):
+            logging.fatal("Error. Cannot evaluate workflow. Specified workflow path does not exist. Invalid path: {}".format(workflowPath))
+            return
+        if not os.path.exists(artefactPath):
+            logging.fatal("Error. Cannot evaluate workflow. Specified artefact path does not exist. Invalid path: {}".format(artefactPath))
+            return
         doEvaluation(evalStratFile, resultPath, workflowPath, artefactPath, label, sessionPath, args_dict)
     elif args_dict['command'] == "optimize":
+        if not os.path.exists(workflowPath):
+            logging.fatal("Error. Cannot evaluate workflow. Specified workflow path does not exist. Invalid path: {}".format(workflowPath))
+            return
+        if not os.path.exists(artefactPath):
+            logging.fatal("Error. Cannot evaluate workflow. Specified artefact path does not exist. Invalid path: {}".format(artefactPath))
+            return
         doOptimization(inputFile, resultPath, workflowPath, artefactPath, label, sessionPath, evalStratFile, args_dict)
     elif args_dict['command'] == "report":
         doReport(inputFile, resultPath, args_dict)
