@@ -68,7 +68,7 @@ class DefaultMetric (object):
     They will be passed as arguments to the workflow execution. Key is the argument
     name and the dict value the argument value. The default implementation will
     generate an cl argument signature like --<key> <value>. Thus {'a':120} will
-    be "--a 120". To change this behavior, override MetricBase._generateWorkflowCall(...)
+    be "--a 120". To change this behavior, override DefaultMetric._generateWorkflowCall(...)
     @param label: You can specify a label that is used by the metric when defining
     the workflow session path. If not specified a unique label will be generated.
     @return: Returns a EvaluationResult instance with everything you want to know.
