@@ -65,6 +65,12 @@ class TestDoseAcc(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
+      action = doseAcc(ActionTagSelector("Dose"), ActionTagSelector("Registration"), ActionTagSelector("Plan"), interpolator="rosu", actionTag = "Acc+Reg+Plan+Interpolation")
+      token = action.do()
+      self.assertEqual(token.isSuccess(), True)
+      token = action.do()
+      self.assertEqual(token.isSkipped(), True)
+
 
     def test_simple_dose_acc_action_alwaysdo(self):
       
