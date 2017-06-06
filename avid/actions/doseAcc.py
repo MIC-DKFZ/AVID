@@ -144,11 +144,11 @@ class DoseAccBatchAction(BatchActionBase):
   '''This action accumulates a whole selection of doses and stores the
   Remark. The doses will be sorted before accumulation (incremental) results.'''
 
-  def __init__(self,  doseSelector, registrationSelector = None, planSelector = None,
-               regLinker = FractionLinker(), planLinker = FractionLinker(useClosestPast=True), doseSorter = TimePointSorter(),
-               doseSplitProperty = None, operator="+",
-               actionTag = "doseAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, **singleActionParameters):
+  def __init__(self,  doseSelector, registrationSelector=None, planSelector=None,
+               regLinker=FractionLinker(), planLinker=FractionLinker(useClosestPast=True), doseSorter=TimePointSorter(),
+               doseSplitProperty = None, interpolator="linear", operator="+",
+               actionTag="doseAcc", alwaysDo=False,
+               session=None, additionalActionProps=None, **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
 
     self._doses = doseSelector.getSelection(self._session.artefacts)
@@ -167,6 +167,7 @@ class DoseAccBatchAction(BatchActionBase):
     self._singleActionParameters = singleActionParameters
     self._doseSplitProperty = doseSplitProperty
     self._operator = operator
+    self._interpolator = interpolator
 
   def _generateActions(self):
     # filter only type result. Other artefact types are not interesting
@@ -228,7 +229,7 @@ class DoseAccBatchAction(BatchActionBase):
         if pos == 0:
           # first element should be handled differently
           if self._operator is not "*":
-            action = DoseAccAction(dose, dose, lReg, 0.0, weight2,
+            action = DoseAccAction(dose, dose, lReg, 0.0, weight2, interpolator=self._interpolator,
                                    operator=self._operator,
                                    actionTag=self._actionTag, alwaysDo=self._alwaysDo,
                                    session=self._session,
@@ -243,7 +244,7 @@ class DoseAccBatchAction(BatchActionBase):
             interimDoseArtefact = actions[-1]._resultArtefact # take the dose result of the last action
           if self._operator is "*":
             weight2 = 1.0
-          action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2,
+          action = DoseAccAction(interimDoseArtefact, dose, lReg, 1.0, weight2, interpolator=self._interpolator,
                                  operator=self._operator,
                                  actionTag=self._actionTag, alwaysDo=self._alwaysDo,
                                  session=self._session,
