@@ -18,6 +18,8 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
+from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
+
 from . import BatchActionBase
 from cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker
@@ -60,7 +62,7 @@ class invertRAction(CLIActionBase):
 
     # Specify result artefact
     userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                        artefactProps.FORMAT: artefactProps.FORMAT_VALUE_MATCHPOINT}
+                        artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT}
 
     self._resultArtefact = self.generateArtefact(artefactRef,
                                                  userDefinedProps = userDefinedProps,
