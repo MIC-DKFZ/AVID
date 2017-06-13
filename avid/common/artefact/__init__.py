@@ -284,7 +284,7 @@ pathGenerationDelegate = _defaultGenerateArtefactPath
 
 def ensureValidPath(unsafePath):
     """
-    Normalizes string, converts to lowercase, removes non-alpha characters,
+    Normalizes string, removes non-alpha characters,
     and converts spaces to hyphens.
     """
     import unicodedata
@@ -296,6 +296,7 @@ def ensureValidPath(unsafePath):
         validPathChars += '/'
     cleanedFilename = unicodedata.normalize('NFKD', unicode(unsafePath, "utf-8")).encode('ASCII', 'ignore')
     result = ''.join(c for c in cleanedFilename if c in validPathChars)
+    result = result.strip().replace(' ','_')
     return result
 
 
