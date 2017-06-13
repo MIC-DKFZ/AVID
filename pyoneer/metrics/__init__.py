@@ -20,7 +20,7 @@ import subprocess
 from avid.common import osChecker
 from pyoneer.evaluationResult import EvaluationResult, MeasurementResult
 
-from avid.common.artefact import defaultProps
+from avid.common.artefact import defaultProps, ensureValidPath
 from avid.common.artefact.fileHelper import loadArtefactList_xml
 from avid.selectors import SelectorBase
 from pyoneer.dataSetEvaluator import DataSetEvaluator
@@ -151,7 +151,7 @@ class DefaultMetric (object):
     if label is None:
       name = datetime.datetime.now().strftime("EvalSession_%Y-%m-%d_%H-%M-%S")
     
-    return (os.path.join(self.sessionDir, name+os.extsep+"avid"), name) 
+    return (ensureValidPath(os.path.join(self.sessionDir, name+os.extsep+"avid")), name)
 
   @property
   def valueNames(self):
