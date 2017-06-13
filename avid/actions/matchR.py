@@ -116,16 +116,16 @@ class matchRAction(CLIActionBase):
         content += ' "' + key + "=" + value + '"'
       if self._movingMask:
         movingMaskURL = artefactHelper.getArtefactProperty(self._movingMask, artefactProps.URL)
-        content += ' --moving-mask ' + movingMaskURL
+        content += ' --moving-mask "' + movingMaskURL + '"'
       if self._targetMask:
         targetMaskURL = artefactHelper.getArtefactProperty(self._targetMask, artefactProps.URL)
-        content += ' --target-mask ' + targetMaskURL
+        content += ' --target-mask "' + targetMaskURL + '"'
       if self._movingPointSet:
         movingPSURL = artefactHelper.getArtefactProperty(self._movingPointSet, artefactProps.URL)
-        content += ' --moving-pointset ' + movingPSURL
+        content += ' --moving-pointset "' + movingPSURL + '"'
       if self._targetPointSet:
         targetPSURL = artefactHelper.getArtefactProperty(self._targetPointSet, artefactProps.URL)
-        content += ' --target-pointset ' + targetPSURL
+        content += ' --target-pointset "' + targetPSURL + '"'
 
     except:
       logger.error("Error for getExecutable.")
