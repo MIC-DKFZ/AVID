@@ -36,7 +36,7 @@ class TestVioConvert(unittest.TestCase):
       except:
         pass
 
-    def test_simple_inversion_action(self):
+    def test_simple_conversion_action(self):
         action = vioConvert(ActionTagSelector("Input"), actionTag="TestConvert")
         token = action.do()
 
@@ -45,7 +45,7 @@ class TestVioConvert(unittest.TestCase):
         token = action.do()
         self.assertEqual(token.isSkipped(), True)
 
-    def test_simple_inversion_action_always_do(self):
+    def test_simple_conversion_action_always_do(self):
         action = vioConvert(ActionTagSelector("Input"), actionTag="TestConvert", alwaysDo=True)
         token = action.do()
 
