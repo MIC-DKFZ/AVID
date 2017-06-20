@@ -17,6 +17,7 @@ import logging
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
+from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
@@ -58,15 +59,11 @@ class invertRAction(CLIActionBase):
   def _indicateOutputs(self):
     artefactRef = self._registration
 
-    name = self._generateName()
-
     # Specify result artefact
-    userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                        artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT}
-
     self._resultArtefact = self.generateArtefact(artefactRef,
-                                                 userDefinedProps = userDefinedProps,
-                                                 urlHumanPrefix=name,
+    userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                                                                   artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT},
+                                                 urlHumanPrefix=self._generateName(),
                                                  urlExtension='mapr')
 
     return [self._resultArtefact]
