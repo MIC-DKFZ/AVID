@@ -19,6 +19,7 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.AVIDUrlLocater import getToolConfigPath
 from pyoneer.criteria.plmDiceCriterion import PlmDiceCriterion as DiceCriterion
+from pyoneer.criteria.plmDiceCriterion import PrecompPlmDiceCriterion as PrecompDiceCriterion
 
 
 @unittest.skipIf(getToolConfigPath('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
@@ -40,6 +41,10 @@ class TestDiceCriterion(unittest.TestCase):
     self.data2 = list()
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a3)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a4)
+
+    self.a5 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "DiceResult", artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT_VALUE_RTTB_STATS_XML, os.path.join(self.testDataDir, "plmDice.xml"))
+    self.data_precomp = list()
+    self.data_precomp = artefact.addArtefactToWorkflowData(self.data_precomp, self.a5)
 
     refCriterion = DiceCriterion()
     self.instanceResultRef = {'pyoneer.criteria.PlmDiceCriterion.TN': 548180.0, 'pyoneer.criteria.PlmDiceCriterion.hausdorff.p95': 15.967952,
@@ -229,8 +234,23 @@ class TestDiceCriterion(unittest.TestCase):
      'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.avg.sd': 'Average Hausdorff distance boundary (std dev)',
      'pyoneer.criteria.PlmDiceCriterion.FP.mean': 'False Positives (mean)'}
 
+    self.precomp_ref = {'pyoneer.criteria.PlmDiceCriterion.TN': '10',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.p95': '11',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.p95': '13',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff': '3',
+                        'pyoneer.criteria.PlmDiceCriterion.SP': '8',
+                        'pyoneer.criteria.PlmDiceCriterion.FP': '1',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg': '14',
+                        'pyoneer.criteria.PlmDiceCriterion.DICE': '4',
+                        'pyoneer.criteria.PlmDiceCriterion.FN': '12',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.avg': '2',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary': '6',
+                        'pyoneer.criteria.PlmDiceCriterion.TP': '9',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.maxavg': '5',
+                        'pyoneer.criteria.PlmDiceCriterion.SE': '15',
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.avg': '7'}
 
-  def test_PropertyCriterion_instance(self):
+  def test_PlmDiceCriterion_instance(self):
     criterion = DiceCriterion()
     
     result = criterion.evaluateInstance(self.data)
@@ -240,7 +260,7 @@ class TestDiceCriterion(unittest.TestCase):
     self.assertEqual(None, result)
     
     
-  def test_PropertyCriterion_set(self):
+  def test_PlmDiceCriterion_set(self):
     criterion = DiceCriterion()
     
     instanceMeasurements = list()
@@ -252,7 +272,21 @@ class TestDiceCriterion(unittest.TestCase):
 
   def test_PropertyCriterion_names(self):
     names = DiceCriterion('coolProp').valueNames
-    
+
+    self.assertDictEqual(names, self.namesRef)
+
+  def test_PrecompPlmDiceCriterion_instance(self):
+    criterion = PrecompDiceCriterion()
+
+    result = criterion.evaluateInstance(self.data_precomp)
+    self.assertDictEqual(self.precomp_ref, result)
+
+    result = criterion.evaluateInstance([])
+    self.assertEqual(None, result)
+
+  def test_PrecompPlmDiceCriterion_names(self):
+    names = PrecompDiceCriterion('coolProp').valueNames
+
     self.assertDictEqual(names, self.namesRef)
 
 

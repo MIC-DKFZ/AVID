@@ -46,12 +46,6 @@ class PlmDiceCriterionBase(MetricCriterionBase):
     MID_HausdorffBoundaryMaxAvg = 'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg'
     MID_HausdorffBoundaryP95 = 'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.p95'
 
-    DICE_KEYS = ['FN', 'FP', 'DICE', 'SE', 'SP',
-                 'Hausdorff distance', 'Avg average Hausdorff distance',
-                 'Max average Hausdorff distance', 'Percent (0.95) Hausdorff distance',
-                 'Hausdorff distance (boundary)', 'Avg average Hausdorff distance (boundary)',
-                 'Max average Hausdorff distance (boundary)', 'Percent (0.95) Hausdorff distance (boundary)']
-
     MAPPING_CRITERION_ID_2_PLM_ID = {MID_TP: 'TP',
                                      MID_TN: 'TN',
                                      MID_FN: 'FN',
@@ -138,7 +132,7 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
               result[key] = None
     else:
       global logger
-      logger.error("Error in plmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
+      logger.error("Error in PlmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
          
     return result
 
@@ -156,14 +150,14 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
 
     if err == 0:
       global logger
-      logger.error("Error in plmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
+      logger.error("Error in PlmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
     else:
         result = parseDiceResult(output)
 
     return result
 
 
-class PrecomputedPlmDiceCriterion(PlmDiceCriterionBase):
+class PrecompPlmDiceCriterion(PlmDiceCriterionBase):
     '''Criterion that evaluates based on the results of an AVID plmDice action.
        The criterion assumes as default that the dice action results are selected by the tag "DiceResult" and are
        statistic artefacts of a AVID plmDice action.
@@ -190,37 +184,24 @@ class PrecomputedPlmDiceCriterion(PlmDiceCriterionBase):
          '''
         result = None
 
-        if len(relevantArtefacts['referenceSelector']) == 1 and len(relevantArtefacts['testSelector']) == 1:
+        if len(relevantArtefacts['resultSelector']) == 1:
 
-            plmResult = self._callPlastimatchDice(relevantArtefacts['referenceSelector'][0],
-                                                  relevantArtefacts['testSelector'][0])
+            resultPath = getArtefactProperty(relevantArtefacts['resultSelector'][0], artefactProps.URL)
+
+            from avid.externals import doseTool
+            plmResult = doseTool.loadResult(resultPath)
 
             result = dict()
             for key in self.MAPPING_CRITERION_ID_2_PLM_ID:
                 try:
-                    result[key] = plmResult[self.MAPPING_CRITERION_ID_2_PLM_ID[key]]
+                    result[key] = plmResult.results[self.MAPPING_CRITERION_ID_2_PLM_ID[key]].value
                 except:
                     result[key] = None
+                    logger.warning("plmDice result '%s', was not found in parsed statistic file. File: %s", key,
+                                   resultPath)
         else:
             global logger
-            logger.error("Error in plmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
+            logger.error("Error in PrecompPlmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
 
         return result
 
-
-    def _parseDiceFile(self, filename):
-        """get relevant values from file"""
-        from avid.externals import doseTool
-        resultContainer = doseTool.loadResult(filename)
-
-        diceResults = dict()
-
-        for key in self.DICE_KEYS:
-            if key in resultContainer.results:
-                diceResults[key] = resultContainer.results[key].value
-            else:
-                logger.warning("plmDice result '%s', was not found in parsed statistic file. File: %s",
-                               key,
-                               filename)
-
-        return diceResults
