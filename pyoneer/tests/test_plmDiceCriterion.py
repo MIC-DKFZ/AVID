@@ -234,21 +234,21 @@ class TestDiceCriterion(unittest.TestCase):
      'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.avg.sd': 'Average Hausdorff distance boundary (std dev)',
      'pyoneer.criteria.PlmDiceCriterion.FP.mean': 'False Positives (mean)'}
 
-    self.precomp_ref = {'pyoneer.criteria.PlmDiceCriterion.TN': '10',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.p95': '11',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.p95': '13',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff': '3',
-                        'pyoneer.criteria.PlmDiceCriterion.SP': '8',
-                        'pyoneer.criteria.PlmDiceCriterion.FP': '1',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg': '14',
-                        'pyoneer.criteria.PlmDiceCriterion.DICE': '4',
-                        'pyoneer.criteria.PlmDiceCriterion.FN': '12',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.avg': '2',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary': '6',
-                        'pyoneer.criteria.PlmDiceCriterion.TP': '9',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.maxavg': '5',
-                        'pyoneer.criteria.PlmDiceCriterion.SE': '15',
-                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.avg': '7'}
+    self.precomp_ref = {'pyoneer.criteria.PlmDiceCriterion.TN': 10,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.p95': 11,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.p95': 13,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff': 3,
+                        'pyoneer.criteria.PlmDiceCriterion.SP': 8,
+                        'pyoneer.criteria.PlmDiceCriterion.FP': 1,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.maxavg': 14,
+                        'pyoneer.criteria.PlmDiceCriterion.DICE': 4,
+                        'pyoneer.criteria.PlmDiceCriterion.FN': 12,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.avg': 2,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary': 6,
+                        'pyoneer.criteria.PlmDiceCriterion.TP': 9,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.maxavg': 5,
+                        'pyoneer.criteria.PlmDiceCriterion.SE': 15,
+                        'pyoneer.criteria.PlmDiceCriterion.hausdorff.boundary.avg': 7}
 
   def test_PlmDiceCriterion_instance(self):
     criterion = DiceCriterion()

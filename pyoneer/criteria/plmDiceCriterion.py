@@ -194,7 +194,7 @@ class PrecompPlmDiceCriterion(PlmDiceCriterionBase):
             result = dict()
             for key in self.MAPPING_CRITERION_ID_2_PLM_ID:
                 try:
-                    result[key] = plmResult.results[self.MAPPING_CRITERION_ID_2_PLM_ID[key]].value
+                    result[key] = float(plmResult.results[self.MAPPING_CRITERION_ID_2_PLM_ID[key]].value)
                 except:
                     result[key] = None
                     logger.warning("plmDice result '%s', was not found in parsed statistic file. File: %s", key,
