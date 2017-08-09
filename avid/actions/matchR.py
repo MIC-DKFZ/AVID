@@ -113,7 +113,7 @@ class matchRAction(CLIActionBase):
       if self._algorithmParameters:
         content += ' --parameters'
       for key, value in self._algorithmParameters.iteritems():
-        content += ' "' + key + "=" + value + '"'
+        content += ' "' + key + '=' + value + '"'
       if self._movingMask:
         movingMaskURL = artefactHelper.getArtefactProperty(self._movingMask, artefactProps.URL)
         content += ' --moving-mask "' + movingMaskURL + '"'

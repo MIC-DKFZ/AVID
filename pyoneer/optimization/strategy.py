@@ -171,7 +171,7 @@ class OptimizationStrategy(object):
 
     def __init__(self, evaluationFile, sessionDir, reportCallback = None):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
-          strategy that shoud be used.
+          strategy that should be used.
           @param sessionDir Root path for any avid sessions that will be used.
           @param reportCallback: function that is used by to inform about a new result. Function must have the signature
           (x, y). x is the current interim OptimizationResult; y is the new candidate evaluation result
