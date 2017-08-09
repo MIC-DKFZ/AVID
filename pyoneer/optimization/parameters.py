@@ -10,11 +10,11 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import math
 from pyoneer.optimization import OptimizerBase
 
 '''This module holds helper to construct and interact with a search parameter descriptor (spd).
-   SPDs are used to comunicate parameter aspects (e.g. start value, boundaries) to the optimization strategy.
+   SPDs are used to communicate parameter aspects (e.g. start value, boundaries) to the optimization strategy.
    olDenotes the minimum boundary of a parameter.
    A spd is basicaly a dictionary the keys denote the parameter, the value is a dictionary containing the
    decorations for the parameter.
@@ -135,3 +135,11 @@ def getScalingFromOpt(descriptor, paramname):
         return getDecoration(descriptor, paramname, DECORATOR_SCALING_FROM_OPT, True)
     except:
         return UnityScaling
+
+def Log10Scaling(val):
+    '''Scaler that transforms with a log base 10 into result space.'''
+    return math.log10(val)
+
+def Exp10Scaling(val):
+    '''Scaler that transforms with by f <= 10^val into result space.'''
+    return math.pow(10,val)
