@@ -79,7 +79,7 @@ class DifferentialEvolution(OptimizerBase):
         for pos, value in enumerate(self._mimima):
             parameters[self._parameterIDs[pos]] = x[pos]
 
-        label = "I{}_{}".format(self._currentCandidateNR, str(x))
+        label = "I{}".format(self._currentCandidateNR)
         results = self._evaluate(candidates={label: parameters})
         self._currentCandidateNR += 1
 
