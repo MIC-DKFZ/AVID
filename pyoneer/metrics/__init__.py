@@ -92,9 +92,17 @@ class DefaultMetric (object):
     
     evaluator = DataSetEvaluator(self._metricCriteria, self._instanceDefiningProps, self._instanceDefiningSelector)
     
-    artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
+    artefacts = None
+
+    gmeasure = dict()
+    imeasure = dict()
+    try:
+      loadArtefactList_xml(sessionFile, True, self.sessionDir)
+      gmeasure, imeasure = evaluator.evaluate(artefacts)
+    except:
+      logger.debug('Error. Cannot load artefacts. Evaluation candidate workflow might have failed.')
     
-    gmeasure, imeasure = evaluator.evaluate(artefacts)
+
        
     if self._clearSessionDir:
       artefactDir = os.path.join(self.sessionDir, sessionName)
