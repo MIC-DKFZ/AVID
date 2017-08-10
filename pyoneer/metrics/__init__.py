@@ -97,7 +97,7 @@ class DefaultMetric (object):
     gmeasure = dict()
     imeasure = dict()
     try:
-      loadArtefactList_xml(sessionFile, True, self.sessionDir)
+      artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
       gmeasure, imeasure = evaluator.evaluate(artefacts)
     except:
       logger.debug('Error. Cannot load artefacts. Evaluation candidate workflow might have failed.')
