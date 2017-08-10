@@ -201,9 +201,12 @@ def _generateCandidatesOverview(result, showBest = True):
             rowcontent.append(html.td(m.workflowModifier[wmkey]))
 
         for vkey in vkeys:
-            rowcontent.append(html.td(m.measurements[vkey]))
-            if showBest:
-                plotValues[vkey].append(m.measurements_weighted[vkey])
+            try:
+                rowcontent.append(html.td(m.measurements[vkey]))
+                if showBest:
+                    plotValues[vkey].append(m.measurements_weighted[vkey])
+            except:
+                rowcontent.append(html.td('N/A'))
 
         if not showBest:
             plotValues['SV'].append(m.svMeasure)
