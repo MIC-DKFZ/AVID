@@ -100,12 +100,16 @@ def doReport(inputFilePath, resultPath, args_dict):
     if args_dict['report'] is not None:
         logging.warn("Report flag is ignored when using the report command.")
 
+    validReport = False
+
     try:
         result = readOptimizationResult(inputFilePath)
         report = htmlreport.generateOptimizationReport(result)
 
         with open(resultPath, 'w') as fileHandle:
             fileHandle.write(report)
+
+        validReport = True
     except:
         try:
             result = readEvaluationResult(inputFilePath)
@@ -113,11 +117,13 @@ def doReport(inputFilePath, resultPath, args_dict):
 
             with open(resultPath, 'w') as fileHandle:
                 fileHandle.write(report)
+
+            validReport = True
         except:
             logging.error('Cannot convert result file to report. Seems to be no valid evaluation or optimization result file. Invalid file: "%s".',
                          inputFilePath)
 
-    if args_dict['noDisplay'] is not True:
+    if args_dict['noDisplay'] is not True and validReport is True:
         webbrowser.open('file:///' + resultPath)
 
 
