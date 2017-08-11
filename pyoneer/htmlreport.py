@@ -14,6 +14,62 @@
 import os
 import pyhtml as html
 
+def _generateTableSortingScript():
+    return 'function sortTable(tableID, column) {\r'\
+        '  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;\r'\
+        '  table = document.getElementById("table_"+tableID.toString());\r'\
+        '  switching = true;\r'\
+        '  //Set the sorting direction to ascending:\r'\
+        '  dir = "asc";\r'\
+        '  /*Make a loop that will continue until\r'\
+        '  no switching has been done:*/\r'\
+        '  while (switching) {\r'\
+        '    //start by saying: no switching is done:\r'\
+        '    switching = false;\r'\
+        '    rows = table.getElementsByTagName("TR");\r'\
+        '    /*Loop through all table rows (except the\r'\
+        '    first, which contains table headers):*/\r'\
+        '    for (i = 1; i < (rows.length - 1); i++) {\r'\
+        '      //start by saying there should be no switching:\r'\
+        '      shouldSwitch = false;\r'\
+        '      /*Get the two elements you want to compare,\r'\
+        '      one from current row and one from the next:*/\r'\
+        '      x = rows[i].getElementsByTagName("TD")[column];\r'\
+        '      y = rows[i + 1].getElementsByTagName("TD")[column];\r'\
+        '      /*check if the two rows should switch place,\r'\
+        '      based on the direction, asc or desc:*/\r'\
+        '      if (dir == "asc") {\r'\
+        '        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {\r'\
+        '          //if so, mark as a switch and break the loop:\r'\
+        '          shouldSwitch= true;\r'\
+        '          break;\r'\
+        '        }\r'\
+        '      } else if (dir == "desc") {\r'\
+        '        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {\r'\
+        '          //if so, mark as a switch and break the loop:\r'\
+        '          shouldSwitch= true;\r'\
+        '          break;\r'\
+        '        }\r'\
+        '      }\r'\
+        '    }\r'\
+        '    if (shouldSwitch) {\r'\
+        '      /*If a switch has been marked, make the switch\r'\
+        '      and mark that a switch has been done:*/\r'\
+        '      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);\r'\
+        '      switching = true;\r'\
+        '      //Each time a switch is done, increase this count by 1:\r'\
+        '      switchcount ++;\r'\
+        '    } else {\r'\
+        '      /*If no switching has been done AND the direction is "asc",\r'\
+        '      set the direction to "desc" and run the while loop again.*/\r'\
+        '      if (switchcount == 0 && dir == "asc") {\r'\
+        '        dir = "desc";\r'\
+        '        switching = true;\r'\
+        '      }\r'\
+        '    }\r'\
+        '  }\r'\
+        '}'
+
 def getAllInstanceMeasurementValueKeys(ims):
     vkeys = set()
     for imkey in ims:
@@ -162,14 +218,16 @@ def _generateBestDetails(result):
 
 def _generateCandidatesOverview(result, showBest = True):
     ms = result.best
+    tableID = 0
     if not showBest:
         ms = result.candidates
+        tableID = 1
 
     vkeys = getMeasurementValueKeys(ms, onlyWeigted=True)
     wmkeys = getWorkflowModKeys(ms)
     tablecontent = list()
 
-    headers = list([html.th('Label'), html.th('SV score')])
+    headers = list([html.th(onclick ='sortTable({},0)'.format(tableID))('Label'), html.th(onclick ='sortTable({},1)'.format(tableID))('SV score')])
     for wmkey in wmkeys:
         headers.append(html.th(wmkey))
 
@@ -249,10 +307,9 @@ def _generateCandidatesOverview(result, showBest = True):
     return html.div(html.script(type = "text/javascript", src = "http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.js"),
                     html.script(type = "text/javascript", src = "http://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.js"),
                     html.link(href = "http://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.css", rel = "stylesheet", type = "text/css"),
-                    html.table(*tablecontent),
+                    html.table(id='table_{}'.format(tableID))(*tablecontent),
                     html.div(id = chartKey),
                     html.script(genStr))
-
 
 def generateOptimizationReport(result):
     '''generates an html (string) based on the passsed optimization result'''
@@ -274,6 +331,7 @@ def generateOptimizationReport(result):
                 _generateBestDetails(result)),
             html.section(
                 html.header(html.h2('Legend:')),
-                _generateValueDescriptions(result))
+                _generateValueDescriptions(result)),
+            html.script(_generateTableSortingScript())
         ))
     return report.render()
