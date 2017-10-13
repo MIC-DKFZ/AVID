@@ -81,7 +81,7 @@ class combineRBatchAction(BatchActionBase):
   def __init__(self,  reg1Selector, reg2Selector,
                regLinker = FractionLinker(),
                actionTag = "combineR", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, scheduler = SimpleScheduler(), **singleActionParameters):
+               additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
     self._reg1s = reg1Selector.getSelection(self._session.artefacts)
