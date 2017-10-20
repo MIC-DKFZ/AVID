@@ -23,7 +23,6 @@ from . import BatchActionBase
 from cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
 from simpleScheduler import SimpleScheduler
-from avid.selectors.keyValueSelector import FormatSelector
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
     CONVERSION_T2 = "t2"
 
     def __init__(self, signal, conversiontype=CONVERSION_T1_ABSOLUTE, k=1, recoveryTime=None,
-                 relaxivity=None, relaxationTime=None, te=None, actionTag="MR2SignalConcentration", alwaysDo=False,
+                 relaxivity=None, relaxationTime=None, te=None, actionTag="MRSignal2Concentration", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict)
@@ -54,6 +53,10 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
             raise RuntimeError("Cannot convert T2 without parameter TE set.")
         if conversiontype == self.CONVERSION_T1_FLASH and (recoveryTime is None or relaxationTime is None or relaxivity is None):
             raise RuntimeError("Cannot convert T1 flash without parameter recoveryTime, relaxationTime and relaxivity set.")
+
+        if self._cwd is None:
+            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MRSignal2ConcentrationMiniApp", actionConfig))
+
 
     def _generateName(self):
         name = "signal2concentration_" + self._conversiontype + "_"+ str(artefactHelper.getArtefactProperty(self._signal, artefactProps.ACTIONTAG)) \
@@ -75,15 +78,14 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
 
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "MR2SignalConcentrationMiniApp", self._actionConfig)
+        execURL = AVIDUrlLocater.getExecutableURL(self._session, "MRSignal2ConcentrationMiniApp", self._actionConfig)
 
-
-        content = '"{}" -i "{}" -o "{}"'.format(execURL, signalPath, resultPath)
-        if (self._conversiontype is self.CONVERSION_T1_ABSOLUTE or self._conversiontype is self.CONVERSION_T1_RELATIVE)
+        content = '"{}" -i "{}" -o "{}" -{}'.format(execURL, signalPath, resultPath, self._conversiontype)
+        if self._conversiontype == self.CONVERSION_T1_ABSOLUTE or self._conversiontype == self.CONVERSION_T1_RELATIVE:
             content += ' -k "{}" '.format(self._k)
-        elif (self._conversiontype is self.CONVERSION_T1_FLASH)
+        elif self._conversiontype == self.CONVERSION_T1_FLASH:
             content += ' -k "{}" --TE "{}"'.format(self._k)
-        elif (self._conversiontype is self.CONVERSION_T2)
+        elif self._conversiontype == self.CONVERSION_T2:
             content += ' --relaxivity "{}" --recovery-time "{}" --relaxation-time "{}"'.format(self._relaxivity, self._recoveryTime, self._relaxationTime)
 
         return content
@@ -92,8 +94,13 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
 class MR2SignalConcentrationMiniAppBatchAction(BatchActionBase):
     '''Batch action for MR2SignalConcentrationMiniApp.'''
 
+    CONVERSION_T1_ABSOLUTE = MR2SignalConcentrationMiniAppAction.CONVERSION_T1_ABSOLUTE
+    CONVERSION_T1_RELATIVE = MR2SignalConcentrationMiniAppAction.CONVERSION_T1_RELATIVE
+    CONVERSION_T1_FLASH = MR2SignalConcentrationMiniAppAction.CONVERSION_T1_FLASH
+    CONVERSION_T2 = MR2SignalConcentrationMiniAppAction.CONVERSION_T2
+
     def __init__(self, signalSelector,
-                 actionTag="MR2SignalConcentration", alwaysDo=False, session=None,
+                 actionTag="MRSignal2Concentration", alwaysDo=False, session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
