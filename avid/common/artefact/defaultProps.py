@@ -27,7 +27,7 @@ TIMEPOINT = "timePoint"
 '''Tag lable used for a certain action step in the workflow'''
 ACTIONTAG = "actionTag"
 '''Objective or Object id that can e.g. used to indicates a certain objective of
- an action (e.g. Registration with a special structure mask or statisti/segmentation
+ an action (e.g. Registration with a special structure, segmentation/mask or statistics
  of a certain organ at risk).'''
 OBJECTIVE = "objective"
 '''Type of the artefact represented by the entry'''
@@ -36,17 +36,19 @@ TYPE = "type"
 FORMAT = "format"
 '''URL to the artefact stored in a file/resource and indicated by the entry'''
 URL = "url"
+'''In case actions produce more then one result artefact, this property may be used to make the results distinguishable.'''
+RESULT_SUB_TAG = "result_sub_tag"
 '''Indicates if a given artefact is valid (True) or not (False).'''
 INVALID = "invalid"
 '''Creation time of an artefact.'''
 TIMESTAMP = "timestamp"
-'''Dict with the IDs of the infput artefact used to generate the artefact.'''
+'''Dict with the IDs of the input artefact used to generate the artefact.'''
 INPUT_IDS = "input_ids"
 '''Duration of the action execution that generated the artefact (in [s]).'''
 EXECUTION_DURATION = "execution_duration"
 '''Name of the action class that used to do/represent the action.'''
 ACTION_CLASS = "action_class"
-'''UID of the actoin instance that generated the artefact'''
+'''UID of the action instance that generated the artefact'''
 ACTION_INSTANCE_UID = "action_instance_uid"
 '''Defines a reference to a plan file the artefact is associated with. Normaly
 this could be found as optional property for virtuos dose artefacts.'''
@@ -60,13 +62,6 @@ PRESCRIBED_DOSE = "prescribed_dose"
 '''Element of an accumulation (e.g. dose accumulation)'''
 ACC_ELEMENT = "acc_element"
 
-'''Standard type value. Indicating misc files like batch files for cli execution.'''
-TYPE_VALUE_MISC = "misc"
-'''Standard type value. Indicating any configuration artefacts that are needed
-by an action.'''
-TYPE_VALUE_CONFIG = "config"
-''' Standard type value. Indicating any result artefacts produced by an action.'''
-TYPE_VALUE_RESULT = "result"
 ''' Property indicates a certain dose statistic value covered by the associated artefact '''
 DOSE_STAT = "dose_stat"
 ''' Property indicates a certain diagram type covered by the associated artefact '''
@@ -76,6 +71,13 @@ ONLY_ESTIMATOR = "only_estimator"
 ''' Property indicates a certain diagram type covered by the associated artefact '''
 N_FRACTIONS_FOR_ESTIMATION = "n_fractions_for_estimation"
 
+'''Standard type value. Indicating misc files like batch files for cli execution.'''
+TYPE_VALUE_MISC = "misc"
+'''Standard type value. Indicating any configuration artefacts that are needed
+by an action.'''
+TYPE_VALUE_CONFIG = "config"
+''' Standard type value. Indicating any result artefacts produced by an action.'''
+TYPE_VALUE_RESULT = "result"
 
 '''Standard type value. Indicating the artefact is stored as DICOM iod.'''
 FORMAT_VALUE_DCM = "dcm"

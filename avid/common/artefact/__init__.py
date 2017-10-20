@@ -33,8 +33,8 @@ logger = logging.getLogger(__name__)
 '''List of properties that should be checked to determine the similarity of two artifacts.'''
 similarityRelevantProperties = [defaultProps.CASE, defaultProps.CASEINSTANCE, defaultProps.TIMEPOINT,
                                 defaultProps.ACTIONTAG, defaultProps.TYPE, defaultProps.FORMAT, defaultProps.OBJECTIVE,
-                                defaultProps.DOSE_STAT, defaultProps.DIAGRAM_TYPE, defaultProps.ONLY_ESTIMATOR,
-                                defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT]
+                                defaultProps.RESULT_SUB_TAG, defaultProps.DOSE_STAT, defaultProps.DIAGRAM_TYPE,
+                                defaultProps.ONLY_ESTIMATOR, defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT]
 
 
 class Artefact(object):
@@ -52,6 +52,7 @@ class Artefact(object):
             self._defaultProps[defaultProps.FORMAT] = None
             self._defaultProps[defaultProps.URL] = None
             self._defaultProps[defaultProps.OBJECTIVE] = None
+            self._defaultProps[defaultProps.RESULT_SUB_TAG] = None
             self._defaultProps[defaultProps.INVALID] = None
             self._defaultProps[defaultProps.INPUT_IDS] = None
             self._defaultProps[defaultProps.ACTION_CLASS] = None
