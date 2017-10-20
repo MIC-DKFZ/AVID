@@ -10,11 +10,11 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
-
+import argparse
 import os
 
 from avid.common.artefact import artefactExists
-
+from avid.common.artefact.fileHelper import saveArtefactList_xml as saveArtefactList
 
 def splitall(path):
     allparts = []
@@ -62,7 +62,17 @@ class DirectoryCrawler(object):
     return artefacts
       
   
-    
-  
-    
-  
+def runSimpleCrawlerScriptMain(fileFunction):
+    '''This is a helper function that can be used if you want to write a crawler script that crawles a root directory
+     and stores the results as file. This function will parse for command line arguments "root" (the root directory)
+     and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly.'''
+    parser = argparse.ArgumentParser()
+    parser.add_argument('root')
+    parser.add_argument('output')
+
+    cliargs, unknown = parser.parse_known_args()
+
+    crawler = DirectoryCrawler(cliargs.root, fileFunction, True)
+    artefacts = crawler.getArtefacts()
+
+    saveArtefactList(cliargs.output, artefacts)
