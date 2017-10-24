@@ -99,7 +99,7 @@ def main():
   #if 'command' in args_dict:
   if args_dict['command'] == "tools":
     if len(args_dict['subcommands']) == 0:
-      print("Error. Command 'tools' has to specify a subcommand ('update', 'install').")
+      print("Error. Command 'tools' has to specify a subcommand ('update', 'install', 'add').")
       return
     else:
       if args_dict['subcommands'][0] == "install" or args_dict['subcommands'][0] == "update":
@@ -119,6 +119,31 @@ def main():
             installTool(tool, toolsPath, sourceConfigPath)
           else:
             updateTool(tool, toolsPath, sourceConfigPath)
+      elif args_dict['subcommands'][0] == "add":
+        if len(args_dict['subcommands']) < 3:
+          print(
+          "Error. Command 'tools add' needs two aditional positional arguments (tool/action id, path to the executable).")
+          return
+        else:
+          actionID = args_dict['subcommands'][1]
+          execPath = args_dict['subcommands'][2]
+
+          configFilePath = getToolConfigPath(actionID)
+
+          if configFilePath is not None:
+            print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
+            return
+          else:
+            configFilePath = getToolConfigPath(actionID, checkExistance=False)
+            checkAndCreateDir(os.path.split(configFilePath)[0])
+            with open(configFilePath, 'w') as configFile:
+              config = ConfigParser.ConfigParser()
+              config.set('', 'exe', execPath)
+              config.write(configFile)
+
+              print("Added tool {} with executable {}.".format(actionID, execPath))
+
+
       else:
         print("Error. Subcommand '%s' is not supported for command avidconfig tools." % args_dict['subcommands'][0])
 
