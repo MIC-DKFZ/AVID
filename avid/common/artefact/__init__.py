@@ -290,7 +290,7 @@ def ensureValidPath(unsafePath):
     """
     import unicodedata
     import string
-    validPathChars = ":-_.() %s%s" % (string.ascii_letters, string.digits)
+    validPathChars = ":-_.() #%s%s" % (string.ascii_letters, string.digits)
     validPathChars += os.sep
     if platform.system() is 'Windows':
         # also add unix version because windows can handle it to.
@@ -307,6 +307,29 @@ def generateArtefactPath(workflow, workflowArtefact):
        Ensures that the path is valid."""
     artefactPath = pathGenerationDelegate(workflow, workflowArtefact)
     return ensureValidPath(artefactPath)
+
+
+def _defaultGetArtefactShortName(workflowArtefact):
+    '''Default strategy for the short name. If no objective is defined '''
+    import defaultProps as artefactProps
+    tag = getArtefactProperty(workflowArtefact, artefactProps.ACTIONTAG)
+    timePoint = getArtefactProperty(workflowArtefact, artefactProps.TIMEPOINT)
+    name = '{}#{}'.format(tag, timePoint)
+
+    objective = getArtefactProperty(workflowArtefact, artefactProps.OBJECTIVE)
+    if not objective is None:
+        name = '{}-{}#{}'.format(tag, objective, timePoint)
+
+    return name
+
+shortNameGenerationDelegate = _defaultGetArtefactShortName
+
+def getArtefactShortName(workflowArtefact):
+    '''Public method that should be used to get a "nick name" for the passed artefact. This is e.g. used by action
+     if the determin the name of an action instance based on the gifen artefacts. One may alter the short name strategy
+     by overwritting the shortNameGenerationDelegate.'''
+    name = shortNameGenerationDelegate(workflowArtefact)
+    return ensureValidPath(name)
 
 
 from generator import generateArtefactEntry
