@@ -59,8 +59,7 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
 
 
     def _generateName(self):
-        name = "signal2concentration_" + self._conversiontype + "_"+ str(artefactHelper.getArtefactProperty(self._signal, artefactProps.ACTIONTAG)) \
-               + "_#" + str(artefactHelper.getArtefactProperty(self._signal, artefactProps.TIMEPOINT))
+        name = "signal2concentration_" + self._conversiontype + "_"+ artefactHelper.getArtefactShortName(self._signal)
         return name
 
     def _indicateOutputs(self):

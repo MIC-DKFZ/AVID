@@ -46,7 +46,7 @@ class MRPerfusionMiniAppAction(CLIActionBase):
         if aifimage is not None and aifmask is None:
             raise RuntimeError("Cannot use an AIF image without and AIF mask. Please specify mask.")
 
-        self._addInputArtefacts(signal=signal)
+        self._addInputArtefacts(signal=signal, mask = mask, aifmask = aifmask, aifimage = aifimage)
 
         self._signal = signal
         self._model = model
@@ -72,17 +72,13 @@ class MRPerfusionMiniAppAction(CLIActionBase):
         style = ''
         if not self._roibased:
             style = 'pixel'
-        name = "perfusion_{}_{}_{}_#".format(self._model, style, str(artefactHelper.getArtefactProperty(self._signal, artefactProps.ACTIONTAG)),
-                                          str(artefactHelper.getArtefactProperty(self._signal, artefactProps.TIMEPOINT)))
+        name = "perfusion_{}_{}_{}".format(self._model, style, artefactHelper.getArtefactShortName(self._signal))
         if self._mask is not None:
-            name += "_ROI_{}_#{}".format(str(artefactHelper.getArtefactProperty(self._mask, artefactProps.ACTIONTAG)),
-                                          str(artefactHelper.getArtefactProperty(self._mask, artefactProps.TIMEPOINT)))
+            name += "_ROI_{}".format(artefactHelper.getArtefactShortName(self._mask))
         if self._aifimage is not None:
-            name += "_AIF_{}_#{}".format(str(artefactHelper.getArtefactProperty(self._aifimage, artefactProps.ACTIONTAG)),
-                                          str(artefactHelper.getArtefactProperty(self._aifimage, artefactProps.TIMEPOINT)))
+            name += "_AIF_{}".format(artefactHelper.getArtefactShortName(self._aifimage))
         if self._aifmask is not None:
-            name += "_AIFROI_{}_#{}".format(str(artefactHelper.getArtefactProperty(self._aifmask, artefactProps.ACTIONTAG)),
-                                          str(artefactHelper.getArtefactProperty(self._aifmask, artefactProps.TIMEPOINT)))
+            name += "_AIFROI_{}".format(artefactHelper.getArtefactProperty(self._aifmask))
 
         return name
 
