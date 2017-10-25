@@ -272,14 +272,14 @@ class Test(unittest.TestCase):
 
         a = action.generateArtefact()
         ref = Artefact({'case': None, 'caseInstance': None, 'format': None, 'url': None, 'timestamp': '1479379069.53',
-                  'timePoint': None, 'actionTag': 'Test1', 'invalid': False, 'objective': None, 'type': None,
+                  'timePoint': None, 'actionTag': 'Test1', 'invalid': False, 'objective': None, 'type': None, 'result_sub_tag': None,
                   'id': 'e2c810cf-acb1-11e6-83b8-7054d2ab75be', 'input_ids':input_ids}, {})
         self.assert_(ref.is_similar(a))
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379250.0',
-                  'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3',
+                  'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3', 'result_sub_tag': None,
                   'id': '4e599a30-acb2-11e6-a3a0-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
@@ -287,7 +287,7 @@ class Test(unittest.TestCase):
 
         a = action.generateArtefact(self.a_3, False)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379309.88',
-                  'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3',
+                  'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3', 'result_sub_tag': None,
                   'id': '720a1b80-acb2-11e6-85a5-7054d2ab75be', 'input_ids':input_ids}, {})
         self.assert_(ref.is_similar(a))
         self.assert_(not 'myCoolProp3' in a)
@@ -297,7 +297,7 @@ class Test(unittest.TestCase):
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test2", additionalActionProps={artefactProps.OBJECTIVE: 'newO'})
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380425.43',
-                  'timePoint': 3, 'actionTag': 'Test2', 'invalid': False, 'objective': 'newO', 'type': 'Type3',
+                  'timePoint': 3, 'actionTag': 'Test2', 'invalid': False, 'objective': 'newO', 'type': 'Type3', 'result_sub_tag': None,
                   'id': '0af4eb21-acb5-11e6-be37-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
@@ -308,7 +308,7 @@ class Test(unittest.TestCase):
                                    propInheritanceDict={artefactProps.OBJECTIVE: 'i1', 'myCoolProp':'i0', 'notExistingProp':'i0', artefactProps.TIMEPOINT:'InexistingInput'})
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380822.18',
-                  'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'Objctive2', 'type': 'Type3',
+                  'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'Objctive2', 'type': 'Type3', 'result_sub_tag': None,
                   'id': 'f771898f-acb5-11e6-b4db-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp': 'Prop1', 'myCoolProp3': 'Prop3'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
@@ -322,7 +322,7 @@ class Test(unittest.TestCase):
                                                         artefactProps.TIMEPOINT: 'InexistingInput'})
         a = action.generateArtefact(self.a_3)
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
-                  'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'newO', 'type': 'Type3',
+                  'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'newO', 'type': 'Type3', 'result_sub_tag': None,
                   'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'Prop1'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
@@ -355,7 +355,7 @@ class Test(unittest.TestCase):
         a = action.generateArtefact(self.a_3, userDefinedProps={artefactProps.OBJECTIVE: 'userO', 'myUserProp': 'user1',
                                                         artefactProps.TIMEPOINT: 42})
         ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
-                  'timePoint': 42, 'actionTag': 'Test3', 'invalid': False, 'objective': 'userO', 'type': 'Type3',
+                  'timePoint': 42, 'actionTag': 'Test3', 'invalid': False, 'objective': 'userO', 'type': 'Type3', 'result_sub_tag': None,
                   'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be'}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'i0', 'myUserProp':'user1'})
         self.assert_(ref.is_similar(a))
         self.assertEqual(a['myUserProp'], ref['myUserProp'])

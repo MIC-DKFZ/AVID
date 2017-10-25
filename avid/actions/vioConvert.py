@@ -36,7 +36,10 @@ class VioConvertAction(CLIActionBase):
     self._inputFile = inputFile
     self._desiredOutputFormat = desiredOutputFormat
     self._rescale = rescale
-  
+
+    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "VioConvert", actionConfig))
+    self._cwd = cwd
+
   def _generateName(self):
     name = "vioConvert_"+str(artefactHelper.getArtefactProperty(self._inputFile, artefactProps.ACTIONTAG))\
             + "_#" + str(artefactHelper.getArtefactProperty(self._inputFile, artefactProps.TIMEPOINT))
