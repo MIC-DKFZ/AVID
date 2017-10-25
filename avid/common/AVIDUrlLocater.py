@@ -140,10 +140,17 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
       config.read(toolconfigPath)
     
       configSection = 'default'
+      if not config.has_section(configSection) and config.has_section('DEFAULT'):
+        configSection = 'DEFAULT'
+
       if not actionConfig is None:
         configSection = str(actionConfig)
-        
-      execURL = config.get(configSection,'exe')
+
+      execURL = None
+      try:
+        execURL = config.get(configSection,'exe')
+      except:
+        pass
       
       if not os.path.isabs(execURL):
         execURL = os.path.join(os.path.dirname(toolconfigPath),execURL)
