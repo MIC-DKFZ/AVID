@@ -178,7 +178,8 @@ class SingleActionBase(ActionBase):
         things; e.g. determining the Caseinstance of the action instance, used in the
         generation of new artefacts, used to determine if outputs can be generated.'''
         for iKey in inputs:
-            self._inputArtefacts[iKey] = inputs[iKey]
+            if inputs[iKey] is not None:
+                self._inputArtefacts[iKey] = inputs[iKey]
 
         self._setCaseInstanceByArtefact(self._inputArtefacts.values())
 
