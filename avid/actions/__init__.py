@@ -231,8 +231,8 @@ class SingleActionBase(ActionBase):
             None,
             artefactHelper.getArtefactProperty(reference, artefactProps.OBJECTIVE),
             action_class = self.__class__.__name__,
-            action_instance_uid = self.actionInstanceUID
-        )
+            action_instance_uid = self.actionInstanceUID,
+            result_sub_tag = artefactHelper.getArtefactProperty(reference, artefactProps.RESULT_SUB_TAG))
 
         for propID in self._propInheritanceDict:
             if not propID == artefactProps.ACTIONTAG \
