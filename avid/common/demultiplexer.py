@@ -56,3 +56,23 @@ def getSelectors(propKey, selector = SelectorBase(), workflowData = None):
   demux = Demultiplexer(propKey, selector, workflowData)
   
   return demux.getSelectors()
+
+
+def splitArtefact(inputArtefacts, *splitArgs):
+    '''Convinience helper function. Takes a list of artefacts and will split them by the given list of split arguments
+    /properties. The function will return a list of splitted artefact lists.
+     @param splitArgs the function assumes that all unkown arguments passed to the function should be handeled as split
+     properties.'''
+    splittedA = [inputArtefacts]
+
+    for splitProperty in splitArgs:
+        newSplits = list()
+        for oldSplits in splittedA:
+            splitDict = getSelectors(str(splitProperty), workflowData=oldSplits)
+            for splitID in splitDict:
+                relevantDoseSelector = splitDict[splitID]
+                relevantInputs = relevantDoseSelector.getSelection(oldSplits)
+                newSplits.append(relevantInputs)
+        splittedA = newSplits
+
+    return splittedA

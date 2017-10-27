@@ -1,0 +1,29 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">stats</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">a</avid:property>
+		<avid:property key="format">txt</avid:property>
+		<avid:property key="url">./1.txt</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">stats</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">b</avid:property>
+		<avid:property key="format">txt</avid:property>
+		<avid:property key="url">./2.txt</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case_1</avid:property>
+		<avid:property key="timePoint">2</avid:property>
+		<avid:property key="actionTag">stats</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">b</avid:property>
+		<avid:property key="format">txt</avid:property>
+		<avid:property key="url">./3.txt</avid:property>
+	</avid:artefact>
+</avid:artefacts>

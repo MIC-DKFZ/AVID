@@ -22,6 +22,7 @@ from avid.actions import BatchActionBase
 from avid.actions import SingleActionBase
 from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
+import avid.common.demultiplexer as demux
 
 logger = logging.getLogger(__name__)
 
@@ -152,3 +153,42 @@ class PythonUnaryBatchAction(BatchActionBase):
       actions.append(action)
 
     return actions
+
+
+class PythonNaryBatchAction(BatchActionBase):
+    '''Batch class that assumes a list of input artefacts will be passed to the script.
+    The list of artefacts is defined via the input selector.
+    @param splitProperties You can define a list of split properties (list of property names)
+    to separate it into different actions (e.g. like the PixelDumpMiniApp action.
+    '''
+
+    def __init__(self, inputSelector, splitProperties = None, actionTag="NaryScript", alwaysDo=False,
+               session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+      BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+
+      self._inputs = inputSelector.getSelection(self._session.artefacts)
+      self._splitProps = splitProperties
+
+      self._singleActionParameters = singleActionParameters
+
+
+    def _generateActions(self):
+      resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+      allinputs = self.ensureRelevantArtefacts(self._inputs, resultSelector, "inputs")
+
+      global logger
+
+      splittedInputs = [allinputs]
+
+      if self._splitProps is not None:
+          splittedInputs = demux.splitArtefact(allinputs, *self._splitProps)
+
+      actions = list()
+
+      for inputs in splittedInputs:
+          action = PythonAction(inputs=inputs, actionTag=self._actionTag, alwaysDo=self._alwaysDo,
+                                          session=self._session,
+                                          additionalActionProps=self._additionalActionProps,
+                                          **self._singleActionParameters)
+          actions.append(action)
+      return actions
