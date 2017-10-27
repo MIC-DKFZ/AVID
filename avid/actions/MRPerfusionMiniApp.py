@@ -78,7 +78,7 @@ class MRPerfusionMiniAppAction(CLIActionBase):
         if self._aifimage is not None:
             name += "_AIF_{}".format(artefactHelper.getArtefactShortName(self._aifimage))
         if self._aifmask is not None:
-            name += "_AIFROI_{}".format(artefactHelper.getArtefactProperty(self._aifmask))
+            name += "_AIFROI_{}".format(artefactHelper.getArtefactShortName(self._aifmask))
 
         return name
 
@@ -199,7 +199,7 @@ class MRPerfusionMiniAppBatchAction(BatchActionBase):
         if aifSelector is not None:
             self._aifs = aifSelector.getSelection(self._session.artefacts)
         self._aifmasks = list()
-        if maskSelector is not None:
+        if aifMaskSelector is not None:
             self._aifmasks = aifMaskSelector.getSelection(self._session.artefacts)
 
         self._maskLinker = maskLinker
