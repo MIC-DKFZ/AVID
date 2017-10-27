@@ -180,11 +180,7 @@ class DoseAccBatchAction(BatchActionBase):
     splittedDoses = list()
 
     if self._doseSplitProperty is not None:
-      splitDict = demux.getSelectors(str(self._doseSplitProperty), workflowData=allDoses)
-      for splitID in splitDict:
-        relevantDoseSelector = splitDict[splitID]
-        relevantInputs = relevantDoseSelector.getSelection(allDoses)
-        splittedDoses.append(relevantInputs)
+      splittedDoses = demux.splitArtefact(allDoses, str(self._doseSplitProperty))
     else:
       splittedDoses.append(allDoses)
 

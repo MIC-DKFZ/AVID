@@ -49,23 +49,16 @@ class mapRAction(CLIActionBase):
     self._cwd = cwd    
     
   def _generateName(self):
-    name = "map_"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.ACTIONTAG))
-
-    objective = artefactHelper.getArtefactProperty(self._inputImage,artefactProps.OBJECTIVE)
-    if not objective is None:
-        name += '-%s'%objective
-
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._inputImage,artefactProps.TIMEPOINT))
+    name = "map_"+artefactHelper.getArtefactShortName(self._inputImage)
 
     if self._registration is not None:
-      name += "_reg_"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.TIMEPOINT))
+      name += "_reg_"+artefactHelper.getArtefactShortName(self._registration)
     else:
       name += "_identity"
     
     if self._templateImage is not None:
-      name += "_to_"+str(artefactHelper.getArtefactProperty(self._templateImage,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._templateImage,artefactProps.TIMEPOINT))
+      name += "_to_"+artefactHelper.getArtefactShortName(self._templateImage)
+
     return name
 
   def _hasDICOMputput(self):
