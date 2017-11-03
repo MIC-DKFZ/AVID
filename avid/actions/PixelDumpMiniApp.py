@@ -104,7 +104,7 @@ class PixelDumpMiniAppAction(CLIActionBase):
         captions = list()
         for signalname in self._signals:
             signalPathes.append(artefactHelper.getArtefactProperty(self._signals[signalname], artefactProps.URL))
-            captions.append('"{}"'.format(self._captionDelegate(self._signals[signalname])))
+            captions.append(self._captionDelegate(self._signals[signalname]))
 
         execURL = AVIDUrlLocater.getExecutableURL(self._session, "PixelDumpMiniApp", self._actionConfig)
 
@@ -112,16 +112,16 @@ class PixelDumpMiniAppAction(CLIActionBase):
         result.append(execURL)
         result.append('-i')
         for path in signalPathes:
-            result.append('{}'.format(path))
+            result.append('"{}"'.format(path))
         result.append('-o')
-        result.append('{}'.format(resultPath))
+        result.append('"{}"'.format(resultPath))
         result.append('-c')
         for caption in captions:
-            result.append('{}'.format(caption))
+            result.append('"{}"'.format(caption))
 
         if maskPath is not None:
             result.append('-m')
-            result.append('{}'.format(maskPath))
+            result.append('"{}"'.format(maskPath))
 
         return result
 

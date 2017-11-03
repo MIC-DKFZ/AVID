@@ -170,7 +170,12 @@ class MRPerfusionMiniAppAction(CLIActionBase):
 
 
     def _prepareCLIExecution(self):
-        content = ' '.join(self._generateCLIArguments())
+        args = self._generateCLIArguments()
+        #escape everything to be sure that no propblem in the batch file (reserved charactars) or with the pathes occure.
+        #cannot be done in _generateCLIArguments because the direct call used by preview does not like the escapation.
+        #should be handled soundly by reworking prepareCLIExecution not returning the content string, but all arguments
+        #of the call. Then escaption etc can be handled in the base class.
+        content = args[0] + ' "' +'" "'.join(args[1:])+'"'
         resultPath = artefactHelper.getArtefactProperty(self._resultTemplate, artefactProps.URL)
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
