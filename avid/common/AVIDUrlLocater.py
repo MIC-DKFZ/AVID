@@ -139,9 +139,10 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
       config = ConfigParser.ConfigParser()
       config.read(toolconfigPath)
     
-      configSection = 'default'
-      if not config.has_section(configSection) and config.has_section('DEFAULT'):
-        configSection = 'DEFAULT'
+      configSection = 'DEFAULT'
+      if config.has_section('default'):
+        #check to ensure backwards compatibility (old config files used 'default' instead of 'DEFAULT'
+        configSection = 'default'
 
       if not actionConfig is None:
         configSection = str(actionConfig)
