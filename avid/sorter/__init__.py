@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 class BaseSorter(object):
   '''base clase for functors used to sort a artefact list by certain criterias
   and pass back the sorted list.
@@ -25,5 +26,5 @@ class BaseSorter(object):
     return selection
   
   
-from keyValueSorter import KeyValueSorter
-from timePointSorter import TimePointSorter
+from .keyValueSorter import KeyValueSorter
+from .timePointSorter import TimePointSorter

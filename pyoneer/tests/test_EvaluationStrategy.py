@@ -53,7 +53,7 @@ class TestEvaluationStrategy(unittest.TestCase):
 
   def assertDictEqual(self, d1, d2, msg=None):
     '''special implementation to compare with assertAlmostEqual, because measurements might differ slightly.'''
-    for k,v1 in d1.iteritems():
+    for k,v1 in d1.items():
       self.assertIn(k, d2, msg)
       v2 = d2[k]
       self.assertAlmostEquals(v1, v2, 5, msg)

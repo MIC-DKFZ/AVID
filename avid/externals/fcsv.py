@@ -11,9 +11,10 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import csv
 import os
-from pointset import PointRepresentation
+from .pointset import PointRepresentation
 
 '''Formate type value. Indicating the artefact is stored as a MatchPoint simple point set file.'''
 FORMAT_VALUE_SLICER_POINTSET = "3Dslicer_pointset"
@@ -29,7 +30,7 @@ def read_fcsv(filePath):
     if not os.path.isfile(filePath):
         raise ValueError( "Cannot read fcsv point set file. File does not exist. File path: " +str(filePath))
 
-    with open(filePath, "rb") as csvfile:
+    with open(filePath, "r", newline='') as csvfile:
         pointreader = csv.reader(csvfile, delimiter = ",")
 
         for row in pointreader:
@@ -67,8 +68,8 @@ def write_fcsv(filePath, pointset):
     '''
     from avid.common import osChecker
     osChecker.checkAndCreateDir(os.path.split(filePath)[0])
-    with open(filePath, "wb") as csvfile:
-        writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+    with open(filePath, "w", newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
 
         for pos, point in enumerate(pointset):
             row = list()

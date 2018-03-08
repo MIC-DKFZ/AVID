@@ -12,24 +12,24 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 
+from builtins import str
 import argparse
 from avid.common.AVIDUrlLocater import getUtilityPath
 from avid.common.AVIDUrlLocater import getAVIDConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigPath
-from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
 
 from avid.common.osChecker import checkAndCreateDir
 
 import os
-import ConfigParser
+import configparser
 import subprocess
 
 def getAllKnownTools(sourceConfigPath):
   '''
   returns a list of all tools mentioned in the source config
   ''' 
-  sourceConfig = ConfigParser.ConfigParser()
+  sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
   
   return sourceConfig.sections()
@@ -40,7 +40,7 @@ def updateTool(toolName, toolsPath, sourceConfigPath):
   Updates the tool. Supported only for svn. Function does an svn update
   for the tool or and svn checkout if the tool is not available yet.
   '''
-  sourceConfig = ConfigParser.ConfigParser()
+  sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
 
   svnURL = sourceConfig.get(toolName, 'svn')
@@ -69,7 +69,7 @@ def installTool(toolName, toolsPath, sourceConfigPath):
   '''
   installs a tool in the given toolspath
   '''
-  sourceConfig = ConfigParser.ConfigParser()
+  sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
   
   svnURL = sourceConfig.get(toolName, 'svn')
@@ -137,7 +137,7 @@ def main():
             configFilePath = getToolConfigPath(actionID, checkExistance=False)
             checkAndCreateDir(os.path.split(configFilePath)[0])
             with open(configFilePath, 'w') as configFile:
-              config = ConfigParser.ConfigParser()
+              config = configparser.ConfigParser()
               config.set('', 'exe', execPath)
               config.write(configFile)
 
@@ -181,7 +181,7 @@ def main():
           with open(configFilePath, 'w') as configFile:
             pass
       
-      config = ConfigParser.ConfigParser()
+      config = configparser.ConfigParser()
       config.read(configFilePath)
       if not section in config.sections() and not section == '':
         config.add_section(section)
@@ -205,7 +205,7 @@ def main():
         return
         
       configFilePath = getAVIDConfigPath()
-      config = ConfigParser.ConfigParser()
+      config = configparser.ConfigParser()
       config.read(configFilePath)
       if not section in config.sections():
         config.add_section(section)

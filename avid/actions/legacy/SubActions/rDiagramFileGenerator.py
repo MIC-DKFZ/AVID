@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import os
 
 from avid.common.flatFileEntryGenerator import FlatFileEntryGenerator

@@ -16,7 +16,7 @@
 from setuptools import setup, find_packages
 from setuptools import Command as SetupCommand
 import os
-import ConfigParser
+import configparser
 
 with open('README.rst') as f:
     readme = f.read()

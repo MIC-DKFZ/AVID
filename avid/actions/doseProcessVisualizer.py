@@ -11,15 +11,17 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import range
 import logging, os
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from . import BatchActionBase
 from avid.selectors import TypeSelector
 from avid.selectors.keyValueSelector import FormatSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 import avid.common.templateFileCustomizer as templateFileCustomizer
 
 logger = logging.getLogger(__name__)

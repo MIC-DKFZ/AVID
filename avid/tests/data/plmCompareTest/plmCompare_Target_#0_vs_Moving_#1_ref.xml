@@ -1,12 +1,13 @@
+<?xml version='1.0' encoding='us-ascii'?>
 <statistics>
   <results>
-    <property name="RATIO">0.0</property>
     <property name="MIN">0.0</property>
+    <property name="AVE">0.0</property>
     <property name="MAX">0.0</property>
+    <property name="MAE">0.0</property>
+    <property name="MSE">0.0</property>
     <property name="DIF">0.0</property>
     <property name="NUM">600000.0</property>
-    <property name="MAE">0.0</property>
-    <property name="AVE">0.0</property>
-    <property name="MSE">0.0</property>
+    <property name="RATIO">0.0</property>
   </results>
 </statistics>

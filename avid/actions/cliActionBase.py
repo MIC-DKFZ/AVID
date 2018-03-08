@@ -17,6 +17,7 @@ import logging
 import os
 import time
 import stat
+import math
 
 import avid.common.settings as AVIDSettings
 import avid.common.artefact.defaultProps as artefactProps
@@ -125,7 +126,7 @@ class CLIActionBase(SingleActionBase):
           #if the process can access the bat file or if there is still a racing
           #condition.
           pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE) 
-          max_pause_count = AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration
+          max_pause_count = math.ceil( AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
           pause_count = 0
           time.sleep(0.1)
           while True :

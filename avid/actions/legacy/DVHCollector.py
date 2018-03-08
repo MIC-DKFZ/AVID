@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import range
 import collections
 import os
 
@@ -94,7 +96,7 @@ def _normalize(DVHResultContainer, maxVolCcm):
   for index, DVHEntry in enumerate(DVHData) :
     absDose = index*deltaD
     absVolume = DVHEntry*deltaV
-    absoluteValuesGyCcm[absDose] = absVolume/maxVolCcm
+    absoluteValuesGyCcm[absDose] = absVolume / maxVolCcm
   return absoluteValuesGyCcm
 
 def _getVolume(filename):

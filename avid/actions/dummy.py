@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 
 from ..actions import BatchActionBase
@@ -18,7 +19,7 @@ from avid.actions import SingleActionBase
 from avid.actions.cliActionBase import CLIActionBase
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.common import osChecker, AVIDUrlLocater
 
 class DummySingleAction(SingleActionBase):

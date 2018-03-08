@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 from shutil import copyfile
@@ -21,10 +22,10 @@ import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT, getDeformationFieldPath
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 
 logger = logging.getLogger(__name__)

@@ -10,6 +10,8 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+from builtins import str
+from builtins import object
 import inspect
 import uuid
 

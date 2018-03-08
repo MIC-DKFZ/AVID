@@ -16,7 +16,7 @@
   tis responsible to add new dict entries in the flat file data container 
 '''
 
-import defaultProps
+from . import defaultProps
 from avid.common.artefact import Artefact
 
 def generateArtefactEntry(case, caseInstance, timePoint, actionTag, artefactType, artefactFormat, url = None, objective= None, invalid = False, **additionalProps):

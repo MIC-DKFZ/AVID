@@ -24,5 +24,5 @@ def do(workflow, DVHDoseSelector, DVHVolumeSelector,RTemplateFile, title, xAxisN
         rDiagramSeparatedHeaderGenerator.do(workflow, DVHDoseSelector, DVHVolumeSelector, RTemplateFile, title, xAxisName, yAxisName, actionTag)
         rScriptRunner.do(workflow,MultiKeyValueSelector(workflow,{FFDE.FORMAT:"r",FFDE.ACTIONTAG: actionTag}), "Rscript")
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print("Unexpected error:", sys.exc_info()[0])
         raise 

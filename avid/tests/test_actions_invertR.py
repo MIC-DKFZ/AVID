@@ -12,7 +12,6 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 # workaround a pyCharm bug
-from __future__ import absolute_import
 import os
 import shutil
 import unittest

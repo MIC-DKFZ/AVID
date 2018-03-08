@@ -23,7 +23,7 @@ import avid.externals.fcsv as fcsv
 from . import BatchActionBase
 from . import SingleActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.selectors.keyValueSelector import FormatSelector
 
 logger = logging.getLogger(__name__)

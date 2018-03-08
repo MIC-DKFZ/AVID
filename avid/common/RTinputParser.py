@@ -11,8 +11,9 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import argparse, csv
-import artefact.defaultProps as artefactProps
+from .artefact import defaultProps as artefactProps
 
 
 parser = argparse.ArgumentParser()
@@ -44,13 +45,13 @@ def generateInputDataObject():
   return _inputDataObject
 
 def generateStructureList():
-  with open(_args.structuresFile, 'r') as f:
+  with open(_args.structuresFile, 'r', newline='') as f:
     reader = csv.reader(f, delimiter=';')
     aList = list(reader)
   return aList
 
 def generateGaussianParametersList():
-  with open(_args.gaussianParametersFile, 'r') as f:
+  with open(_args.gaussianParametersFile, 'r', newline='') as f:
     reader = csv.reader(f, delimiter=';')
     stringList = list(reader)
   floatList=[]

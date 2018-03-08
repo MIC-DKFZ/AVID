@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import range
 import os
 import logging
 import csv
@@ -23,7 +25,7 @@ import avid.externals.doseTool as doseTool
 from . import BatchActionBase
 from . import SingleActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.selectors.keyValueSelector import FormatSelector
 
 logger = logging.getLogger(__name__)
@@ -56,7 +58,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
   def _indicateOutputs(self):
     self._statsMatrix = self._generateStatsMatrix()
     if self._keys is None:
-      self._keys = self._statsMatrix.keys()
+      self._keys = list(self._statsMatrix.keys())
 
     name = self.instanceName
 
@@ -71,7 +73,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
                                                      urlExtension='csv')
         self._resultArtefacts[key] = artefact
 
-    return self._resultArtefacts.values()
+    return list(self._resultArtefacts.values())
 
 
   def _parseDoseStats(self, filename, statsOfInterest):
@@ -80,7 +82,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
 
     doseMapOneFraction = {}
     if statsOfInterest is None:
-      statsOfInterest = resultContainer.results.keys() #if user hasn't defined something we take all
+      statsOfInterest = list(resultContainer.results.keys()) #if user hasn't defined something we take all
 
     for key in statsOfInterest:
       if key in resultContainer.results:
@@ -107,7 +109,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
       valueMap = self._parseDoseStats(aPath, self._keys)
 
       if keys is None:
-        keys = valueMap.keys() #user has not select keys -> take everything
+        keys = list(valueMap.keys()) #user has not select keys -> take everything
 
       for key in keys:
         if key in valueMap:
@@ -136,8 +138,8 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
   def _writeToCSV(self, key, columnHeaders, content, filename):
     try:
       osChecker.checkAndCreateDir(os.path.split(filename)[0])
-      with open(filename, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=';', lineterminator='\n')
+      with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
 
         if self._withHeaders:
           writer.writerow([self._rowKey+"/" +self._columnKey] + columnHeaders)
@@ -150,7 +152,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
           writer.writerow(row)
 
     except:
-      print "CSV file writing error. Aborting..."
+      print("CSV file writing error. Aborting...")
       raise
 
 
@@ -159,7 +161,7 @@ class DoseStatsWithInterpolationCollectorAction(SingleActionBase):
     for key in self._keys:
       csvPath = artefactHelper.getArtefactProperty(self._resultArtefacts[key],artefactProps.URL)
       keyMatrix = self._statsMatrix[key]
-      columnHeaderValues = range(1,nPlannedFractions+1)
+      columnHeaderValues = list(range(1,nPlannedFractions+1))
       csvContent = dict()
       for rowID in sorted(keyMatrix):
         if len(keyMatrix[rowID]) == 1:

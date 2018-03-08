@@ -11,7 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-class DVHType:
+from builtins import object
+class DVHType(object):
     Cumulative = 1
     Differential = 2
 

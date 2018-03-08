@@ -12,9 +12,9 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 from avid.linkers import LinkerBase
-from keyValueLinker import CaseLinker
-from caseInstanceLinker import CaseInstanceLinker
-from keyValueLinker import TimePointLinker
+from .keyValueLinker import CaseLinker
+from .caseInstanceLinker import CaseInstanceLinker
+from .keyValueLinker import TimePointLinker
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 

@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import os
 import itertools
 
@@ -26,7 +28,7 @@ def do(workflow, DVHDoseSelector, DVHVolumeSelector, RTemplateFile, title, xAxis
       DVHVolumeSelector.updateKeyValueDict({FFDE.CASE:str(i)})
       DVHDoseAggregatedList = DVHDoseSelector.getFilteredContainer(workflow.artefacts)
       DVHVolumeAggregatedList = DVHVolumeSelector.getFilteredContainer(workflow.artefacts)
-      for elementDose, elementVolume in itertools.izip(DVHDoseAggregatedList, DVHVolumeAggregatedList):
+      for elementDose, elementVolume in zip(DVHDoseAggregatedList, DVHVolumeAggregatedList):
         csvFilename = os.path.basename(elementDose[FFDE.URL])
         iteration = int(os.path.splitext(csvFilename)[0].split("-")[1])
         #adjustment for transformation zero-based to one-based index ()

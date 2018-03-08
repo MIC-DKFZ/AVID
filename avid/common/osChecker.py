@@ -13,16 +13,15 @@
 
 import os
 import errno
-import exceptions
 import platform
 
 def checkAndCreateDir(completePath):
   """ generates a directory """
   try:
     os.makedirs(completePath)
-  except exceptions.OSError as exc:
+  except OSError as exc:
     if exc.errno != errno.EEXIST:
-	  raise exc
+      raise exc
     pass
 
 def isWindows():

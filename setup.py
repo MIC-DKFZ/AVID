@@ -16,7 +16,6 @@
 from setuptools import setup, find_packages
 from setuptools import Command as SetupCommand
 import os
-import ConfigParser
 
 with open('README.rst') as f:
     readme = f.read()
@@ -38,10 +37,13 @@ setup(
     packages=find_packages(exclude=('tests', 'doc', 'tutorials', 'templates')),
     # the requirements to install this project.
     # Since this one is so simple this is empty.
-    install_requires=[],
     # a more sophisticated project might have something like:
     #install_requires=['numpy>=1.11.0', 'scipy>=0.17', 'scikit-learn']
-
+    install_requires=[],
+    # the requirements are only need for special configurations.
+	extras_require = {
+        'pyoneer':  ["pyhtml==0.7.0"],
+    },
     # after running setup.py, you will be able to call samplepackage_exe
     # from the console as if it was a normal binary. It will call the function
     # main in bin/samplepackage_exe.py

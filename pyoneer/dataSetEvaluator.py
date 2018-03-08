@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 import logging
 from avid.common.artefact import defaultProps
 from avid.common.demultiplexer import getSelectors

@@ -11,12 +11,13 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 def writeFileCustomized(templateFilename, targetFilename, replaceDict):
   inputFile = open(templateFilename, 'r')
   content = inputFile.read()
   inputFile.close()
 
-  for key, value in replaceDict.iteritems() :
+  for key, value in replaceDict.items() :
     content = content.replace(key, str(value))
 
   outputFile = open(targetFilename, 'w')

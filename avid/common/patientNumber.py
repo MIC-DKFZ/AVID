@@ -11,7 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-import artefact.defaultProps as artefactProps
+from .artefact import defaultProps as artefactProps
 
 def getNumberOfPatients(container):
   '''

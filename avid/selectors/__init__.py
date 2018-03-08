@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 class SelectorBase(object):
   '''
       Base class for selectors. Derive from this class to implement special
@@ -55,19 +56,19 @@ class AndSelector(SelectorBase):
           
     return resultSelection
 
-from multiKeyValueSelector import MultiKeyValueSelector
-from keyValueSelector import KeyValueSelector
-from keyValueSelector import ActionTagSelector
-from keyValueSelector import CaseSelector
-from keyValueSelector import CaseInstanceSelector
-from keyValueSelector import FormatSelector
-from keyValueSelector import TimepointSelector
-from keyValueSelector import TypeSelector
-from keyValueSelector import ResultSelector
-from keyValueSelector import ObjectiveSelector
-from keyValueSelector import DoseStatSelector
-from validitySelector import ValiditySelector
-from keyMulitValueSelector import KeyMultiValueSelector
+from .multiKeyValueSelector import MultiKeyValueSelector
+from .keyValueSelector import KeyValueSelector
+from .keyValueSelector import ActionTagSelector
+from .keyValueSelector import CaseSelector
+from .keyValueSelector import CaseInstanceSelector
+from .keyValueSelector import FormatSelector
+from .keyValueSelector import TimepointSelector
+from .keyValueSelector import TypeSelector
+from .keyValueSelector import ResultSelector
+from .keyValueSelector import ObjectiveSelector
+from .keyValueSelector import DoseStatSelector
+from .validitySelector import ValiditySelector
+from .keyMulitValueSelector import KeyMultiValueSelector
 
 class ValidResultSelector(AndSelector):
   ''' Convenience selector to select all valid (!) artefacts of type result.'''

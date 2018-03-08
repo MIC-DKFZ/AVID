@@ -12,8 +12,6 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 import logging
-import os
-import xml
 import re
 
 logger = logging.getLogger(__name__)
@@ -43,7 +41,7 @@ def parseCompareResult(outputStr):
   lines = outputStr.splitlines()
   
   for line in lines:
-    items = filter(None, line.split())
+    items = [_f for _f in line.split() if _f]
     key = None
     for item in items:
       candidate = item.strip(' \t\n\r')
@@ -78,7 +76,7 @@ def parseDiceResult(outputStr):
   lines = outputStr.splitlines()
   for line in lines:
     try:
-      items = filter(None, re.split(r'\s*[:,\=]\s*', line))
+      items = [_f for _f in re.split(r'\s*[:,\=]\s*', line) if _f]
       if items[0] in DICE_KEYS:
         result[items[0]] = float(items[1])
     except:

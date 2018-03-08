@@ -22,9 +22,9 @@ from avid.linkers import FractionLinker
 import avid.common.demultiplexer as demux
 
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

@@ -11,11 +11,12 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import range
 from math import sqrt
 
 def mean(list):
   try:
-    return sum(list)/len(list)
+    return sum(list) / len(list)
   except:
     return None
 

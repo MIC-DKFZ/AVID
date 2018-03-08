@@ -19,11 +19,11 @@ import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker, LinkerBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.externals.matchPoint import ensureMAPRegistrationArtefact
 
 logger = logging.getLogger(__name__)

@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import range
 import logging
 
 from pyoneer.optimization import OptimizerBase

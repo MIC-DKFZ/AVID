@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 import argparse
 import logging
 import os
@@ -52,7 +53,7 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
             if args_dict['noDisplay'] is not True:
                 webbrowser.open('file:///'+reportPath)
 
-class InterimReporter:
+class InterimReporter(object):
     def __init__(self, resultPath, reportPath = None):
         self._resultPath = resultPath
         self._reportPath = reportPath

@@ -19,8 +19,6 @@ from avid.common.artefact import getArtefactProperty
 from avid.common.artefact import defaultProps as artefactProps
 from avid.selectors.keyValueSelector import ActionTagSelector
 import subprocess
-from StringIO import StringIO
-
 
 logger = logging.getLogger(__name__)
 

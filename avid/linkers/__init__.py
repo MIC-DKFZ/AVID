@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 class LinkerBase(object):
   ''' Linkers serve as delegate to generate sub selection that have some semantic
       linkage to the masterEntry (e.g. have the same case id or time point)
@@ -62,8 +63,8 @@ class AndLinker(LinkerBase):
     return resultSelection
 
 
-from keyValueLinker import KeyValueLinker
-from keyValueLinker import CaseLinker
-from keyValueLinker import TimePointLinker
-from fractionLinker import FractionLinker
-from caseInstanceLinker import CaseInstanceLinker
+from .keyValueLinker import KeyValueLinker
+from .keyValueLinker import CaseLinker
+from .keyValueLinker import TimePointLinker
+from .fractionLinker import FractionLinker
+from .caseInstanceLinker import CaseInstanceLinker

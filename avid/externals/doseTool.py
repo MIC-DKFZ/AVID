@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 import xml.etree.ElementTree as ElementTree
 import logging
 import os

@@ -114,7 +114,7 @@ class TestSelectors(unittest.TestCase):
 
     descs = DurationCriterion().valueDescriptions
     
-    self.assertListEqual(names.keys(), descs.keys())
+    self.assertListEqual(list(names.keys()), list(descs.keys()))
 
 if __name__ == '__main__':
     unittest.main()

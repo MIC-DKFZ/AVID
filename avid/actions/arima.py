@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 import csv
@@ -21,9 +22,9 @@ import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.linkers import FractionLinker
 from avid.selectors.keyValueSelector import FormatSelector
 from avid.common.AVIDUrlLocater import getAVIDProjectRootPath

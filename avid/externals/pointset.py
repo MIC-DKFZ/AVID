@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 class PointRepresentation(object):
     '''Simple representations for points in avid. Most generic to be able to swallow all kinds of input format
      (e.g. itk, mitk point sets, slicer fcsv). As a policy points in this representation should be stored in a

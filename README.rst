@@ -11,6 +11,7 @@ Add Python directory and python/scripts to your Windows PATH as otherwise, neith
 nor avidconfig will be found!
 
 ## install dependencies
+(only needed for development environments that should be well defined; normal user can skipp this step)
 either use:
 ```
 pip install -r requirements.txt

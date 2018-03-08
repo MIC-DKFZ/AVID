@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 
@@ -19,10 +20,10 @@ import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.externals.plastimatch import parseCompareResult
 from avid.externals.doseTool import saveSimpleDictAsResultXML
 
@@ -88,9 +89,9 @@ class plmCompareAction(CLIActionBase):
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-    result = parseCompareResult(open(self._logFilePath).read())
-
-    saveSimpleDictAsResultXML(result, resultPath)
+    with open(self._logFilePath) as logfile:
+      result = parseCompareResult(logfile.read())
+      saveSimpleDictAsResultXML(result, resultPath)
 
 
 class plmCompareBatchAction(BatchActionBase):    

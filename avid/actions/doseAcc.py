@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 
@@ -19,12 +20,12 @@ import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from avid.sorter import TimePointSorter
-from simpleScheduler import SimpleScheduler
-from doseMap import _getArtefactLoadStyle 
+from .simpleScheduler import SimpleScheduler
+from .doseMap import _getArtefactLoadStyle 
 from avid.externals.matchPoint import ensureMAPRegistrationArtefact
 import avid.common.demultiplexer as demux
 
@@ -189,7 +190,7 @@ class DoseAccBatchAction(BatchActionBase):
     for doses in splittedDoses:
       doses = self._doseSorter.sortSelection(doses)
       for (pos, dose) in enumerate(doses):
-        weight2 = 1.0/len(doses)
+        weight2 = 1.0 / len(doses)
         linkedPlans = self._planLinker.getLinkedSelection(pos, doses, plans)
 
         if len(linkedPlans) > 0:

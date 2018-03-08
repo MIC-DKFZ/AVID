@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import range
 import os
 import logging
 
@@ -21,10 +23,10 @@ from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +87,7 @@ class RegVarToolAction(CLIActionBase):
 
   def _toString(self, parameters):
     parametersString = ""
-    for key, value in parameters.iteritems():
+    for key, value in parameters.items():
       parametersString += key + " " + value
       parametersString += " "
     parametersString = parametersString.strip()

@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 import time
@@ -22,11 +23,11 @@ from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 
 from xml.etree.ElementTree import ElementTree
 import avid.common.customTags as Tag
@@ -112,7 +113,7 @@ class matchRAction(CLIActionBase):
       content += ' --output "' + resultPath + '"'
       if self._algorithmParameters:
         content += ' --parameters'
-      for key, value in self._algorithmParameters.iteritems():
+      for key, value in self._algorithmParameters.items():
         content += ' "' + key + '=' + value + '"'
       if self._movingMask:
         movingMaskURL = artefactHelper.getArtefactProperty(self._movingMask, artefactProps.URL)

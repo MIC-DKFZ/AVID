@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 import re
@@ -20,10 +21,10 @@ import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,7 @@ class VoxelizerBatchAction(BatchActionBase):
     self._refLinker = referenceLinker
     self._structNames = structNames
     if (self._structNames is None):
-      self._structNames = self._session.structureDefinitions.keys()
+      self._structNames = list(self._session.structureDefinitions.keys())
     self._singleActionParameters = singleActionParameters
 
       

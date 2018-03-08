@@ -22,7 +22,7 @@ def getInputArtefactIDs(workflowData):
   for entry in workflowData:
     value = getArtefactProperty(entry, artefactProps.INPUT_IDS)
 
-    for ID in value.values():
+    for ID in list(value.values()):
       inputs.add(ID)
 
   return list(inputs)
@@ -65,7 +65,7 @@ class IsPrimeInvalidSelector(SelectorBase):
       found = False
       if input_ids is not None and entry[artefactProps.INVALID]:
         found = True
-        for ID in input_ids.values():
+        for ID in list(input_ids.values()):
           if not ID in valid_ids:
             found = False
       if found:

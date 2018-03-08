@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import pyhtml as html
 
@@ -86,10 +87,10 @@ def getMeasurementValueKeys(ms, onlyWeigted = False):
         m = ms[0]
         vkeys = list()
         if onlyWeigted:
-            vkeys = m.measureWeights.keys()
+            vkeys = list(m.measureWeights.keys())
 
         if len(vkeys)==0:
-            vkeys = m.measurements.keys()
+            vkeys = list(m.measurements.keys())
     except:
         vkeys = list()
 
@@ -100,7 +101,7 @@ def getWorkflowModKeys(ms):
      have the same modifier and only checks the first elmeent.'''
     try:
         m = ms[0]
-        vkeys = m.workflowModifier.keys()
+        vkeys = list(m.workflowModifier.keys())
     except:
         vkeys = list()
 

@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
       
       token = action.do()
       
-      self.assert_(token.isFailure())
+      self.assertTrue(token.isFailure())
       self.assertIn(self.a_valid, token.generatedArtefacts)
       self.assertIn(self.a_NoFile, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -164,7 +164,7 @@ class Test(unittest.TestCase):
       
       selection = action.ensureRelevantArtefacts(self.session.artefacts, CaseSelector("Case2"))
      
-      self.assert_(len(selection)==3)
+      self.assertTrue(len(selection)==3)
       self.assertIn(self.a_valid2, selection)
       self.assertIn(self.a_NoneURL, selection)
       self.assertIn(self.a_Invalid, selection)

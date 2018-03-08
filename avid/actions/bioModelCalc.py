@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 
@@ -18,12 +19,12 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
-from doseMap import _getArtefactLoadStyle
-from doseAcc import _getFractionWeight
+from .simpleScheduler import SimpleScheduler
+from .doseMap import _getArtefactLoadStyle
+from .doseAcc import _getFractionWeight
 import avid.externals.virtuos as virtuos
 
 logger = logging.getLogger(__name__)
@@ -188,7 +189,7 @@ class BioModelCalcBatchAction(BatchActionBase):
 
 
       if self._normalizeFractions is True:
-        nFractions = int(1/weight)
+        nFractions = int(1//weight)
       if self._useDoseScaling is False:
         weight = 1.0
 

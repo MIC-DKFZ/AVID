@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 from avid.selectors import ActionTagSelector
 
 ACTION_SUCCESS = "SUCCESS"
@@ -25,7 +27,7 @@ def boolToSuccess(boolValue):
     else:
         return ACTION_FAILUER
         
-class ActionToken:
+class ActionToken(object):
 
     def __init__(self, session, actionTag = None, instanceName = None, state = ACTION_SUCCESS):
         self.session = session

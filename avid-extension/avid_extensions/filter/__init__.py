@@ -11,5 +11,5 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from mask_dilation import dilate_mask as dilate_mask
-from mask_dilation import bounding_box as bounding_box
+from .mask_dilation import dilate_mask as dilate_mask
+from .mask_dilation import bounding_box as bounding_box

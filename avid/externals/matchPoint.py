@@ -10,13 +10,14 @@
 # A PARTICULAR PURPOSE.
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
+from builtins import str
 import csv
 import logging
 import os
 import xml.etree.ElementTree as ElementTree
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from pointset import PointRepresentation
+from .pointset import PointRepresentation
 
 logger = logging.getLogger(__name__)
 
@@ -202,8 +203,8 @@ def read_simple_pointset(filePath):
 def write_simple_pointset(filePath, pointset):
     from avid.common import osChecker
     osChecker.checkAndCreateDir(os.path.split(filePath)[0])
-    with open(filePath, 'w') as csvfile:
-        writer = csv.writer(csvfile, delimiter=' ', lineterminator='\n')
+    with open(filePath, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=' ')
 
         '''write given values'''
         for point in pointset:

@@ -11,11 +11,13 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 import avid.common.workflow as workflow
 from avid.selectors.keyValueSelector import KeyValueSelector
 from avid.selectors import SelectorBase
         
-class Demultiplexer:
+class Demultiplexer(object):
 
   def __init__(self, propKey, selector = SelectorBase(), workflowData = None):
       

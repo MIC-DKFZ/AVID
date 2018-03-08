@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 import os
 import xml.etree.ElementTree as ElementTree
 from pyoneer.evaluation import EvalInstanceDescriptor
@@ -509,7 +511,7 @@ def _writeResultBase(result, builder):
     builder.end(XML_ARTEFACTFILE)
 
     builder.start(XML_MEASUREMENTS_INFO, {})
-    keys = set(result.valueNames.keys() + result.valueDescriptions.keys())
+    keys = set(list(result.valueNames.keys()) + list(result.valueDescriptions.keys()))
 
     for key in keys:
         builder.start(XML_INFO, {XML_ATTR_KEY: key})

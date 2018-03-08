@@ -24,9 +24,9 @@ from avid.linkers import CaseLinker
 from avid.linkers import FractionLinker
 
 from . import BatchActionBase
-from cliActionBase import CLIActionBase
+from .cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class CurveDescriptorMiniAppAction(CLIActionBase):
             result[artefactProps.URL] = info[2]
             self._resultArtefacts[info[1]] = result
 
-        return self._resultArtefacts.values()
+        return list(self._resultArtefacts.values())
 
     def _generateCLIArguments(self):
         resultPath = artefactHelper.getArtefactProperty(self._resultTemplate, artefactProps.URL)

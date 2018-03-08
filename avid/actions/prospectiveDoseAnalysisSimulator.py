@@ -11,6 +11,9 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import map
+from builtins import str
+from builtins import range
 import os
 import logging
 import csv
@@ -23,7 +26,7 @@ from avid.common import osChecker
 from . import BatchActionBase
 from . import SingleActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.selectors.keyValueSelector import FormatSelector
 from avid.probability.Logistic import LogisticProbabilityFunction
 from avid.probability.Logistic import LogisticProbabilityFunctionEstimator
@@ -101,7 +104,7 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
 
       self._resultArtefacts[0] = artefact
       
-    return self._resultArtefacts.values()
+    return list(self._resultArtefacts.values())
 
 
   def _parseDoseStatsCollector(self, filename, statsOfInterest):
@@ -114,13 +117,13 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
     for row in resultContainer:
       index = row[0]
       row.pop(0)
-      rowInt = map(float,row)
+      rowInt = list(map(float,row))
       doseMapOneCaseInstance[index]=rowInt
     return doseMapOneCaseInstance
 
   def _readCSV(self, filename):
     matrix = list()
-    with open(filename, 'r') as csvFile:
+    with open(filename, 'r', newline='') as csvFile:
       reader = csv.reader(csvFile, delimiter=';')
       for row in reader:
         matrix.append(row)
@@ -129,7 +132,7 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
 
   def _computeDifference(self, doseMap):
     diffDict = dict()
-    for key, value in doseMap.iteritems():
+    for key, value in doseMap.items():
       lastEntry = 0
       diffInstance = list()
       for entry in value:
@@ -159,23 +162,23 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
   def _writeToCSV(self, key, columnHeaders, content, filename):
     try:
       osChecker.checkAndCreateDir(os.path.split(filename)[0])  
-      with open(filename, 'w') as csvfile:
-        writer = csv.writer(csvfile, delimiter=';', lineterminator='\n')
+      with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
         
         if self._withHeaders:
           writer.writerow([self._rowKey+"/" +self._columnKey] + columnHeaders)
                 
         '''write given values'''
-        for key, value in content.iteritems():
+        for key, value in content.items():
           orderedValues = collections.OrderedDict(sorted(value.items()))
           row = list()
           row.append(key)
-          for key, value in orderedValues.iteritems():
+          for key, value in orderedValues.items():
             row.append(value)
           writer.writerow(row)
               
     except:
-      print "CSV file writing error. Aborting..."
+      print("CSV file writing error. Aborting...")
       raise
 
   
@@ -202,14 +205,14 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
         if self._predictor is 'logistic':
           probabilityFunctionEstimator = LogisticProbabilityFunctionEstimator()
         else:
-          raise'predictor not implemented'
+          raise RuntimeError('predictor not implemented')
 
         distributionParametersEstimation = probabilityFunctionEstimator.estimateParameters(actualDosesToFractionForPrediction)
 
         if self._predictor is 'logistic':
           probabilityFunction = LogisticProbabilityFunction(distributionParametersEstimation)
         else:
-          raise'predictor not implemented'
+          raise RuntimeError('predictor not implemented')
 
         for percentil in self._percentilSampling:
           sumToFraction = sum(actualDosesToFraction)

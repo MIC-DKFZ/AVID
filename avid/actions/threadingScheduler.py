@@ -11,8 +11,10 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import range
+from builtins import object
 from threading import Thread
-import Queue
+import queue
 
 class Worker(Thread):
     def __init__(self, actions, tokens):
@@ -29,7 +31,7 @@ class Worker(Thread):
           token = action.do(False)    
           self.tokens.append(token)
           self.actions.task_done()
-      except Queue.Empty:
+      except queue.Empty:
         pass
 
 
@@ -40,7 +42,7 @@ class ThreadingScheduler(object):
   
   def execute(self, actionList):
     
-    actionqueue = Queue.Queue()
+    actionqueue = queue.Queue()
     tokens = list()
 
     threadcount = self.threadcount

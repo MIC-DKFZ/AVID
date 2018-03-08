@@ -11,13 +11,14 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import csv
 import logging
 import os
 import uuid
 import xml.etree.ElementTree as ElementTree
 
-import defaultProps
+from . import defaultProps
 from avid.common.artefact import generateArtefactEntry
 
 
@@ -58,7 +59,7 @@ def loadArtefactList_csv(filePath, expandPaths=False, rootPath=None):
     if not os.path.isfile(filePath):
         raise ValueError("Cannot load artefact list from file. File does not exist. File path: " + str(filePath))
 
-    with open(filePath, "rb") as csvfile:
+    with open(filePath, "r", newline='') as csvfile:
         artefactreader = csv.reader(csvfile, delimiter=";")
 
         for row in artefactreader:

@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
 

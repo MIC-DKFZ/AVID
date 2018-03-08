@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 import os
 import logging
 import time
@@ -21,7 +23,7 @@ from ..common.artefact.generator import generateArtefactEntry
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 import avid.common.workflow as workflow
 import avid.selectors as selectors
 
@@ -181,7 +183,7 @@ class SingleActionBase(ActionBase):
             if inputs[iKey] is not None:
                 self._inputArtefacts[iKey] = inputs[iKey]
 
-        self._setCaseInstanceByArtefact(self._inputArtefacts.values())
+        self._setCaseInstanceByArtefact(list(self._inputArtefacts.values()))
 
     def _setCaseInstanceByArtefact(self, *inputArtefacts):
         '''defines the case instance used by the action based on the passed input artefact.'''
@@ -251,8 +253,8 @@ class SingleActionBase(ActionBase):
                 result[propID] = self._additionalActionProps[propID]
 
         if reference is not None and copyAdditionalPropsFromReference:
-            k1 = result._additionalProps.keys()
-            k2 = reference._additionalProps.keys()
+            k1 = list(result._additionalProps.keys())
+            k2 = list(reference._additionalProps.keys())
             additionalKs = [x for x in k2 if x not in k1]
 
             for k in additionalKs:

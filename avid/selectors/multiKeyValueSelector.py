@@ -55,5 +55,4 @@ class MultiKeyValueSelector(SelectorBase):
             outList.append(entry)
       return outList
     except KeyError:
-      print ("A key (%s) was specified, which is not stored in the input data!",dictEntry)
-      self.__workflow.getLogger().info("A key (%s) was specified, which is not stored in the input data!",dictEntry)  
+      self.__workflow.getLogger().info("A key (%s) was specified, which is not stored in the input data!",dictEntry)

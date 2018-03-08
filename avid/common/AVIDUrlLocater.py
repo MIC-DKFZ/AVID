@@ -17,9 +17,10 @@
    every action has to use this action tool location routines!
 '''
 
+from builtins import str
 import os
 import logging
-import ConfigParser
+import configparser
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ def getUtilityPath(checkExistance = True):
   configPath = getAVIDConfigPath()
     
   if os.path.isfile(configPath):
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(configPath)
     toolspath = config.get('avid','toolspath') 
           
@@ -136,7 +137,7 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
       toolconfigPath = getToolConfigPath(actionID)
 
     if os.path.isfile(str(toolconfigPath)):
-      config = ConfigParser.ConfigParser()
+      config = configparser.ConfigParser()
       config.read(toolconfigPath)
     
       configSection = 'DEFAULT'

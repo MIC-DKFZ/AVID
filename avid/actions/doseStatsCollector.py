@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
 import os
 import logging
 import csv
@@ -23,7 +24,7 @@ import avid.externals.doseTool as doseTool
 from . import BatchActionBase
 from . import SingleActionBase
 from avid.selectors import TypeSelector
-from simpleScheduler import SimpleScheduler
+from .simpleScheduler import SimpleScheduler
 from avid.selectors.keyValueSelector import FormatSelector
 
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class DoseStatsCollectorAction(SingleActionBase):
   def indicateOutputs(self):
     if self._keys is None:
       self._statsMatrix = self._generateStatsMatrix()
-      self._keys = self._statsMatrix.keys()
+      self._keys = list(self._statsMatrix.keys())
 
     for key in self._keys:
       if len(self._doseSelections) > 0:
@@ -75,7 +76,7 @@ class DoseStatsCollectorAction(SingleActionBase):
                                                      urlExtension='csv')
         self._resultArtefacts[key] = artefact
 
-    return self._resultArtefacts.values()
+    return list(self._resultArtefacts.values())
 
   def _parseDoseStats(self, filename, statsOfInterest):
     """get relevant values from file (DoseStatistics)"""
@@ -83,7 +84,7 @@ class DoseStatsCollectorAction(SingleActionBase):
 
     doseMapOneFraction = {}
     if statsOfInterest is None:
-      statsOfInterest = resultContainer.results.keys()  # if user hasn't defined something we take all
+      statsOfInterest = list(resultContainer.results.keys())  # if user hasn't defined something we take all
 
     for key in statsOfInterest:
       if key in resultContainer.results:
@@ -113,7 +114,7 @@ class DoseStatsCollectorAction(SingleActionBase):
         valueMap = self._parseDoseStats(aPath, self._keys)
 
       if keys is None:
-        keys = valueMap.keys()  # user has not select keys -> take everything
+        keys = list(valueMap.keys())  # user has not select keys -> take everything
 
       for key in keys:
         if key in valueMap:
@@ -149,7 +150,7 @@ class DoseStatsCollectorAction(SingleActionBase):
 
     for key in matrix:
       rowMatrix = matrix[key]
-      columnKeys = rowMatrix.keys()
+      columnKeys = list(rowMatrix.keys())
       headers.extend(columnKeys)
 
     # ensure everything is unique and sorted
@@ -159,8 +160,8 @@ class DoseStatsCollectorAction(SingleActionBase):
   def _writeToCSV(self, key, columnHeaders, content, filename):
     try:
       osChecker.checkAndCreateDir(os.path.split(filename)[0])
-      with open(filename, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=';', lineterminator='\n')
+      with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
 
         if self._withHeaders:
           writer.writerow([self._rowKey + "/" + self._columnKey] + columnHeaders)
@@ -171,9 +172,10 @@ class DoseStatsCollectorAction(SingleActionBase):
           if self._withHeaders:
             row = [str(rowID)] + row
           writer.writerow(row)
-
+    except Exception as exc:
+      print("CSV file writing error. Reason: {0}".format(exc))
     except:
-      print "CSV file writing error. Aborting..."
+      print("CSV file writing error. Aborting...")
       raise
 
   def _generateOutputs(self):

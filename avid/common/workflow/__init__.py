@@ -11,6 +11,8 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import str
+from builtins import object
 import logging
 import os
 import sys
@@ -198,7 +200,8 @@ class Session(object):
       fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
     
     global currentGeneratedSession
-    currentGeneratedSession = None
+    if currentGeneratedSession == self:
+      currentGeneratedSession = None
 
 
   def __enter__(self):
@@ -221,7 +224,7 @@ class Session(object):
       
   @property
   def definedStructures(self):
-    return self.structureDefinitions.keys()
+    return list(self.structureDefinitions.keys())
   
   def hasStructurePattern(self, name):
     result = False
@@ -283,7 +286,7 @@ class Session(object):
       """Returns all actions of the session that have failed."""
       failedActions = []
       
-      for anActionID in self.actions.keys():
+      for anActionID in list(self.actions.keys()):
           #check each action
           actionToken = self.actions[anActionID]
           if actionToken.isFailure():
@@ -295,7 +298,7 @@ class Session(object):
     """Returns all actions of the session that have been skipped."""
     skippedActions = []
 
-    for anActionID in self.actions.keys():
+    for anActionID in list(self.actions.keys()):
       # check each action
       actionToken = self.actions[anActionID]
       if actionToken.isSkipped():
@@ -307,7 +310,7 @@ class Session(object):
     """Returns all actions of the session that have been successful."""
     succActions = []
 
-    for anActionID in self.actions.keys():
+    for anActionID in list(self.actions.keys()):
       # check each action
       actionToken = self.actions[anActionID]
       if actionToken.isSuccess():

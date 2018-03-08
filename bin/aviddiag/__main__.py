@@ -24,7 +24,7 @@ from avid.common.artefact.fileHelper import loadArtefactList_xml
 from avid.common.osChecker import checkAndCreateDir
 
 import os
-import ConfigParser
+import configparser
 import subprocess
 
 from avid.selectors import SelectorBase, AndSelector

@@ -16,7 +16,7 @@ Allows access to the general settings of avid
 '''
 import os
 from avid.common.AVIDUrlLocater import getAVIDConfigPath
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 SUBPROCESS_PAUSE = 'subprocess_pause'
 ACTION_TIMEOUT = 'action_timeout'
@@ -35,7 +35,7 @@ def _getSettingFromConfigFile(name):
   configFilePath = getAVIDConfigPath()
   
   try:
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(configFilePath)
     return config.get('avid',name)
     

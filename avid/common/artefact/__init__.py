@@ -16,6 +16,8 @@
   tis responsible to add new dict entries in the flat file data container 
 '''
 
+from builtins import str
+from builtins import object
 import sys
 import os
 import platform
@@ -25,7 +27,7 @@ import logging
 
 import collections
 
-import defaultProps
+from . import defaultProps
 import threading
 
 logger = logging.getLogger(__name__)
@@ -75,8 +77,8 @@ class Artefact(object):
 
     def is_similar(self, other):
 
-        mykeys = self.keys()
-        okeys = other.keys()
+        mykeys = list(self.keys())
+        okeys = list(other.keys())
 
         for key in similarityRelevantProperties:
             if key in mykeys and key in okeys:
@@ -90,7 +92,7 @@ class Artefact(object):
         return True
 
     def keys(self):
-        return self._defaultProps.keys() + self._additionalProps.keys()
+        return list(self._defaultProps.keys()) + list(self._additionalProps.keys())
 
     def is_invalid(self):
         return self._defaultProps[defaultProps.INVALID]
@@ -295,7 +297,7 @@ def ensureValidPath(unsafePath):
     if platform.system() is 'Windows':
         # also add unix version because windows can handle it to.
         validPathChars += '/'
-    cleanedFilename = unicodedata.normalize('NFKD', unicode(unsafePath, "utf-8")).encode('ASCII', 'ignore')
+    cleanedFilename = unicodedata.normalize('NFKD', unsafePath).encode('ascii', 'ignore').decode('ascii')
     result = ''.join(c for c in cleanedFilename if c in validPathChars)
     result = result.strip().replace(' ','_')
     return result
@@ -311,7 +313,7 @@ def generateArtefactPath(workflow, workflowArtefact):
 
 def _defaultGetArtefactShortName(workflowArtefact):
     '''Default strategy for the short name. If no objective is defined '''
-    import defaultProps as artefactProps
+    from . import defaultProps as artefactProps
     tag = getArtefactProperty(workflowArtefact, artefactProps.ACTIONTAG)
     timePoint = getArtefactProperty(workflowArtefact, artefactProps.TIMEPOINT)
     name = '{}#{}'.format(tag, timePoint)
@@ -332,4 +334,4 @@ def getArtefactShortName(workflowArtefact):
     return ensureValidPath(name)
 
 
-from generator import generateArtefactEntry
+from .generator import generateArtefactEntry

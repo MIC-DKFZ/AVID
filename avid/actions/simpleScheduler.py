@@ -11,6 +11,7 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
+from builtins import object
 class SimpleScheduler(object):
   '''Simple scheduler implementation that just executes the actions sequentially.'''
   def __init__(self):
