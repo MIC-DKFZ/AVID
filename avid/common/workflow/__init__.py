@@ -196,9 +196,6 @@ class Session(object):
 
 
   def __del__(self):
-    if self.autoSave:
-      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
-    
     global currentGeneratedSession
     if currentGeneratedSession == self:
       currentGeneratedSession = None

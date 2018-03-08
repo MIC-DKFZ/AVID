@@ -172,24 +172,22 @@ def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
 
 
 def saveArtefactList_xml(filePath, artefacts, rootPath=None):
-    builder = ElementTree.TreeBuilder()
-
     if rootPath is None:
         rootPath = os.path.split(filePath)[0]
 
-    builder.start(XML_ARTEFACTS, {XML_ATTR_VERSION: "1.0", "xmlns:avid": XML_NAMESPACE})
+    root = ElementTree.Element(XML_ARTEFACTS, {XML_ATTR_VERSION: "1.0", "xmlns:avid": XML_NAMESPACE})
+
     for artefact in artefacts:
-        builder.start(XML_ARTEFACT, {})
+        xmlArtefact = ElementTree.SubElement(root, XML_ARTEFACT)
         for key in artefact._defaultProps:
             if artefact[key] is not None:
-                builder.start(XML_PROPERTY, {XML_ATTR_KEY: key})
+                xmlProp = ElementTree.SubElement(xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key})
                 value = artefact[key]
                 if key is defaultProps.INPUT_IDS:
                     for sourceName in value:
                         if value[sourceName] is not None:
-                            builder.start(XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
-                            builder.data(value[sourceName])
-                            builder.end(XML_INPUT_ID)
+                            xmlInput = ElementTree.SubElement(xmlProp,XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
+                            xmlInput.text = value[sourceName]
                 else:
                     if key is defaultProps.URL:
                         # make all paths relative
@@ -200,18 +198,12 @@ def saveArtefactList_xml(filePath, artefacts, rootPath=None):
                                 "Artefact URL cannot be converted to be realtive. Path is keept absolute. Artefact URL: %s",
                                 value)
                         value = value.replace("\\", "/")
-                    builder.data(str(value))
-                builder.end(XML_PROPERTY)
+                    xmlProp.text = str(value)
         for key in artefact._additionalProps:
             if artefact[key] is not None:
-                builder.start(XML_PROPERTY, {XML_ATTR_KEY: key})
-                builder.data(str(artefact[key]))
-                builder.end(XML_PROPERTY)
+                xmlProp = ElementTree.SubElement(xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key})
+                xmlProp.text = str(artefact[key])
 
-        builder.end(XML_ARTEFACT)
-    builder.end(XML_ARTEFACTS)
-
-    root = builder.close()
     tree = ElementTree.ElementTree(root)
     indent(root)
 
