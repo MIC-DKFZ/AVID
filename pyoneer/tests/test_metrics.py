@@ -163,8 +163,8 @@ class TestSelectors(unittest.TestCase):
     
     result = metric.evaluate(self.testWorkflowFile, self.testArtefactFile)
 
-    self.assert_(os.path.exists(os.path.join(self.sessionDir,result.name)))
-    self.assert_(os.path.exists(os.path.join(self.sessionDir,result.name+os.extsep+'avid')))
+    self.assertTrue(os.path.exists(os.path.join(self.sessionDir,result.name)))
+    self.assertTrue(os.path.exists(os.path.join(self.sessionDir,result.name+os.extsep+'avid')))
 
     
 if __name__ == '__main__':

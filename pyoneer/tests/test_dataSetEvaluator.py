@@ -48,15 +48,15 @@ class TestSelectors(unittest.TestCase):
                               EvalInstanceDescriptor({'case': 'Case2'}): {'pyoneer.criteria.DurationCriterion.duration': 30.0},
                               EvalInstanceDescriptor({'case': 'Case1'}): {'pyoneer.criteria.DurationCriterion.duration': 3.0}}
 
-    self.instanceResultRef_2Criteria = {EvalInstanceDescriptor({'case': 'Case3'}): {'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 3.0],
-                                                                                    'pyoneer.criteria.DurationCriterion.duration': 300.0,
-                                                                                    'pyoneer.criteria.PropertyCriterion.timePoint.sum': 4.0},
-                                        EvalInstanceDescriptor({'case': 'Case2'}): {'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 2.0],
-                                                                                    'pyoneer.criteria.DurationCriterion.duration': 30.0,
-                                                                                    'pyoneer.criteria.PropertyCriterion.timePoint.sum': 3.0},
-                                        EvalInstanceDescriptor({'case': 'Case1'}): {'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 2.0],
-                                                                                    'pyoneer.criteria.DurationCriterion.duration': 3.0,
-                                                                                    'pyoneer.criteria.PropertyCriterion.timePoint.sum': 3.0}}
+    self.instanceResultRef_2Criteria = {EvalInstanceDescriptor({'case': 'Case1'}): {'pyoneer.criteria.DurationCriterion.duration': 3.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint.sum': 3.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 2.0]},
+     EvalInstanceDescriptor({'case': 'Case2'}): {'pyoneer.criteria.DurationCriterion.duration': 30.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint.sum': 3.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 2.0]},
+     EvalInstanceDescriptor({'case': 'Case3'}): {'pyoneer.criteria.DurationCriterion.duration': 300.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint.sum': 4.0,
+                                                 'pyoneer.criteria.PropertyCriterion.timePoint': [1.0, 3.0]}}
 
     self.instanceResultRef_split = {EvalInstanceDescriptor({'case': 'Case1', 'timePoint': 1}): {'pyoneer.criteria.DurationCriterion.duration': 1.0},
                                     EvalInstanceDescriptor({'case': 'Case1', 'timePoint': 2}): {'pyoneer.criteria.DurationCriterion.duration': 2.0},
@@ -78,19 +78,19 @@ class TestSelectors(unittest.TestCase):
                           MetricCriterionBase.MID_FailedInstances : 0
                         }
 
-    self.resultRef_2Criteria = {'pyoneer.criteria.PropertyCriterion.timePoint.mean': 1.6666666666666667,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.max': 3.0,
-                                'pyoneer.criteria.DurationCriterion.duration.min': 3.0,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.sum.mean': 3.3333333333333335,
-                                'pyoneer.criteria.DurationCriterion.duration.max': 300.0,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.sum.min': 3.0,
-                                'pyoneer.criteria.DurationCriterion.duration.mean': 111.0,
-                                'pyoneer.criteria.DurationCriterion.duration.sd': 134.09697983176207,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.sd': 0.74535599249993,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.min': 1.0,
-                                'pyoneer.criteria.MetricCriterionBase.FailedInstances': 0,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.sum.sd': 0.4714045207910317,
-                                'pyoneer.criteria.PropertyCriterion.timePoint.sum.max': 4.0}
+    self.resultRef_2Criteria = {'pyoneer.criteria.DurationCriterion.duration.mean': 111.0,
+     'pyoneer.criteria.DurationCriterion.duration.min': 3.0,
+     'pyoneer.criteria.DurationCriterion.duration.max': 300.0,
+     'pyoneer.criteria.DurationCriterion.duration.sd': 134.09697983176207,
+     'pyoneer.criteria.PropertyCriterion.timePoint.sum.mean': 3.3333333333333335,
+     'pyoneer.criteria.PropertyCriterion.timePoint.sum.min': 3.0,
+     'pyoneer.criteria.PropertyCriterion.timePoint.sum.max': 4.0,
+     'pyoneer.criteria.PropertyCriterion.timePoint.sum.sd': 0.4714045207910317,
+     'pyoneer.criteria.PropertyCriterion.timePoint.mean': 1.6666666666666667,
+     'pyoneer.criteria.PropertyCriterion.timePoint.min': 1.0,
+     'pyoneer.criteria.PropertyCriterion.timePoint.max': 3.0,
+     'pyoneer.criteria.PropertyCriterion.timePoint.sd': 0.7453559924999299,
+     'pyoneer.criteria.MetricCriterionBase.FailedInstances': 0}
 
     self.resultRef_split = {'pyoneer.criteria.DurationCriterion.duration.max': 200.0,
                             'pyoneer.criteria.DurationCriterion.duration.min': 1.0,

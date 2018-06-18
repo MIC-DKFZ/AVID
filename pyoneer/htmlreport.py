@@ -174,7 +174,7 @@ def _generateMeasuremntResult(result):
                          _generateInstanceContent(result))))
 
 def _generateValueDescriptionsContent(result):
-    valueKeys = list(set(result.valueNames.keys())|set(result.valueDescriptions.keys()))
+    valueKeys = sorted(set(result.valueNames.keys())|set(result.valueDescriptions.keys()))
     for key in valueKeys:
         try:
             name = result.valueNames[key]

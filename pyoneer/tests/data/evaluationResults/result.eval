@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='us-ascii'?>
 <avid:evaluation_result version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
   <avid:name>TestEval</avid:name>
   <avid:workflow_file>myWorkflow</avid:workflow_file>
@@ -30,8 +31,8 @@
         <avid:defining_value key="case">C1</avid:defining_value>
       </avid:instance_descriptor>
       <avid:measurements>
-        <avid:measurement key="crit2.1">0.2</avid:measurement>
         <avid:measurement key="crit1.1">0.1</avid:measurement>
+        <avid:measurement key="crit2.1">0.2</avid:measurement>
       </avid:measurements>
     </avid:measurement_instance>
   </avid:measurement_instances>

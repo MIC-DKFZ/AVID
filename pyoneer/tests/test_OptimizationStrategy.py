@@ -72,15 +72,15 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     result = strat.optimize(workflowFile=self.testWorkflowFile, artefactFile=self.testArtefactFile)
 
-    self.assert_(not result is None)
-    self.assertEquals(strat.defineName(), result.name)
+    self.assertTrue(not result is None)
+    self.assertEqual(strat.defineName(), result.name)
 
     best = result.best[0]
     self.assertEqual('Best',best.label)
     refParameter = {'delay': 0, 'x': 100}
     refSVMeasure = 0.0
     self.assertEqual(refParameter, best.workflowModifier)
-    self.assertAlmostEquals(refSVMeasure, best.svMeasure, 6)
+    self.assertAlmostEqual(refSVMeasure, best.svMeasure, 6)
 
     loadedResult = readOptimizationResult(self.testResultFile)
     self.assertEqual(self.testArtefactFile, result.artefactFile)

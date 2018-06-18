@@ -52,18 +52,18 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     clicall = 'avidpyoneer optimize "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
-    self.assertEquals(0, subprocess.call(clicall, shell= self.useShell))
+    self.assertEqual(0, subprocess.call(clicall, shell= self.useShell))
 
     result = readOptimizationResult(resultPath)
-    self.assert_(not result is None)
-    self.assertEquals('AvidPyoneer_Test', result.name)
+    self.assertTrue(not result is None)
+    self.assertEqual('AvidPyoneer_Test', result.name)
 
     best = result.best[0]
     self.assertEqual('Best',best.label)
-    refParameter = {'delay': '0', 'x': '100'}
+    refParameter = {'delay': '0.0', 'x': '100.0'}
     refSVMeasure = 0.0
     self.assertEqual(refParameter, best.workflowModifier)
-    self.assertAlmostEquals(refSVMeasure, best.svMeasure, 6)
+    self.assertAlmostEqual(refSVMeasure, best.svMeasure, 6)
 
     loadedResult = readOptimizationResult(self.testResultFile)
     self.assertEqual(self.testArtefactFile, result.artefactFile)
@@ -78,11 +78,11 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     clicall = 'avidpyoneer evaluate "{}" "{}" -w "{}" -a "{}" -n AvidPyoneer_Test'.format(self.testOptStratFile, resultPath, self.testWorkflowFile, self.testArtefactFile)
 
-    self.assertEquals(0, subprocess.call(clicall, shell= self.useShell))
+    self.assertEqual(0, subprocess.call(clicall, shell= self.useShell))
 
     result = readEvaluationResult(resultPath)
-    self.assert_(not result is None)
-    self.assertEquals('AvidPyoneer_Test', result.name)
+    self.assertTrue(not result is None)
+    self.assertEqual('AvidPyoneer_Test', result.name)
 
 
 if __name__ == '__main__':

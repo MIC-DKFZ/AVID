@@ -76,7 +76,7 @@ def parseDiceResult(outputStr):
   lines = outputStr.splitlines()
   for line in lines:
     try:
-      items = [_f for _f in re.split(r'\s*[:,\=]\s*', line) if _f]
+      items = [_f for _f in re.split(r'\s*[:\=]\s*', line) if _f]
       if items[0] in DICE_KEYS:
         result[items[0]] = float(items[1])
     except:

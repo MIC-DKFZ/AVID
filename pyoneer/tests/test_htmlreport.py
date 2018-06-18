@@ -16,6 +16,7 @@ import shutil
 import unittest
 
 import pyoneer.htmlreport as htmlreport
+from avid.common.osChecker import checkAndCreateDir
 from pyoneer.evaluationResult import readEvaluationResult as readEvaluationResult, readOptimizationResult
 
 
@@ -23,10 +24,13 @@ class TestHTMLreport(unittest.TestCase):
   def setUp(self):
 
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
-    self.testResultFile = os.path.join(os.path.split(__file__)[0],"data",'evaluationResults', "result"+os.extsep+"eval")
-    self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary", "test_evaluationResults")
-
+    self.testEvalResultFile = os.path.join(os.path.split(__file__)[0],"data",'evaluationResults', "result"+os.extsep+"eval")
     self.testOptResultFile = os.path.join(os.path.split(__file__)[0],"data",'evaluationResults', "result"+os.extsep+"opt")
+    self.testEvalHTMLRefFile = os.path.join(os.path.split(__file__)[0],"data",'htmlReport', "eval"+os.extsep+"html")
+    self.testOptHTMLRefFile = os.path.join(os.path.split(__file__)[0],"data",'htmlReport', "opt"+os.extsep+"html")
+
+    self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary", "test_evaluationResults")
+    checkAndCreateDir(self.sessionDir)
 
   def tearDown(self):
     try:
@@ -43,22 +47,24 @@ class TestHTMLreport(unittest.TestCase):
         self.assertEqual(ref, test)
 
   def test_generateEvaluationReport(self):
-    result = readEvaluationResult(self.testResultFile)
+    result = readEvaluationResult(self.testEvalResultFile)
     report = htmlreport.generateEvaluationReport(result)
+    resultFile = os.path.join(self.sessionDir, "test.html")
 
-    with open(os.path.join(self.testDataDir, "test.html"), 'w') as fileHandle:
+    with open(resultFile, 'w') as fileHandle:
       fileHandle.write(report)
 
-    self.assertEqual(report, '')
+    self.assert_file_content(resultFile, self.testEvalHTMLRefFile)
 
   def test_generateOptimizationReport(self):
     result = readOptimizationResult(self.testOptResultFile)
     report = htmlreport.generateOptimizationReport(result)
+    resultFile = os.path.join(self.sessionDir, "test.html")
 
-    with open(os.path.join(self.testDataDir, "test.html"), 'w') as fileHandle:
+    with open(resultFile, 'w') as fileHandle:
       fileHandle.write(report)
 
-    self.assertEqual(report, '')
+    self.assert_file_content(resultFile, self.testOptHTMLRefFile)
 
 if __name__ == '__main__':
     unittest.main()

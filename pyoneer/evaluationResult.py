@@ -511,7 +511,7 @@ def _writeResultBase(result, builder):
     builder.end(XML_ARTEFACTFILE)
 
     builder.start(XML_MEASUREMENTS_INFO, {})
-    keys = set(list(result.valueNames.keys()) + list(result.valueDescriptions.keys()))
+    keys = sorted(set(list(result.valueNames.keys()) + list(result.valueDescriptions.keys())))
 
     for key in keys:
         builder.start(XML_INFO, {XML_ATTR_KEY: key})

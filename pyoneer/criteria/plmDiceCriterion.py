@@ -150,7 +150,7 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
       global logger
       logger.error("Error in PlmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
     else:
-        result = parseDiceResult(output)
+        result = parseDiceResult(output.decode())
 
     return result
 
@@ -181,6 +181,7 @@ class PrecompPlmDiceCriterion(PlmDiceCriterionBase):
         value ID. The dict value is the measurement value(s).
          '''
         result = None
+        global logger
 
         if len(relevantArtefacts['resultSelector']) == 1:
 
@@ -198,7 +199,6 @@ class PrecompPlmDiceCriterion(PlmDiceCriterionBase):
                     logger.warning("plmDice result '%s', was not found in parsed statistic file. File: %s", key,
                                    resultPath)
         else:
-            global logger
             logger.error("Error in PrecompPlmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
 
         return result
