@@ -252,7 +252,7 @@ def _verboseGenerateArtefactPath(workflow, workflowArtefact):
         +[artefact.case]+[artefact.caseinstance]+[artefact.timepoint]
         The case, caseinstance and timepoint parts are skipped if the respective
         value is NONE. """
-    artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG],
+    artefactPath = os.path.join(workflow.contentPath, workflowArtefact[defaultProps.ACTIONTAG],
                                 workflowArtefact[defaultProps.TYPE])
     if workflowArtefact[defaultProps.CASE] is not None:
         artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
@@ -272,7 +272,7 @@ def _defaultGenerateArtefactPath(workflow, workflowArtefact):
         +[artefact.case]+[artefact.caseinstance]
         The case and caseinstance parts are skipped if the respective
         value is NONE. """
-    artefactPath = os.path.join(workflow.rootPath, workflow.name, workflowArtefact[defaultProps.ACTIONTAG],
+    artefactPath = os.path.join(workflow.contentPath, workflowArtefact[defaultProps.ACTIONTAG],
                                 workflowArtefact[defaultProps.TYPE])
     if workflowArtefact[defaultProps.CASE] is not None:
         artefactPath = os.path.join(artefactPath, str(workflowArtefact[defaultProps.CASE]))
