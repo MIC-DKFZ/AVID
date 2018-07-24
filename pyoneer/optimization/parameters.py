@@ -16,7 +16,7 @@ from pyoneer.optimization import OptimizerBase
 '''This module holds helper to construct and interact with a search parameter descriptor (spd).
    SPDs are used to communicate parameter aspects (e.g. start value, boundaries) to the optimization strategy.
    olDenotes the minimum boundary of a parameter.
-   A spd is basicaly a dictionary the keys denote the parameter, the value is a dictionary containing the
+   A spd is basically a dictionary the keys denote the parameter, the value is a dictionary containing the
    decorations for the parameter.
    Two special decorations are DECORATOR_SCALING_TO_OPT and DECORATOR_SCALING_FROM_OPT. Both serve to
    scale/transform (if needed) between the evaluation domain (value that the user/workflow sees) and the
@@ -143,3 +143,7 @@ def Log10Scaling(val):
 def Exp10Scaling(val):
     '''Scaler that transforms with by f <= 10^val into result space.'''
     return math.pow(10,val)
+
+def RoundScaling(val):
+    '''Scaler that rounds the given value into an integar.'''
+    return int(round(val))
