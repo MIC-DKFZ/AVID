@@ -28,13 +28,15 @@ logger = logging.getLogger(__name__)
 class EvaluationSchedulingBase(object):
     '''Helper class to run the evaluation of optimization candidates.'''
 
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters, staticWorkflowModifier = None):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
           @param workflowFile: Path to the file that specifies the workflow.
           @param artefactFile: Path to the artefact file.
           @param searchParameters: Search parameter descriptor defined by the strategy for the current optimization.
+          @param staticWorkflowModifier: Workflow modifiers defined by the strategy for the current optimization that
+           should be passed to the workflow but are not subject to optimization.
         '''
         self._sessionDir = sessionDir
         self._evaluationFile = evaluationFile
@@ -42,6 +44,7 @@ class EvaluationSchedulingBase(object):
         self._artefactFile = artefactFile
         self.reportCandidateResultFunctor = None
         self._searchParameters = searchParameters
+        self._staticWorkflowModifier = staticWorkflowModifier
 
     def getEvaluationStrategyInstance(self):
         evalclasses = detectEvaluationStrategies(self._evaluationFile)
@@ -91,6 +94,15 @@ class EvaluationSchedulingBase(object):
 
         raise ImportError('Implement this methods in derived classes.')
 
+    def _compileWorkflowModifier(self, candidateModifier):
+        '''Internal helper function that merges the static workflow modifier with a given workflow modifier of a concrete
+        candidate. If there is a merge conflict candidate overwrites the static modifier.'''
+        workflowModifier = candidateModifier
+        if self._staticWorkflowModifier is not None:
+            workflowModifier = {**self._staticWorkflowModifier, **workflowModifier}
+
+        return workflowModifier
+
     def reportCandidate(self, label, candidateParam):
         '''Function may be called by evaluate to indicate the evaluation of an candidate.
         @param candidateParam dictionary with the param used to evaluate the candidate.
@@ -107,14 +119,15 @@ class EvaluationSchedulingBase(object):
 
 
 class SimpleEvaluationScheduling(EvaluationSchedulingBase):
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters, staticWorkflowModifier = None):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
         '''
         EvaluationSchedulingBase.__init__(self, evaluationFile=evaluationFile,sessionDir=sessionDir,
                                           workflowFile=workflowFile, artefactFile=artefactFile,
-                                          searchParameters=searchParameters)
+                                          searchParameters=searchParameters,
+                                          staticWorkflowModifier = staticWorkflowModifier)
 
         self.evalStrategy = self.getEvaluationStrategyInstance()
 
@@ -130,7 +143,9 @@ class SimpleEvaluationScheduling(EvaluationSchedulingBase):
         for candidateKey in candidates:
             logger.info("Evaluate candidate: {}".format(candidateKey))
             self.reportCandidate(candidateKey, candidates[candidateKey])
-            result = self.evalStrategy.evaluate(workflowFile=self._workflowFile, artefactFile=self._artefactFile, workflowModifier=candidates[candidateKey], label=candidateKey)
+            result = self.evalStrategy.evaluate(workflowFile=self._workflowFile, artefactFile=self._artefactFile,
+                                                workflowModifier=self._compileWorkflowModifier(candidates[candidateKey]),
+                                                label=candidateKey)
             results[candidateKey] = result
             self.reportCandidateResult(candidateKey, result)
             logger.info("Evaluation finisched. Candidate {} SV Measure: {}".format(candidateKey, str(result.svMeasure)))
@@ -196,34 +211,62 @@ class OptimizationStrategy(object):
          reimplemented to specify the name of the strategy.'''
         return "Unnamed Optimization"
 
-    def defineEvaluationScheduling(self, workflowFile, artefactFile, label=None):
-        '''This methos returns the scheduling strategy that should be used to evaluate candidates of an optimization
+    def defineStaticWorkflowModifier(self):
+        '''This method returns a dictionary of static parameters/workflow modifiers that
+         are passed to the evaluated workflows.'''
+
+    def _compileWorkflowModifier(self, userWorkflowModifier):
+        '''Internal helper function that merges the static workflow modifier of the strategy with workflow modifiers
+         specified by the caller of the function (e.g. user specified modifiers). If there is a merge conflict user
+         modifier overwrites the strategy modifier.'''
+        result = userWorkflowModifier
+        strategyModifier = self.defineStaticWorkflowModifier()
+        if strategyModifier is not None:
+            result = {**strategyModifier, **result}
+
+        return result
+
+    def defineEvaluationScheduling(self, workflowFile, artefactFile, label=None, staticWorkflowModifier = None):
+        '''This method returns the scheduling strategy that should be used to evaluate candidates of an optimization
          step. Default implementation is a simple serial evaluation scheduling. Reimplement this method to change
-         the scheduling of the strategy'''
+         the scheduling of the strategy.
+         @param staticWorkflowModifier Workflow modifier that are no search parameters but should also be passed to
+         the workflow under optimization.'''
         if label is None:
             label = self.defineName()
+
+        if staticWorkflowModifier is None:
+            staticWorkflowModifier = dict()
+
         currentsessionDir = os.path.join(self.sessionDir,ensureValidPath(label))
 
         return SimpleEvaluationScheduling(sessionDir=currentsessionDir, evaluationFile=self.evaluationFile,
-                                          workflowFile=workflowFile, artefactFile=artefactFile, searchParameters = self.defineSearchParameters())
+                                          workflowFile=workflowFile, artefactFile=artefactFile,
+                                          staticWorkflowModifier = staticWorkflowModifier, searchParameters = self.defineSearchParameters())
 
-    def optimize(self, workflowFile, artefactFile, label=None):
+    def optimize(self, workflowFile, artefactFile, label=None, userWorkflowModifier = None):
         '''Function is called to evaluate a workflow used the passed artfact definitions
         @param workflowFile: String defining the path to the avid workflow that should
         be executed.
         @param artefactFile: String defining the path to the artefact bootstrap file
          for the workflow session that will be evaluated.
         @param label Label that should be used by the optimization strategy for the optimization run.
+        @param userWorkflowModifier Workflow modifier defined that are defined by the user and
+        should also be passed to the workflow under optimization.
         @return An OptimizationResult instance resembling the optimization run.
         '''
         if label is None:
             label = self.defineName()
+        if userWorkflowModifier is None:
+            userWorkflowModifier = dict()
 
         result = OptimizationResult(name=label, workflowFile=workflowFile, artefactFile=artefactFile)
 
         optimizer = self.defineOptimizer()
+
+
         evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile,
-                                                        label=label)
+                                                        label=label, staticWorkflowModifier = userWorkflowModifier)
         evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, self._reportCallback)
 
         optimizer.evaluationCallBack = evalScheduler.evaluate

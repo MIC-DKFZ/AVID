@@ -77,13 +77,19 @@ def doOptimization(stratFile, resultPath, workflowPath, artefactPath, label, ses
         if len(args_dict['report']) > 0:
             reportPath = args_dict['report']
 
+    workflowMod = None
+    if args_dict['modifier'] is not None:
+        workflowMod = dict()
+        for mod in args_dict['modifier']:
+            workflowMod[mod[0]] = mod[1]
+
     for stratClass in optStratClasses:
         reportCallBack = None
         if args_dict['interim'] is not None:
             reportCallBack = InterimReporter(resultPath, reportPath)
 
         strat = stratClass(evalStratFile, sessionPath, reportCallBack)
-        result = strat.optimize(workflowPath,artefactPath, label=label)
+        result = strat.optimize(workflowPath,artefactPath, label=label, userWorkflowModifier=workflowMod)
         writeOptimizationResult(resultPath, result)
 
         if args_dict['report'] is not None:
@@ -147,7 +153,7 @@ def main():
     parser.add_argument('--report', '-r', nargs='?', const='', default=None, help = 'Generates and displays an html report out of the result. If no explicit path is specified it will use the result path with an added html extension.')
     parser.add_argument('--noDisplay', '-y', action='store_true', help = 'Indicates that generated html report should just be stored and not displayed (e.g. when AVID pyoneer runs on a server terminal).')
     parser.add_argument('--interim', '-i', action='store_true', help = 'Indicates already interim results of the optimization process should be reported. Meaning results will be stored also after each candidate evaluation.')
-    parser.add_argument('--modifier', '-m', action='append', nargs=2, metavar=('key', 'value'), help='Allows to pass workflow modifier to the evaluation when using "avidpyoneer evalute". The key is assumed to be the argument name (--<key>) and the value content will be forwarded to the workflow under evaluation.')
+    parser.add_argument('--modifier', '-m', action='append', nargs=2, metavar=('key', 'value'), help='Allows to pass workflow modifier to the evaluation when using "avidpyoneer evalute" or "avidpyoneer optimize". The key is assumed to be the argument name (--<key>) and the value content will be forwarded to the workflow under evaluation.')
 
     args_dict = vars(parser.parse_args())
 
