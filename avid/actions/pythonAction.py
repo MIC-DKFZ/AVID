@@ -20,6 +20,7 @@ from avid.common.osChecker import checkAndCreateDir
 
 from avid.actions import BatchActionBase
 from avid.actions import SingleActionBase
+from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
 import avid.common.demultiplexer as demux
@@ -151,6 +152,44 @@ class PythonUnaryBatchAction(BatchActionBase):
                              additionalActionProps=self._additionalActionProps,
                              **self._singleActionParameters)
       actions.append(action)
+
+    return actions
+
+
+class PythonBinaryBatchAction(BatchActionBase):
+  '''Batch class that assumes two input artefacts (joined by an (optional) linker) will be passed to the script.
+     The batch class assumes that the python script takes the inputs as arguments "input_1" and "input_2".'''
+
+  def __init__(self, input1Selector, input2Selector, inputLinker = None, actionTag="BinaryScript", alwaysDo=False,
+               session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+
+    self._inputs1 = input1Selector.getSelection(self._session.artefacts)
+    self._inputs2 = input2Selector.getSelection(self._session.artefacts)
+
+    self._inputLinker = inputLinker
+    if inputLinker is None:
+        self._inputLinker = CaseLinker()
+
+    self._singleActionParameters = singleActionParameters
+
+  def _generateActions(self):
+    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+
+    inputs1 = self.ensureRelevantArtefacts(self._inputs1, resultSelector, "1st input")
+    inputs2 = self.ensureRelevantArtefacts(self._inputs2, resultSelector, "1st input")
+
+    actions = list()
+
+    for (pos, input1) in enumerate(inputs1):
+        linked2 = self._inputLinker.getLinkedSelection(pos, inputs1, inputs2)
+
+        for lt in linked2:
+            action = PythonAction(inputs_1=[input1], inputs_2=[lt], actionTag=self._actionTag, alwaysDo=self._alwaysDo,
+                                  session=self._session,
+                                  additionalActionProps=self._additionalActionProps,
+                                  **self._singleActionParameters)
+            actions.append(action)
 
     return actions
 

@@ -72,8 +72,8 @@ def splitArtefact(inputArtefacts, *splitArgs):
         for oldSplits in splittedA:
             splitDict = getSelectors(str(splitProperty), workflowData=oldSplits)
             for splitID in splitDict:
-                relevantDoseSelector = splitDict[splitID]
-                relevantInputs = relevantDoseSelector.getSelection(oldSplits)
+                relevantSelector = splitDict[splitID]
+                relevantInputs = relevantSelector.getSelection(oldSplits)
                 newSplits.append(relevantInputs)
         splittedA = newSplits
 

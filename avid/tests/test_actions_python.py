@@ -20,8 +20,6 @@ from avid.actions.pythonAction import PythonNaryBatchAction as naryPython
 
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.artefact import defaultProps as artefactProps
-from avid.common.AVIDUrlLocater import getToolConfigPath
-
 
 def test_copy_script(inputs, outputs, times = 1):
     '''Simple python test script.'''
