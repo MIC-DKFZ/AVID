@@ -40,8 +40,30 @@ def generateDescriptor(names):
 
     return result
 
+def decorateParameter(descriptor, paramname, minimum = None, maximum = None, start = None, scalingToOpt = None, scalingFromOpt = None, minBoundary = None, maxBoundary = None, **args):
+    '''Helper function that can be sued to compactly define all relevant decorations for a parameter.
+       If a default decoration is not expliotly defined, it will be skipped.
+       All unknown named arguments will be treated as custom decorations for the parameter.'''
+    if minimum is not None:
+        decorateMinimum(descriptor = descriptor, paramname= paramname, minimum=minimum)
+    if maximum is not None:
+        decorateMaximum(descriptor = descriptor, paramname= paramname, maximum=maximum)
+    if start is not None:
+        decorateStart(descriptor = descriptor, paramname= paramname, start=start)
+    if scalingToOpt is not None:
+        decorateScalingToOpt(descriptor = descriptor, paramname= paramname, scaler=scalingToOpt)
+    if scalingFromOpt is not None:
+        decorateScalingFromOpt(descriptor = descriptor, paramname= paramname, scaler=scalingFromOpt)
+    if minBoundary is not None:
+        decorateMinimumBoundary(descriptor = descriptor, paramname= paramname, boundary=minBoundary)
+    if maxBoundary is not None:
+        decorateMaximumBoundary(descriptor = descriptor, paramname= paramname, boundary=maxBoundary)
+    for argname in args:
+        #decorate with all additional arguments passed to the function
+        decorateCustom(descriptor=descriptor, paramname=paramname, decorator=argname, value=args[argname])
 
-def decorateParameter(descriptor, paramname, decorator, value):
+
+def decorateCustom(descriptor, paramname, decorator, value):
     '''Helper function that adds a user specified decorator for the passed parameter.'''
     if paramname in descriptor:
         descriptor[paramname][decorator] = value
@@ -50,37 +72,37 @@ def decorateParameter(descriptor, paramname, decorator, value):
 
 def decorateMinimum(descriptor, paramname, minimum):
     '''Helper function that adds a minimum for the passed parameter.'''
-    decorateParameter(descriptor, paramname, DECORATOR_MINIMUM, minimum)
+    decorateCustom(descriptor, paramname, DECORATOR_MINIMUM, minimum)
 
 def decorateMaximum(descriptor, paramname, maximum):
     '''Helper function that adds a maximum for the passed parameter.'''
-    decorateParameter(descriptor, paramname, DECORATOR_MAXIMUM, maximum)
+    decorateCustom(descriptor, paramname, DECORATOR_MAXIMUM, maximum)
 
 def decorateStart(descriptor, paramname, start):
     '''Helper function that adds a start for the passed parameter.'''
-    decorateParameter(descriptor, paramname, DECORATOR_START, start)
+    decorateCustom(descriptor, paramname, DECORATOR_START, start)
 
 def decorateMinimumBoundary(descriptor, paramname, boundary):
     '''Helper function that adds a boundary for the passed parameter.'''
-    decorateParameter(descriptor, paramname, DECORATOR_MINIMUM_BOUNDARY, boundary)
+    decorateCustom(descriptor, paramname, DECORATOR_MINIMUM_BOUNDARY, boundary)
 
 def decorateMaximumBoundary(descriptor, paramname, boundary):
     '''Helper function that adds a boundary for the passed parameter.'''
-    decorateParameter(descriptor, paramname, DECORATOR_MAXIMUM_BOUNDARY, boundary)
+    decorateCustom(descriptor, paramname, DECORATOR_MAXIMUM_BOUNDARY, boundary)
 
 def decorateScalingToOpt(descriptor, paramname, scaler):
     '''Helper function that adds a scaler instance for the passed parameter. This can be used to specify
        scalings for the parameter value from the evaluation domain (value that the user/workflow sees) into
        the optimization domain (value that the optimizer works with). Remark: All other valued decorators work
        in the evaluation domain.'''
-    decorateParameter(descriptor, paramname, DECORATOR_SCALING_TO_OPT, scaler)
+    decorateCustom(descriptor, paramname, DECORATOR_SCALING_TO_OPT, scaler)
 
 def decorateScalingFromOpt(descriptor, paramname, scaler):
     '''Helper function that adds a scaler instance for the passed parameter. This can be used to specify
        scalings for the parameter value from the optimization domain (value that the optimizer works with) into
        the evaluation domain (value that the user/workflow sees). Remark: All other valued decorators work
        in the evaluation domain.'''
-    decorateParameter(descriptor, paramname, DECORATOR_SCALING_FROM_OPT, scaler)
+    decorateCustom(descriptor, paramname, DECORATOR_SCALING_FROM_OPT, scaler)
 
 def getDecoration(descriptor, paramname, decoration, must_exist = False, scaleToOpt = False):
     '''Helper function that get a specified decoration form a parameter descriptor.'''

@@ -34,12 +34,8 @@ class DummyOptimizationStrategy(ExhaustiveSearchStrategy):
 
     def defineSearchParameters(self):
         desc = param_helper.generateDescriptor(['x','delay'])
-        param_helper.decorateMinimum(desc, 'x', -200)
-        param_helper.decorateMinimum(desc, 'delay', -10)
-        param_helper.decorateMaximum(desc, 'x', 200)
-        param_helper.decorateMaximum(desc, 'delay', 10)
-        param_helper.decorateParameter(desc, 'x', 'frequency', 4)
-        param_helper.decorateParameter(desc, 'delay', 'frequency', 4)
+        param_helper.decorateParameter(desc, 'x', minimum=-200, maximum=200, frequency=4)
+        param_helper.decorateParameter(desc, 'delay', minimum=-10, maximum=10, frequency=4)
         return desc
 
     def defineName(self):
