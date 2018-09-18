@@ -130,7 +130,7 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
               result[key] = None
     else:
       global logger
-      logger.error("Error in PlmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
+      logger.error("Error in PlmDiceCriterion. Invalid number of relevant artifacts. Number of referenceSelector artefacts: %s. Number of testSelector artefacts: %s. Invalid artefacts: %s" , len(relevantArtefacts['resultSelector']), len(relevantArtefacts['testSelector']), relevantArtefacts)
          
     return result
 
@@ -148,7 +148,7 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
 
     if err == 0:
       global logger
-      logger.error("Error in PlmDiceCriterion when calling plastimatch. Error information: %s", errors.getvalue())
+      logger.error("Error in PlmDiceCriterion when calling plastimatch. Error information: %s", err.getvalue())
     else:
         result = parseDiceResult(output.decode())
 
@@ -199,7 +199,7 @@ class PrecompPlmDiceCriterion(PlmDiceCriterionBase):
                     logger.warning("plmDice result '%s', was not found in parsed statistic file. File: %s", key,
                                    resultPath)
         else:
-            logger.error("Error in PrecompPlmDiceCriterion. Invalid number of relevant artifacts: %s", relevantArtefacts)
+            logger.error("Error in PrecompPlmDiceCriterion. Invalid number of relevant artifacts: %s. Invalid artefacts: %s" , len(relevantArtefacts['resultSelector']), relevantArtefacts)
 
         return result
 
