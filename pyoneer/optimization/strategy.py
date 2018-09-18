@@ -260,13 +260,15 @@ class OptimizationStrategy(object):
         if userWorkflowModifier is None:
             userWorkflowModifier = dict()
 
+        workflowModifier = self._compileWorkflowModifier(userWorkflowModifier = userWorkflowModifier)
+
         result = OptimizationResult(name=label, workflowFile=workflowFile, artefactFile=artefactFile)
 
         optimizer = self.defineOptimizer()
 
 
         evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile,
-                                                        label=label, staticWorkflowModifier = userWorkflowModifier)
+                                                        label=label, staticWorkflowModifier = workflowModifier)
         evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, self._reportCallback)
 
         optimizer.evaluationCallBack = evalScheduler.evaluate
