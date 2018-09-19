@@ -50,6 +50,7 @@ setup(
     entry_points={
         'console_scripts': ['avidconfig=bin.avidconfig.__main__:main',
                             'aviddiag=bin.aviddiag.__main__:main',
+							'avidsplit=bin.avidsplit.__main__:main',
                             'avidpyoneer=bin.avidpyoneer.__main__:main'],
     },
 )

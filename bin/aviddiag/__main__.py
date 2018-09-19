@@ -13,19 +13,8 @@
 
 
 import argparse
-from avid.common.AVIDUrlLocater import getUtilityPath
-from avid.common.AVIDUrlLocater import getAVIDConfigPath
-from avid.common.AVIDUrlLocater import getToolConfigPath
-from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
-from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
 from avid.common.artefact import defaultProps
 from avid.common.artefact.fileHelper import loadArtefactList_xml
-
-from avid.common.osChecker import checkAndCreateDir
-
-import os
-import configparser
-import subprocess
 
 from avid.selectors import SelectorBase, AndSelector
 from avid.selectors import ValiditySelector
