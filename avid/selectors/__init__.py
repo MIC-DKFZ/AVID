@@ -56,6 +56,32 @@ class AndSelector(SelectorBase):
           
     return resultSelection
 
+
+class OrSelector(SelectorBase):
+  '''
+      Special selector that works like an or operation on to child selectors.
+      The selction result of the OrSelector is the merge (no dublicates)
+      of both child selectors.
+  '''
+
+  def __init__(self, selector1, selector2):
+    ''' init '''
+    self._selector1 = selector1
+    self._selector2 = selector2
+
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    selection1 = self._selector1.getSelection(workflowData)
+    selection2 = self._selector2.getSelection(workflowData)
+    resultSelection = selection1
+
+    for item2 in selection2:
+      if not item2 in resultSelection:
+        resultSelection.append(item2)
+
+    return resultSelection
+
+
 from .multiKeyValueSelector import MultiKeyValueSelector
 from .keyValueSelector import KeyValueSelector
 from .keyValueSelector import ActionTagSelector
