@@ -13,7 +13,7 @@
 import unittest
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
-from avid.selectors import AndSelector
+from avid.selectors import AndSelector, OrSelector, KeyValueSelector
 from avid.selectors import ActionTagSelector
 from avid.selectors import CaseSelector
 from avid.selectors import ValidResultSelector
@@ -47,6 +47,50 @@ class TestSelectors(unittest.TestCase):
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a3)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a9)
     self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a10)
+
+  def test_KeyValueSelector(self):
+    selector = KeyValueSelector("timePoint", 0)
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 6)
+    self.assertIn(self.a1, selection)
+    self.assertIn(self.a3, selection)
+    self.assertIn(self.a4, selection)
+    self.assertIn(self.a6, selection)
+    self.assertIn(self.a7, selection)
+    self.assertIn(self.a8, selection)
+
+  def test_KeyValueSelector_negate(self):
+    selector = KeyValueSelector("timePoint", 0, negate=True)
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 2)
+    self.assertIn(self.a2, selection)
+    self.assertIn(self.a5, selection)
+
+  def test_KeyValueSelector_allowstring(self):
+    selector = KeyValueSelector("timePoint", "0")
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 0)
+
+    selector = KeyValueSelector("timePoint", "0", allowStringCompare=True)
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 6)
+    self.assertIn(self.a1, selection)
+    self.assertIn(self.a3, selection)
+    self.assertIn(self.a4, selection)
+    self.assertIn(self.a6, selection)
+    self.assertIn(self.a7, selection)
+    self.assertIn(self.a8, selection)
+
+  def test_KeyValueSelector_allowstring_negate(self):
+    selector = KeyValueSelector("timePoint", "0", negate = True)
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 8)
+
+    selector = KeyValueSelector("timePoint", "0", allowStringCompare=True, negate = True)
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 2)
+    self.assertIn(self.a2, selection)
+    self.assertIn(self.a5, selection)
 
   def test_ActionTagSelector(self):
     selector = ActionTagSelector("Action1")
@@ -96,6 +140,16 @@ class TestSelectors(unittest.TestCase):
     self.assertEqual(len(selection), 2)
     self.assertIn(self.a4, selection)
     self.assertIn(self.a5, selection)
+
+  def test_OrSelector(self):
+    selector = OrSelector(ActionTagSelector("Action1"), CaseSelector("Case2"))
+    selection = selector.getSelection(self.data)
+    self.assertEqual(len(selection), 5)
+    self.assertIn(self.a1, selection)
+    self.assertIn(self.a2, selection)
+    self.assertIn(self.a4, selection)
+    self.assertIn(self.a5, selection)
+    self.assertIn(self.a6, selection)
 
   def test_ValidResultSelector(self):
     selector = ValidResultSelector()

@@ -35,16 +35,16 @@ class KeyValueSelector(SelectorBase):
     
     for entry in workflowData:
       if self.__key in entry:
-        if (not self.__negate and entry[self.__key] == self.__value) or (self.__negate and not entry[self.__key] == self.__value) :
-          outList.append(entry)
-        elif self.__allowStringCompare:
-          validValue = entry[self.__key] is not None\
-          and self.__value is not None\
-          and str(entry[self.__key]) == str(self.__value)
-          
+        if self.__allowStringCompare:
+          validValue = entry[self.__key] is not None \
+                       and self.__value is not None \
+                       and str(entry[self.__key]) == str(self.__value)
+
           if (not self.__negate and validValue) or (self.__negate and not validValue):
             outList.append(entry)
-
+        else:
+          if (not self.__negate and entry[self.__key] == self.__value) or (self.__negate and not entry[self.__key] == self.__value) :
+            outList.append(entry)
       else:
         if self.__value is None:
           #key does not exist, but selection value is None, therefore it is a match
