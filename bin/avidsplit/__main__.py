@@ -97,7 +97,7 @@ def main():
     for i in range(subSize):
       subArtefacts.extend(splitInstances[0])
       splitInstances.pop(0)
-    subFilePath = os.path.join(filePath, fileNameBase+os.path.extsep+str(pos+1)+fileExt)
+    subFilePath = os.path.join(filePath, fileNameBase+os.path.extsep+'sub'+str(pos+1)+fileExt)
     saveArtefactList_xml(subFilePath,subArtefacts)
 
   if len(splitInstances)>0:
