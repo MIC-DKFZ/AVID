@@ -185,7 +185,7 @@ class OptimizationModifierFunctor(object):
          modifier overwrites the strategy modifier.
         @param userWorkflowModifier: Dictionary containing all user specified modifiers. Key is the modifier name. Value is
          its value.
-        @param callback: function that is used by the functor to get the static modifiers. It asumes the same signature
+        @param callback: function that is used by the functor to get the static modifiers. It assumes the same signature
         like OptimizationStrategy.defineStaticWorkflowModifier()'''
         self._userWorkflowModifier = userWorkflowModifier
         self._callback = callback

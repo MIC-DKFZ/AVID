@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class DifferentialEvolution(OptimizerBase):
-    '''Pyoneer wrapper arround the scipy differential evolution optimizer.
+    '''Pyoneer wrapper around the scipy differential evolution optimizer.
       '''
 
     def __init__(self, parameterIDs, minima, maxima, strategy='best1bin', maxiter=1000, popsize=2, tol=0.01,
