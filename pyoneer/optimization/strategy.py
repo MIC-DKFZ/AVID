@@ -28,23 +28,21 @@ logger = logging.getLogger(__name__)
 class EvaluationSchedulingBase(object):
     '''Helper class to run the evaluation of optimization candidates.'''
 
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters, staticWorkflowModifier = None):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
           @param workflowFile: Path to the file that specifies the workflow.
           @param artefactFile: Path to the artefact file.
           @param searchParameters: Search parameter descriptor defined by the strategy for the current optimization.
-          @param staticWorkflowModifier: Workflow modifiers defined by the strategy for the current optimization that
-           should be passed to the workflow but are not subject to optimization.
         '''
         self._sessionDir = sessionDir
         self._evaluationFile = evaluationFile
         self._workflowFile = workflowFile
         self._artefactFile = artefactFile
-        self.reportCandidateResultFunctor = None
         self._searchParameters = searchParameters
-        self._staticWorkflowModifier = staticWorkflowModifier
+        self.reportCandidateResultFunctor = None
+        self.optimizationModifierFunctor = None
 
     def getEvaluationStrategyInstance(self):
         evalclasses = detectEvaluationStrategies(self._evaluationFile)
@@ -98,8 +96,11 @@ class EvaluationSchedulingBase(object):
         '''Internal helper function that merges the static workflow modifier with a given workflow modifier of a concrete
         candidate. If there is a merge conflict candidate overwrites the static modifier.'''
         workflowModifier = candidateModifier
-        if self._staticWorkflowModifier is not None:
-            workflowModifier = {**self._staticWorkflowModifier, **workflowModifier}
+        staticModifier = dict()
+        if self.optimizationModifierFunctor is not None:
+            staticModifier = self.optimizationModifierFunctor(candidateModifier)
+
+        workflowModifier = {**staticModifier, **workflowModifier}
 
         return workflowModifier
 
@@ -119,15 +120,14 @@ class EvaluationSchedulingBase(object):
 
 
 class SimpleEvaluationScheduling(EvaluationSchedulingBase):
-    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters, staticWorkflowModifier = None):
+    def __init__(self, evaluationFile, sessionDir, workflowFile, artefactFile, searchParameters):
         '''@param evaluationFile: String defining the path to the file containing the evaluation
           strategy that shoud be used.
           @param sessionDir Root path for any avid sessions that will be used.
         '''
         EvaluationSchedulingBase.__init__(self, evaluationFile=evaluationFile,sessionDir=sessionDir,
                                           workflowFile=workflowFile, artefactFile=artefactFile,
-                                          searchParameters=searchParameters,
-                                          staticWorkflowModifier = staticWorkflowModifier)
+                                          searchParameters=searchParameters)
 
         self.evalStrategy = self.getEvaluationStrategyInstance()
 
@@ -177,6 +177,29 @@ class OptimizationReportFunctor(object):
         except:
             pass
 
+class OptimizationModifierFunctor(object):
+    '''Helper functor to compile the user and static modifier of an candidate evaluations of the current optimization run.'''
+    def __init__(self, userWorkflowModifier,  callback):
+        ''' Internal helper function that gets the static workflow modifier of the strategy and merges it with workflow
+         modifiers specified by the caller of the function (e.g. user specified modifiers). If there is a merge conflict user
+         modifier overwrites the strategy modifier.
+        @param userWorkflowModifier: Dictionary containing all user specified modifiers. Key is the modifier name. Value is
+         its value.
+        @param callback: function that is used by the functor to get the static modifiers. It asumes the same signature
+        like OptimizationStrategy.defineStaticWorkflowModifier()'''
+        self._userWorkflowModifier = userWorkflowModifier
+        self._callback = callback
+
+    def __call__(self, candidateModifier):
+
+        result = self._userWorkflowModifier
+        strategyModifier = self._callback(candidateModifier)
+
+        if strategyModifier is not None:
+            result = {**strategyModifier, **result}
+
+        return result
+
 
 class OptimizationStrategy(object):
     ''' Base class for Optimization strategies.
@@ -201,7 +224,7 @@ class OptimizationStrategy(object):
         '''This method must be implemented and return an optimizer instance.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
 
-    def defineSearchParameters(self):
+    def defineSearchParameters(self, ):
         '''This method must be implmented and return a parameter descriptor. The descriptor
         specifies the search parameter used by the optimizer.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
@@ -211,22 +234,15 @@ class OptimizationStrategy(object):
          reimplemented to specify the name of the strategy.'''
         return "Unnamed Optimization"
 
-    def defineStaticWorkflowModifier(self):
+    def defineStaticWorkflowModifier(self, candidateSearchParameter = None):
         '''This method returns a dictionary of static parameters/workflow modifiers that
-         are passed to the evaluated workflows.'''
+         are passed to the evaluated workflows.
+         @param candidateSearchParameter Dict containing the search parameter of an candidate. If None, then no candidate
+         is available. This information is passed through to allow strategies to specify modifiers based on search parameters
+         of the candidate.'''
+        return dict()
 
-    def _compileWorkflowModifier(self, userWorkflowModifier):
-        '''Internal helper function that merges the static workflow modifier of the strategy with workflow modifiers
-         specified by the caller of the function (e.g. user specified modifiers). If there is a merge conflict user
-         modifier overwrites the strategy modifier.'''
-        result = userWorkflowModifier
-        strategyModifier = self.defineStaticWorkflowModifier()
-        if strategyModifier is not None:
-            result = {**strategyModifier, **result}
-
-        return result
-
-    def defineEvaluationScheduling(self, workflowFile, artefactFile, label=None, staticWorkflowModifier = None):
+    def defineEvaluationScheduling(self, workflowFile, artefactFile, label=None):
         '''This method returns the scheduling strategy that should be used to evaluate candidates of an optimization
          step. Default implementation is a simple serial evaluation scheduling. Reimplement this method to change
          the scheduling of the strategy.
@@ -235,14 +251,11 @@ class OptimizationStrategy(object):
         if label is None:
             label = self.defineName()
 
-        if staticWorkflowModifier is None:
-            staticWorkflowModifier = dict()
-
         currentsessionDir = os.path.join(self.sessionDir,ensureValidPath(label))
 
         return SimpleEvaluationScheduling(sessionDir=currentsessionDir, evaluationFile=self.evaluationFile,
                                           workflowFile=workflowFile, artefactFile=artefactFile,
-                                          staticWorkflowModifier = staticWorkflowModifier, searchParameters = self.defineSearchParameters())
+                                          searchParameters = self.defineSearchParameters())
 
     def optimize(self, workflowFile, artefactFile, label=None, userWorkflowModifier = None):
         '''Function is called to evaluate a workflow used the passed artfact definitions
@@ -260,18 +273,17 @@ class OptimizationStrategy(object):
         if userWorkflowModifier is None:
             userWorkflowModifier = dict()
 
-        workflowModifier = self._compileWorkflowModifier(userWorkflowModifier = userWorkflowModifier)
-
         result = OptimizationResult(name=label, workflowFile=workflowFile, artefactFile=artefactFile)
 
         optimizer = self.defineOptimizer()
 
-
         evalScheduler = self.defineEvaluationScheduling(workflowFile=workflowFile, artefactFile=artefactFile,
-                                                        label=label, staticWorkflowModifier = workflowModifier)
+                                                        label=label)
         evalScheduler.reportCandidateResultFunctor = OptimizationReportFunctor(result, self._reportCallback)
+        evalScheduler.optimizationModifierFunctor = OptimizationModifierFunctor(userWorkflowModifier, self.defineStaticWorkflowModifier)
 
         optimizer.evaluationCallBack = evalScheduler.evaluate
+
 
         bestresults = optimizer.optimize()
 
@@ -292,7 +304,7 @@ def detectOptimizationStrategies(relevantFile):
 
     result = list()
 
-    moduleName = 'relevant_pyoneer_strategy_search_module' #search_msearchos.path.splitext(os.path.split(relevantFile)[1])[0]
+    moduleName = 'relevant_pyoneer_strategy_search_module'
     stratModule = imp.load_source(moduleName, relevantFile)
 
     for member in inspect.getmembers(stratModule, _predicateOptimizationStrategy):

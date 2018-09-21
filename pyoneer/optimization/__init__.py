@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class OptimizerBase (object):
   '''Base class for optimizer that are used by pyoneer's optimization strategies.
-   Optimizer my be concrete implementations or a wrapper arrund an optimizer to comply the pyoneer optimizer API.
+   Optimizer my be concrete implementations or a wrapper around an optimizer to comply the pyoneer optimizer API.
    To use an optimizer properly ou have to set the property evaluationCallBack
     '''
   

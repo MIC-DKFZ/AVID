@@ -21,15 +21,16 @@ logger = logging.getLogger(__name__)
 
 class ExhaustiveSearchOptimizer (OptimizerBase):
   '''Simple exhaustive search optimizer that samples the search space and returns the
-  best found parameter set.'''
+  best found parameter set. If you define a minima of 1 a maxima of 9 and a frequency of 5, the following
+  positions will be tested (1, 3, 5, 7, 9).'''
   
   def __init__(self, parameterIDs, minima, maxima, frequencies, searchMinimum = True):
     '''Initialization of the optimizer.
     @param parameterIDs: list containg the IDs of the parameters that should be optimized
-    @param minima: list (same ordering than parameterIDs) specifying the minim boundary of the search space.
-    @param maxima: list (same ordering than parameterIDs) specifying the maxima boundary of the search space.
+    @param minima: list (same ordering than parameterIDs) specifying the minima boundary of the search space. The boundary is included.
+    @param maxima: list (same ordering than parameterIDs) specifying the maxima boundary of the search space. The boundary is included.
     @param frequencies: list (same ordering than parameterIDs) specifying the frequencies that used to sample the search space.
-    @param searchMinimum: indicates if the optimizer shoud search a minimum or maximum.
+    @param searchMinimum: indicates if the optimizer should search a minimum or maximum.
     '''
     OptimizerBase.__init__(self, parameterIDs=parameterIDs)
     self._mimima = minima
@@ -58,8 +59,12 @@ class ExhaustiveSearchOptimizer (OptimizerBase):
 
   def deepSearch(self, level, position):
     if level < len(self._mimima):
-      delta = (self._maxima[level] - self._mimima[level])/self._frequencies[level]
-      steps = [self._mimima[level]+delta*x for x in range(0,self._frequencies[level])]
+      try:
+        delta = (self._maxima[level] - self._mimima[level])/(self._frequencies[level]-1)
+      except:
+        delta = 0
+
+      steps = [self._mimima[level]+delta*x for x in range(self._frequencies[level])]
       newposition = list(position)
       for i in steps:
         newposition[level] = i

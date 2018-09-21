@@ -31,7 +31,7 @@ class DummyEvalStrategy(EvaluationStrategy):
         '''This method must be implemented and return an metric instance.'''
         return DefaultMetric([DurationCriterion(), PropertyCriterion('myValue', ActionTagSelector('Result'))],
                              self.sessionDir,
-                             measureWeights={'pyoneer.criteria.PropertyCriterion.myValue.mean':1, 'pyoneer.criteria.DurationCriterion.duration.mean':1},
+                             measureWeights={'pyoneer.criteria.PropertyCriterion.myValue.mean':1},
                              clearSessionDir=self.clearSessionDir)
     def defineName(self):
         return "TestEvaluation"
@@ -39,17 +39,22 @@ class DummyEvalStrategy(EvaluationStrategy):
 class DummyOptimizationStrategy(ExhaustiveSearchStrategy):
 
     def defineSearchParameters(self):
-        desc = param_helper.generateDescriptor(['x','delay'])
-        param_helper.decorateParameter(desc, 'x', minimum=-100, maximum=200)
-        param_helper.decorateParameter(desc, 'delay', minimum=-5, maximum=10)
-        param_helper.decorateCustom(desc, 'x', 'frequency', 4)
-        param_helper.decorateCustom(desc, 'delay', 'frequency', 4)
+        desc = param_helper.generateDescriptor(['x'])
+        param_helper.decorateParameter(desc, 'x', minimum=-200, maximum=200)
+        param_helper.decorateCustom(desc, 'x', 'frequency', 5)
         return desc
 
     def defineName(self):
         return "TestOptimization"
 
-class TestOptimizationStrategy(unittest.TestCase):
+    def defineStaticWorkflowModifier(self, candidateSearchParameter = None):
+        result = dict()
+        result['delay'] = 9999
+        if candidateSearchParameter is not None:
+            result['delay'] = candidateSearchParameter['x']*2
+        return result
+
+class TestOptimizationStrategyStatic(unittest.TestCase):
   def setUp(self):
 
     self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "workflow")
@@ -75,28 +80,10 @@ class TestOptimizationStrategy(unittest.TestCase):
 
     best = result.best[0]
     self.assertEqual('Best',best.label)
-    refParameter = {'delay': 0, 'x': 100}
+    refParameter = {'delay':200, 'x': 100}
     refSVMeasure = 0.0
     self.assertEqual(refParameter, best.workflowModifier)
     self.assertAlmostEqual(refSVMeasure, best.svMeasure, 6)
-
-    loadedResult = readOptimizationResult(self.testResultFile)
-    self.assertEqual(self.testArtefactFile, result.artefactFile)
-    self.assertEqual(self.testWorkflowFile, result.workflowFile)
-    self.assertEqual(loadedResult.valueDescriptions, result.valueDescriptions)
-    self.assertEqual(loadedResult.valueNames, result.valueNames)
-    self.assertEqual(loadedResult.name, result.name)
-    self.assertEqual(len(loadedResult.best), len(result.best))
-    self.assertEqual(len(loadedResult.candidates), len(result.candidates))
-
-
-  def test_StrategyDetection(self):
-    stratClasses = detectOptimizationStrategies(__file__)
-
-    self.assertEqual(len(stratClasses), 1)
-    self.assertEqual(stratClasses[0].__name__, 'DummyOptimizationStrategy')
-    strat = stratClasses[0](__file__, self.sessionDir)
-    self.assertEqual(strat.defineName(), 'TestOptimization')
 
 
 if __name__ == '__main__':
