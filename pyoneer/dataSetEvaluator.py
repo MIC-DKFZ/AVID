@@ -70,8 +70,8 @@ class DataSetEvaluator (object):
       
   def evaluate(self, resultData):
     '''Evaluates the passed data.
-    @param resultData: artefact list that contains the evaluation relevant of the
-    workflow.
+    @param resultData: artefact list that contains the evaluation relevant artefacts
+     of the workflow.
     @return: Returns a tuple. First element is the result for the whole data set
     Second element is a result dictionary for each instance. The key of the dict
     is a EvalInstanceDescriptor instance, the value is a pooled dictionary of
