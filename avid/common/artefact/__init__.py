@@ -104,7 +104,7 @@ class Artefact(object):
         elif key in self._additionalProps:
             return self._additionalProps[key]
 
-        raise KeyError()
+        raise KeyError('Unkown artefact key was requested. Key: {}; Artefact: {}'.format(key, self))
 
     def __setitem__(self, key, value):
         with self.lock:

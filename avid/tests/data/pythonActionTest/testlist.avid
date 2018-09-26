@@ -10,7 +10,7 @@
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case_1</avid:property>
-		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
 		<avid:property key="actionTag">stats</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="objective">b</avid:property>
