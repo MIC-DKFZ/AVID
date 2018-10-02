@@ -61,12 +61,12 @@ class mapRAction(CLIActionBase):
 
     return name
 
-  def _hasDICOMputput(self):
+  def _hasDICOMinput(self):
     return self._outputExt.lower() =="dcm" or self._outputExt.lower() == "ima"
 
   def _indicateOutputs(self):
     userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT}
-    if self._hasDICOMputput():
+    if self._hasDICOMinput():
       userDefinedProps[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_DCM
 
     self._resultArtefact = self.generateArtefact(self._inputImage,
@@ -108,7 +108,7 @@ class mapRAction(CLIActionBase):
     if not self._paddingValue is None:
         content += ' -p %s'%self._paddingValue
     
-    if self._hasDICOMputput():
+    if self._hasDICOMinput():
       content += ' --seriesReader dicom'
 
     return content
