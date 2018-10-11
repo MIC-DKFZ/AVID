@@ -126,12 +126,19 @@ class DefaultMetric (object):
 
     gmeasure = dict()
     imeasure = dict()
+    artefacts = list()
+
     try:
       artefacts = loadArtefactList_xml(sessionFile, True, self.sessionDir)
-      gmeasure, imeasure = evaluator.evaluate(artefacts)
     except:
       logger.debug('Error. Cannot load artefacts. Evaluation candidate workflow might have failed.')
     
+    try:
+      gmeasure, imeasure = evaluator.evaluate(artefacts)
+    except BaseException as e:
+      logger.error('Error. Cannot evaluate artefacts. Reason: {}'.format(str(e)))
+    except:
+      logger.error('Unkown Error. Cannot evaluate artefacts.')
 
        
     if self._clearSessionDir:

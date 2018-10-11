@@ -24,7 +24,7 @@ class SelectorBase(object):
   def getSelection(self, workflowData):
     '''Filters the given list of entries and returns all selected entries'''
     return workflowData #default just returns everything.
-     
+
   def __add__(self,other):
     '''Creates an AndSelector with self and other and returns it'''
     andSelector = AndSelector(self,other)
@@ -80,6 +80,21 @@ class OrSelector(SelectorBase):
         resultSelection.append(item2)
 
     return resultSelection
+
+
+class LambdaSelector(SelectorBase):
+  '''
+      Special selector that takes a lambda/function object and calls it to
+      make the selection.
+  '''
+
+  def __init__(self, selectionFunction):
+    ''' init '''
+    self._selectionFunction = selectionFunction
+
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    return self._selectionFunction(workflowData)
 
 
 from .multiKeyValueSelector import MultiKeyValueSelector
