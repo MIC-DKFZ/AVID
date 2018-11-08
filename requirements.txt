@@ -1,1 +1,1 @@
-pyhtml==0.7.0 [pyoneer]
+pyhtml==0.7.0

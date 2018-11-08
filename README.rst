@@ -6,12 +6,15 @@ Description
 TODO
 
 Python requirements
------------------
+-------------------
+You must use python 3.x
+
 Add Python directory and python/scripts to your Windows PATH as otherwise, neither python,
 nor avidconfig will be found!
 
 ## install dependencies
-(only needed for development environments that should be well defined; normal user can skipp this step)
+This is only needed if 1) you want to use the avid pyoneer package and 2) for development environments that should be well defined; normal user can skip this step.
+
 either use:
 ```
 pip install -r requirements.txt
@@ -61,6 +64,9 @@ use
 Please have in mind that python/scripts has to be in PATH!
 
 ## Get the tools (for the AVID actions)
+REMARK: This tools feature is currently only supported for Windows systems.
+        For Linux and MacOS you have to build the tools directly on your machine.
+
 You have two choices:
 1. "install" the tools. This means that you will get copies to the tools, but
 it is not connected to any versioning of the version control system the tools
@@ -79,8 +85,6 @@ use
 ```
   avidconfig tools install
 ```
-
-
 
 ###update all tools specified by your AVID distribution
 use
