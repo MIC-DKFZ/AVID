@@ -86,7 +86,7 @@ class DefaultMetric (object):
 
     useShell = not osChecker.isWindows()
 
-    artefacts = None
+    artefacts = list(dict(),)
 
     for runCount in range(self._nrOfRetries+1):
       if runCount>0:

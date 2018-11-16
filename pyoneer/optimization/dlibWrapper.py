@@ -85,9 +85,4 @@ class FindMinGlobalOptimizer(OptimizerBase):
 
         position, value = find_min_global(self._evalCall, self._mimima, self._maxima, self._maxiter)
 
-        result = dict()
-
-        for top in self._top5:
-            result[top.label] = (top.workflowModifier, top)
-        return result
         return {'Best':(self._best,self._bestResult)}
