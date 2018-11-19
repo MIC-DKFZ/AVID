@@ -19,6 +19,7 @@ import os
 import sys
 
 from pyoneer import htmlreport
+from pyoneer import csvexport
 from pyoneer.evaluation import detectEvaluationStrategies
 from pyoneer.evaluationResult import writeEvaluationResult, writeOptimizationResult, readOptimizationResult, \
     readEvaluationResult
@@ -58,10 +59,7 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
             if len(args_dict['csv'])>0:
                 csvPath = args_dict['csv']
 
-            report = htmlreport.generateEvaluationReport(result)
-
-            with open(csvPath, 'w') as fileHandle:
-                fileHandle.write(report)
+            csvexport.generateEvaluationCSV(result, csvPath)
 
 
 class InterimReporter(object):
@@ -131,12 +129,24 @@ def doReport(inputFilePath, resultPath, args_dict):
     except:
         try:
             result = readEvaluationResult(inputFilePath)
-            report = htmlreport.generateEvaluationReport(result)
 
-            with open(resultPath, 'w') as fileHandle:
-                fileHandle.write(report)
+            csvPath = resultPath
+            csvOnly = False
 
-            validReport = True
+            if args_dict['csv'] is not None:
+                if len(args_dict['csv'])>0:
+                    csvPath = args_dict['csv']
+                else:
+                    csvOnly = True
+
+                csvexport.generateEvaluationCSV(result, csvPath)
+
+            if not csvOnly:
+                report = htmlreport.generateEvaluationReport(result)
+                with open(resultPath, 'w') as fileHandle:
+                    fileHandle.write(report)
+                validReport = True
+
         except:
             logging.error('Cannot convert result file to report. Seems to be no valid evaluation or optimization result file. Invalid file: "%s".',
                          inputFilePath)
