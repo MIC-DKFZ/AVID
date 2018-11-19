@@ -21,6 +21,9 @@ class EvalInstanceDescriptor (object):
     It use used to lable/identify the evaluation measurments for instances'''
   
   def __init__(self, definingValues, ID = None):
+    '''@param definingValues Dictionary that containes the values that uniquely define/descripe an instance.
+       @param ID ID of the instance measurement that is labeled with this EvalInstanceDescriptor. If no ID is specified
+        (the default) an UID will generated.'''
     self._definingValues = definingValues
     
     self._definingStr = str()
@@ -58,6 +61,14 @@ class EvalInstanceDescriptor (object):
 
   def __str__(self):
     return '(%s)' % (self._definingValues)
+
+  def keys(self):
+    return self._definingValues.keys()
+
+  def __getitem__(self, key):
+    if key in self._definingValues:
+      return self._definingValues[key]
+    raise KeyError('Unkown defining value key was requested. Key: {}; self: {}'.format(key, self))
 
 
 class EvaluationStrategy(object):

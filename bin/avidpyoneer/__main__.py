@@ -53,6 +53,17 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
             if args_dict['noDisplay'] is not True:
                 webbrowser.open('file:///'+reportPath)
 
+        if args_dict['csv'] is not None:
+            csvPath = resultPath + os.extsep + 'csv'
+            if len(args_dict['csv'])>0:
+                csvPath = args_dict['csv']
+
+            report = htmlreport.generateEvaluationReport(result)
+
+            with open(csvPath, 'w') as fileHandle:
+                fileHandle.write(report)
+
+
 class InterimReporter(object):
     def __init__(self, resultPath, reportPath = None):
         self._resultPath = resultPath
@@ -154,6 +165,7 @@ def main():
     parser.add_argument('--noDisplay', '-y', action='store_true', help = 'Indicates that generated html report should just be stored and not displayed (e.g. when AVID pyoneer runs on a server terminal).')
     parser.add_argument('--interim', '-i', action='store_true', help = 'Indicates already interim results of the optimization process should be reported. Meaning results will be stored also after each candidate evaluation.')
     parser.add_argument('--modifier', '-m', action='append', nargs=2, metavar=('key', 'value'), help='Allows to pass workflow modifier to the evaluation when using "avidpyoneer evalute" or "avidpyoneer optimize". The key is assumed to be the argument name (--<key>) and the value content will be forwarded to the workflow under evaluation.')
+    parser.add_argument('--csv', '-c', nargs='?', const='', default=None, help = 'Generates a csv (comma seperated value) file out of the result. In case of evaluation it contains all instance results. In case of an optimiztion it containes the optimization process. You may use it with any action (evaluate, optimize, report). If no explicit path is specified it will use the result path with an added csv extension.')
 
     args_dict = vars(parser.parse_args())
 
