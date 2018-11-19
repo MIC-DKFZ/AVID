@@ -14,7 +14,8 @@
 import os
 import csv
 from avid.common import osChecker
-from pyoneer.htmlreport import getAllInstanceMeasurementValueKeys, getValueDisplayName
+from pyoneer.htmlreport import getAllInstanceMeasurementValueKeys, getValueDisplayName, getMeasurementValueKeys, \
+    getWorkflowModKeys
 
 
 def _generateInstanceHeader(result, csvwriter):
@@ -22,7 +23,7 @@ def _generateInstanceHeader(result, csvwriter):
 
     header = []
     if len(result.instanceMeasurements) > 0:
-        eid = result.instanceMeasurements.keys()[0]
+        eid = list(result.instanceMeasurements)[0]
         for eidKey in sorted(eid.keys()):
             header.append(eidKey)
 
@@ -58,3 +59,42 @@ def generateEvaluationCSV(result, csvFilePath):
 
         _generateInstanceHeader(result, writer)
         _generateInstanceContent(result, writer)
+
+
+def generateOptimizationCSV(result, csvFilePath):
+    '''generates a CSV out of the optimization results (all candidates overview) and stores it as a csv file'''
+    osChecker.checkAndCreateDir(os.path.split(csvFilePath)[0])
+    with open(csvFilePath, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
+
+        ms = result.candidates
+        tableID = 1
+
+        vkeys = getMeasurementValueKeys(ms, onlyWeigted=True)
+        wmkeys = getWorkflowModKeys(ms)
+
+        tablecontent = list()
+        headers = ['Label', 'SV score']
+
+        for wmkey in wmkeys:
+            headers.append(wmkey)
+
+        for vkey in vkeys:
+            headers.append(getValueDisplayName(result,vkey))
+
+        writer.writerow(headers)
+
+        for m in ms:
+            rowcontent = [m.label]
+            rowcontent.append(m.svMeasure)
+
+            for wmkey in wmkeys:
+                rowcontent.append(m.workflowModifier[wmkey])
+
+            for vkey in vkeys:
+                try:
+                    rowcontent.append(m.measurements[vkey])
+                except:
+                    rowcontent.append('N/A')
+
+            writer.writerow(rowcontent)

@@ -58,7 +58,6 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
             csvPath = resultPath + os.extsep + 'csv'
             if len(args_dict['csv'])>0:
                 csvPath = args_dict['csv']
-
             csvexport.generateEvaluationCSV(result, csvPath)
 
 
@@ -109,6 +108,12 @@ def doOptimization(stratFile, resultPath, workflowPath, artefactPath, label, ses
 
             if args_dict['noDisplay'] is not True:
                 webbrowser.open('file:///'+reportPath)
+
+        if args_dict['csv'] is not None:
+            csvPath = resultPath + os.extsep + 'csv'
+            if len(args_dict['csv'])>0:
+                csvPath = args_dict['csv']
+            csvexport.generateOptimizationCSV(result, csvPath)
 
 
 def doReport(inputFilePath, resultPath, args_dict):

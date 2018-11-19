@@ -81,7 +81,7 @@ def getAllInstanceMeasurementValueKeys(ims):
     return list(sorted(vkeys))
 
 def getMeasurementValueKeys(ms, onlyWeigted = False):
-    '''Returns the value keys of the passed measurement dictionary. Funxtion assumes that all measurements have the
+    '''Returns the value keys of the passed measurement dictionary. Function assumes that all measurements have the
     same values and only checks the first elmeent.'''
     try:
         m = ms[0]
