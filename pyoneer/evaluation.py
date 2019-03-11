@@ -139,3 +139,29 @@ def detectEvaluationStrategies(relevantFile):
     result.append(member[1])
 
   return result
+
+
+def performEvaluation(stratFile, workflowPath, artefactPath, label, sessionPath, workflowModifier = None, clearSession=True):
+    '''Helper/convenience function that performes an evaluation with the given inputs and returns an evaluation result instance.
+    @param stratFile: String that defines the path to the strategy file that specifies the evaluation strategy that
+    should be used.
+    @param workflowPath: String that defines the path to AVID workflow script that should be evaluated.
+    @param artefactPath: String that defines the path to AVID artefact file that should be used to evaluate the workflow.
+    @param label: Label that should be used by the metric when evaluating the workflow file and generating the result information.
+    @param sessionPath: String that defines the path where the (interim) results of the evaluated workflow should be stored.
+    @param workflowModifier: Dict that defines the modifier for the workflow.
+    They will be passed as arguments to the workflow execution. Key is the argument
+    name and the dict value the argument value. The default implementation will
+    generate an cl argument signature like --<key> <value>. Thus {'a':120} will
+    be "--a 120". To change this behavior, you ave to chose an appropriated metric in your evaluation strategy.
+    @param clearSession: Indicates if the directory indicated by sessionPath should removed after evaluation or should be keept.
+    '''
+    stratClasses = detectEvaluationStrategies(stratFile)
+
+    result = None
+    if len(stratClasses)>0:
+        result = stratClasses[0](sessionPath, clearSession).evaluate(workflowFile=workflowPath,
+                                                                      artefactFile=artefactPath, label=label,
+                                                                      workflowModifier= workflowModifier)
+
+    return result

@@ -20,45 +20,43 @@ import sys
 
 from pyoneer import htmlreport
 from pyoneer import csvexport
-from pyoneer.evaluation import detectEvaluationStrategies
+from pyoneer.evaluation import performEvaluation
 from pyoneer.evaluationResult import writeEvaluationResult, writeOptimizationResult, readOptimizationResult, \
     readEvaluationResult
 from pyoneer.optimization.strategy import detectOptimizationStrategies
 import webbrowser
 
 def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessionPath, args_dict):
-    stratClasses = detectEvaluationStrategies(stratFile)
-
     workflowMod = None
     if args_dict['modifier'] is not None:
         workflowMod = dict()
         for mod in args_dict['modifier']:
             workflowMod[mod[0]] = mod[1]
 
-    for stratClass in stratClasses:
-        result = stratClass(sessionPath, not args_dict['keepArtefacts']).evaluate(workflowFile=workflowPath,
-                                                                                  artefactFile=artefactPath, label=label,
-                                                                                  workflowModifier= workflowMod)
-        writeEvaluationResult(resultPath, result)
+    result = performEvaluation(stratFile=stratFile, workflowPath=workflowPath, artefactPath=artefactPath, label=label,
+                               sessionPath=sessionPath, workflowModifier=workflowMod,
+                               clearSession=not args_dict['keepArtefacts'])
 
-        if args_dict['report'] is not None:
-            reportPath = resultPath + os.extsep + 'html'
-            if len(args_dict['report'])>0:
-                reportPath = args_dict['report']
+    writeEvaluationResult(resultPath, result)
 
-            report = htmlreport.generateEvaluationReport(result)
+    if args_dict['report'] is not None:
+        reportPath = resultPath + os.extsep + 'html'
+        if len(args_dict['report'])>0:
+            reportPath = args_dict['report']
 
-            with open(reportPath, 'w') as fileHandle:
-                fileHandle.write(report)
+        report = htmlreport.generateEvaluationReport(result)
 
-            if args_dict['noDisplay'] is not True:
-                webbrowser.open('file:///'+reportPath)
+        with open(reportPath, 'w') as fileHandle:
+            fileHandle.write(report)
 
-        if args_dict['csv'] is not None:
-            csvPath = resultPath + os.extsep + 'csv'
-            if len(args_dict['csv'])>0:
-                csvPath = args_dict['csv']
-            csvexport.generateEvaluationCSV(result, csvPath)
+        if args_dict['noDisplay'] is not True:
+            webbrowser.open('file:///'+reportPath)
+
+    if args_dict['csv'] is not None:
+        csvPath = resultPath + os.extsep + 'csv'
+        if len(args_dict['csv'])>0:
+            csvPath = args_dict['csv']
+        csvexport.generateEvaluationCSV(result, csvPath)
 
 
 class InterimReporter(object):
