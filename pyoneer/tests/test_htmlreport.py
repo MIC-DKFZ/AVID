@@ -15,11 +15,19 @@ import os
 import shutil
 import unittest
 
-import pyoneer.htmlreport as htmlreport
 from avid.common.osChecker import checkAndCreateDir
 from pyoneer.evaluationResult import readEvaluationResult as readEvaluationResult, readOptimizationResult
 
 
+def pyhtmlIsAvailable():
+  try:
+    import pyhtml
+    return True
+  except:
+    return False
+
+
+@unittest.skipIf(pyhtmlIsAvailable() is False, 'pyhtml is not installed on the system.')
 class TestHTMLreport(unittest.TestCase):
   def setUp(self):
 
@@ -47,6 +55,7 @@ class TestHTMLreport(unittest.TestCase):
         self.assertEqual(ref, test)
 
   def test_generateEvaluationReport(self):
+    import pyoneer.htmlreport as htmlreport
     result = readEvaluationResult(self.testEvalResultFile)
     report = htmlreport.generateEvaluationReport(result)
     resultFile = os.path.join(self.sessionDir, "test.html")
@@ -57,6 +66,7 @@ class TestHTMLreport(unittest.TestCase):
     self.assert_file_content(resultFile, self.testEvalHTMLRefFile)
 
   def test_generateOptimizationReport(self):
+    import pyoneer.htmlreport as htmlreport
     result = readOptimizationResult(self.testOptResultFile)
     report = htmlreport.generateOptimizationReport(result)
     resultFile = os.path.join(self.sessionDir, "test.html")

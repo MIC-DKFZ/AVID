@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 from setuptools import Command as SetupCommand
 import os
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 with open('LICENSE') as f:

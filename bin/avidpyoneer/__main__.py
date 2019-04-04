@@ -18,7 +18,6 @@ import os
 
 import sys
 
-from pyoneer import htmlreport
 from pyoneer import csvexport
 from pyoneer.evaluation import performEvaluation
 from pyoneer.evaluationResult import writeEvaluationResult, writeOptimizationResult, readOptimizationResult, \
@@ -44,6 +43,7 @@ def doEvaluation(stratFile, resultPath, workflowPath, artefactPath, label, sessi
         if len(args_dict['report'])>0:
             reportPath = args_dict['report']
 
+        from pyoneer import htmlreport
         report = htmlreport.generateEvaluationReport(result)
 
         with open(reportPath, 'w') as fileHandle:
@@ -99,6 +99,7 @@ def doOptimization(stratFile, resultPath, workflowPath, artefactPath, label, ses
         writeOptimizationResult(resultPath, result)
 
         if args_dict['report'] is not None:
+            from pyoneer import htmlreport
             report = htmlreport.generateOptimizationReport(result)
 
             with open(reportPath, 'w') as fileHandle:
@@ -115,6 +116,7 @@ def doOptimization(stratFile, resultPath, workflowPath, artefactPath, label, ses
 
 
 def doReport(inputFilePath, resultPath, args_dict):
+    from pyoneer import htmlreport
 
     if args_dict['report'] is not None:
         logging.warn("Report flag is ignored when using the report command.")

@@ -23,8 +23,9 @@ from pyoneer.optimization import OptimizerBase
    optimization domain (value that the optimizer works with). If one of both decorators are not set "no scaling"
    can be assumed. DECORATOR_SCALING_TO_OPT scales into the optimization domain. DECORATOR_SCALING_FROM_OPT scales
    from the optimization domain back to the evaluation domain.'''
-DECORATOR_MINIMUM = 'minimum'
-DECORATOR_MAXIMUM = 'maximum'
+DECORATOR_DOMAIN = 'domain'
+DECORATOR_DATA = 'data'
+DECORATOR_TYPE = 'type'
 DECORATOR_START = 'start'
 DECORATOR_SCALING_TO_OPT = 'scaling_to_opt'
 DECORATOR_SCALING_FROM_OPT = 'scaling_from_opt'
@@ -72,11 +73,21 @@ def decorateCustom(descriptor, paramname, decorator, value):
 
 def decorateMinimum(descriptor, paramname, minimum):
     '''Helper function that adds a minimum for the passed parameter.'''
-    decorateCustom(descriptor, paramname, DECORATOR_MINIMUM, minimum)
+    data = getDecoration(descriptor=descriptor, paramname=paramname, decoration=DECORATOR_DATA)
+    if data is None:
+        data = [minimum, None]
+    else:
+        data[0] = minimum
+    decorateCustom(descriptor=descriptor, paramname=paramname, decorator=DECORATOR_DATA, value=data)
 
 def decorateMaximum(descriptor, paramname, maximum):
     '''Helper function that adds a maximum for the passed parameter.'''
-    decorateCustom(descriptor, paramname, DECORATOR_MAXIMUM, maximum)
+    data = getDecoration(descriptor=descriptor, paramname=paramname, decoration=DECORATOR_DATA)
+    if data is None:
+        data = [None, maximum]
+    else:
+        data[1] = maximum
+    decorateCustom(descriptor=descriptor, paramname=paramname, decorator=DECORATOR_DATA, value=data)
 
 def decorateStart(descriptor, paramname, start):
     '''Helper function that adds a start for the passed parameter.'''
@@ -121,11 +132,29 @@ def getDecoration(descriptor, paramname, decoration, must_exist = False, scaleTo
 
 def getMinimum(descriptor, paramname, must_exist = False, scaleToOpt = False):
     '''Helper function that gets the minimum for the passed parameter. If parameter or decoration is not defined, None will be returned.'''
-    return getDecoration(descriptor, paramname, DECORATOR_MINIMUM, must_exist, scaleToOpt)
+    data = getDecoration(descriptor, paramname, DECORATOR_DATA, must_exist)
+    if data[0] is None:
+        raise ValueError(
+            'Decorated parameter ({}) is not part of the descriptor {} or does not have a minimum.'.format(
+                paramname, descriptor))
+    else:
+        if scaleToOpt:
+            return getScalingToOpt(descriptor,paramname)(data[0])
+        else:
+            return data[0]
 
 def getMaximum(descriptor, paramname, must_exist = False, scaleToOpt = False):
     '''Helper function that gets the maximum for the passed parameter. If parameter or decoration is not defined, None will be returned.'''
-    return getDecoration(descriptor, paramname, DECORATOR_MAXIMUM, must_exist, scaleToOpt)
+    data = getDecoration(descriptor, paramname, DECORATOR_DATA, must_exist)
+    if data[1] is None:
+        raise ValueError(
+            'Decorated parameter ({}) is not part of the descriptor {} or does not have a maximum.'.format(
+                paramname, descriptor))
+    else:
+        if scaleToOpt:
+            return getScalingToOpt(descriptor,paramname)(data[1])
+        else:
+            return data[1]
 
 def getStart(descriptor, paramname, must_exist = False, scaleToOpt = False):
     '''Helper function that gets the start for the passed parameter. If parameter or decoration is not defined, None will be returned.'''
@@ -138,9 +167,6 @@ def getMinimumBoundary(descriptor, paramname, must_exist = False, scaleToOpt = F
 def getMaximumBoundary(descriptor, paramname, must_exist = False, scaleToOpt = False):
     '''Helper function that gets the boundary for the passed parameter. If parameter or decoration is not defined, None will be returned.'''
     return getDecoration(descriptor, paramname, DECORATOR_MAXIMUM_BOUNDARY, must_exist, scaleToOpt)
-
-def UnityScaling(val):
-    return val
 
 def getScalingToOpt(descriptor, paramname):
     '''Helper function that gets the scaler instance for the passed parameter. If parameter or decoration is not defined,
@@ -157,6 +183,9 @@ def getScalingFromOpt(descriptor, paramname):
         return getDecoration(descriptor, paramname, DECORATOR_SCALING_FROM_OPT, True)
     except:
         return UnityScaling
+
+def UnityScaling(val):
+    return val
 
 def Log10Scaling(val):
     '''Scaler that transforms with a log base 10 into result space.'''
