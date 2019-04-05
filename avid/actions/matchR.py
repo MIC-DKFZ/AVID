@@ -113,8 +113,9 @@ class matchRAction(CLIActionBase):
       content += ' --output "' + resultPath + '"'
       if self._algorithmParameters:
         content += ' --parameters'
-      for key, value in self._algorithmParameters.items():
-        content += ' "' + key + '=' + value + '"'
+        for key, value in self._algorithmParameters.items():
+          content += ' "' + key + '=' + value + '"'
+        content += ' "WorkingDirectory=' + os.path.join(self._session._rootPath, artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) +'"'
       if self._movingMask:
         movingMaskURL = artefactHelper.getArtefactProperty(self._movingMask, artefactProps.URL)
         content += ' --moving-mask "' + movingMaskURL + '"'
