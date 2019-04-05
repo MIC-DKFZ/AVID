@@ -41,6 +41,7 @@ class HyppopyOptimizer(OptimizerBase):
         self._hySolver = solver
         self._currentCandidateNR = 0
         self._top5 = list()
+        self._lastEvalResult = None
 
         if config is None and ( project is None or solver is None):
             raise ValueError(
@@ -62,7 +63,9 @@ class HyppopyOptimizer(OptimizerBase):
         results = self._evaluate(candidates={label: parameters})
         self._currentCandidateNR += 1
 
-        resultSV = results[label].svMeasure
+        lastEvalResult = results[label]
+        resultSV = lastEvalResult.svMeasure
+
 
         weakestPos = None
         weakestSV = float('-inf')
@@ -72,11 +75,12 @@ class HyppopyOptimizer(OptimizerBase):
                 weakestSV = top[1].svMeasure
 
         if weakestSV>resultSV or len(self._top5)==0:
-            self._top5.append([parameters, results[label]])
+            self._top5.append([parameters, lastEvalResult])
 
         if len(self._top5)>5:
             del(self._top5[weakestPos])
 
+        self._lastEvalResult = lastEvalResult
         return resultSV
 
     def _optimize(self):
@@ -93,5 +97,10 @@ class HyppopyOptimizer(OptimizerBase):
             if params == best:
                 evalResult = result
                 break
+
+        if evalResult is None:
+            logger.info("Best parameter cannot be found in the stored evaluation results; propably guessed by the solver. Trigger evaluation of the given best parameters.")
+            self._blackBoxCall(best)
+            evalResult = self._lastEvalResult
 
         return {'Best': (best, evalResult)}
