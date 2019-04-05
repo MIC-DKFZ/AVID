@@ -43,9 +43,6 @@ class DummyOptimizationStrategy(HyppopyGridSearchStrategy):
         param_helper.decorateParameter(desc, 'x', minimum=-100, maximum=200, frequency = 4, domain = 'uniform', type = 'float')
         param_helper.decorateParameter(desc, 'delay', minimum=-5, maximum=10, frequency = 4, domain = 'uniform', type = 'float')
 
-        #TODO Remove interim test code
-        desc['x']['data'].append(4)
-        desc['delay']['data'].append(4)
         return desc
 
     def defineName(self):

@@ -43,10 +43,10 @@ class HyppopyPoolStrategy(OptimizationStrategy):
 
 
 class HyppopyGridSearchStrategy(HyppopyPoolStrategy):
-    ''' Base class for strategies that uses hyppopy (and its solver pool) to optimize a workflow.
+    ''' Class for strategies that uses hyppopy (and its solver pool) to optimize a workflow via gridsearch.
         Implement defineSearchParameters() to generate the "hyperparameter" section of the hyppopy
         config dict.
-        Implement defineSolverSettings() to generate the "settings" section of the hyppopy
+        Reimplement defineSolverSettings() to generate the "settings" section of the hyppopy
         config dict.
     '''
 
@@ -58,3 +58,20 @@ class HyppopyGridSearchStrategy(HyppopyPoolStrategy):
 
     def defineName(self):
         return "HyppopyGridSearchStrategy"
+
+class HyppopyHyperoptStrategy(HyppopyPoolStrategy):
+    ''' Class for strategies that uses hyppopy (and its solver pool) to optimize a workflow via Hyperopt.
+        Implement defineSearchParameters() to generate the "hyperparameter" section of the hyppopy
+        config dict.
+        Reimplement defineSolverSettings() to generate the "settings" section of the hyppopy
+        config dict.
+    '''
+
+    def defineSolverSettings(self):
+        '''Returns the "settings" section/sub dict of the hyppopy config dict. This result will be used to properly
+        configure the solver.
+        '''
+        return {'custom':{'use_solver': 'hyperopt'}}
+
+    def defineName(self):
+        return "HyppopyHyperoptStrategy"
