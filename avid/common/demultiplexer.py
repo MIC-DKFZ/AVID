@@ -65,7 +65,7 @@ def splitArtefact(inputArtefacts, *splitArgs):
     /properties. The function will return a list of splitted artefact lists.
      @param splitArgs the function assumes that all unkown arguments passed to the function should be handeled as split
      properties.'''
-    splittedA = [inputArtefacts]
+    splittedA = [inputArtefacts.copy()]
 
     for splitProperty in splitArgs:
         newSplits = list()

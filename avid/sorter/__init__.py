@@ -23,7 +23,7 @@ class BaseSorter(object):
     '''
     does nothing
     '''
-    return selection
+    return selection.copy()
   
   
 from .keyValueSorter import KeyValueSorter
