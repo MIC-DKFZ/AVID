@@ -746,6 +746,22 @@ class ActionBatchGenerator(object):
 
         return artefacts
 
+    def _generateDependencySequence(self):
+        names = self._additionalInputSelectors.keys()
+        #Get all inputs that do not depend on others and put it directly in the list
+        result = [name for name in names if name not in self._dependentLinker]
+        leftNames = self._dependentLinker.keys()
+
+        while len(leftNames)>0:
+            masterName = None
+            for leftName in leftNames:
+                masterName = self._dependentLinker[leftName][0]
+                if masterName in result:
+                    result.append(leftName)
+                    leftNames.remove(leftName)
+                    break
+            raise RuntimeError('Error in dependent linker definition. Seems to be invald or containes cyclic dependencies. Left dependencies: {}'.format(leftNames))
+        return result
 
     def generateActions(self):
         ''' Method that generates all actions based on the given state of the session and configuration nof self.
@@ -758,12 +774,44 @@ class ActionBatchGenerator(object):
             additionalInputs[key] = self._prepareInputArtifacts(inputName=key)
 
         actions = list()
+        depSequence = self._generateDependencySequence()
 
-hier weiter, anleine an PythonNAryBatchAction nehmen:
-    - schleife über alle primaries
-    - für jeden primary erstmal die linked additionals erzeugen für alle additional inputs
-    - dependency sequence für alle additionals erzeugen (erst die die kein dependentLinker haben und dann so dass die eigene dependency immer zu erst kommt
-    - jetzt in die recursion gehen. zusätzlich aber im else zweig noch falls es für
+        for (pos, primarySplit) in enumerate(primaryInput):
+            linkedAdditionals = dict()
+            for additionalKey in additionalInputs:
+                linkedAdditionals[additionalKey] = self._linker[additionalKey].getLinkedSelection(pos, primaryInput,
+                                                                              additionalInputs[additionalKey])
+            actions.extend(self._generateActions_recursive({self._primaryAlias: primarySplit}, None, linkedAdditionals.copy(), depSequence))
 
         return actions
 
+    def _generateActions_recursive(self, relevantAdditionalInputs, relevantAddtitionalInputPos, additionalInputs, leftInputNames):
+        actions = list()
+        if relevantAddtitionalInputPos is None:
+            relevantAddtitionalInputPos = dict()
+
+        if leftInputNames is None or len(leftInputNames) == 0:
+            singleActionParameters = {**self._singleActionParameters, **relevantAdditionalInputs}
+            action = self._actionClass(**singleActionParameters)
+            actions.append(action)
+        else:
+            currentName = leftInputNames[0]
+            currentInputs = additionalInputs[currentName]
+
+            newLeftNames = leftInputNames[1:]
+            newRelInputs = relevantAdditionalInputs.copy()
+            newRelPos = relevantAddtitionalInputPos.copy()
+            newAdditionalInputs = additionalInputs.copy()
+
+            if currentName in self._dependentLinker:
+                sourceName = self._dependentLinker[currentName][0]
+                linker = self._dependentLinker[currentName][1]
+                currentInputs = linker.getLinkedSelection(relevantAddtitionalInputPos[sourceName], additionalInputs[sourceName], currentInputs)
+                newAdditionalInputs[currentName] = currentInputs
+
+            for (pos,aSplit) in enumerate(currentInputs):
+                newRelPos[currentName] = pos
+                newRelInputs[currentName] = aSplit
+                actions.extend(self._generateActions_recursive(newRelInputs, newRelPos, newAdditionalInputs, newLeftNames))
+
+        return actions
