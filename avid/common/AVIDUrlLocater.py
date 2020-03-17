@@ -159,7 +159,10 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
                   
       if os.path.isfile(execURL):
         returnURL = execURL        
-   
+
+  if returnURL is None:
+    logger.error('Action "%s" seems not to have a configured tool. Please use avidconfig and see the readme.md for information how to do it.', actionID)
+
   if not os.path.exists(returnURL):
     logger.debug('Found executable URL for action "%s" seems to be invalid. Found URL: %s', actionID, returnURL)
   
