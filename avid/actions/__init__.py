@@ -634,7 +634,7 @@ class ActionBatchGenerator(object):
           (except itself = key of the value) or the primary input. The second element is the linker instance that should
           be used. You may combine linker and dependentLinker specifications for any additional input.
           To associate primary input as master use PRIMARY_INPUT_KEY as value.
-          @param relevanceSelector: Selector used to specify for all inputs an actions what is relevant. If not set
+          @param relevanceSelector: Selector used to specify for all inputs of actions what is relevant. If not set
           it is assumed that only artefact of type TYPE_VALUE_RESULT are relevant.
           @param session: Session object of the workflow the action is working in
         '''
@@ -764,7 +764,7 @@ class ActionBatchGenerator(object):
         return result
 
     def generateActions(self):
-        ''' Method that generates all actions based on the given state of the session and configuration nof self.
+        ''' Method that generates all actions based on the given state of the session and configuration of self.
           For the strategy how the actions are generated see the explination in the class documentation.'''
 
         primaryInput = self._prepareInputArtifacts(inputName=self.PRIMARY_INPUT_KEY)
