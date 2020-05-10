@@ -26,35 +26,38 @@ class FractionLinker(LinkerBase):
   '''
   def __init__(self, useClosestPast = False):
     '''@param useClosestPast If true it will check also for the largest timepoint
-    smaller then the actual timepoint and links against it.'''
+    smaller then the actual timepoint and links against it.
+    REMARK: If useClosestPast is used, currently only the first artefact in the primary and all relevant secondary
+    selections will be checked.
+    '''
     
     self._useClosestPast = useClosestPast
 
     
-  def getLinkedSelection(self, masterIndex, masterSelection, slaveSelection):
+  def getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
     
     linker = CaseLinker() + CaseInstanceLinker()
     
     if not self._useClosestPast:
       linker = linker + TimePointLinker()
 
-    resultSelection = linker.getLinkedSelection(masterIndex,masterSelection, slaveSelection)
+    resultSelections = linker.getLinkedSelection(primaryIndex, primarySelections, secondarySelections)
     
-    if self._useClosestPast and len(resultSelection)>0:
-      masterTimePoint = float(artefactHelper.getArtefactProperty(masterSelection[masterIndex],artefactProps.TIMEPOINT))
+    if self._useClosestPast and len(resultSelections)>0:
+      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelections[0][primaryIndex], artefactProps.TIMEPOINT))
       bestSelection = None
       bestTimePoint = -1
       #search for the best time fit
-      for aLink in resultSelection:
+      for aLink in resultSelections:
         try:
-          timePoint = float(artefactHelper.getArtefactProperty(aLink,artefactProps.TIMEPOINT))
+          timePoint = float(artefactHelper.getArtefactProperty(aLink[0],artefactProps.TIMEPOINT))
           if timePoint > bestTimePoint and timePoint <= masterTimePoint:
             bestTimePoint = timePoint
             bestSelection = aLink
         except:
           pass
         
-      resultSelection = [bestSelection]
+      resultSelections = [bestSelection]
          
-    return resultSelection
+    return resultSelections
   

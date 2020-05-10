@@ -31,17 +31,7 @@ class TestLinkers(unittest.TestCase):
     self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "result", "dummy", None)
     self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", None)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a7)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a9)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a10)
+    self.data = [[self.a1],[self.a2],[self.a3],[self.a4],[self.a5],[self.a6],[self.a7],[self.a8],[self.a9],[self.a10]]
 
   def test_LinkerBase(self):
     linker = LinkerBase()
@@ -54,20 +44,25 @@ class TestLinkers(unittest.TestCase):
 
   def test_AndLinker(self):
     linker = CaseLinker() + TimePointLinker()
-    selection = linker.getLinkedSelection(2, self.data,self.data)
-    self.assertEqual(len(selection), 2)
-    self.assertIn(self.a3, selection)
-    self.assertIn(self.a4, selection)
+    selections = linker.getLinkedSelection(2, self.data,self.data)
+    self.assertEqual(len(selections), 2)
+    self.assertEqual(len(selections[0]), 1)
+    self.assertEqual(len(selections[1]), 1)
+    self.assertIn(self.a3, selections[0])
+    self.assertIn(self.a4, selections[1])
   
-    selection = linker.getLinkedSelection(0, self.data,self.data)
-    self.assertEqual(len(selection), 1)
-    self.assertIn(self.a1, selection)
+    selections = linker.getLinkedSelection(0, self.data,self.data)
+    self.assertEqual(len(selections), 1)
+    self.assertEqual(len(selections[0]), 1)
+    self.assertIn(self.a1, selections[0])
     
     selector2 = AndLinker(CaseLinker(), TimePointLinker())
-    selection = selector2.getLinkedSelection(2, self.data,self.data)
-    self.assertEqual(len(selection), 2)
-    self.assertIn(self.a3, selection)
-    self.assertIn(self.a4, selection)
+    selections = selector2.getLinkedSelection(2, self.data,self.data)
+    self.assertEqual(len(selections), 2)
+    self.assertEqual(len(selections[0]), 1)
+    self.assertEqual(len(selections[1]), 1)
+    self.assertIn(self.a3, selections[0])
+    self.assertIn(self.a4, selections[1])
 
 
 if __name__ == '__main__':

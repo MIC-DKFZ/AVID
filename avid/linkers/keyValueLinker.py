@@ -17,30 +17,54 @@ import avid.common.artefact.defaultProps as artefactProps
 
 class KeyValueLinker(LinkerBase):
   '''
-      Links data based on the value of a given key. 
+      Links data based on the value of a given key.
   '''
-  def __init__(self, key):
+  def __init__(self, key, checkAllPrimaryArtefacts = True):
+    '''@param checkAllPrimaryArtefacts indicates if all artefacts of the primary selection must find at least one
+      matching artefact in the secondary selection to count as semantically linked. If false, it is enough that
+      on primary artefact finds a match.'''
     self.__key = key
+    self.__checkAllPrimaryArtefacts = checkAllPrimaryArtefacts
       
-  def getLinkedSelection(self, masterIndex, masterSelection, slaveSelection):
+  def getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
     '''Filters the given list of entries and returns all selected entries'''
-    masterEntry = masterSelection[masterIndex]
-    linkValue = None
-    if self.__key in masterEntry:
-      linkValue = masterEntry[self.__key]
+    primarySelection = primarySelections[primaryIndex]
 
-    resultSelection = list(dict(),)   
-    for item in slaveSelection:
-      if self.__key in item:
-        if item[self.__key] == linkValue:
-          resultSelection.append(item)
-      else:
-        if linkValue is None:
-          #key does not exist, but selection value is None, therefore it is a match
-          resultSelection.append(item)
-        
+    resultSelections = list(list(),)
+    for secondSelection in secondarySelections:
+
+      addSelection = False
+      if self.__checkAllPrimaryArtefacts:
+        addSelection = True;
+
+      for primeArtefact in primarySelection:
+        linkValue = None
+        if self.__key in primeArtefact:
+          linkValue = primeArtefact[self.__key]
+        hasLink = False
+
+        for secondArtefact in secondSelection:
+          if self.__key in secondArtefact:
+            if secondArtefact[self.__key] == linkValue:
+              hasLink = True
+              break
+          else:
+            if linkValue is None:
+              #key does not exist, but selection value is None, therefore it is a match
+              hasLink = True
+              break
+
+        if hasLink and not self.__checkAllPrimaryArtefacts:
+          addSelection = True
+          break
+        elif not hasLink and self.__checkAllPrimaryArtefacts:
+          addSelection = False
+          break
+
+      if addSelection:
+        resultSelections.append(secondSelection)
           
-    return resultSelection
+    return resultSelections
   
     
 class CaseLinker(KeyValueLinker):
