@@ -178,18 +178,19 @@ class SingleActionBase(ActionBase):
         things; e.g. determining the Caseinstance of the action instance, used in the
         generation of new artefacts, used to determine if outputs can be generated.'''
         for iKey in inputs:
-            if inputs[iKey] is not None:
+            if inputs[iKey] is not None or len(inputs[iKey])>0:
                 self._inputArtefacts[iKey] = inputs[iKey]
 
-        self._setCaseInstanceByArtefact(list(self._inputArtefacts.values()))
+        self._setCaseInstanceByArtefact(self._inputArtefacts)
 
-    def _setCaseInstanceByArtefact(self, *inputArtefacts):
+    def _setCaseInstanceByArtefact(self, inputArtefacts):
         '''defines the case instance used by the action based on the passed input artefact.'''
         stubArtefact = dict()
         stubArtefact[artefactProps.CASEINSTANCE] = None
-        if not artefactHelper.ensureCaseInstanceValidity(stubArtefact, *inputArtefacts):
-            logger.warning("Case instance conflict raised by the input artefact of the action. Input artefacts %s",
-                           inputArtefacts)
+        for inputKey in inputArtefacts:
+            if not artefactHelper.ensureCaseInstanceValidity(stubArtefact, *inputArtefacts[inputKey]):
+                logger.warning("Case instance conflict raised by the input artefact of the action. Input artefacts %s",
+                               inputArtefacts)
 
         self._caseInstance = stubArtefact[artefactProps.CASEINSTANCE]
 
@@ -211,6 +212,8 @@ class SingleActionBase(ActionBase):
         artefact_id: ID of the new artefact
         extension_seperator: OS specific file extension seperator
         urlExtension: Parameter of the call
+        REMARK: Currently if self has a _propInheritanceDict specified, only the first artefact of the indicated
+        input selection will be used to inherit the property.
         @param reference An other artefact as reference. If given, the following
         properties will be copied to the new artefact: Case, case instance, timepoint,
         type, format, objective.
@@ -240,7 +243,7 @@ class SingleActionBase(ActionBase):
                     and not propID == artefactProps.URL:
                 try:
                     if propID in self._inputArtefacts[self._propInheritanceDict[propID]]:
-                        result[propID] = artefactHelper.getArtefactProperty(self._inputArtefacts[self._propInheritanceDict[propID]],propID)
+                        result[propID] = artefactHelper.getArtefactProperty(self._inputArtefacts[self._propInheritanceDict[propID]][0],propID)
                 except:
                     pass
 
@@ -281,7 +284,10 @@ class SingleActionBase(ActionBase):
 
         inputs = dict()
         for inputName in self._inputArtefacts:
-          inputs[inputName] = artefactHelper.getArtefactProperty(self._inputArtefacts[inputName],artefactProps.ID)
+            iaIDs = list()
+            for ia in self._inputArtefacts[inputName]:
+                iaIDs.append(artefactHelper.getArtefactProperty(ia,artefactProps.ID))
+            inputs[inputName] = iaIDs
         if len(inputs)>0:
             result[artefactProps.INPUT_IDS] = inputs
         else:

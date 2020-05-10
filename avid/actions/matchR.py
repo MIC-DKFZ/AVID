@@ -29,9 +29,6 @@ from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 
-from xml.etree.ElementTree import ElementTree
-import avid.common.customTags as Tag
-
 logger = logging.getLogger(__name__)
 
 def EnsureSingleArtefact (artefacts, name):
