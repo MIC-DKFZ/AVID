@@ -34,7 +34,8 @@ logger = logging.getLogger(__name__)
 
 '''List of properties that should be checked to determine the similarity of two artifacts.'''
 similarityRelevantProperties = [defaultProps.CASE, defaultProps.CASEINSTANCE, defaultProps.TIMEPOINT,
-                                defaultProps.ACTIONTAG, defaultProps.TYPE, defaultProps.FORMAT, defaultProps.OBJECTIVE,
+                                defaultProps.ACTIONTAG, defaultProps.ACTION_CLASS, defaultProps.INPUT_IDS,
+                                defaultProps.TYPE, defaultProps.FORMAT, defaultProps.OBJECTIVE,
                                 defaultProps.RESULT_SUB_TAG, defaultProps.DOSE_STAT, defaultProps.DIAGRAM_TYPE,
                                 defaultProps.ONLY_ESTIMATOR, defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT]
 
