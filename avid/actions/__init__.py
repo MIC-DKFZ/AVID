@@ -18,21 +18,15 @@ import logging
 import time
 import uuid
 
-from avid.linkers import CaseLinker
-from avid.selectors import TypeSelector
-from avid.sorter import BaseSorter
-from avid.splitter import SingleSplitter
 from ..common import actionToken
-from ..common.artefact.generator import generateArtefactEntry
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 from .simpleScheduler import SimpleScheduler
 import avid.common.workflow as workflow
-import avid.selectors as selectors
+from .actionBatchGenerator import ActionBatchGenerator
 
 logger = logging.getLogger(__name__)
-
 
 class ActionBase(object):
     '''Base class for action objects used in the pipeline.'''
@@ -358,8 +352,11 @@ class SingleActionBase(ActionBase):
         invalidInputs = dict()
 
         for key in self._inputArtefacts:
-            if not self._inputArtefacts[key] is None and self._inputArtefacts[key].is_invalid():
-                invalidInputs[key] = self._inputArtefacts[key]
+            if not self._inputArtefacts[key] is None:
+                for artefact in self._inputArtefacts[key]:
+                    if artefact.is_invalid():
+                        invalidInputs[key] = self._inputArtefacts[key]
+                        break;
 
         return invalidInputs
 
@@ -419,189 +416,21 @@ class SingleActionBase(ActionBase):
 
         return token
 
-
 class BatchActionBase(ActionBase):
-    '''Base class for action objects that are used together with selectors and
-      should therefore able to process a batch of SingleActionBased actions.'''
+    '''Base class for action objects that resemble the logic to generate and
+       to process a batch of SingleActionBased actions based ond the current session and the given selectors, sorters,
+       linkers, splitters.'''
 
-    def __init__(self, actionTag, alwaysDo=False, scheduler=SimpleScheduler(), session=None,
-                 additionalActionProps=None):
-        '''init the action and setting the workflow session, the action is working
-          in.
-          @param session: Session object of the workflow the action is working in
-          @param actionTag: Tag of the action within the session
-          @param alwaysDo: Indicates if single actions should generate its artefacts even
-          if they already exist in the workflow (True) or if the action should skip
-          the processing (False).
-          @param scheduler Strategy how to execute the single actions.
-        '''
-        ActionBase.__init__(self, actionTag, session, additionalActionProps)
+    PRIMARY_INPUT_KEY = ActionBatchGenerator.PRIMARY_INPUT_KEY
 
-        self._alwaysDo = alwaysDo
-        self._actions = None
-        self._scheduler = scheduler  # scheduler that should be used to execute the jobs
-
-    def ensureRelevantArtefacts(self, artefacts, relevantSelector, infoTag="none"):
-        ''' Helper function that filters the passed artefact list by the passed relevantSelector.
-        Returns the list containing the relevant artefacts. If the valid list is empty
-        it will be logged as. This function is for batch actions that want to ensure specific
-        properties for there artefact before they are used in the batch processing (e.g. only
-        artefacts of type "result" are allowed).'''
-
-        result = relevantSelector.getSelection(artefacts)
-
-        if len(result) == 0:
-            global logger
-            logger.debug("Input selection contains no valid artefacts. Info tag: %s", infoTag)
-
-        return result
-
-    def _generateName(self):
-        return self.__class__.__name__ + "_" + str(self.actionTag)
-
-    def _indicateOutputs(self):
-        ''' Return a list of artefact entries the action will produce if do() is
-          called. Reimplement this method for derived actions. The method should
-          return complete entries. Therefore the enties should already contain the
-          url where they *will* be stored if the action is executed.'''
-        if self._actions is None:
-            self._actions = self._generateActions()
-
-        outputs = list()
-
-        for action in self._actions:
-            outputs += action.indicateOutputs()
-
-        return outputs
-
-    def _generateActions(self):
-        ''' Internal method that should generate all single actions that should be
-          executed and returns them in a list. This method should be
-          reimplemented in derived classes to do the real work of dispatching the
-          selectors and creating the action functors for all needed actions.
-          @postcondition: all needed single actions are created and configured to be
-          read to be executed.'''
-        raise NotImplementedError("Reimplement in a derived class to function correctly.")
-        # Implement: generat all jobs and return them.
-        pass
-
-    def _do(self):
-        ''' Triggers the processing of an action. '''
-
-        if self._actions is None:
-            self._actions = self._generateActions()
-
-        tokens = self._scheduler.execute(self._actions)
-
-        token = self.generateActionToken(actionToken.ACTION_SKIPPED)
-
-        for aToken in tokens:
-            if aToken.isSuccess() and not token.isFailure():
-                token.state = actionToken.ACTION_SUCCESS
-            elif aToken.isFailure():
-                token.state = actionToken.ACTION_FAILUER
-
-            token.generatedArtefacts.extend(aToken.generatedArtefacts)
-
-        return token
-
-
-class BatchActionBase(ActionBase):
-    '''Base class for action objects that are used together with selectors and
-      should therefore able to process a batch of SingleActionBased actions.'''
-
-    def __init__(self, actionTag, alwaysDo=False, scheduler=SimpleScheduler(), session=None,
-                 additionalActionProps=None):
-        '''init the action and setting the workflow session, the action is working
-          in.
-          @param session: Session object of the workflow the action is working in
-          @param actionTag: Tag of the action within the session
-          @param alwaysDo: Indicates if single actions should generate its artefacts even
-          if they already exist in the workflow (True) or if the action should skip
-          the processing (False).
-          @param scheduler Strategy how to execute the single actions.
-        '''
-        ActionBase.__init__(self, actionTag, session, additionalActionProps)
-
-        self._alwaysDo = alwaysDo
-        self._actions = None
-        self._scheduler = scheduler  # scheduler that should be used to execute the jobs
-
-    def ensureRelevantArtefacts(self, artefacts, relevantSelector, infoTag="none"):
-        ''' Helper function that filters the passed artefact list by the passed relevantSelector.
-        Returns the list containing the relevant artefacts. If the valid list is empty
-        it will be logged as. This function is for batch actions that want to ensure specific
-        properties for there artefact before they are used in the batch processing (e.g. only
-        artefacts of type "result" are allowed).'''
-
-        result = relevantSelector.getSelection(artefacts)
-
-        if len(result) == 0:
-            global logger
-            logger.debug("Input selection contains no valid artefacts. Info tag: %s", infoTag)
-
-        return result
-
-    def _generateName(self):
-        return self.__class__.__name__ + "_" + str(self.actionTag)
-
-    def _indicateOutputs(self):
-        ''' Return a list of artefact entries the action will produce if do() is
-          called. Reimplement this method for derived actions. The method should
-          return complete entries. Therefore the enties should already contain the
-          url where they *will* be stored if the action is executed.'''
-        if self._actions is None:
-            self._actions = self._generateActions()
-
-        outputs = list()
-
-        for action in self._actions:
-            outputs += action.indicateOutputs()
-
-        return outputs
-
-    def _generateActions(self):
-        ''' Internal method that should generate all single actions that should be
-          executed and returns them in a list. This method should be
-          reimplemented in derived classes to do the real work of dispatching the
-          selectors and creating the action functors for all needed actions.
-          @postcondition: all needed single actions are created and configured to be
-          read to be executed.'''
-        raise NotImplementedError("Reimplement in a derived class to function correctly.")
-        # Implement: generat all jobs and return them.
-        pass
-
-    def _do(self):
-        ''' Triggers the processing of an action. '''
-
-        if self._actions is None:
-            self._actions = self._generateActions()
-
-        tokens = self._scheduler.execute(self._actions)
-
-        token = self.generateActionToken(actionToken.ACTION_SKIPPED)
-
-        for aToken in tokens:
-            if aToken.isSuccess() and not token.isFailure():
-                token.state = actionToken.ACTION_SUCCESS
-            elif aToken.isFailure():
-                token.state = actionToken.ACTION_FAILUER
-
-            token.generatedArtefacts.extend(aToken.generatedArtefacts)
-
-        return token
-
-
-class ActionBatchGenerator(object):
-    '''Class helps to generate concrete action instance for a given session and a given set of rules (for selecting, splitting, sorting and linking).
-    '''
-
-    PRIMARY_INPUT_KEY = "primaryInput"
-
-    def __init__(self, actionClass, primaryInputSelector, primaryAlias = None, additionalInputSelectors = None,
+    def __init__(self, actionTag, actionClass, primaryInputSelector, primaryAlias = None, additionalInputSelectors = None,
                  splitter = None, sorter = None, linker = None, dependentLinker = None, session=None,
-                 relevanceSelector = None, **actionParameters):
-        '''init the generator.
+                 relevanceSelector = None, additionalActionProps = None, scheduler=SimpleScheduler(), **actionParameters, ):
+        '''init the action and setting the workflow session, the action is working
+          in.
+          @param actionTag: Tag of the action within the session
+          @param additionalActionProps: Dictionary that can be used to define additional
+          properties that should be added to any artefact that are produced by the action.
           @param actionClass: Class of the action that should be generated
           @param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
           @param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
@@ -615,7 +444,7 @@ class ActionBatchGenerator(object):
           input that should be associated with the splitter. To associate primary input use PRIMARY_INPUT_KEY as key.The
           values of the dict are the splitter instances that should be used for the respective key.
           @param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
-          If no sorter is defined explicitly for an input BaseSorter() (so no sorting at all) will be assumed.
+          If no sorter is defined explicitly for an input, BaseSorter() (so no sorting at all) will be assumed.
           The key indicates the input that should be associated with the sorter. To associate primary input use
           PRIMARY_INPUT_KEY as key. The values of the dict are the sorter instances that should be used for the
           respective key.
@@ -637,181 +466,65 @@ class ActionBatchGenerator(object):
           @param relevanceSelector: Selector used to specify for all inputs of actions what is relevant. If not set
           it is assumed that only artefact of type TYPE_VALUE_RESULT are relevant.
           @param session: Session object of the workflow the action is working in
+          @param scheduler Strategy how to execute the single actions.
         '''
-        if session is None:
-            # check if we have a current generated global session we can use
-            if workflow.currentGeneratedSession is not None:
-                self._session = workflow.currentGeneratedSession
-            else:
-                raise ValueError("Session passed to the action is invalid. Session is None.")
-        else:
-            self._session = session
+        ActionBase.__init__(self, actionTag, session, additionalActionProps)
+        self._actions = None
+        self._scheduler = scheduler  # scheduler that should be used to execute the jobs
 
-        self._actionClass = actionClass
+        actionParameters["actionTag"] = actionTag
+        actionParameters["additionalActionProps"] = additionalActionProps
 
-        self._singleActionParameters = actionParameters
-
-        self._primaryInputSelector = primaryInputSelector
-
-        self._primaryAlias = primaryAlias
-        if self._primaryAlias is None:
-            self._primaryAlias = self.PRIMARY_INPUT_KEY
-
-        self._additionalInputSelectors = additionalInputSelectors
-        if self._additionalInputSelectors is None:
-            self._additionalInputSelectors = dict()
-
-        if self.PRIMARY_INPUT_KEY in self._additionalInputSelectors:
-            raise ValueError('Additional input selectors passed to the action are invalid. It does contain key value "'+self.PRIMARY_INPUT_KEY+'" reserved for the primary input channel. Check passed additional input dictionary %s.'.format(self._additionalInputSelectors))
-
-        self._splitter = dict()
-        if splitter is not None:
-            self._splitter = splitter.copy()
-        for key in self._additionalInputSelectors:
-            if not key in self._splitter:
-                self._splitter[key] = SingleSplitter()
-        if not self.PRIMARY_INPUT_KEY in self._splitter:
-            self._splitter["primaryInput"] = SingleSplitter()
-
-        self._sorter = dict()
-        if sorter is not None:
-            self._sorter = sorter.copy()
-        for key in self._additionalInputSelectors:
-            if not key in self._sorter:
-                self._sorter[key] = BaseSorter()
-
-        if not self.PRIMARY_INPUT_KEY in self._sorter:
-            self._sorter["primaryInput"] = BaseSorter()
-
-        self._linker = dict()
-        if linker is not None:
-            self._linker = linker.copy()
-        if self.PRIMARY_INPUT_KEY in self._linker:
-            raise ValueError('Primary input can not have a linkage. Invalid linker setting. Check passed dictionary %s.'.format(self._dependentLinker))
-
-        for key in self._additionalInputSelectors:
-            if not key in self._linker:
-                self._linker[key] = CaseLinker()
-
-        self._dependentLinker = dict()
-        if dependentLinker is not None:
-            self._dependentLinker = dependentLinker.copy()
-        if self.PRIMARY_INPUT_KEY in self._dependentLinker:
-            raise ValueError('Primary input can not have a linkage. Invalid dependentLinker setting. Check passed dictionary %s.'.format(self._dependentLinker))
-
-        for key in self._dependentLinker:
-            if self._dependentLinker[key][0] is key:
-                raise ValueError('Recursive linkage dependency. Input indicates to depend on itself. Check passed dependentLinker dictionary %s.'.format(
-                        self._dependentLinker))
-
-        self._relevanceSelector = relevanceSelector
-        if self._relevanceSelector is None:
-            self._relevanceSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
+        self._generator = ActionBatchGenerator(actionClass= actionClass, primaryInputSelector = primaryInputSelector,
+                                               primaryAlias= primaryAlias,
+                                               additionalInputSelectors=additionalInputSelectors, splitter=splitter,
+                                               sorter=sorter, linker=linker, dependentLinker=dependentLinker,
+                                               session=session, relevanceSelector=relevanceSelector, **actionParameters)
 
 
-    def _ensureRelevantArtefacts(self, artefacts, infoTag="none"):
-        ''' Helper function that filters the passed artefact list by the passed relevantSelector.
-        Returns the list containing the relevant artefacts. If the valid list is empty
-        it will be logged as. This function is for batch actions that want to ensure specific
-        properties for there artefact before they are used in the batch processing (e.g. only
-        artefacts of type "result" are allowed).'''
+    def _generateName(self):
+        return self.__class__.__name__ + "_" + str(self.actionTag)
 
-        result = self._relevanceSelector.getSelection(artefacts)
+    def _indicateOutputs(self):
+        ''' Return a list of artefact entries the action will produce if do() is
+          called. Reimplement this method for derived actions. The method should
+          return complete entries. Therefore the enties should already contain the
+          url where they *will* be stored if the action is executed.'''
+        if self._actions is None:
+            self._actions = self._generateActions()
 
-        if len(result) == 0:
-            global logger
-            logger.debug("Input selection contains no valid artefacts. Info tag: %s", infoTag)
+        outputs = list()
 
-        return result
+        for action in self._actions:
+            outputs += action.indicateOutputs()
 
-    def _prepareInputArtifacts(self, inputName):
-        '''Gets, for one input all artefact form the session, sorts and splits them.'''
-        artefacts = None
+        return outputs
 
-        selector = self._primaryInputSelector
-        if not inputName == self.PRIMARY_INPUT_KEY:
-            selector = self._additionalInputSelectors[inputName]
+    def _generateActions(self):
+        ''' Internal method that should generate all single actions that should be
+          executed and returns them in a list. This method should be
+          reimplemented in derived classes to do the real work of dispatching the
+          selectors and creating the action functors for all needed actions.
+          @postcondition: all needed single actions are created and configured to be
+          read to be executed.'''
+        return self._generator.generateActions()
 
-        if selector is not None:
-            artefacts = selector.getSelection(self._session.artefacts)
-            artefacts = self._ensureRelevantArtefacts(artefacts, inputName)
+    def _do(self):
+        ''' Triggers the processing of an action. '''
 
-            splittedArtefacts = self._splitter[inputName].splitSelection(artefacts)
+        if self._actions is None:
+            self._actions = self._generateActions()
 
-            sortedArtefacts = list()
-            for split in splittedArtefacts:
-                sortedArtefacts.append(self._sorter[inputName].sortSelection(split))
+        tokens = self._scheduler.execute(self._actions)
 
-            artefacts = sortedArtefacts
+        token = self.generateActionToken(actionToken.ACTION_SKIPPED)
 
-        return artefacts
+        for aToken in tokens:
+            if aToken.isSuccess() and not token.isFailure():
+                token.state = actionToken.ACTION_SUCCESS
+            elif aToken.isFailure():
+                token.state = actionToken.ACTION_FAILUER
 
-    def _generateDependencySequence(self):
-        names = self._additionalInputSelectors.keys()
-        #Get all inputs that do not depend on others and put it directly in the list
-        result = [name for name in names if name not in self._dependentLinker]
-        leftNames = self._dependentLinker.keys()
+            token.generatedArtefacts.extend(aToken.generatedArtefacts)
 
-        while len(leftNames)>0:
-            masterName = None
-            for leftName in leftNames:
-                masterName = self._dependentLinker[leftName][0]
-                if masterName in result:
-                    result.append(leftName)
-                    leftNames.remove(leftName)
-                    break
-            raise RuntimeError('Error in dependent linker definition. Seems to be invald or containes cyclic dependencies. Left dependencies: {}'.format(leftNames))
-        return result
-
-    def generateActions(self):
-        ''' Method that generates all actions based on the given state of the session and configuration of self.
-          For the strategy how the actions are generated see the explination in the class documentation.'''
-
-        primaryInput = self._prepareInputArtifacts(inputName=self.PRIMARY_INPUT_KEY)
-
-        additionalInputs = dict()
-        for key in self._additionalInputSelectors:
-            additionalInputs[key] = self._prepareInputArtifacts(inputName=key)
-
-        actions = list()
-        depSequence = self._generateDependencySequence()
-
-        for (pos, primarySplit) in enumerate(primaryInput):
-            linkedAdditionals = dict()
-            for additionalKey in additionalInputs:
-                linkedAdditionals[additionalKey] = self._linker[additionalKey].getLinkedSelection(pos, primaryInput,
-                                                                              additionalInputs[additionalKey])
-            actions.extend(self._generateActions_recursive({self._primaryAlias: primarySplit}, None, linkedAdditionals.copy(), depSequence))
-
-        return actions
-
-    def _generateActions_recursive(self, relevantAdditionalInputs, relevantAddtitionalInputPos, additionalInputs, leftInputNames):
-        actions = list()
-        if relevantAddtitionalInputPos is None:
-            relevantAddtitionalInputPos = dict()
-
-        if leftInputNames is None or len(leftInputNames) == 0:
-            singleActionParameters = {**self._singleActionParameters, **relevantAdditionalInputs}
-            action = self._actionClass(**singleActionParameters)
-            actions.append(action)
-        else:
-            currentName = leftInputNames[0]
-            currentInputs = additionalInputs[currentName]
-
-            newLeftNames = leftInputNames[1:]
-            newRelInputs = relevantAdditionalInputs.copy()
-            newRelPos = relevantAddtitionalInputPos.copy()
-            newAdditionalInputs = additionalInputs.copy()
-
-            if currentName in self._dependentLinker:
-                sourceName = self._dependentLinker[currentName][0]
-                linker = self._dependentLinker[currentName][1]
-                currentInputs = linker.getLinkedSelection(relevantAddtitionalInputPos[sourceName], additionalInputs[sourceName], currentInputs)
-                newAdditionalInputs[currentName] = currentInputs
-
-            for (pos,aSplit) in enumerate(currentInputs):
-                newRelPos[currentName] = pos
-                newRelInputs[currentName] = aSplit
-                actions.extend(self._generateActions_recursive(newRelInputs, newRelPos, newAdditionalInputs, newLeftNames))
-
-        return actions
+        return token
