@@ -193,7 +193,7 @@ class PythonBinaryBatchAction(BatchActionBase):
     actions = list()
 
     for (pos, input1) in enumerate(inputs1):
-        linked2 = self._inputLinker.getLinkedSelection(masterIndex=pos, masterSelection=inputs1, slaveSelection=inputs2)
+        linked2 = self._inputLinker.getLinkedSelection(primaryIndex=pos, primarySelections=inputs1, secondarySelections=inputs2)
 
         for lt in linked2:
             action = PythonAction(inputs1=[input1], inputs2=[lt], actionTag=self._actionTag, alwaysDo=self._alwaysDo,
