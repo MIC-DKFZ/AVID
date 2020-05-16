@@ -37,14 +37,15 @@ class mapRAction(CLIActionBase):
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
-    self._inputImage = inputImage
-    self._registration = registration
-    self._templateImage = templateImage
+
+    self._inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
+    self._registration = self._ensureSingleArtefact(registration,"regstration")
+    self._templateImage = self._ensureSingleArtefact(templateImage, "templateImage")
     self._interpolator = interpolator
     self._outputExt = outputExt
     self._paddingValue = paddingValue
     self._inputIsReference = inputIsReference
-    
+
     cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", actionConfig))
     self._cwd = cwd    
     
@@ -118,13 +119,13 @@ class mapRBatchAction(BatchActionBase):
     should therefore able to process a batch of SingleActionBased actions.'''
   
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
-               regLinker = FractionLinker(), templateLinker = CaseLinker(), 
-               actionTag = "mapR", inputIsReference=True, alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), templateRegLinker = LinkerBase(),
+               regLinker = None, templateLinker = None,
+               actionTag = "mapR", session = None, additionalActionProps = None,
+               scheduler = SimpleScheduler(), templateRegLinker = None,
                **singleActionParameters):
     '''@param inputSelector Selector for the artefacts that should be mapped.
     @param registrationSelector Selector for the artefacts that specify the registration. If no registrations are
-    specified, anidentity transform will be assumed.
+    specified, an identity transform will be assumed.
     @param templateSelector Selector for the reference geometry that should be used to map into it. If None is
     specified, the geometry of the input will be used.
     @param regLinker Linker to select the registration that should be used on an input. Default is FractionLinker.
@@ -132,56 +133,20 @@ class mapRBatchAction(BatchActionBase):
     @param templateRegLinker Linker to select which regs (resulting from the regLinker should be used regarding
     the template that will be used. Default is LinkerBase (so every link registration will be used with every linked
     template.'''
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputImages = inputSelector.getSelection(self._session.artefacts)
-    self._registrations = list()
-    if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.artefacts)
+    if regLinker is None:
+      regLinker = FractionLinker()
+    if templateLinker is None:
+      templateLinker = CaseLinker()
+    if templateRegLinker is None:
+      templateRegLinker = LinkerBase()
 
-    self._templateImages = list()
-    if templateSelector is not None:
-      self._templateImages = templateSelector.getSelection(self._session.artefacts)
-    
-    self._regLinker = regLinker
-    self._templateLinker = templateLinker
-    self._templateRegLinker = templateRegLinker
+    additionalInputSelectors = {"registration": registrationSelector, "templateImage": templateSelector}
+    linker = {"registration": regLinker, "templateImage": templateLinker}
+    dependentLinker = {"registration": ("templateImage",templateRegLinker)}
 
-    self._inputIsReference = inputIsReference
-
-    self._singleActionParameters = singleActionParameters
-
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    inputs = self.ensureRelevantArtefacts(self._inputImages, resultSelector, "mapR input")
-    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "mapR registrations")
-    temps = self.ensureRelevantArtefacts(self._templateImages, resultSelector, "mapR templates")
-    
-    actions = list()
-    
-    for (pos,inputImage) in enumerate(inputs):
-      linkedTemps = self._templateLinker.getLinkedSelection(pos,inputs,temps)
-      if len(linkedTemps) == 0:
-        linkedTemps = [None]
-        
-      linkedRegs = self._regLinker.getLinkedSelection(pos, inputs, regs)
-      if len(linkedRegs) == 0:
-        linkedRegs = [None]
-      
-      for (pos2, lt) in enumerate(linkedTemps):
-        linkedRegsByTemp = self._templateRegLinker.getLinkedSelection(pos2, linkedTemps, linkedRegs)
-
-        for lr in linkedRegsByTemp:
-          action = mapRAction(inputImage, lr, lt,
-                              actionTag = self._actionTag,
-                              alwaysDo = self._alwaysDo,
-                              session = self._session,
-                              inputIsReference=self._inputIsReference,
-                              additionalActionProps = self._additionalActionProps,
-                              **self._singleActionParameters)
-          actions.append(action)
-    
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=mapRAction, primaryInputSelector= inputSelector,
+                             primaryAlias="inputImage", additionalInputSelectors = additionalInputSelectors,
+                             linker = linker, dependentLinker=dependentLinker, session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)

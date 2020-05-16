@@ -61,7 +61,7 @@ class ActionBatchGenerator(object):
           input A is (also) linked to an additional input B. The method assumes the following structure of the variable.
           It is a dictionary. The dictionary key indicates the input that should be linked. So it can be any additional
           input. It must not be the primary input. The value associated with a dict key is an iterable (e.g. list) the
-          first element is the name of the input that serves as master for the linkage. It may be any additional input
+          first element is the name of the input that serves as primary selection for the linkage. It may be any additional input
           (except itself = key of the value) or the primary input. The second element is the linker instance that should
           be used. You may combine linker and dependentLinker specifications for any additional input.
           To associate primary input as master use PRIMARY_INPUT_KEY as value.
