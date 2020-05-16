@@ -172,6 +172,16 @@ class SingleActionBase(ActionBase):
         if self._propInheritanceDict is None:
             self._propInheritanceDict = dict()
 
+    def _ensureSingleArtefact(self, artefacts, name):
+        """Helper method that can be used by actions that only handle one artefact as a specific input."""
+        if artefacts is None:
+            return None
+        if len(artefacts) == 0:
+            return None
+        if len(artefacts) > 1:
+            logger.warning("Action %s only supports one artefact as %s. Use first one.".format(self.__class__.__name__,name))
+        return artefacts[0]
+
     def _addInputArtefacts(self, **inputs):
         '''This function should be used in the init of derived actions to register
         artefacts as input artefact for the action instance. This will be used for several

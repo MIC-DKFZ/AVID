@@ -31,15 +31,6 @@ from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
-def EnsureSingleArtefact (artefacts, name):
-    if artefacts is None:
-        return None
-    if len(artefacts) == 0:
-        return None
-    if len(artefacts)>1:
-        logger.warning("Action only supports one artefact as %s. Use first one.".format(name))
-    return artefacts[0]
-
 class matchRAction(CLIActionBase):
   '''Class that wrapps the single action for the tool mapR.'''
 
@@ -53,12 +44,12 @@ class matchRAction(CLIActionBase):
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask,
                             movingMask = movingMask, targetPointSet = targetPointSet, movingPointSet = movingPointSet)
 
-    self._targetImage = EnsureSingleArtefact(targetImage, "target");
-    self._targetMask = EnsureSingleArtefact(targetMask, "targetMask");
-    self._targetPointSet = EnsureSingleArtefact(targetPointSet, "targetPointSet");
-    self._movingImage = EnsureSingleArtefact(movingImage, "moving");
-    self._movingMask = EnsureSingleArtefact(movingMask, "movingMask");
-    self._movingPointSet = EnsureSingleArtefact(movingPointSet, "movingPointSet");
+    self._targetImage = self._ensureSingleArtefact(targetImage, "target");
+    self._targetMask = self._ensureSingleArtefact(targetMask, "targetMask");
+    self._targetPointSet = self._ensureSingleArtefact(targetPointSet, "targetPointSet");
+    self._movingImage = self._ensureSingleArtefact(movingImage, "moving");
+    self._movingMask = self._ensureSingleArtefact(movingMask, "movingMask");
+    self._movingPointSet = self._ensureSingleArtefact(movingPointSet, "movingPointSet");
 
     self._algorithm = algorithm
     self._algorithmParameters = algorithmParameters
@@ -147,9 +138,9 @@ class matchRBatchAction(BatchActionBase):
   
   def __init__(self,  targetSelector, movingSelector, targetMaskSelector = None, movingMaskSelector = None,
                targetPointSetSelector=None, movingPointSetSelector=None,
-               movingLinker = None, targetMaskLinker = FractionLinker(),
-               movingMaskLinker = FractionLinker(), targetPSLinker = FractionLinker(),
-               movingPSLinker = FractionLinker(), actionTag = "matchR",
+               movingLinker = None, targetMaskLinker = None,
+               movingMaskLinker = None, targetPSLinker = None,
+               movingPSLinker = None, actionTag = "matchR",
                session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
 
     if movingLinker is None:
