@@ -30,7 +30,7 @@ class DummySingleAction(SingleActionBase):
 
     inputs = dict()
     for pos, a in enumerate(artefacts):
-      inputs['i'+str(pos)] = a
+      inputs['i'+str(pos)] = [a]
 
     self._addInputArtefacts(**inputs)
     self.callCount_generateOutputs = 0
@@ -48,17 +48,11 @@ class DummySingleAction(SingleActionBase):
 
 
 class DummyBatchAction(BatchActionBase):
-  def __init__(self, artefacts, actionTag = 'Dummy', alwaysDo = False, scheduler = SimpleScheduler(), session = None):
+  def __init__(self, artefactSelector, actionTag = 'Dummy', alwaysDo = False, scheduler = SimpleScheduler(), session = None):
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session = session)
-    self._artefacts = artefacts
 
-  def _generateActions(self):
-    actions = []
-    for artefact in self._artefacts:
-      action = DummySingleAction([artefact],"InternAction",self._alwaysDo, self._session)
-      actions.append(action)
-
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=DummySingleAction, primaryInputSelector= artefactSelector,
+                             primaryAlias="artefacts", session= session, scheduler=scheduler)
 
 
 class DummyCLIAction(CLIActionBase):
@@ -104,8 +98,17 @@ class DummyCLIAction(CLIActionBase):
 
 class DummyCLIBatchAction(BatchActionBase):
   def __init__(self, artefacts, actionTag = 'DummyCLI', alwaysDo = False, scheduler = SimpleScheduler(), session = None):
+
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session = session)
     self._artefacts = artefacts
+
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=DummyCLIAction, primaryInputSelector= targetSelector,
+                             primaryAlias="targetImage", additionalInputSelectors = additionalInputSelectors,
+                             linker = linker, dependentLinker=dependentLinker, session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
+
+
 
   def _generateActions(self):
     actions = []

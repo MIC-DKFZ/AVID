@@ -184,9 +184,11 @@ class SingleActionBase(ActionBase):
 
     def _addInputArtefacts(self, **inputs):
         '''This function should be used in the init of derived actions to register
-        artefacts as input artefact for the action instance. This will be used for several
+        artefacts as input artefacts for the action instance. This will be used for several
         things; e.g. determining the Caseinstance of the action instance, used in the
-        generation of new artefacts, used to determine if outputs can be generated.'''
+        generation of new artefacts, used to determine if outputs can be generated.
+        The class assumes that the inputs passed are a list of artefacts for each input key/channel.
+        Empty lists or none channels will node be added.'''
         for iKey in inputs:
             if inputs[iKey] is not None or len(inputs[iKey])>0:
                 self._inputArtefacts[iKey] = inputs[iKey]
@@ -225,7 +227,7 @@ class SingleActionBase(ActionBase):
         REMARK: Currently if self has a _propInheritanceDict specified, only the first artefact of the indicated
         input selection will be used to inherit the property.
         @param reference An other artefact as reference. If given, the following
-        properties will be copied to the new artefact: Case, case instance, timepoint,
+        properties will be copied to the new artefact: Case, timepoint,
         type, format, objective.
         @param copyAdditionalPropsFromReference Indicates if also the additional properties should be
         transfered from the reference to the new artefact (only relevant of reference is not None).
@@ -252,8 +254,10 @@ class SingleActionBase(ActionBase):
                     and not propID == artefactProps.CASEINSTANCE \
                     and not propID == artefactProps.URL:
                 try:
-                    if propID in self._inputArtefacts[self._propInheritanceDict[propID]]:
+                    if propID in self._inputArtefacts[self._propInheritanceDict[propID]][0]:
                         result[propID] = artefactHelper.getArtefactProperty(self._inputArtefacts[self._propInheritanceDict[propID]][0],propID)
+                    if len(self._inputArtefacts[self._propInheritanceDict[propID]])>1:
+                        logger.warning('Input %s has more then one artefact. Use only first artefact to inherit property "%s". Used artefact: %s', self._propInheritanceDict[propID], propID, self._inputArtefacts[self._propInheritanceDict[propID]][0])
                 except:
                     pass
 

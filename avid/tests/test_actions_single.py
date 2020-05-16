@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
  
         self.a_1 = artefactGenerator.generateArtefactEntry("Case1", 0, 1, "a1", "Type1", "Format1", "URL1", "Objctive1", myCoolProp = "Prop1")
         self.a_2 = artefactGenerator.generateArtefactEntry("Case2", 0, 2, "a2", "Type2", "Format2", "URL2", "Objctive2" )
-        self.a_3 = artefactGenerator.generateArtefactEntry("Case3", 1, 3, "a3", "Type3", "Format3", "URL3", "Objctive3", myCoolProp3 = "Prop3")
+        self.a_3 = artefactGenerator.generateArtefactEntry("Case3", None, 3, "a3", "Type3", "Format3", "URL3", "Objctive3", myCoolProp3 = "Prop3")
 
         self.session = workflow.Session("session1", self.sessionDir)
         artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_valid)
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSkipped())
+      self.assertTrue(token.isSkipped())
       self.assertIn(self.a_valid, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_NoneURL_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -137,7 +137,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_NoneURL_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -152,7 +152,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_NoFile_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -167,7 +167,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_NoFile_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -182,7 +182,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -197,7 +197,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid2_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -225,7 +225,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid2_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
@@ -239,9 +239,9 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isFailure())
+      self.assertTrue(token.isFailure())
       self.assertIn(self.a_NoFile2, token.generatedArtefacts)
-      self.assert_(token.generatedArtefacts[0][artefactProps.INVALID])
+      self.assertTrue(token.generatedArtefacts[0][artefactProps.INVALID])
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(token.actionTag, action1.actionTag)
       self.assertEqual(self.session.actions[action1.actionTag], token)
@@ -256,7 +256,7 @@ class Test(unittest.TestCase):
       
       token = action1.do()
       
-      self.assert_(token.isSkipped())
+      self.assertTrue(token.isSkipped())
       self.assertIn(self.a_valid, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 1)
       self.assertEqual(self.session.actions[action1.actionTag], token)
@@ -268,38 +268,38 @@ class Test(unittest.TestCase):
         workflow.currentGeneratedSession = workflow.Session("test_artefact_generation", self.sessionDir)
 
         action = DummySingleAction([self.a_1, self.a_2, self.a_3],"Test1")
-        input_ids = {'i0': self.a_1[artefactProps.ID],'i1': self.a_2[artefactProps.ID],'i2': self.a_3[artefactProps.ID]}
+        input_ids = {'i0': [self.a_1[artefactProps.ID]],'i1': [self.a_2[artefactProps.ID]],'i2': [self.a_3[artefactProps.ID]]}
 
         a = action.generateArtefact()
-        ref = Artefact({'case': None, 'caseInstance': None, 'format': None, 'url': None, 'timestamp': '1479379069.53',
+        ref = Artefact({'case': None, 'caseInstance': '0', 'format': None, 'url': None, 'timestamp': '1479379069.53',
                   'timePoint': None, 'actionTag': 'Test1', 'invalid': False, 'objective': None, 'type': None, 'result_sub_tag': None,
-                  'id': 'e2c810cf-acb1-11e6-83b8-7054d2ab75be', 'input_ids':input_ids}, {})
-        self.assert_(ref.is_similar(a))
+                  'id': 'e2c810cf-acb1-11e6-83b8-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {})
+        self.assertTrue(ref.is_similar(a))
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         a = action.generateArtefact(self.a_3)
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379250.0',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479379250.0',
                   'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': '4e599a30-acb2-11e6-a3a0-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
-        self.assert_(ref.is_similar(a))
+                  'id': '4e599a30-acb2-11e6-a3a0-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {'myCoolProp3': 'Prop3'})
+        self.assertTrue(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         a = action.generateArtefact(self.a_3, False)
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479379309.88',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479379309.88',
                   'timePoint': 3, 'actionTag': 'Test1', 'invalid': False, 'objective': 'Objctive3', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': '720a1b80-acb2-11e6-85a5-7054d2ab75be', 'input_ids':input_ids}, {})
-        self.assert_(ref.is_similar(a))
-        self.assert_(not 'myCoolProp3' in a)
+                  'id': '720a1b80-acb2-11e6-85a5-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {})
+        self.assertTrue(ref.is_similar(a))
+        self.assertTrue(not 'myCoolProp3' in a)
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test additionalActionProps working
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test2", additionalActionProps={artefactProps.OBJECTIVE: 'newO'})
         a = action.generateArtefact(self.a_3)
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380425.43',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479380425.43',
                   'timePoint': 3, 'actionTag': 'Test2', 'invalid': False, 'objective': 'newO', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': '0af4eb21-acb5-11e6-be37-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3'})
-        self.assert_(ref.is_similar(a))
+                  'id': '0af4eb21-acb5-11e6-be37-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {'myCoolProp3': 'Prop3'})
+        self.assertTrue(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
@@ -307,10 +307,10 @@ class Test(unittest.TestCase):
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test3",
                                    propInheritanceDict={artefactProps.OBJECTIVE: 'i1', 'myCoolProp':'i0', 'notExistingProp':'i0', artefactProps.TIMEPOINT:'InexistingInput'})
         a = action.generateArtefact(self.a_3)
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479380822.18',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479380822.18',
                   'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'Objctive2', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': 'f771898f-acb5-11e6-b4db-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp': 'Prop1', 'myCoolProp3': 'Prop3'})
-        self.assert_(ref.is_similar(a))
+                  'id': 'f771898f-acb5-11e6-b4db-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {'myCoolProp': 'Prop1', 'myCoolProp3': 'Prop3'})
+        self.assertTrue(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
@@ -321,43 +321,43 @@ class Test(unittest.TestCase):
                                    propInheritanceDict={artefactProps.OBJECTIVE: 'i1', 'myCoolProp': 'i0', 'notExistingProp': 'i0',
                                                         artefactProps.TIMEPOINT: 'InexistingInput'})
         a = action.generateArtefact(self.a_3)
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
                   'timePoint': 3, 'actionTag': 'Test3', 'invalid': False, 'objective': 'newO', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be', 'input_ids':input_ids}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'Prop1'})
-        self.assert_(ref.is_similar(a))
+                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'Prop1'})
+        self.assertTrue(ref.is_similar(a))
         self.assertEqual(a['myCoolProp3'], ref['myCoolProp3'])
         self.assertEqual(a['myCoolProp'], ref['myCoolProp'])
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test auto url generation only prefix
         a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName")
-        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', 'HumanReadableFileName.')
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID]
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation only extension
         a = action.generateArtefact(self.a_3, urlExtension='txt')
-        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', a[artefactProps.ID])
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', a[artefactProps.ID])
         refURL = refURL + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation all
         a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName", urlExtension='txt')
-        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', 'HumanReadableFileName.')
+        refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID] + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)
 
-        #test user defined props (overwritting everything
+        #test user defined props (overwritting everything)
         action = DummySingleAction([self.a_1, self.a_2, self.a_3], "Test3",
                                    additionalActionProps={artefactProps.OBJECTIVE: 'newO'},
                                    propInheritanceDict={artefactProps.OBJECTIVE: 'i1', 'myCoolProp': 'i0', 'notExistingProp': 'i0',
                                                         artefactProps.TIMEPOINT: 'InexistingInput'})
-        a = action.generateArtefact(self.a_3, userDefinedProps={artefactProps.OBJECTIVE: 'userO', 'myUserProp': 'user1',
+        a = action.generateArtefact(self.a_3, userDefinedProps={artefactProps.OBJECTIVE: 'userO', 'myUserProp': 'user1', 'myCoolProp': 'userCool',
                                                         artefactProps.TIMEPOINT: 42})
-        ref = Artefact({'case': 'Case3', 'caseInstance': None, 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
+        ref = Artefact({'case': 'Case3', 'caseInstance': '0', 'format': 'Format3', 'url': None, 'timestamp': '1479381085.01',
                   'timePoint': 42, 'actionTag': 'Test3', 'invalid': False, 'objective': 'userO', 'type': 'Type3', 'result_sub_tag': None,
-                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be'}, {'myCoolProp3': 'Prop3', 'myCoolProp': 'i0', 'myUserProp':'user1'})
-        self.assert_(ref.is_similar(a))
+                  'id': '9419e84f-acb6-11e6-8b50-7054d2ab75be', 'input_ids':input_ids, artefactProps.ACTION_CLASS: 'DummySingleAction'}, {'myCoolProp': 'userCool', 'myUserProp':'user1'})
+        self.assertTrue(ref.is_similar(a))
         self.assertEqual(a['myUserProp'], ref['myUserProp'])
 
 
@@ -369,12 +369,12 @@ class Test(unittest.TestCase):
 
         token = action1.do()
 
-        self.assert_(token.isFailure())
+        self.assertTrue(token.isFailure())
         self.assertIn(self.a_valid_new, token.generatedArtefacts)
         self.assertIn(self.a_NoFile, token.generatedArtefacts)
         self.assertEqual(len(token.generatedArtefacts), 2)
-        self.assert_(token.generatedArtefacts[0].is_invalid())
-        self.assert_(token.generatedArtefacts[1].is_invalid())
+        self.assertTrue(token.generatedArtefacts[0].is_invalid())
+        self.assertTrue(token.generatedArtefacts[1].is_invalid())
         self.assertEqual(action1.callCount_generateOutputs, 0)
 
 if __name__ == "__main__":
