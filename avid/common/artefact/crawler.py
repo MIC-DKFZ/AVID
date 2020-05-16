@@ -67,9 +67,12 @@ def runSimpleCrawlerScriptMain(fileFunction):
     '''This is a helper function that can be used if you want to write a crawler script that crawles a root directory
      and stores the results as file. This function will parse for command line arguments "root" (the root directory)
      and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly.'''
-    parser = argparse.ArgumentParser()
-    parser.add_argument('root')
-    parser.add_argument('output')
+    parser = argparse.ArgumentParser(description='Simple AVID artefact crawler script that can be used to index'
+                                                 ' artefacts.')
+    parser.add_argument('root', help='Path to the root directory where the crawler should start to crawl.')
+    parser.add_argument('output', help='File path where the results of the crawl should be stored'
+                                       ' (the found/indexed artefacts). If output already exists it will be'
+                                       ' overwritten.')
 
     cliargs, unknown = parser.parse_known_args()
 
