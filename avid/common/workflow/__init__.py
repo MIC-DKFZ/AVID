@@ -119,7 +119,31 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   currentGeneratedSession = session
   
   return session
-    
+
+def getSessionParser(sessionPath = None):
+    parser = argparse.ArgumentParser(add_help=False)
+
+    if sessionPath is None:
+        parser.add_argument('sessionPath', help="Flag has two jobs. 1) Path identifies location where the session xml"
+                                                " should be stored. If the file exists, the content will be read in"
+                                                " and reused. After the session is finished all artefacts (including"
+                                                " newly generated once) are stored back. 2) It defines the root"
+                                                " location where all the data is stored.")
+    else:
+        parser.add_argument('sessionPath', '-s', help="Flag has two jobs. 1) Path identifies location where the session"
+                                                      " xml should be stored. If the file exists, the content will be"
+                                                      " read in and reused. After the session is finished all artefacts"
+                                                      " (including newly generated once) are stored back. 2) It defines"
+                                                      " the root location where all the data is stored.")
+
+    parser.add_argument('--name', '-n', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it will be "<sessionFile name>_session".')
+    parser.add_argument('--expandPaths', '-e', help = 'Indicates if relative artefact path should be expanded when loading the data.')
+    parser.add_argument('--bootstrapArtefacts', '-b', help = 'File with additional artefacts that should be loaded when the session is initialized.')
+    parser.add_argument('--debug', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
+    parser.add_argument('--overwriteExistingSession', '-o', action='store_true', help = 'Indicates that a session, of it exists should be overwritten. Old artefacts are ignored and the old result folder will be deleted before the session starts.')
+    parser.add_argument('--structDefinition', help = 'Path to the file that defines all structures/structure pattern, that should/might be evaluated in the session.')
+    return parser
+
 def initSession_byCLIargs( sessionPath = None, **args):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present. In contrast to initSession() it offers the possibility
@@ -128,14 +152,7 @@ def initSession_byCLIargs( sessionPath = None, **args):
    The command line arguments have the following format "--<parameter name>" (e.g. --expandPaths)
    For more details see also initSession. 
    '''
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--sessionPath', help = "Flag has two jobs. 1) Path identifies location where the session xml should be stored. If the file exists, the content will be read in and reused. After the session is finished all artefacts (including newly generated once) are stored back. 2) It defines the root location where all the data is stored.")
-  parser.add_argument('--name', help = 'Name of the session result folder in the rootpath defined by sessionPath. If not set it will be "<sessionFile name>_session".')
-  parser.add_argument('--expandPaths', help = 'Indicates if relative artefact path should be expanded when loading the data.')
-  parser.add_argument('--bootstrapArtefacts', help = 'File with additional artefacts that should be loaded when the session is initialized.')
-  parser.add_argument('--debug', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
-  parser.add_argument('--overwriteExistingSession', action='store_true', help = 'Indicates that a session, of it exists should be overwritten. Old artefacts are ignored and the old result folder will be deleted before the session starts.')
-  parser.add_argument('--structDefinition', help = 'Path to the file that defines all structures/structure pattern, that should/might be evaluated in the session.')
+  parser = getSessionParser(sessionPath=sessionPath)
   cliargs, unkown = parser.parse_known_args()
 
   if sessionPath is None and cliargs.sessionPath is not None:
