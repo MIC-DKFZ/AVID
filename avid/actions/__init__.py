@@ -190,7 +190,7 @@ class SingleActionBase(ActionBase):
         The class assumes that the inputs passed are a list of artefacts for each input key/channel.
         Empty lists or none channels will node be added.'''
         for iKey in inputs:
-            if inputs[iKey] is not None or len(inputs[iKey])>0:
+            if inputs[iKey] is not None and len(inputs[iKey])>0:
                 self._inputArtefacts[iKey] = inputs[iKey]
 
         self._setCaseInstanceByArtefact(self._inputArtefacts)

@@ -23,7 +23,7 @@ from avid.actions import SingleActionBase
 from avid.linkers import CaseLinker, CaseInstanceLinker
 from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
-import avid.common.demultiplexer as demux
+from avid.splitter import KeyValueSplitter, BaseSplitter
 
 logger = logging.getLogger(__name__)
 
@@ -68,12 +68,9 @@ class PythonAction(SingleActionBase):
     tempInput = dict()
     for name in self._inputArgs:
         if isinstance(self._inputArgs[name], artefactHelper.Artefact):
-            tempInput[name] = self._inputArgs[name]
+            raise TypeError('Input "%s" type error. Artefacts should not be passed directly but as list of artefacts.'.format(name))
         else:
-            #assuming a list of artefacts
-            for pos, artefact in enumerate(self._inputArgs[name]):
-                tempInput['{}_{}'.format(name,pos)]= artefact
-
+            tempInput[name] = self._inputArgs[name]
     self._addInputArtefacts(**tempInput)
 
   def _generateName(self):
@@ -103,8 +100,8 @@ class PythonAction(SingleActionBase):
                       self._resultArtefacts))
 
       else:
-          #we generate the default as template the first input in the dictionary
-          self._resultArtefacts = [self.generateArtefact(self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]],
+          #we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
+          self._resultArtefacts = [self.generateArtefact(self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]][0],
                                                          userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT},
                                                          urlHumanPrefix=self.instanceName,
                                                          urlExtension=self._outputextension)]
@@ -143,66 +140,32 @@ class PythonAction(SingleActionBase):
 class PythonUnaryBatchAction(BatchActionBase):
   '''Batch class that assumes only one input artefact that will be passed to the script.'''
 
-  def __init__(self, inputSelector, actionTag="UnaryScript", alwaysDo=False,
-               session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+  def __init__(self, inputSelector, actionTag="UnaryScript", session=None, additionalActionProps=None,
+               scheduler=SimpleScheduler(), **singleActionParameters):
 
-    self._inputs = inputSelector.getSelection(self._session.artefacts)
-
-    self._singleActionParameters = singleActionParameters
-
-  def _generateActions(self):
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    inputs = self.ensureRelevantArtefacts(self._inputs, resultSelector, "input")
-
-    actions = list()
-
-    for input in inputs:
-      action = PythonAction(inputs = [input], actionTag = self._actionTag, alwaysDo=self._alwaysDo,
-                             session=self._session,
-                             additionalActionProps=self._additionalActionProps,
-                             **self._singleActionParameters)
-      actions.append(action)
-
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=PythonAction, primaryInputSelector= inputSelector,
+                             primaryAlias="inputs", session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
 
 
 class PythonBinaryBatchAction(BatchActionBase):
   '''Batch class that assumes two input artefacts (joined by an (optional) linker) will be passed to the script.
      The batch class assumes that the python script takes the inputs as arguments "inputs1" and "inputs2".'''
 
-  def __init__(self, inputs1Selector, inputs2Selector, inputLinker = None, actionTag="BinaryScript", alwaysDo=False,
+  def __init__(self, inputs1Selector, inputs2Selector, inputLinker = None, actionTag="BinaryScript",
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputs1 = inputs1Selector.getSelection(self._session.artefacts)
-    self._inputs2 = inputs2Selector.getSelection(self._session.artefacts)
-
-    self._inputLinker = inputLinker
     if inputLinker is None:
-        self._inputLinker = CaseLinker()
+        inputLinker = CaseLinker()
 
-    self._singleActionParameters = singleActionParameters
+    additionalSelectors = {'inputs2': inputs2Selector}
+    linker = {"inputs2": inputLinker}
 
-  def _generateActions(self):
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-
-    inputs1 = self.ensureRelevantArtefacts(self._inputs1, resultSelector, "1st input")
-    inputs2 = self.ensureRelevantArtefacts(self._inputs2, resultSelector, "1st input")
-
-    actions = list()
-
-    for (pos, input1) in enumerate(inputs1):
-        linked2 = self._inputLinker.getLinkedSelection(primaryIndex=pos, primarySelections=inputs1, secondarySelections=inputs2)
-
-        for lt in linked2:
-            action = PythonAction(inputs1=[input1], inputs2=[lt], actionTag=self._actionTag, alwaysDo=self._alwaysDo,
-                                  session=self._session,
-                                  additionalActionProps=self._additionalActionProps,
-                                  **self._singleActionParameters)
-            actions.append(action)
-
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=PythonAction, primaryInputSelector= inputs1Selector,
+                             primaryAlias="inputs1", additionalInputSelectors=additionalSelectors, linker = linker,
+                             session= session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
 
 
 class PythonNaryBatchAction(BatchActionBase):
@@ -221,61 +184,29 @@ class PythonNaryBatchAction(BatchActionBase):
 
   def __init__(self, inputsMaster, actionTag="NaryScript", alwaysDo=False,
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-    self._inputsMaster = inputsMaster.getSelection(self._session.artefacts)
-    self._otherInputs = dict()
-    self._singleActionParameters = dict()
-    self._otherLinker = dict()
+    otherSelectors = dict()
+    otherLinker = dict()
+    newSingleActionParameters = dict()
+
     for paramName in singleActionParameters:
         if paramName.startswith('inputs'):
             if paramName.endswith('Linker'):
-                self._otherLinker[paramName[:-6]] = singleActionParameters[paramName]
+                otherLinker[paramName[:-6]] = singleActionParameters[paramName]
             else:
-                self._otherInputs[paramName] = singleActionParameters[paramName].getSelection(self._session.artefacts)
+                otherSelectors[paramName] = singleActionParameters[paramName]
         else:
-            self._singleActionParameters[paramName] = singleActionParameters[paramName]
+            newSingleActionParameters[paramName] = singleActionParameters[paramName]
 
-    for inputName in self._otherInputs:
-        if not inputName in self._otherLinker:
-            self._otherLinker[inputName] = CaseLinker()+CaseInstanceLinker()
+    for inputName in otherSelectors:
+        if not inputName in otherLinker:
+            otherLinker[inputName] = CaseLinker()+CaseInstanceLinker()
 
-  def _generateActions_recursive(self, relevantAdditionalInputs, additionalInputs, leftInputNames):
-    actions = list()
-    if leftInputNames is None or len(leftInputNames)==0:
-        singleActionParameters = {**self._singleActionParameters, **relevantAdditionalInputs}
-        action = PythonAction(actionTag=self._actionTag, alwaysDo=self._alwaysDo, session=self._session,
-                            additionalActionProps=self._additionalActionProps, **singleActionParameters)
-        actions.append(action)
-    else:
-        currentName = leftInputNames[0]
-        currentInputs = additionalInputs[currentName]
-        newLeftNames = leftInputNames[1:]
-        newRelInputs = relevantAdditionalInputs.copy()
-        for anInput in currentInputs:
-            newRelInputs[currentName] = [anInput]
-            actions.extend(self._generateActions_recursive(newRelInputs, additionalInputs, newLeftNames))
-
-    return actions
-
-  def _generateActions(self):
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-
-    inputsMaster = self.ensureRelevantArtefacts(self._inputsMaster, resultSelector, "master input")
-    otherInputs = dict()
-    for inputName in self._otherInputs:
-        otherInputs[inputName] = self.ensureRelevantArtefacts(self._otherInputs[inputName], resultSelector, inputName)
-
-    actions = list()
-
-    for (pos, inputMaster) in enumerate(inputsMaster):
-        linkedOthers = dict()
-        for otherInputName in otherInputs:
-            linked = self._otherLinker[otherInputName].getLinkedSelection(pos, inputsMaster, self._otherInputs[otherInputName])
-            linkedOthers[otherInputName] = linked
-        actions.extend(self._generateActions_recursive({'inputsMaster':[inputMaster]}, linkedOthers, sorted(linkedOthers.keys())))
-
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=PythonAction, primaryInputSelector= inputsMaster,
+                             primaryAlias="inputsMaster", additionalInputSelectors = otherSelectors,
+                             linker = otherLinker, session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **newSingleActionParameters)
 
 
 class PythonUnaryStackBatchAction(BatchActionBase):
@@ -287,31 +218,13 @@ class PythonUnaryStackBatchAction(BatchActionBase):
 
     def __init__(self, inputSelector, splitProperties = None, actionTag="UnaryStackScript", alwaysDo=False,
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-      BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-      self._inputs = inputSelector.getSelection(self._session.artefacts)
-      self._splitProps = splitProperties
-
-      self._singleActionParameters = singleActionParameters
-
-
-    def _generateActions(self):
-      resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-      allinputs = self.ensureRelevantArtefacts(self._inputs, resultSelector, "inputs")
-
-      global logger
-
-      splittedInputs = [allinputs]
-
-      if self._splitProps is not None:
-          splittedInputs = demux.splitArtefact(allinputs, *self._splitProps)
-
-      actions = list()
-
-      for inputs in splittedInputs:
-          action = PythonAction(inputs=inputs, actionTag=self._actionTag, alwaysDo=self._alwaysDo,
-                                          session=self._session,
-                                          additionalActionProps=self._additionalActionProps,
-                                          **self._singleActionParameters)
-          actions.append(action)
-      return actions
+        splitter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSplitter()}
+        if splitProperties is not None:
+            splitter = {BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSplitter(*splitProperties)}
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PythonAction,
+                                 primaryInputSelector=inputSelector,
+                                 primaryAlias="inputs", splitter=splitter, session=session,
+                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 **singleActionParameters)

@@ -23,4 +23,4 @@ class KeyValueSplitter(BaseSplitter):
     self._key = splitArgs
 
   def splitSelection(self, selection):
-    return splitArtefact(inputArtefacts = selection, *self._key)
+    return splitArtefact(selection, *self._key)

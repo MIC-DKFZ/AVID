@@ -13,7 +13,6 @@
 
 from builtins import object
 import logging
-
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
 from avid.sorter import BaseSorter
@@ -167,7 +166,8 @@ class ActionBatchGenerator(object):
             artefacts = selector.getSelection(self._session.artefacts)
             artefacts = self._ensureRelevantArtefacts(artefacts, inputName)
 
-            splittedArtefacts = self._splitter[inputName].splitSelection(artefacts)
+            splitter = self._splitter[inputName]
+            splittedArtefacts = splitter.splitSelection(artefacts)
 
             sortedArtefacts = list()
             for split in splittedArtefacts:

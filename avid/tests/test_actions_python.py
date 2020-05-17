@@ -55,7 +55,7 @@ caseInstanceCount = 0
 def indicate_nary_output_script(actionInstance, **allargs):
     global caseInstanceCount #used to ensure unique instances as result when testing
     caseInstanceCount += 1
-    result = actionInstance.generateArtefact(actionInstance._inputArtefacts[sorted(actionInstance._inputArtefacts.keys())[0]],
+    result = actionInstance.generateArtefact(actionInstance._inputArtefacts[sorted(actionInstance._inputArtefacts.keys())[0]][0],
                                              userDefinedProps={artefactProps.CASEINSTANCE: str(caseInstanceCount)},
                                              urlHumanPrefix=actionInstance.instanceName,
                                              urlExtension='txt')
