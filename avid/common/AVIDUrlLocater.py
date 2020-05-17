@@ -171,9 +171,4 @@ def getDefaultPath():
      returns a default path for actions
      This method is called if the action executable can't be found elsewhere see getExecutablePath()
   '''
-  return getUtilityPath()       
-
-def removeFileEnding(exe):
-  return exe[:exe.find(".")]
-   
-  
+  return getUtilityPath()

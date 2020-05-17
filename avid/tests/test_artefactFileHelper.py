@@ -29,10 +29,18 @@ class TestArtefactFileHelper(unittest.TestCase):
               
       self.a1 = artefactGenerator.generateArtefactEntry("case1", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), "obj_1", True)
       self.a2 = artefactGenerator.generateArtefactEntry("case2", None, 0, "action2", "result2", "dummy2", os.path.join(self.testDataDir, "artefact2.txt"), None, False, customProp1 = "nice", customProp2 = "42")
-      self.a3 = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), input_ids = {'source':'source_id', 'source2':None} )
+      self.a3 = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), input_ids = {'source':['id_1','id_1_1'], 'source2':None, 'source3': [None], 'source4':['id_2']} )
       self.data = list()
       self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
       self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
+      self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
+
+      self.a3_loaded = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), input_ids = {'source':['id_1','id_1_1'], 'source4':['id_2']} )
+      self.a3_loaded[artefactProps.ID] = self.a3[artefactProps.ID]
+      self.data_loaded = list()
+      self.data_loaded = artefact.addArtefactToWorkflowData(self.data_loaded, self.a1)
+      self.data_loaded = artefact.addArtefactToWorkflowData(self.data_loaded, self.a2)
+      self.data_loaded = artefact.addArtefactToWorkflowData(self.data_loaded, self.a3_loaded)
 
 
     def tearDown(self):
@@ -40,60 +48,6 @@ class TestArtefactFileHelper(unittest.TestCase):
         shutil.rmtree(self.rootTestDir)
       except:
         pass
-
-
-    def test_load_csv(self):
-      
-      with self.assertRaises(ValueError):
-        fileHelper.loadArtefactList_csv("invalidFilePath")
-      
-      artefacts = fileHelper.loadArtefactList_csv(os.path.join(self.testDataDir,"artefactList.csv"),True)
-      self.assertEqual(len(artefacts), 3)
-      self.assertEqual(artefacts[0][artefactProps.CASE], "0")
-      self.assertEqual(artefacts[0][artefactProps.TIMEPOINT], 0)
-      self.assertEqual(artefacts[0][artefactProps.CASEINSTANCE], "")
-      self.assertEqual(artefacts[0][artefactProps.TYPE], "result")
-      self.assertEqual(artefacts[0][artefactProps.FORMAT], "virtuos")
-      self.assertEqual(artefacts[0][artefactProps.URL], os.path.join(self.testDataDir, "artefact1.txt"))
-      self.assertEqual(artefacts[0][artefactProps.ACTIONTAG], "Tag1")
-      self.assertEqual(artefacts[0][artefactProps.OBJECTIVE], None)
-      self.assertEqual(artefacts[0][artefactProps.INVALID], False)
-
-      self.assertEqual(artefacts[1]["8"], "ownProp1")
-      self.assertEqual(artefacts[1]["9"], "ownProp2")   
-      
-      #Check if auto check of url existance works properly: invalidation
-      self.assertEqual(artefacts[2][artefactProps.CASE], "Case3")
-      self.assertEqual(artefacts[2][artefactProps.INVALID], True)      
-
-      artefacts = fileHelper.loadArtefactList_csv(os.path.join(self.testDataDir,"artefactList.csv"), rootPath = self.testDataDir)
-      self.assertEqual(len(artefacts), 3)
-      self.assertEqual(artefacts[0][artefactProps.CASE], "0")
-      self.assertEqual(artefacts[0][artefactProps.TIMEPOINT], 0)
-      self.assertEqual(artefacts[0][artefactProps.CASEINSTANCE], "")
-      self.assertEqual(artefacts[0][artefactProps.TYPE], "result")
-      self.assertEqual(artefacts[0][artefactProps.FORMAT], "virtuos")
-      self.assertEqual(artefacts[0][artefactProps.URL], os.path.join(self.testDataDir, "artefact1.txt"))
-      self.assertEqual(artefacts[0][artefactProps.ACTIONTAG], "Tag1")
-      self.assertEqual(artefacts[0][artefactProps.OBJECTIVE], None)
-      self.assertEqual(artefacts[0][artefactProps.INVALID], False)
-      self.assertEqual(artefacts[1][artefactProps.INVALID], False)
-      self.assertEqual(artefacts[2][artefactProps.INVALID], True)      
-
-      artefacts = fileHelper.loadArtefactList_csv(os.path.join(self.testDataDir,"artefactList.csv"))
-      self.assertEqual(len(artefacts), 3)
-      self.assertEqual(artefacts[0][artefactProps.CASE], "0")
-      self.assertEqual(artefacts[0][artefactProps.TIMEPOINT], 0)
-      self.assertEqual(artefacts[0][artefactProps.CASEINSTANCE], "")
-      self.assertEqual(artefacts[0][artefactProps.TYPE], "result")
-      self.assertEqual(artefacts[0][artefactProps.FORMAT], "virtuos")
-      self.assertEqual(artefacts[0][artefactProps.URL], "./artefact1.txt")
-      self.assertEqual(artefacts[0][artefactProps.ACTIONTAG], "Tag1")
-      self.assertEqual(artefacts[0][artefactProps.OBJECTIVE], None)
-      self.assertEqual(artefacts[0][artefactProps.INVALID], True)
-      self.assertEqual(artefacts[1][artefactProps.INVALID], True)
-      self.assertEqual(artefacts[2][artefactProps.INVALID], True)      
-
 
     def test_load_xml(self):
       with self.assertRaises(ValueError):
@@ -113,7 +67,7 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[0][artefactProps.INVALID], False)
       self.assertEqual(artefacts[0][artefactProps.INPUT_IDS], None)
 
-      self.assert_(artefacts[1][artefactProps.ID] is not None)
+      self.assertTrue(artefacts[1][artefactProps.ID] is not None)
       self.assertEqual(artefacts[1][artefactProps.CASE], "case_2")
       self.assertEqual(artefacts[1][artefactProps.TIMEPOINT], 1)
       self.assertEqual(artefacts[1][artefactProps.CASEINSTANCE], None)
@@ -136,15 +90,15 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertEqual(artefacts[2][artefactProps.ACTIONTAG], "UnkownAction")
       self.assertEqual(artefacts[2][artefactProps.OBJECTIVE], None)
       self.assertEqual(artefacts[2][artefactProps.INVALID], True)      
-      self.assertDictEqual(artefacts[2][artefactProps.INPUT_IDS], {"input1":"ID_1"})
+      self.assertDictEqual(artefacts[2][artefactProps.INPUT_IDS], {"input1":["ID_1","ID_1_2"], "input2":['ID_2']})
 
 
     def test_save_xml(self):
 
       fileHelper.saveArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"),self.data, rootPath = self.testDataDir)
       artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
-      
-      self.assertListEqual(self.data, artefacts)
+
+      self.assertListEqual(self.data_loaded, artefacts)
 
 
 if __name__ == "__main__":

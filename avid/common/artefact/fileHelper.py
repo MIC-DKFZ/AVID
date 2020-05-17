@@ -40,74 +40,6 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-
-def loadArtefactList_csv(filePath, expandPaths=False, rootPath=None):
-    '''Loads a artefact list from a CSV file. This is a methods to load the first
-    generation input files.
-    DEPRECATED!
-    @param filePath Path where the artefact list is located.
-    @param expandPaths If true all relative url will be expanded by the rootPath
-    If rootPath is not set, it will be the directory of filePath
-    @param rootPath If defined any relative url in the list will expanded by the
-    root path. If rootPath is set, expandPaths is implicitly true.
-    '''
-    artefacts = list()
-
-    if rootPath is None and expandPaths is True:
-        rootPath = os.path.split(filePath)[0]
-
-    if not os.path.isfile(filePath):
-        raise ValueError("Cannot load artefact list from file. File does not exist. File path: " + str(filePath))
-
-    with open(filePath, "r", newline='') as csvfile:
-        artefactreader = csv.reader(csvfile, delimiter=";")
-
-        for row in artefactreader:
-            artefact = generateArtefactEntry(None, None, 0, "UnkownAction", None, None, invalid=True)
-            for no, entry in enumerate(row):
-                if no == 0:
-                    if entry == "" or entry == "NA":
-                        entry = str(uuid.uuid1())
-                    artefact[defaultProps.ID] = entry
-                elif no == 1:
-                    artefact[defaultProps.CASE] = entry
-                elif no == 2:
-                    artefact[defaultProps.TIMEPOINT] = entry
-                elif no == 3:
-                    artefact[defaultProps.CASEINSTANCE] = entry
-                elif no == 4:
-                    artefact[defaultProps.ACTIONTAG] = entry
-                elif no == 5:
-                    artefact[defaultProps.TYPE] = entry
-                elif no == 6:
-                    artefact[defaultProps.FORMAT] = entry
-                elif no == 7:
-                    if rootPath is not None and not os.path.isabs(entry):
-                        entry = os.path.normpath(os.path.join(rootPath, entry))
-                    artefact[defaultProps.URL] = entry
-
-                    if os.path.isfile(entry):
-                        artefact[defaultProps.INVALID] = False
-                        logging.info("Artefact had no valid URL. Set invalid property to true. Artefact: %s", artefact)
-                else:
-                    artefact[str(no)] = entry
-
-            try:
-                # If timepoint can be converted into a number, do so
-                artefact[defaultProps.TIMEPOINT] = int(artefact[defaultProps.TIMEPOINT])
-            except:
-                pass
-
-            try:
-                artefact[defaultProps.EXECUTION_DURATION] = float(artefact[defaultProps.EXECUTION_DURATION])
-            except:
-                pass
-
-            artefacts.append(artefact)
-
-    return artefacts
-
-
 XML_ARTEFACTS = "avid:artefacts"
 XML_ARTEFACT = "avid:artefact"
 XML_PROPERTY = "avid:property"
@@ -117,7 +49,6 @@ XML_ATTR_KEY = "key"
 XML_NAMESPACE = "http://www.dkfz.de/en/sidt/avid"
 XML_NAMESPACE_DICT = {"avid": XML_NAMESPACE}
 CURRENT_XML_VERSION = "1.0"
-
 
 def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
     '''Loads a artefact list from a XML file.
@@ -150,7 +81,10 @@ def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
                     value = dict()
                     for aSource in aProp.findall(XML_INPUT_ID, XML_NAMESPACE_DICT):
                         if XML_ATTR_KEY in aSource.attrib:
-                            value[aSource.attrib[XML_ATTR_KEY]] = aSource.text
+                            if aSource.attrib[XML_ATTR_KEY] in value:
+                                value[aSource.attrib[XML_ATTR_KEY]].append(aSource.text)
+                            else:
+                                value[aSource.attrib[XML_ATTR_KEY]] = [aSource.text]
                         else:
                             raise ValueError("XML seems not to be valid. SourceID element has no key attribute")
                     artefact[aProp.attrib[XML_ATTR_KEY]] = value
@@ -186,8 +120,10 @@ def saveArtefactList_xml(filePath, artefacts, rootPath=None):
                 if key is defaultProps.INPUT_IDS:
                     for sourceName in value:
                         if value[sourceName] is not None:
-                            xmlInput = ElementTree.SubElement(xmlProp,XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
-                            xmlInput.text = value[sourceName]
+                            for id in value[sourceName]:
+                                if id is not None:
+                                    xmlInput = ElementTree.SubElement(xmlProp,XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
+                                    xmlInput.text = id
                 else:
                     if key is defaultProps.URL:
                         # make all paths relative
