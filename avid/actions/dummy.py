@@ -48,11 +48,12 @@ class DummySingleAction(SingleActionBase):
 
 
 class DummyBatchAction(BatchActionBase):
-  def __init__(self, artefactSelector, actionTag = 'Dummy', alwaysDo = False, scheduler = SimpleScheduler(), session = None):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session = session)
+  def __init__(self, artefactSelector, actionTag = 'Dummy', scheduler = SimpleScheduler(), session = None,
+               additionalActionProps = None, **singleActionParameters):
 
     BatchActionBase.__init__(self, actionTag= actionTag, actionClass=DummySingleAction, primaryInputSelector= artefactSelector,
-                             primaryAlias="artefacts", session= session, scheduler=scheduler)
+                             primaryAlias="artefacts", session= session, scheduler=scheduler,
+                             additionalActionProps = additionalActionProps, **singleActionParameters)
 
 
 class DummyCLIAction(CLIActionBase):

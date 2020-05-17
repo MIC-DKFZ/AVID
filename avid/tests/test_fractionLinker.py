@@ -29,46 +29,36 @@ class TestFractionLinker(unittest.TestCase):
     self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "result", "dummy", None)
     self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", None)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a7)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a9)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a10)
-
-    self.data2 = list()
-    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a1)
-    self.data2 = artefact.addArtefactToWorkflowData(self.data2, self.a2)
+    self.selections1 = [[self.a1], [self.a2], [self.a3], [self.a4], [self.a5], [self.a6], [self.a7], [self.a8], [self.a9], [self.a10]]
+    self.selections2 = [[self.a1], [self.a2]]
 
 
   def test_FractionLinker(self):
     linker = FractionLinker()
-    selection = linker.getLinkedSelection(2, self.data,self.data)
+    selection = linker.getLinkedSelection(2, self.selections1,self.selections1)
     self.assertEqual(len(selection), 2)
-    self.assertIn(self.a3, selection)
-    self.assertIn(self.a4, selection)
+    self.assertEqual(len(selection[0]), 1)
+    self.assertEqual(len(selection[1]), 1)
+    self.assertIn(self.a3, selection[0])
+    self.assertIn(self.a4, selection[1])
   
     linker = FractionLinker()
-    selection = linker.getLinkedSelection(2, self.data,self.data2)
+    selection = linker.getLinkedSelection(2, self.selections1,self.selections2)
     self.assertEqual(len(selection), 0)
 
     linker = FractionLinker(True)
-    selection = linker.getLinkedSelection(2, self.data,self.data2)
+    selection = linker.getLinkedSelection(2, self.selections1,self.selections2)
     self.assertEqual(len(selection), 1)
-    self.assertIn(self.a2, selection)
+    self.assertEqual(len(selection[0]), 1)
+    self.assertIn(self.a2, selection[0])
 
   def test_FractionLinker_empty_slaves(self):
     linker = FractionLinker()
-    selection = linker.getLinkedSelection(2, self.data, [])
+    selection = linker.getLinkedSelection(2, self.selections1, [])
     self.assertEqual(len(selection), 0)
   
     linker = FractionLinker(True)
-    selection = linker.getLinkedSelection(2, self.data, [])
+    selection = linker.getLinkedSelection(2, self.selections1, [])
     self.assertEqual(len(selection), 0)
 
 

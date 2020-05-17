@@ -15,11 +15,31 @@ import unittest
 import avid.common.workflow as workflow
 import os
 from avid.actions.dummy import DummyBatchAction
-from avid.actions import BatchActionBase
+
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
-from avid.selectors.keyValueSelector import CaseSelector
+from avid.selectors import SelectorBase
+
+
+class TestSelector(SelectorBase):
+  '''
+      Special selector that will only select the artefacts that are passed with init in order to directly control
+      what the action will get.
+  '''
+
+  def __init__(self, legalArtefacts):
+    ''' init '''
+    self._legalArtefacts = legalArtefacts
+
+  def getSelection(self, workflowData):
+    '''Filters the given list of entries and returns all selected entries'''
+    result = []
+    for a in workflowData:
+        if a in self._legalArtefacts:
+            result.append(a)
+    return self._legalArtefacts
+
 
 class Test(unittest.TestCase):
 
@@ -58,11 +78,11 @@ class Test(unittest.TestCase):
         
     def test_simelar_exisiting_alwaysDo(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_valid2_new],"Action1", True)
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_valid2_new]),"Action1", alwaysDo = True)
       
       token = action.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertIn(self.a_valid2_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -74,11 +94,11 @@ class Test(unittest.TestCase):
 
     def test_simelar_exisiting_alwaysOff(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_valid2_new],"Action1", False)
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_valid2_new]),"Action1", alwaysDo = False)
       
       token = action.do()
       
-      self.assert_(token.isSkipped())
+      self.assertTrue(token.isSkipped())
       self.assertIn(self.a_valid, token.generatedArtefacts)
       self.assertIn(self.a_valid2, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -92,11 +112,11 @@ class Test(unittest.TestCase):
 
     def test_simelar_mixed_alwaysDo(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_Invalid_new],"Action1", True)
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_Invalid_new]),"Action1", alwaysDo = True)
       
       token = action.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -108,11 +128,11 @@ class Test(unittest.TestCase):
 
     def test_simelar_mixed_alwaysOff(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_Invalid_new],"Action1", False)
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_Invalid_new]),"Action1", alwaysDo = False)
       
       token = action.do()
       
-      self.assert_(token.isSuccess())
+      self.assertTrue(token.isSuccess())
       self.assertIn(self.a_valid, token.generatedArtefacts)
       self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -126,11 +146,11 @@ class Test(unittest.TestCase):
 
     def test_failure_mixed_alwaysOn(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_NoFile],"Action1", True)
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_NoFile]),"Action1", alwaysDo = True)
       
       token = action.do()
       
-      self.assert_(token.isFailure())
+      self.assertTrue(token.isFailure())
       self.assertIn(self.a_valid_new, token.generatedArtefacts)
       self.assertIn(self.a_NoFile, token.generatedArtefacts)
       self.assertEqual(len(token.generatedArtefacts), 2)
@@ -138,12 +158,12 @@ class Test(unittest.TestCase):
       self.assertEqual(self.session.actions[action.actionTag], token)
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertIn(self.a_NoFile, self.session.artefacts)
-      self.assert_(token.generatedArtefacts[1][artefactProps.INVALID])
+      self.assertTrue(token.generatedArtefacts[1][artefactProps.INVALID])
 
     
     def test_failure_mixed_alwaysOff(self):
       workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction([self.a_valid_new, self.a_NoFile],"Action1")
+      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_NoFile]),"Action1")
       
       token = action.do()
       
@@ -155,20 +175,8 @@ class Test(unittest.TestCase):
       self.assertEqual(self.session.actions[action.actionTag], token)
       self.assertIn(self.a_valid, self.session.artefacts)
       self.assertIn(self.a_NoFile, self.session.artefacts)
-      self.assert_(token.generatedArtefacts[1][artefactProps.INVALID])
+      self.assertTrue(token.generatedArtefacts[1][artefactProps.INVALID])
 
-
-    def test_ensure_valid_artifacts_additional_selector(self):
-      workflow.currentGeneratedSession = self.session
-      action = BatchActionBase("Action1")
-      
-      selection = action.ensureRelevantArtefacts(self.session.artefacts, CaseSelector("Case2"))
-     
-      self.assertTrue(len(selection)==3)
-      self.assertIn(self.a_valid2, selection)
-      self.assertIn(self.a_NoneURL, selection)
-      self.assertIn(self.a_Invalid, selection)
-      
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

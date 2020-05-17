@@ -44,7 +44,7 @@ class FractionLinker(LinkerBase):
     resultSelections = linker.getLinkedSelection(primaryIndex, primarySelections, secondarySelections)
     
     if self._useClosestPast and len(resultSelections)>0:
-      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelections[0][primaryIndex], artefactProps.TIMEPOINT))
+      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelections[primaryIndex][0], artefactProps.TIMEPOINT))
       bestSelection = None
       bestTimePoint = -1
       #search for the best time fit
