@@ -71,10 +71,14 @@ def splitArtefact(inputArtefacts, *splitArgs):
         newSplits = list()
         for oldSplits in splittedA:
             splitDict = getSelectors(str(splitProperty), workflowData=oldSplits)
-            for splitID in splitDict:
-                relevantSelector = splitDict[splitID]
-                relevantInputs = relevantSelector.getSelection(oldSplits)
-                newSplits.append(relevantInputs)
+            if len(splitDict) == 0:
+                #split does not contain value so keep as is
+                newSplits.append(oldSplits)
+            else:
+                for splitID in splitDict:
+                    relevantSelector = splitDict[splitID]
+                    relevantInputs = relevantSelector.getSelection(oldSplits)
+                    newSplits.append(relevantInputs)
         splittedA = newSplits
 
     return splittedA
