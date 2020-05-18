@@ -43,5 +43,16 @@ class TestArtefact(unittest.TestCase):
     path = artefact.generateArtefactPath(self.session, self.a3)
     self.assertEqual(path, 'test_session_dir\\TestSession\\IllegalChars\\result\\Case1\\1')
 
+  def test_ensureSimilarityRelevantProperty(self):
+    self.assertNotIn("ensuredTestProp", artefact.similarityRelevantProperties)
+    artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
+    self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
+
+    propCount = len(artefact.similarityRelevantProperties)
+    artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
+    self.assertEqual(propCount, len(artefact.similarityRelevantProperties))
+    self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
+
+
 if __name__ == '__main__':
     unittest.main()

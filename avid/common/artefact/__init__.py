@@ -40,6 +40,14 @@ similarityRelevantProperties = [defaultProps.CASE, defaultProps.CASEINSTANCE, de
                                 defaultProps.ONLY_ESTIMATOR, defaultProps.N_FRACTIONS_FOR_ESTIMATION, defaultProps.ACC_ELEMENT]
 
 
+def ensureSimilarityRelevantProperty(propertyName):
+    '''Helper that ensures that the passed propertyName is contained in similarityRelevantProperties and therefore will
+     be used to discriminate artifacts.'''
+    global similarityRelevantProperties
+    if propertyName not in similarityRelevantProperties:
+        similarityRelevantProperties.append(propertyName)
+
+
 class Artefact(object):
     def __init__(self, defaultP=None, additionalP=None):
 
