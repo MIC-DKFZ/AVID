@@ -76,6 +76,9 @@ are stored in.
 repository. This is interesting for developers or if you will often update the avid source
 and you want to have an easy possibility to update the tools accordingly.
 
+3. "add" the tools. This will allow to register tools "by hand". This is interesting for
+tools that are currently not centrally stored or are local developments.
+
 ###install all tools specified by your AVID distribution
 requirement is an installed SVN (accessible via commandline, e.g. https://tortoisesvn.net.
 Be sure to enable command line support in installation) and Visual Studio 2013
@@ -101,6 +104,14 @@ or
 ```
   avidconfig tools update <toolname1> [<toolname2> [...]]
 ```
+
+###add own/specific tools
+use
+```
+  avidconfig tools add <toolname/actionID> <path to executable>
+```
+This will registere a new tool with the given toolname/actionID and let the configuration point to the also specified
+executable.
 
 ## run tests
 either run:
