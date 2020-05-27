@@ -63,17 +63,15 @@ class matchRAction(CLIActionBase):
   
   
   def _generateName(self):
-    name = "reg_"+str(artefactHelper.getArtefactProperty(self._movingImage,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._movingImage,artefactProps.TIMEPOINT))
+    name = "reg_"+artefactHelper.getArtefactShortName(self._movingImage)
 
     if self._movingMask is not None:
-      name += "_"+str(artefactHelper.getArtefactProperty(self._movingMask,artefactProps.ACTIONTAG))
+      name += "_"+artefactHelper.getArtefactShortName(self._movingMask)
 
-    name += "_to_"+str(artefactHelper.getArtefactProperty(self._targetImage,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._targetImage,artefactProps.TIMEPOINT))
+    name += "_to_"+artefactHelper.getArtefactShortName(self._targetImage)
 
     if self._targetMask is not None:
-      name += "_"+str(artefactHelper.getArtefactProperty(self._targetMask,artefactProps.ACTIONTAG))
+      name += "_"+artefactHelper.getArtefactShortName(self._targetMask)
       
     return name
     
