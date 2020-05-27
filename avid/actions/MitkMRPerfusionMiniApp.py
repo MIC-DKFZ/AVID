@@ -31,7 +31,7 @@ from .simpleScheduler import SimpleScheduler
 logger = logging.getLogger(__name__)
 
 
-class MRPerfusionMiniAppAction(CLIActionBase):
+class MitkMRPerfusionMiniAppAction(CLIActionBase):
     '''Class that wrapps the single action for the tool MRPerfusionMiniApp.'''
     MODEL_DESCRIPTIVE = "descriptive"
     MODEL_TOFTS = "tofts"
@@ -68,7 +68,7 @@ class MRPerfusionMiniAppAction(CLIActionBase):
                                                      urlExtension='nrrd')
 
         if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MRPerfusionMiniApp", actionConfig))
+            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkMRPerfusionMiniApp", actionConfig))
 
     def _generateName(self):
         style = ''
@@ -106,7 +106,7 @@ class MRPerfusionMiniAppAction(CLIActionBase):
         aifMaskPath = artefactHelper.getArtefactProperty(self._aifmask, artefactProps.URL)
         aifPath = artefactHelper.getArtefactProperty(self._aifimage, artefactProps.URL)
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "MRPerfusionMiniApp", self._actionConfig)
+        execURL = AVIDUrlLocater.getExecutableURL(self._session, "MitkMRPerfusionMiniApp", self._actionConfig)
 
         result = list()
         result.append(execURL)
@@ -155,8 +155,9 @@ class MRPerfusionMiniAppAction(CLIActionBase):
             output = subprocess.check_output(args, cwd=self._cwd)
 
             for line in output.splitlines():
-                if line.startswith('Store result '):
-                    regResults = re.findall('Store result (.*): (.*) -> (.*)', line)
+                stringLine = line.decode()
+                if stringLine.startswith('Store result '):
+                    regResults = re.findall('Store result (.*): (.*) -> (.*)', stringLine)
 
                     try:
                         type = regResults[0][0]
@@ -164,7 +165,7 @@ class MRPerfusionMiniAppAction(CLIActionBase):
                         url = regResults[0][2]
                         results.append((type,name,url))
                     except:
-                        raise RuntimeError('Failed to parse storage info line: {}'.format(line))
+                        raise RuntimeError('Failed to parse storage info line: {}'.format(stringLine))
 
         except subprocess.CalledProcessError as err:
             pass
@@ -185,14 +186,14 @@ class MRPerfusionMiniAppAction(CLIActionBase):
         return content
 
 
-class MRPerfusionMiniAppBatchAction(BatchActionBase):
+class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
     '''Batch action for MRPerfusionMiniApp.'''
 
-    MODEL_DESCRIPTIVE = MRPerfusionMiniAppAction.MODEL_DESCRIPTIVE
-    MODEL_TOFTS = MRPerfusionMiniAppAction.MODEL_TOFTS
-    MODEL_2CX = MRPerfusionMiniAppAction.MODEL_2CX
-    MODEL_2SL = MRPerfusionMiniAppAction.MODEL_2SL
-    MODEL_3SL = MRPerfusionMiniAppAction.MODEL_3SL
+    MODEL_DESCRIPTIVE = MitkMRPerfusionMiniAppAction.MODEL_DESCRIPTIVE
+    MODEL_TOFTS = MitkMRPerfusionMiniAppAction.MODEL_TOFTS
+    MODEL_2CX = MitkMRPerfusionMiniAppAction.MODEL_2CX
+    MODEL_2SL = MitkMRPerfusionMiniAppAction.MODEL_2SL
+    MODEL_3SL = MitkMRPerfusionMiniAppAction.MODEL_3SL
 
     def __init__(self, signalSelector, maskSelector=None, aifmaskSelector = None, aifSelector = None,
                  maskLinker = None, aifLinker = None, aifmaskLinker = None,
@@ -211,7 +212,7 @@ class MRPerfusionMiniAppBatchAction(BatchActionBase):
         linker = {"mask": maskLinker, "aifmask": aifmaskLinker,
                   "aifimage": aifLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MRPerfusionMiniAppAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRPerfusionMiniAppAction,
                                  primaryInputSelector=signalSelector,
                                  primaryAlias="signal", additionalInputSelectors=additionalInputSelectors,
                                  linker=linker, session=session,

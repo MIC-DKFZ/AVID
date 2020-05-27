@@ -15,7 +15,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MRPerfusionMiniApp import MRPerfusionMiniAppBatchAction as perfusion
+from avid.actions.MitkMRPerfusionMiniApp import MitkMRPerfusionMiniAppBatchAction as perfusion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath
 

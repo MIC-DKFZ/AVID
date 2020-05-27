@@ -218,7 +218,7 @@ class ActionBatchGenerator(object):
                     secondSelections= []
                 linkedAdditionals[additionalKey] = self._linker[additionalKey].getLinkedSelection(pos, primaryInput,
                                                                               secondSelections)
-            actions.extend(self._generateActions_recursive({self._primaryAlias: primarySplit}, None, linkedAdditionals.copy(), depSequence))
+            actions.extend(self._generateActions_recursive({self._primaryAlias: primarySplit.copy()}, None, linkedAdditionals.copy(), depSequence))
 
         return actions
 
@@ -243,7 +243,6 @@ class ActionBatchGenerator(object):
             if currentName in self._dependentLinker:
                 sourceName = self._dependentLinker[currentName][0]
                 linker = self._dependentLinker[currentName][1]
-                currentInputs = list()
                 if relevantAdditionalInputPos[sourceName] is not None:
                     currentInput = linker.getLinkedSelection(relevantAdditionalInputPos[sourceName], additionalInputs[sourceName], currentInputs)
                     if currentInputs is None:

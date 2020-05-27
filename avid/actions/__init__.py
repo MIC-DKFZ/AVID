@@ -397,7 +397,6 @@ class SingleActionBase(ActionBase):
             
             invalidInputs = self._getInvalidInputs()
             if len(invalidInputs) is 0:
-
                 try:
                     self._generateOutputs()
                     endtime = time.time()
