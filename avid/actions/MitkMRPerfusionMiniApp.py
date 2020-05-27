@@ -36,6 +36,8 @@ class MRPerfusionMiniAppAction(CLIActionBase):
     MODEL_DESCRIPTIVE = "descriptive"
     MODEL_TOFTS = "tofts"
     MODEL_2CX = "2CX"
+    MODEL_3SL = "3SL"
+    MODEL_2SL = "2SL"
 
     def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask = None, aifmask = None, aifimage = None,
                  hematocrit=0.45, roibased=False, constraints = False, actionTag="MRPerfusion", alwaysDo=False,
@@ -48,14 +50,14 @@ class MRPerfusionMiniAppAction(CLIActionBase):
 
         self._addInputArtefacts(signal=signal, mask = mask, aifmask = aifmask, aifimage = aifimage)
 
-        self._signal = signal
+        self._signal = self._ensureSingleArtefact(signal, "signal");
         self._model = model
         self._injectiontime = injectiontime
-        self._aifmask = aifmask
-        self._aifimage = aifimage
+        self._aifmask = self._ensureSingleArtefact(aifmask, "aifmask")
+        self._aifimage = self._ensureSingleArtefact(aifimage, "aifimage")
         self._hematocrit = hematocrit
         self._roibased = roibased
-        self._mask = mask
+        self._mask = self._ensureSingleArtefact(mask, "mask")
         self._constraints = constraints
 
         self._resultTemplate = self.generateArtefact(self._signal,
@@ -137,7 +139,8 @@ class MRPerfusionMiniAppAction(CLIActionBase):
             result.append('--injectiontime')
             result.append('{}'.format(self._injectiontime))
 
-        if not self._model == self.MODEL_DESCRIPTIVE:
+        if not self._model == self.MODEL_DESCRIPTIVE or not self._model == self.MODEL_2SL\
+                or not self._model == self.MODEL_3SL:
             result.append('--hematocrit')
             result.append('{}'.format(self._hematocrit))
 
@@ -188,66 +191,30 @@ class MRPerfusionMiniAppBatchAction(BatchActionBase):
     MODEL_DESCRIPTIVE = MRPerfusionMiniAppAction.MODEL_DESCRIPTIVE
     MODEL_TOFTS = MRPerfusionMiniAppAction.MODEL_TOFTS
     MODEL_2CX = MRPerfusionMiniAppAction.MODEL_2CX
+    MODEL_2SL = MRPerfusionMiniAppAction.MODEL_2SL
+    MODEL_3SL = MRPerfusionMiniAppAction.MODEL_3SL
 
-    def __init__(self, signalSelector, maskSelector=None, aifMaskSelector = None, aifSelector = None,
-                 maskLinker = FractionLinker(), aifLinker = FractionLinker(), aifMaskLinker = FractionLinker(),
+    def __init__(self, signalSelector, maskSelector=None, aifmaskSelector = None, aifSelector = None,
+                 maskLinker = None, aifLinker = None, aifmaskLinker = None,
                  actionTag="MRPerfusion", alwaysDo=False, session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
 
-        self._signals = signalSelector.getSelection(self._session.artefacts)
+        if maskLinker is None:
+            maskLinker = FractionLinker()
+        if aifLinker is None:
+            aifLinker = FractionLinker()
+        if aifmaskLinker is None:
+            aifmaskLinker = FractionLinker()
 
-        self._masks = list()
-        if maskSelector is not None:
-            self._masks = maskSelector.getSelection(self._session.artefacts)
-        self._aifs = list()
-        if aifSelector is not None:
-            self._aifs = aifSelector.getSelection(self._session.artefacts)
-        self._aifmasks = list()
-        if aifMaskSelector is not None:
-            self._aifmasks = aifMaskSelector.getSelection(self._session.artefacts)
+        additionalInputSelectors = {"mask": maskSelector, "aifmask": aifmaskSelector,
+                                    "aifimage": aifSelector}
+        linker = {"mask": maskLinker, "aifmask": aifmaskLinker,
+                  "aifimage": aifLinker}
 
-        self._maskLinker = maskLinker
-        self._aifLinker = aifLinker
-        self._aifMaskLinker = aifMaskLinker
-
-        self._singleActionParameters = singleActionParameters
-
-    def _generateActions(self):
-        # filter only type result. Other artefact types are not interesting
-        resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-
-        signals = self.ensureRelevantArtefacts(self._signals, resultSelector, "signals")
-        masks = self.ensureRelevantArtefacts(self._masks, resultSelector, "masks")
-        aifs = self.ensureRelevantArtefacts(self._aifs, resultSelector, "aifs")
-        aifmasks = self.ensureRelevantArtefacts(self._aifmasks, resultSelector, "aifmasks")
-
-        global logger
-
-        actions = list()
-
-        for (pos, signal) in enumerate(signals):
-            linkedMasks = self._maskLinker.getLinkedSelection(pos, signals, masks)
-            if len(linkedMasks) == 0:
-                linkedMasks = [None]
-
-            linkedAIFs = self._aifLinker.getLinkedSelection(pos, signals, aifs)
-            if len(linkedAIFs) == 0:
-                linkedAIFs = [None]
-
-            linkedAIFMasks = self._aifMaskLinker.getLinkedSelection(pos, signals, aifmasks)
-            if len(linkedAIFMasks) == 0:
-                linkedAIFMasks = [None]
-
-            for lm in linkedMasks:
-                for lam in linkedAIFMasks:
-                    for la in linkedAIFs:
-                        action = MRPerfusionMiniAppAction(signal, mask=lm, aifimage=la, aifmask=lam,
-                                    actionTag=self._actionTag,
-                                    alwaysDo=self._alwaysDo,
-                                    session=self._session,
-                                    additionalActionProps=self._additionalActionProps,
-                                    **self._singleActionParameters)
-                        actions.append(action)
-
-        return actions
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MRPerfusionMiniAppAction,
+                                 primaryInputSelector=signalSelector,
+                                 primaryAlias="signal", additionalInputSelectors=additionalInputSelectors,
+                                 linker=linker, session=session,
+                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 **singleActionParameters)
