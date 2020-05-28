@@ -125,7 +125,7 @@ class MitkFuse3Dto4DImageMiniAppBatchAction(BatchActionBase):
 
         sorter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSorter()}
         if timeProperty is not None:
-            sorter = {BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSorter(key=timeProperty)}
+            sorter = {BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSorter(key=timeProperty, asNumbers=True)}
 
         splitter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSplitter()}
         if splitProperties is not None:

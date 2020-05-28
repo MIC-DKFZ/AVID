@@ -11,15 +11,11 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from avid.sorter import BaseSorter
+from avid.sorter.keyValueSorter import KeyValueSorter
 
 import avid.common.artefact.defaultProps as artefactProps
 
-class TimePointSorter(BaseSorter):
+class TimePointSorter(KeyValueSorter):
   '''Special version that enforces that time point is sorted as numeric.'''
   def __init__(self, reverse = False):
-    self._reverse = reverse
-        
-  def sortSelection(self, selection):
-    sortedSel = sorted(selection, key=lambda k: float(k[artefactProps.TIMEPOINT]), reverse = self._reverse)  
-    return sortedSel
+    KeyValueSorter.__init__(key=artefactProps.TIMEPOINT, reverse= reverse, asNumbers=True)
