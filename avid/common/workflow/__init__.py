@@ -29,7 +29,8 @@ from avid.common import artefact
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
 stdoutlogstream = None
 
-def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False, debug = False, structDefinition = None, overwriteExistingSession = False):
+def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
+                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
    @param sessionPath Path of the stored artefact list the session should use
@@ -37,6 +38,7 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
    just be the rootpath of the new session.
    @param name of the session.
    @param structDefinition Path to the structure definition file.
+   @param autoSave
    '''
   sessionExists = False
    
@@ -54,7 +56,8 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
   
-  session = Session(name, rootPath, autoSave = autoSave, debug = debug)
+  session = Session(name, rootPath, autoSave = autoSave or interimSessionSave,
+                    interimSessionSave = interimSessionSave, debug = debug)
       
   #logging setup
   logginglevel = logging.INFO
@@ -142,6 +145,8 @@ def getSessionParser(sessionPath = None):
     parser.add_argument('--debug', action='store_true', help = 'Indicates that the session should also log debug information (Therefore the log is more verbose).')
     parser.add_argument('--overwriteExistingSession', '-o', action='store_true', help = 'Indicates that a session, of it exists should be overwritten. Old artefacts are ignored and the old result folder will be deleted before the session starts.')
     parser.add_argument('--structDefinition', help = 'Path to the file that defines all structures/structure pattern, that should/might be evaluated in the session.')
+    parser.add_argument('--noInterimSave', action='store_true', help = 'Indicates that a session, should one store its new state after everything is processed. If not set, '
+                                                                             'the session file will be actualized with every new artefact stored in the session.')
     return parser
 
 def initSession_byCLIargs( sessionPath = None, **args):
@@ -170,12 +175,14 @@ def initSession_byCLIargs( sessionPath = None, **args):
     args["overwriteExistingSession"] = cliargs.overwriteExistingSession    
   if not "structDefinition" in args and cliargs.structDefinition is not None:
     args["structDefinition"] = cliargs.structDefinition
-  
+  if not "noInterimSave" in args and cliargs.noInterimSave is not None:
+    args["interimSessionSave"] = not cliargs.overwriteExistingSession
+
   return initSession(sessionPath, **args)  
 
    
 class Session(object):
-  def __init__(self, name = None, rootPath = None, autoSave = False, debug = False):
+  def __init__(self, name = None, rootPath = None, autoSave = False, interimSessionSave = False, debug = False):
     if name is None or rootPath is None:
       raise TypeError()
     
@@ -207,6 +214,7 @@ class Session(object):
     self.numberOfPatients = self.getNumberOfPatientsDecorator(patientNumber.getNumberOfPatients)
 
     self.autoSave = autoSave
+    self.interimSessionSave = interimSessionSave
 
     #indicates that the session runs in debug mode
     self.debug = debug
@@ -281,8 +289,7 @@ class Session(object):
     ''' 
     with self.lock:    
       self.actionTools[actionID] = entry
-          
-          
+
   def addActionToken(self, actionToken):
       """Adds a action token to a workflow (with the session info)"""
       with self.lock:
@@ -299,7 +306,13 @@ class Session(object):
     ''' 
     with self.lock:
       self.artefacts = artefact.addArtefactToWorkflowData(self.artefacts, artefactEntry, removeSimelar)
-    
+      try:
+        if self.interimSessionSave:
+          logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
+          fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+      except:
+        pass
+
   def getFailedActions(self):
       """Returns all actions of the session that have failed."""
       failedActions = []
