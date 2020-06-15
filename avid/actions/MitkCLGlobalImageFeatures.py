@@ -53,7 +53,7 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
 
         self._cliArgs = dict()
         if cliArgs is not None:
-            illegalArgs = ["i", "image", "m", "mask", "morph-mask", "morph", "o", "outpur", "x", "xml-output"]
+            illegalArgs = ["i", "image", "m", "mask", "morph-mask", "morph", "o", "output", "x", "xml-output"]
             for arg in cliArgs:
                 if arg not in illegalArgs:
                     self._cliArgs[arg] = cliArgs[arg]
