@@ -70,7 +70,15 @@ class mapRAction(CLIActionBase):
     if self._hasDICOMinput():
       userDefinedProps[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_DCM
 
-    self._resultArtefact = self.generateArtefact(self._inputImage,
+    artefactRef = self._inputImage
+    if self._inputIsReference is False:
+      if self._templateImage is None:
+        logger.error("template image is None and can't be used as Reference")
+        raise
+      else:
+        artefactRef = self._templateImage
+
+    self._resultArtefact = self.generateArtefact(artefactRef,
                                                  userDefinedProps = userDefinedProps,
                                                  urlHumanPrefix=self.instanceName,
                                                  urlExtension=self._outputExt)

@@ -16,6 +16,7 @@ import os
 import shutil
 import avid.common.workflow as workflow
 from avid.actions.mapR import mapRBatchAction as mapR
+from avid.common.artefact.defaultProps import TIMEPOINT
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath
@@ -28,7 +29,8 @@ class TestMapR(unittest.TestCase):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_mapr")
-      
+      self.testArtefactFile2 = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist_2.avid")
+
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
               
@@ -58,6 +60,25 @@ class TestMapR(unittest.TestCase):
 
       token = action.do()
       self.assertEqual(token.isSuccess(), True)
+
+    def test_mapr_action_inputIsReference(self):
+
+        newsession = workflow.initSession(os.path.join(self.sessionDir, "testlist_2.avid"), expandPaths=True,
+                                            bootstrapArtefacts=self.testArtefactFile2)
+
+        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
+                      alwaysDo=True, actionTag="TestMapping")
+        token = action.do()
+        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 1)
+
+        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
+                      inputIsReference=False, alwaysDo=True, actionTag="TestMapping")
+        token = action.do()
+        self.assertEqual(token.isSuccess(), True)
+        #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
+        #the template
+        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 0)
 
 
 if __name__ == "__main__":
