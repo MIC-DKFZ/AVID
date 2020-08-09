@@ -182,7 +182,7 @@ class PythonNaryBatchAction(BatchActionBase):
      - the master input as "inputsMaster"
      - all other inputs with the name they where passed to the batch action.'''
 
-  def __init__(self, inputsMaster, actionTag="NaryScript", alwaysDo=False,
+  def __init__(self, inputsMaster, actionTag="NaryScript",
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
     otherSelectors = dict()
@@ -216,7 +216,7 @@ class PythonUnaryStackBatchAction(BatchActionBase):
     to separate it into different actions (e.g. like the PixelDumpMiniApp action.
     '''
 
-    def __init__(self, inputSelector, splitProperties = None, actionTag="UnaryStackScript", alwaysDo=False,
+    def __init__(self, inputSelector, splitProperties = None, actionTag="UnaryStackScript",
                session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         splitter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSplitter()}
