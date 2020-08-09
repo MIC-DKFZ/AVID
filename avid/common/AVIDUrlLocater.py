@@ -134,6 +134,9 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
     try:
       toolconfigPath = getToolConfigPath(actionID, workflow.rootPath)
     except:
+      logger.debug(
+        'Error when try to get ToolConfigPath for action "%s" with workflow root path "%s". Fall back on generic getToolConfigPath.',
+        actionID, workflow.rootPath)
       toolconfigPath = getToolConfigPath(actionID)
 
     if os.path.isfile(str(toolconfigPath)):
@@ -158,7 +161,15 @@ def getExecutableURL(workflow, actionID, actionConfig = None):
         execURL = os.path.join(os.path.dirname(toolconfigPath),execURL)
                   
       if os.path.isfile(execURL):
-        returnURL = execURL        
+        returnURL = execURL
+      else:
+        logger.error(
+          'ExecURL for action "%s" is invalid. ToolConfigPath: "%s"; ExecURL: "%s".',
+          actionID, toolconfigPath, execURL)
+    else:
+      logger.error(
+        'ToolConfigPath for action "%s" is invalid. ToolConfigPath "%s".',
+        actionID, toolconfigPath)
 
   if returnURL is None:
     logger.error('Action "%s" seems not to have a configured tool. Please use avidconfig and see the readme.md for information how to do it.', actionID)
