@@ -31,4 +31,6 @@ class BaseSplitter(object):
 
 
 from .keyValueSplitter import KeyValueSplitter
+from .keyValueSplitter import CaseSplitter
+from .keyValueSplitter import FractionSplitter
 from .singleSplitter import SingleSplitter

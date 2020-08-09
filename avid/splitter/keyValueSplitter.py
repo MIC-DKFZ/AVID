@@ -13,6 +13,7 @@
 
 from avid.splitter import BaseSplitter
 from avid.common.demultiplexer import splitArtefact
+import avid.common.artefact.defaultProps as artefactProps
 
 class KeyValueSplitter(BaseSplitter):
   '''Splits the artefacts in such a way that all artefacts in a splitt list have the same values for all specified keys
@@ -24,3 +25,13 @@ class KeyValueSplitter(BaseSplitter):
 
   def splitSelection(self, selection):
     return splitArtefact(selection, *self._key)
+
+class CaseSplitter(KeyValueSplitter):
+  '''Splits artefact in such a way that all artefacts of same case are in one split.'''
+  def __init__(self):
+    KeyValueSplitter.__init__(self, artefactProps.CASE)
+
+class FractionSplitter(KeyValueSplitter):
+  '''Splits artefact in such a way that all artefacts of same case and timepoint are in one split.'''
+  def __init__(self):
+    KeyValueSplitter.__init__(self, artefactProps.CASE, artefactProps.TIMEPOINT)
