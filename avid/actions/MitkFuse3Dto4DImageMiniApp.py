@@ -32,10 +32,9 @@ from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
-FORMAT_VALUE_MITK_GIF_XML = 'mitk_cl_gif_xml'
 
 class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
-    '''Class that wrapps the single action for the tool MITK CLGlobalImageFeatures.'''
+    '''Class that wrapps the single action for the tool MitkFuse3Dto4DImageMiniApp.'''
 
     def __init__(self, images, timeProperty = None, timeGenerationCallable = None, actionTag="MitkFuse3Dto4DImageMiniApp", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
@@ -120,7 +119,7 @@ class MitkFuse3Dto4DImageMiniAppBatchAction(BatchActionBase):
         to separate images. All artefacts of one action will be fused into one 4D image.'''
 
     def __init__(self, imageSelector, timeProperty = None, splitProperties = None,
-                 actionTag="MitkFuse3Dto4DImageMiniApp", alwaysDo=False, session=None,
+                 actionTag="MitkFuse3Dto4DImageMiniApp", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         sorter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSorter()}

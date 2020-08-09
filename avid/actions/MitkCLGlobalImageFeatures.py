@@ -172,7 +172,7 @@ class MitkCLGlobalImageFeaturesLegacyCSVBatchAction(BatchActionBase):
         condensed into one csv.'''
 
     def __init__(self, imageSelector, maskSelector, maskLinker=None, splitProperties = None,
-                 actionTag="MITKCLGlobalImageFeatures", alwaysDo=False, session=None,
+                 actionTag="MITKCLGlobalImageFeatures", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         if maskLinker is None:
             maskLinker = FractionLinker()

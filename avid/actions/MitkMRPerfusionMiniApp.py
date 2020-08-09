@@ -197,7 +197,7 @@ class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
 
     def __init__(self, signalSelector, maskSelector=None, aifmaskSelector = None, aifSelector = None,
                  maskLinker = None, aifLinker = None, aifmaskLinker = None,
-                 actionTag="MRPerfusion", alwaysDo=False, session=None,
+                 actionTag="MRPerfusion", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         if maskLinker is None:
