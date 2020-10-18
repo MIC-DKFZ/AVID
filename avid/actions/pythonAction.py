@@ -36,7 +36,7 @@ class PythonAction(SingleActionBase):
    For the arguments the user of the action is free to use any keyword that is not reserved by the action and is not
    "outputs". Additionally the action assumes that all unknown keyword arguments that start with "inputs" are lists of
    artefacts that serves as input.
-   @param generateCallable A callable that will be called to generat the outputs. The action assumes that all outputs
+   @param generateCallable A callable that will be called to generate the outputs. The action assumes that all outputs
    are generated an stored at their designated location.
    @param indicateCallable A callable that, if defined, will be called (like generateCallable) to query the outputs.
    The action assumes that the callable returns a list of output artefacts (like self.indicateOutputs). If this callable

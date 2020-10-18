@@ -21,9 +21,8 @@ from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath
 
-@unittest.skipIf(getToolConfigPath('mapR') is None, 'Tool mapR not installed on the system.')
+@unittest.skipIf(getToolConfigPath('MitkStitchImagesMiniApp') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
 class TestMitkStitchImagesMiniApp(unittest.TestCase):
-
 
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
