@@ -253,7 +253,7 @@ def artefactExists(workflowData, artefactEntry):
     return findSimilarArtefact(workflowData, artefactEntry) is not None
 
 
-def _verboseGenerateArtefactPath(workflow, workflowArtefact):
+def generateVerboseArtefactPath(workflow, workflowArtefact):
     """ Generates the path derived from the workflow informations and the
         properties of the artefact. This default style will generate the following
         path:
@@ -273,7 +273,7 @@ def _verboseGenerateArtefactPath(workflow, workflowArtefact):
     return artefactPath
 
 
-def _defaultGenerateArtefactPath(workflow, workflowArtefact):
+def generateDefaultArtefactPath(workflow, workflowArtefact):
     """ Generates the path derived from the workflow informations and the
         properties of the artefact. This default style will generate the following
         path:
@@ -290,8 +290,11 @@ def _defaultGenerateArtefactPath(workflow, workflowArtefact):
 
     return artefactPath
 
+def generateFlatArtefactPath(workflow, workflowArtefact):
+    """ Using this function will write all artefacts directly into the content directory of the workflow."""
+    return workflow.contentPath
 
-pathGenerationDelegate = _defaultGenerateArtefactPath
+pathGenerationDelegate = generateDefaultArtefactPath
 
 
 def ensureValidPath(unsafePath):
