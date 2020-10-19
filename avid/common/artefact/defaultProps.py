@@ -95,6 +95,8 @@ FORMAT_VALUE_VIRTUOS_HEAD = "virtuos_head"
 FORMAT_VALUE_CSV = "csv"
 '''Standard type value. Indicating the artefact is stored as a JSON file.'''
 FORMAT_VALUE_JSON = "json"
+'''Standard type value. Indicating the artefact is stored as a XML file.'''
+FORMAT_VALUE_XML = "xml"
 '''Standard type value. Indicating the artefact is stored as a bat file/batch script.'''
 FORMAT_VALUE_BAT = "bat"
 '''Standard type value. Indicating the artefact is stored as a avid tools xml format (legacy).'''

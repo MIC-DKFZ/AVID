@@ -13,9 +13,19 @@
 from builtins import object
 import argparse
 import os
+import logging
+import sys
 
 from avid.common.artefact import artefactExists
 from avid.common.artefact.fileHelper import saveArtefactList_xml as saveArtefactList
+
+log_stdout = logging.StreamHandler(sys.stdout)
+crawl_logger = logging.getLogger(__name__)
+log_stdout = logging.StreamHandler(sys.stdout)
+#log_stdout.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+log_stdout.setLevel(logging.INFO)
+crawl_logger.addHandler(log_stdout)
+crawl_logger.setLevel(logging.INFO)
 
 def splitall(path):
     allparts = []
@@ -54,11 +64,17 @@ class DirectoryCrawler(object):
       pathParts = splitall(relativePath)
       
       for aFile in files:
-        
-        artefact = self._fileFunctor(pathParts,aFile, os.path.join(root, aFile))
-        
-        if artefact is not None and not (artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts):
-          artefacts.append(artefact)
+
+        fullpath = os.path.join(root, aFile)
+        artefact = self._fileFunctor(pathParts,aFile, fullpath)
+
+        if artefact is None:
+            crawl_logger.debug(f'Check "{fullpath}": Skipped')
+        elif artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts:
+            crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
+        else:
+            artefacts.append(artefact)
+            crawl_logger.info(f'Check "{fullpath}": Added')
 
     return artefacts
       
@@ -79,4 +95,5 @@ def runSimpleCrawlerScriptMain(fileFunction):
     crawler = DirectoryCrawler(cliargs.root, fileFunction, True)
     artefacts = crawler.getArtefacts()
 
+    crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')
     saveArtefactList(cliargs.output, artefacts)
