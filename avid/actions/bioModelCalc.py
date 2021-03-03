@@ -20,7 +20,8 @@ import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
-from avid.linkers import FractionLinker
+from avid.linkers import FractionLinker, CaseLinker
+from avid.sorter import BaseSorter
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 from .doseMap import _getArtefactLoadStyle
@@ -30,27 +31,70 @@ import avid.externals.virtuos as virtuos
 logger = logging.getLogger(__name__)
 
 class BioModelCalcAction(CLIActionBase):
-  '''Class that wraps the single action for the tool doseMap.'''
+  '''Class that wraps the single action for the RTTB tool BioModelCalc.
+    The current implementation expects only one input dose element per call.'''
 
-  def __init__(self, inputDose, weight=1.0, nFractions=1, modelParameters=[0.1,0.01], modelParameterMaps = list(), modelName="LQ", outputExt="nrrd",
-               actionTag = "DoseStat", alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
+  def __init__(self, inputDose, weight=None, nFractions=None, modelParameters=None, modelParameterMaps = None,
+               plan = None, modelName="LQ", normalizeFractions= True, useDoseScaling=True, outputExt="nrrd",
+               actionTag = "DoseStat", alwaysDo = False, session = None, additionalActionProps = None,
+               actionConfig = None, propInheritanceDict = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
-    self._addInputArtefacts(inputDose=inputDose)
-    self._inputDose = inputDose
+    self._addInputArtefacts(inputDose=inputDose, plan = plan, modelParameterMaps = modelParameterMaps)
+    self._inputDose = self._ensureSingleArtefact(inputDose, "inputDose")
+    self._plan = self._ensureSingleArtefact(plan, "plan")
+
+    self._modelParameterMaps = modelParameterMaps
+    self._modelParameters = modelParameters
+    if modelParameters is None and ( self._modelParameterMaps is None or len(self._modelParameterMaps) == 0):
+      self._modelParameters = [0.1,0.01]
+
+    self._modelName = modelName
+
+    self._outputExt = outputExt
+
     self._weight = weight
     self._nFractions = nFractions
-    self._modelParameters = modelParameters
-    self._modelParameterMaps = modelParameterMaps
-    self._modelName = modelName
-    self._outputExt = outputExt
-    
-  def _generateName(self):
-    name = "bioModelCalc_"
+    self._normalizeFractions = normalizeFractions
+    self._useDoseScaling = useDoseScaling
 
-    name += "__"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.TIMEPOINT))
+
+    if self._plan is not None:
+      # deduce weight by planned fraction number
+      planWeight = _getFractionWeight(self._plan)
+      if planWeight is None:
+        logger.warning(
+          "Selected plan has no fraction number information. Cannot determine fraction weight. Fall back to default strategy (weight: %s). Used plan artefact: %s",
+          self._weight, self._plan)
+      else:
+        self._weight = planWeight
+    else:
+      logger.info(
+        "No plan selected, no fraction number information available. Cannot determine fraction weight. Fall back to default strategy (1/number of selected doses => weight: %s).",
+        weight)
+
+    if self._plan is None:
+      if self._weight is None:
+        self._weight = 1.0
+        logger.info(
+          "No plan selected, no fraction weight specifed. Use default weight of 1.0.")
+      if self._nFractions is None:
+        self._nFractions = 1
+        logger.info(
+          "No plan selected, no number of fractions specifed. Use default number of 1.")
+
+    if self._normalizeFractions is True:
+      self._nFractions = int(1 // self._weight)
+      logger.info(
+        "Normalize fraction is true. Nr of fraction set to {}.".format(self._nFractions))
+
+    if self._useDoseScaling is False:
+      self._weight = 1.0
+      logger.info(
+        "Use dose scaling deactivated. Weight set to 1.0 for bio model computation.")
+
+  def _generateName(self):
+    name = "bioModelCalc_{}_{}".format(self._modelName, artefactHelper.getArtefactShortName(self._inputDose))
     return name
    
   def _indicateOutputs(self):
@@ -67,7 +111,6 @@ class BioModelCalcAction(CLIActionBase):
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
 
-    
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "BioModelCalc", self._actionConfig)
@@ -77,7 +120,7 @@ class BioModelCalcAction(CLIActionBase):
     content += ' --outputFile "' + resultPath + '"'
     content += ' --doseScaling ' + str(self._weight)
     content += ' --model "'+ self._modelName +'"'
-    if self._modelParameterMaps:
+    if self._modelParameterMaps is not None and len(self._modelParameterMaps) > 0:
       content += ' --modelParameterMaps '
       for val in self._modelParameterMaps:
         mapsPath = artefactHelper.getArtefactProperty(val, artefactProps.URL)
@@ -126,78 +169,23 @@ class BioModelCalcBatchAction(BatchActionBase):
   '''Base class for action objects that are used together with selectors and
     should therefore able to process a batch of SingleActionBased actions.'''
   
-  def __init__(self,  inputSelector, planSelector=None, normalizeFractions= True, useDoseScaling=True,
-               planLinker = FractionLinker(useClosestPast=True), modelParameters=[0.1,0.01],
-               modelParameterMapsSelector = None,
-               actionTag = "bioModelCalc", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+  def __init__(self,  inputSelector, planSelector=None, planLinker = None,
+               modelParameterMapsSelector = None, modelParameterMapsLinker = None, modelParameterMapsSorter = None,
+               actionTag = "bioModelCalc", session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
+               **singleActionParameters):
 
-    self._inputDoses = inputSelector.getSelection(self._session.artefacts)
-    if planSelector is not None:
-        self._plan = planSelector.getSelection(self._session.artefacts)
-    else:
-        self._plan=None
-    self._planLinker = planLinker
-    self._normalizeFractions = normalizeFractions
-    self._useDoseScaling = useDoseScaling
+    if planLinker is None:
+      planLinker = FractionLinker(useClosestPast=True)
+    if modelParameterMapsLinker is None:
+      modelParameterMapsLinker = CaseLinker()
+    if modelParameterMapsSorter is None:
+      modelParameterMapsSorter = BaseSorter()
 
-    if modelParameterMapsSelector is not None:
-      self._modelParameterMaps = modelParameterMapsSelector.getSelection(self._session.artefacts)
-      self._modelParameters = list()
-    else:
-      self._modelParameterMaps = None
-      self._modelParameters = modelParameters
+    additionalInputSelectors = {"plan": planSelector, "modelParameterMaps": modelParameterMapsSelector}
+    linker = {"plan": planLinker, "modelParameterMaps": modelParameterMapsLinker}
+    sorter = {"modelParameterMaps": modelParameterMapsSorter}
 
-    self._singleActionParameters = singleActionParameters
-
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    inputs = self.ensureRelevantArtefacts(self._inputDoses, resultSelector, "bioModelCalc doses")
-    if self._plan is not None:
-        aPlan = self.ensureRelevantArtefacts(self._plan, resultSelector, "plan")
-
-    if self._modelParameterMaps is not None:
-      validParameterMaps = self.ensureRelevantArtefacts(self._modelParameterMaps, resultSelector, "parameter maps")
-    else :
-      validParameterMaps = list()
-       
-    actions = list()
-    
-    for (pos,inputDose) in enumerate(inputs):
-      weight = 1.0
-      nFractions = 1
-      if self._plan is not None:
-          linkedPlans = self._planLinker.getLinkedSelection(pos,inputs,aPlan)
-
-          if len(linkedPlans) > 0:
-            #deduce weight by planned fraction number
-            lPlan = linkedPlans[0]
-            planWeight = _getFractionWeight(lPlan)
-            if planWeight is None:
-              logger.warning("Selected plan has no fraction number information. Cannot determine fraction weight. Fall back to default strategy (weight: %s). Used plan artefact: %s", weight, lPlan)
-            else:
-              weight = planWeight
-
-            if len(linkedPlans) > 1:
-              logger.warning("Improper selection of plans. Multiple plans for one dose/fraction selected. Action assumes only one plan linked per dose. Use first plan. Drop other plan. Used plan artefact: %s", lPlan)
-          else:
-            logger.info("No plan selected, no fraction number information available. Cannot determine fraction weight. Fall back to default strategy (1/number of selected doses => weight: %s).", weight)
-
-
-      if self._normalizeFractions is True:
-        nFractions = int(1//weight)
-      if self._useDoseScaling is False:
-        weight = 1.0
-
-      action = BioModelCalcAction(inputDose, weight, nFractions, self._modelParameters, validParameterMaps,
-                          actionTag = self._actionTag, alwaysDo = self._alwaysDo,
-                          session = self._session,
-                          additionalActionProps = self._additionalActionProps,
-                          **self._singleActionParameters)
-      actions.append(action)
-    
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=BioModelCalcAction, primaryInputSelector= inputSelector,
+                             primaryAlias="inputDose", additionalInputSelectors = additionalInputSelectors,
+                             linker = linker, sorter=sorter, session= session,
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
