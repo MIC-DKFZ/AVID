@@ -18,4 +18,4 @@ import avid.common.artefact.defaultProps as artefactProps
 class TimePointSorter(KeyValueSorter):
   '''Special version that enforces that time point is sorted as numeric.'''
   def __init__(self, reverse = False):
-    KeyValueSorter.__init__(key=artefactProps.TIMEPOINT, reverse= reverse, asNumbers=True)
+    KeyValueSorter.__init__(self, key=artefactProps.TIMEPOINT, reverse= reverse, asNumbers=True)

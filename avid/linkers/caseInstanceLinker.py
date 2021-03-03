@@ -19,7 +19,7 @@ class CaseInstanceLinker(LinkerBase):
     """
     Links data on the basis of the artefactProps.CASEINSTANCE entry.
     If strict linkage is false the linker will also accept instances where
-    one of master and slave is none and the other has a defined value.
+    one of primary and secondary is none and the other has a defined value.
     """
 
     def __init__(self, useStrictLinkage=False):
