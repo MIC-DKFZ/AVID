@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 FORMAT_VALUE_MITK_GIF_XML = 'mitk_cl_gif_xml'
 
 class MitkCLGlobalImageFeaturesAction(CLIActionBase):
-    '''Class that wrapps the single action for the tool MITK CLGlobalImageFeatures.'''
+    '''Class that wraps the single action for the tool MITK CLGlobalImageFeatures.'''
 
     def __init__(self, images, masks = None, cliArgs= None, legacyOutput = False, actionTag="MitkCLGlobalImageFeatures", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):

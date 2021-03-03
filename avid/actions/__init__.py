@@ -178,6 +178,9 @@ class SingleActionBase(ActionBase):
             return None
         if len(artefacts) == 0:
             return None
+        from avid.common.artefact import Artefact
+        if isinstance(artefacts, Artefact):
+            return artefacts
         if len(artefacts) > 1:
             logger.warning("Action %s only supports one artefact as %s. Use first one.".format(self.__class__.__name__,name))
         return artefacts[0]
