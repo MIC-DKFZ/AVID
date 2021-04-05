@@ -19,9 +19,9 @@ from avid.actions.MitkStitchImagesMiniApp import MitkStitchImagesMiniAppBatchAct
 from avid.common.artefact.defaultProps import TIMEPOINT
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getToolConfigPath('MitkStitchImagesMiniApp') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
+@unittest.skipIf(getExecutableURL(None, 'MitkStitchImagesMiniApp') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
 class TestMitkStitchImagesMiniApp(unittest.TestCase):
 
     def setUp(self):

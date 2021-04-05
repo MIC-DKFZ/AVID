@@ -19,10 +19,10 @@ import unittest
 import avid.common.workflow as workflow
 from avid.actions.invertR import invertRBatchAction as invertR
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import getExecutableURL
 
 
-@unittest.skipIf(getToolConfigPath('invertR') is None, 'Tool invertR not installed on the system.')
+@unittest.skipIf(getExecutableURL(None,'invertR') is None, 'Tool invertR not installed on the system.')
 class TestInvertR(unittest.TestCase):
 
     def setUp(self):

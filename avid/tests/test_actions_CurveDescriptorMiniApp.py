@@ -17,9 +17,9 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.CurveDescriptorMiniApp import CurveDescriptorMiniAppBatchAction as curveDescription
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getToolConfigPath('CurveDescriptorMiniApp') is None, 'Tool CurveDescriptorMiniApp is not installed on the system.')
+@unittest.skipIf(getExecutableURL(None, 'CurveDescriptorMiniApp') is None, 'Tool CurveDescriptorMiniApp is not installed on the system.')
 class TestCurveDescriptorMiniApp(unittest.TestCase):
 
 
