@@ -21,7 +21,7 @@ import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
-from avid.linkers import CaseLinker
+from avid.linkers import CaseLinker, LinkerBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
@@ -33,54 +33,47 @@ logger = logging.getLogger(__name__)
 class DoseMapAction(CLIActionBase):
   '''Class that wraps the single action for the tool doseMap.'''
 
-  def __init__(self, inputDose, registration = None, templateDose = None, 
+  def __init__(self, inputDose, registration = None, templateDose = None,
                interpolator = "linear", outputExt = "nrrd", 
                actionTag = "doseMap", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
-                           propInheritanceDict=propInheritanceDict)
-    self._addInputArtefacts(inputDose=inputDose, registration=registration, templateDose=templateDose)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="DoseMap",
+                           actionConfig = actionConfig, propInheritanceDict=propInheritanceDict)
+    self._addInputArtefacts(inputDoses=inputDose, registrations=registration, templateDose=templateDose)
 
-    self._inputDose = inputDose
-    self._registration = registration
-    self._templateDose = templateDose
+    self._inputDose = self._ensureSingleArtefact(inputDose,"inputDose")
+    self._registration = self._ensureSingleArtefact(registration,"registration")
+    self._templateDose = self._ensureSingleArtefact(templateDose, "templateDose")
     self._interpolator = interpolator
     self._outputExt = outputExt
-    
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", actionConfig))
-    self._cwd = cwd    
-    
 
   def _generateName(self):
-    name = "doseMap_"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._inputDose,artefactProps.TIMEPOINT))
+    name = "doseMap_"+artefactHelper.getArtefactShortName(self._inputDose)
 
     if self._registration is not None:
-      name += "_reg_"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.TIMEPOINT))
+      name += "_reg_" + artefactHelper.getArtefactShortName(self._registration)
     else:
       name += "_identity"
-    
+
     if self._templateDose is not None:
-      name += "_to_"+str(artefactHelper.getArtefactProperty(self._templateDose,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._templateDose,artefactProps.TIMEPOINT))
+      name += "_to_"+artefactHelper.getArtefactShortName(self._templateDose)
 
     return name
 
-   
-  def _indicateOutputs(self):    
-    name = self.instanceName
+  def _hasDICOMinput(self):
+    return self._outputExt.lower() =="dcm" or self._outputExt.lower() == "ima"
 
-    self._resultArtefact = self.generateArtefact(self._inputDose)
-    self._resultArtefact[artefactProps.TYPE] = artefactProps.TYPE_VALUE_RESULT
-    self._resultArtefact[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
-    
-    path = artefactHelper.generateArtefactPath(self._session, self._resultArtefact)
-    resName = name + "." + str(artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.ID)) + os.extsep + self._outputExt
-    resName = os.path.join(path, resName)
-    
-    self._resultArtefact[artefactProps.URL] = resName
+  def _indicateOutputs(self):
+    userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT}
+    if self._hasDICOMinput():
+      userDefinedProps[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_DCM
 
+    artefactRef = self._inputDose
+
+    self._resultArtefact = self.generateArtefact(artefactRef,
+                                                 userDefinedProps = userDefinedProps,
+                                                 urlHumanPrefix=self.instanceName,
+                                                 urlExtension=self._outputExt)
     return [self._resultArtefact]
  
                 
@@ -101,7 +94,7 @@ class DoseMapAction(CLIActionBase):
     
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseMap", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
     
     content = '"' + execURL + '"' + ' "' + inputPath + '"' + ' "' + resultPath + '"'
     if registrationPath is not None:
@@ -148,56 +141,35 @@ def _getArtefactLoadStyle(artefact):
 
 
 class DoseMapBatchAction(BatchActionBase):    
-  '''Base class for action objects that are used together with selectors and
-    should therefore able to process a batch of SingleActionBased actions.'''
+  '''Standard batch action class for DoseMap actions.'''
   
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
-               regLinker = FractionLinker(), templateLinker = CaseLinker(), 
-               actionTag = "doseMap", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
+               regLinker = None, templateLinker = None, templateRegLinker = None,
+               actionTag = "doseMap", session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
                **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+    '''@param inputSelector Selector for the dose artefacts that should be mapped.
+    @param registrationSelector Selector for the artefacts that specify the registration. If no registrations are
+    specified, an identity transform will be assumed.
+    @param templateSelector Selector for the reference geometry that should be used to map into it. If None is
+    specified, the geometry of the input will be used.
+    @param regLinker Linker to select the registration that should be used on an input. Default is FractionLinker.
+    @param templateLinker Linker to select the reference geometry that should be used to map an input. Default is CaseLinker.
+    @param templateRegLinker Linker to select which regs (resulting from the regLinker should be used regarding
+    the template that will be used. Default is LinkerBase (so every link registration will be used with every linked
+    template.'''
+    if regLinker is None:
+      regLinker = FractionLinker()
+    if templateLinker is None:
+      templateLinker = CaseLinker()
+    if templateRegLinker is None:
+      templateRegLinker = LinkerBase()
 
-    self._inputDoses = inputSelector.getSelection(self._session.artefacts)
-    self._registrations = list()
-    if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.artefacts)
+    additionalInputSelectors = {"registration": registrationSelector, "templateDose": templateSelector}
+    linker = {"registration": regLinker, "templateDose": templateLinker}
+    dependentLinker = {"registration": ("templateDose",templateRegLinker)}
 
-    self._templateDoses = list()
-    if templateSelector is not None:
-      self._templateDoses = templateSelector.getSelection(self._session.artefacts)
-    
-    self._regLinker = regLinker
-    self._templateLinker = templateLinker  
-    self._singleActionParameters = singleActionParameters
-
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    inputs = self.ensureRelevantArtefacts(self._inputDoses, resultSelector, "doseMap doses")
-    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "doseMap registrations")
-    temps = self.ensureRelevantArtefacts(self._templateDoses, resultSelector, "doseMap templates")
-       
-    actions = list()
-    
-    for (pos,inputDose) in enumerate(inputs):
-      linkedTemps = self._templateLinker.getLinkedSelection(pos,inputs,temps)
-      if len(linkedTemps) == 0:
-        linkedTemps = [None]
-        
-      linkedRegs = self._regLinker.getLinkedSelection(pos, inputs, regs)
-      if len(linkedRegs) == 0:
-        linkedRegs = [None]
-      
-      for lt in linkedTemps:
-        for lr in linkedRegs:
-          action = DoseMapAction(inputDose, registration=lr, templateDose=lt,
-                              actionTag=self._actionTag, alwaysDo = self._alwaysDo,
-                              session = self._session,
-                              additionalActionProps = self._additionalActionProps,
-                              **self._singleActionParameters)
-          actions.append(action)
-    
-    return actions
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=DoseMapAction, primaryInputSelector= inputSelector,
+                             primaryAlias="inputDose", additionalInputSelectors = additionalInputSelectors,
+                             linker = linker, dependentLinker=dependentLinker, session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
