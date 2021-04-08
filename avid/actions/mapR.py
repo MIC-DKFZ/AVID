@@ -35,7 +35,8 @@ class mapRAction(CLIActionBase):
                interpolator = "linear", outputExt = "nrrd", paddingValue = None,
                actionTag = "mapR", inputIsReference = True, alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID = "mapR",
+                           actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
 
     self._inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
@@ -46,9 +47,6 @@ class mapRAction(CLIActionBase):
     self._paddingValue = paddingValue
     self._inputIsReference = inputIsReference
 
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "mapR", actionConfig))
-    self._cwd = cwd    
-    
   def _generateName(self):
     name = "map_"+artefactHelper.getArtefactShortName(self._inputImage)
 
@@ -102,7 +100,7 @@ class mapRAction(CLIActionBase):
     
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "mapR", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
     
     content = '"' + execURL + '"' + ' "' + inputPath + '"'
     if registrationPath is not None:
@@ -123,9 +121,8 @@ class mapRAction(CLIActionBase):
     return content
 
 class mapRBatchAction(BatchActionBase):
-  '''Base class for action objects that are used together with selectors and
-    should therefore able to process a batch of SingleActionBased actions.'''
-  
+  '''Standard batch action class for mapR actions.'''
+
   def __init__(self,  inputSelector, registrationSelector = None, templateSelector = None,
                regLinker = None, templateLinker = None,
                actionTag = "mapR", session = None, additionalActionProps = None,

@@ -22,7 +22,7 @@ import math
 import avid.common.settings as AVIDSettings
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import osChecker
+from avid.common import osChecker, AVIDUrlLocater
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,16 @@ class CLIActionBase(SingleActionBase):
   for the CLI call to run properly. Then the call should be returned as result of
   the method.'''
 
-  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionConfig = None, propInheritanceDict = None):
-    '''@param cwd Specifies the current working directory that should be used for the cli call'''
+  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionID = None, actionConfig = None, propInheritanceDict = None):
+    '''@param cwd Specifies the current working directory that should be used for the cli call.
+    if not set explicitly, it will be deduced automatically by the specified tool/action '''
     SingleActionBase.__init__(self, actionTag,alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
-    self._cwd = cwd
+    self._actionID = actionID
     self._actionConfig = actionConfig
+    self._cwd = cwd
+    if self._cwd is None:
+      self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", actionConfig))
+
     self._logFilePath = None
     self._logErrorFilePath = None
     

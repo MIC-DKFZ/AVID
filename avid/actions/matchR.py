@@ -39,7 +39,7 @@ class matchRAction(CLIActionBase):
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
        
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID= "matchR", actionConfig = actionConfig,
                            propInheritanceDict = propInheritanceDict)
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask,
                             movingMask = movingMask, targetPointSet = targetPointSet, movingPointSet = movingPointSet)
@@ -57,10 +57,6 @@ class matchRAction(CLIActionBase):
       self._algorithmParameters = dict()
 
     self._targetIsReference = targetIsReference
-
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", actionConfig))
-    self._cwd = cwd
-  
   
   def _generateName(self):
     name = "reg_"+artefactHelper.getArtefactShortName(self._movingImage)
@@ -97,7 +93,7 @@ class matchRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
       
     try:
-      execURL = AVIDUrlLocater.getExecutableURL(self._session, "matchR", self._actionConfig)
+      execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
       targetImageURL = artefactHelper.getArtefactProperty(self._targetImage,artefactProps.URL)
       movingImageURL = artefactHelper.getArtefactProperty(self._movingImage, artefactProps.URL)
     
