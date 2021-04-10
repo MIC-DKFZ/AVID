@@ -14,8 +14,9 @@
 from builtins import object
 class SelectorBase(object):
   '''
-      Base class for selectors. Derive from this class to implement special
-      selector versions. This class is not functional.
+      Base class for selectors. Selectors are used to make a selection
+      of relevant artefacts. Derive from this class to implement special
+      selector types. This class is not functional.
   '''
   def __init__(self):
     ''' init '''

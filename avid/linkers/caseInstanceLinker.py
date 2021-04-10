@@ -11,44 +11,41 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from avid.linkers import LinkerBase
+from avid.linkers import InnerLinkerBase
 import avid.common.artefact.defaultProps as artefactProps
 
-
-class CaseInstanceLinker(LinkerBase):
+class CaseInstanceLinker(InnerLinkerBase):
     """
     Links data on the basis of the artefactProps.CASEINSTANCE entry.
     If strict linkage is false the linker will also accept instances where
     one of primary and secondary is none and the other has a defined value.
     """
 
-    def __init__(self, useStrictLinkage=False):
+    def __init__(self, useStrictLinkage=False, allowOnlyFullLinkage = True, performInternalLinkage=False):
         '''@param useStrictLinkage If true it will only link with the very same instance id.
-      If false, it will treat None as wildcard that also matches.'''
+           If false, it will treat None as wildcard that also matches.'''
+        InnerLinkerBase.__init__(self, allowOnlyFullLinkage=allowOnlyFullLinkage,
+                                 performInternalLinkage=performInternalLinkage)
 
         self._useStrictLinkage = useStrictLinkage
 
-    def getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-        primarySelection = primarySelections[primaryIndex]
+    def _findLinkedArtefactOptions(self, primaryArtefact, secondarySelection):
         linkValue = None
 
-        if artefactProps.CASEINSTANCE in primarySelection[0]:
-            linkValue = primarySelection[0][artefactProps.CASEINSTANCE]
+        if artefactProps.CASEINSTANCE in primaryArtefact:
+            linkValue = primaryArtefact[artefactProps.CASEINSTANCE]
 
-        resultSelections = list(list(), )
-        for secondSelection in secondarySelections:
-            for secondArtefact in secondSelection:
-                if artefactProps.CASEINSTANCE in secondArtefact:
-                    itemValue = secondArtefact[artefactProps.CASEINSTANCE]
-                    if itemValue == linkValue \
-                            or (not self._useStrictLinkage \
-                                and (linkValue is None or itemValue is None)):
-                        resultSelections.append(secondSelection)
-                        break
-                else:
-                    if linkValue is None:
-                        # key does not exist, but selection value is None, therefore it is a match
-                        resultSelections.append(secondSelection)
-                        break
+        result = list()
+        for secondArtefact in secondarySelection:
+            if artefactProps.CASEINSTANCE in secondArtefact:
+                itemValue = secondArtefact[artefactProps.CASEINSTANCE]
+                if itemValue == linkValue \
+                        or (not self._useStrictLinkage \
+                            and (linkValue is None or itemValue is None)):
+                    result.append(secondArtefact)
+            else:
+                if linkValue is None:
+                    # key does not exist, but selection value is None, therefore it is a match
+                    result.append(secondArtefact)
 
-        return resultSelections
+        return result

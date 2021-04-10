@@ -31,26 +31,111 @@ class TestFractionLinker(unittest.TestCase):
 
     self.selections1 = [[self.a1], [self.a2], [self.a3], [self.a4], [self.a5], [self.a6], [self.a7], [self.a8], [self.a9], [self.a10]]
     self.selections2 = [[self.a1], [self.a2]]
+    self.selections3 = [[self.a1, self.a2], [self.a3, self.a1], [self.a2, self.a3]]
+    self.selections4 = [[self.a1], [self.a2], [self.a1, self.a2], [self.a3, self.a1, self.a2], [self.a2, self.a3, self.a6]]
 
+  def checkSelections(self, refSelections, testSelections):
+    self.assertEqual(len(testSelections), len(refSelections))
+
+    for pos,refSelection in enumerate(refSelections):
+      self.assertEqual(len(testSelections[pos]), len(refSelection))
+      for posArtefact, artefact in enumerate(refSelection):
+        self.assertIn(artefact, testSelections[pos])
 
   def test_FractionLinker(self):
     linker = FractionLinker()
     selection = linker.getLinkedSelection(2, self.selections1,self.selections1)
-    self.assertEqual(len(selection), 2)
-    self.assertEqual(len(selection[0]), 1)
-    self.assertEqual(len(selection[1]), 1)
-    self.assertIn(self.a3, selection[0])
-    self.assertIn(self.a4, selection[1])
-  
+    self.checkSelections([[self.a3],[self.a4]], selection)
+
     linker = FractionLinker()
     selection = linker.getLinkedSelection(2, self.selections1,self.selections2)
-    self.assertEqual(len(selection), 0)
+    self.checkSelections([], selection)
 
     linker = FractionLinker(True)
     selection = linker.getLinkedSelection(2, self.selections1,self.selections2)
-    self.assertEqual(len(selection), 1)
-    self.assertEqual(len(selection[0]), 1)
-    self.assertIn(self.a2, selection[0])
+    self.checkSelections([[self.a2]], selection)
+
+  def test_FractionLinker_options(self):
+    linker = FractionLinker(useClosestPast=False, allowOnlyFullLinkage=False, performInternalLinkage=False)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1],[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2],[self.a2, self.a3, self.a6]], selection)
+
+    linker = FractionLinker(useClosestPast=False, allowOnlyFullLinkage=False, performInternalLinkage=True)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, None],[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1],[self.a3, None]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2, None],[self.a2, self.a3]], selection)
+
+    linker = FractionLinker(useClosestPast=False, allowOnlyFullLinkage=True, performInternalLinkage=False)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([], selection)
+
+    linker = FractionLinker(useClosestPast=False, allowOnlyFullLinkage=True, performInternalLinkage=True)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2, self.a3]], selection)
+
+    linker = FractionLinker(useClosestPast=True, allowOnlyFullLinkage=False, performInternalLinkage=False)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1],[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2],[self.a2, self.a3, self.a6]], selection)
+
+    linker = FractionLinker(useClosestPast=True, allowOnlyFullLinkage=False, performInternalLinkage=True)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a1],[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1],[self.a3, None]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2, self.a2],[self.a2, self.a3]], selection)
+
+    linker = FractionLinker(useClosestPast=True, allowOnlyFullLinkage=True, performInternalLinkage=False)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a2]], selection)
+
+    linker = FractionLinker(useClosestPast=True, allowOnlyFullLinkage=True, performInternalLinkage=True)
+    selection = linker.getLinkedSelection(0, self.selections3,self.selections4)
+    self.checkSelections([[self.a1, self.a1],[self.a1, self.a2]], selection)
+
+    selection = linker.getLinkedSelection(1, self.selections3,self.selections4)
+    self.checkSelections([[self.a3, self.a1]], selection)
+
+    selection = linker.getLinkedSelection(2, self.selections3,self.selections4)
+    self.checkSelections([[self.a2, self.a2],[self.a2, self.a3]], selection)
+
 
   def test_FractionLinker_empty_slaves(self):
     linker = FractionLinker()

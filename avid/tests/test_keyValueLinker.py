@@ -33,91 +33,140 @@ class TestKeyValueLinker(unittest.TestCase):
     self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "result", "dummy", None)
     self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", None)
 
-    self.data = [[self.a1],[self.a2],[self.a3],[self.a4],[self.a5],[self.a6],[self.a7],[self.a8],[self.a9],[self.a10]]
-    self.data2 = [[self.a1, self.a2],[self.a3 , self.a4],[self.a5, self.a6, self.a7],[self.a8, self.a9, self.a10]]
+    self.data = [[self.a1],[self.a2],[self.a3],[self.a4],[self.a5],[self.a6],[self.a7],[self.a8],[self.a9],[self.a10],
+                 [self.a1, self.a2],[self.a1, self.a2, self.a3],[self.a1, self.a5],[self.a5, self.a9]]
+    self.data2 = [[self.a1, self.a2],[self.a3 , self.a4],[self.a4, self.a5],[self.a5, self.a6, self.a7],[self.a8, self.a9, self.a10]]
 
 
+  def checkSelections(self, refSelections, testSelections):
+    self.assertEqual(len(testSelections), len(refSelections))
 
-  def test_CaseLinker(self):
+    for pos,refSelection in enumerate(refSelections):
+      self.assertEqual(len(testSelections[pos]), len(refSelection))
+      for posArtefact, artefact in enumerate(refSelection):
+        self.assertIn(artefact, testSelections[pos])
+
+  def test_CaseLinker_default(self):
+    #check default settings
     linker = CaseLinker()
     selections = linker.getLinkedSelection(2, self.data,self.data)
-    self.assertEqual(len(selections), 4)
-    self.assertEqual(len(selections[0]), 1)
-    self.assertEqual(len(selections[1]), 1)
-    self.assertEqual(len(selections[2]), 1)
-    self.assertEqual(len(selections[3]), 1)
-    self.assertIn(self.a1, selections[0])
-    self.assertIn(self.a2, selections[1])
-    self.assertIn(self.a3, selections[2])
-    self.assertIn(self.a4, selections[3])
+    self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4]], selections)
+
+    selections = linker.getLinkedSelection(4, self.data,self.data)
+    self.checkSelections([[self.a5],[self.a6],[self.a7],[self.a8]], selections)
 
     selections = linker.getLinkedSelection(1, self.data2, self.data2)
-    self.assertEqual(len(selections), 2)
-    self.assertEqual(len(selections[0]), 2)
-    self.assertIn(self.a1, selections[0])
-    self.assertIn(self.a2, selections[0])
-    self.assertEqual(len(selections[1]), 2)
-    self.assertIn(self.a3, selections[1])
-    self.assertIn(self.a4, selections[1])
+    self.checkSelections([[self.a1, self.a2],[self.a3 , self.a4],[self.a4 , self.a5]], selections)
 
-  def test_TimePointLinker(self):
+    selections = linker.getLinkedSelection(2, self.data2, self.data2)
+    self.checkSelections([[self.a4 , self.a5]], selections)
+
+    selections = linker.getLinkedSelection(3, self.data2, self.data2)
+    self.checkSelections([[self.a5, self.a6, self.a7], [self.a8, self.a9, self.a10]], selections)
+
+  def test_CaseLinker_internallinkageOn(self):
+    linker = CaseLinker(performInternalLinkage=True, allowOnlyFullLinkage=True)
+    selections = linker.getLinkedSelection(2, self.data,self.data)
+    self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4]], selections)
+
+    selections = linker.getLinkedSelection(4, self.data,self.data)
+    self.checkSelections([[self.a5],[self.a6],[self.a7],[self.a8]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a1, self.a1],[self.a3 , self.a3],[self.a4 , self.a4]], selections)
+
+    selections = linker.getLinkedSelection(2, self.data2, self.data2)
+    self.checkSelections([[self.a4 , self.a5]], selections)
+
+    selections = linker.getLinkedSelection(3, self.data2, self.data2)
+    self.checkSelections([[self.a5, self.a5, self.a5], [self.a8, self.a8, self.a8]], selections)
+
+    linker = CaseLinker(performInternalLinkage=True, allowOnlyFullLinkage=False)
+    selections = linker.getLinkedSelection(2, self.data,self.data)
+    self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4]], selections)
+
+    selections = linker.getLinkedSelection(4, self.data,self.data)
+    self.checkSelections([[self.a5],[self.a6],[self.a7],[self.a8]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a1, self.a1],[self.a3 , self.a3],[self.a4 , self.a4]], selections)
+
+    selections = linker.getLinkedSelection(2, self.data2, self.data2)
+    self.checkSelections([[self.a1 , None],[self.a3 , None],[self.a4 , self.a5],[None , self.a5],[None , self.a8]], selections)
+
+    selections = linker.getLinkedSelection(3, self.data2, self.data2)
+    self.checkSelections([[self.a5, self.a5, self.a5], [self.a8, self.a8, self.a8]], selections)
+
+  def test_CaseLinker_internallinkageOff(self):
+    linker = CaseLinker(performInternalLinkage=False, allowOnlyFullLinkage=True)
+    selections = linker.getLinkedSelection(2, self.data,self.data)
+    self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4]], selections)
+
+    selections = linker.getLinkedSelection(4, self.data,self.data)
+    self.checkSelections([[self.a5],[self.a6],[self.a7],[self.a8]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a1, self.a2],[self.a3 , self.a4],[self.a4 , self.a5]], selections)
+
+    selections = linker.getLinkedSelection(2, self.data2, self.data2)
+    self.checkSelections([[self.a4 , self.a5]], selections)
+
+    selections = linker.getLinkedSelection(3, self.data2, self.data2)
+    self.checkSelections([[self.a5, self.a5, self.a5], [self.a8, self.a8, self.a8]], selections)
+
+    linker = CaseLinker(performInternalLinkage=False, allowOnlyFullLinkage=False)
+    selections = linker.getLinkedSelection(2, self.data,self.data)
+    self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4],[self.a1, self.a2],[self.a1, self.a2, self.a3],[self.a1, self.a5]], selections)
+
+    selections = linker.getLinkedSelection(4, self.data,self.data)
+    self.checkSelections([[self.a5],[self.a6],[self.a7],[self.a8],[self.a1, self.a5],[self.a5, self.a9]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a1, self.a2],[self.a3 , self.a4],[self.a4 , self.a5]], selections)
+
+    selections = linker.getLinkedSelection(2, self.data2, self.data2)
+    self.checkSelections(self.data2, selections)
+
+    selections = linker.getLinkedSelection(3, self.data2, self.data2)
+    self.checkSelections([[self.a4, self.a5],[self.a5, self.a6, self.a7],[self.a8, self.a9, self.a10]], selections)
+
+
+  def test_TimePointLinker_default(self):
     linker = TimePointLinker()
     selections = linker.getLinkedSelection(7, self.data,self.data)
-    self.assertEqual(len(selections), 3)
-    self.assertEqual(len(selections[0]), 1)
-    self.assertEqual(len(selections[1]), 1)
-    self.assertEqual(len(selections[2]), 1)
-    self.assertIn(self.a3, selections[0])
-    self.assertIn(self.a4, selections[1])
-    self.assertIn(self.a8, selections[2])
+    self.checkSelections([[self.a3],[self.a4],[self.a8]], selections)
 
     selections = linker.getLinkedSelection(1, self.data2, self.data2)
-    self.assertEqual(len(selections), 2)
-    self.assertEqual(len(selections[0]), 2)
-    self.assertIn(self.a3, selections[0])
-    self.assertIn(self.a4, selections[0])
-    self.assertEqual(len(selections[1]), 3)
-    self.assertIn(self.a8, selections[1])
-    self.assertIn(self.a9, selections[1])
-    self.assertIn(self.a10, selections[1])
+    self.checkSelections([[self.a3 , self.a4],[self.a4, self.a5]], selections)
+
+
+  def test_TimePointLinker_internalLinkageOn(self):
+    linker = TimePointLinker(performInternalLinkage=True, allowOnlyFullLinkage=True)
+    selections = linker.getLinkedSelection(7, self.data,self.data)
+    self.checkSelections([[self.a3],[self.a4],[self.a8]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a3 , self.a3],[self.a4, self.a4],[self.a8, self.a8]], selections)
+
+    linker = TimePointLinker(performInternalLinkage=True, allowOnlyFullLinkage=False)
+    selections = linker.getLinkedSelection(7, self.data,self.data)
+    self.checkSelections([[self.a3],[self.a4],[self.a8]], selections)
+
+    selections = linker.getLinkedSelection(1, self.data2, self.data2)
+    self.checkSelections([[self.a3 , self.a3],[self.a4, self.a4],[self.a8, self.a8]], selections)
+
 
   def test_KeyValueLinker(self):
     linker = KeyValueLinker(artefactProps.ACTIONTAG)
     selections = linker.getLinkedSelection(0, self.data,self.data)
-    self.assertEqual(len(selections), 4)
-    self.assertEqual(len(selections[0]), 1)
-    self.assertEqual(len(selections[1]), 1)
-    self.assertEqual(len(selections[2]), 1)
-    self.assertEqual(len(selections[3]), 1)
-    self.assertIn(self.a1, selections[0])
-    self.assertIn(self.a2, selections[1])
-    self.assertIn(self.a5, selections[2])
-    self.assertIn(self.a6, selections[3])
+    self.checkSelections([[self.a1],[self.a2],[self.a5],[self.a6]], selections)
 
     selections = linker.getLinkedSelection(1, self.data2, self.data2)
-    self.assertEqual(len(selections), 2)
-    self.assertEqual(len(selections[0]), 2)
-    self.assertIn(self.a3, selections[0])
-    self.assertIn(self.a4, selections[0])
-    self.assertEqual(len(selections[1]), 3)
-    self.assertIn(self.a8, selections[1])
-    self.assertIn(self.a9, selections[1])
-    self.assertIn(self.a10, selections[1])
+    self.checkSelections([[self.a3 , self.a4]], selections)
 
-    weakLinker = KeyValueLinker(artefactProps.ACTIONTAG, checkAllPrimaryArtefacts=False)
+    weakLinker = KeyValueLinker(artefactProps.ACTIONTAG, allowOnlyFullLinkage=False)
     selections = weakLinker.getLinkedSelection(1, self.data2, self.data2)
-    self.assertEqual(len(selections), 3)
-    self.assertEqual(len(selections[0]), 2)
-    self.assertIn(self.a3, selections[0])
-    self.assertIn(self.a4, selections[0])
-    self.assertEqual(len(selections[1]), 3)
-    self.assertIn(self.a5, selections[1])
-    self.assertIn(self.a6, selections[1])
-    self.assertIn(self.a7, selections[1])
-    self.assertEqual(len(selections[2]), 3)
-    self.assertIn(self.a8, selections[2])
-    self.assertIn(self.a9, selections[2])
-    self.assertIn(self.a10, selections[2])
+    self.checkSelections([[self.a3 , self.a4],[self.a4, self.a5],[self.a5, self.a6, self.a7],[self.a8, self.a9, self.a10]], selections)
 
     linker = KeyValueLinker(artefactProps.ACTIONTAG)
     selections = linker.getLinkedSelection(0, self.data,[])

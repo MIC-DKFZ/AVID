@@ -11,53 +11,88 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from avid.linkers import LinkerBase
+from avid.linkers import InnerLinkerBase
 from .keyValueLinker import CaseLinker
 from .caseInstanceLinker import CaseInstanceLinker
 from .keyValueLinker import TimePointLinker
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 
-class FractionLinker(LinkerBase):
+class FractionLinker(InnerLinkerBase):
   '''
       Links fraction data. This implies that the entries have the same case, case instance and timepoint
       Allows to also link to the nearest time point in the past, if
       current time point is not available.
   '''
-  def __init__(self, useClosestPast = False):
+  def __init__(self, useClosestPast = False, allowOnlyFullLinkage=True, performInternalLinkage=False):
     '''@param useClosestPast If true it will check also for the largest timepoint
     smaller then the actual timepoint and links against it.
-    REMARK: If useClosestPast is used, currently only the first artefact in the primary and all relevant secondary
-    selections will be checked.
     '''
-    
+    InnerLinkerBase.__init__(self, allowOnlyFullLinkage=allowOnlyFullLinkage,
+                             performInternalLinkage=performInternalLinkage)
     self._useClosestPast = useClosestPast
+    self._caseLinker = CaseLinker(allowOnlyFullLinkage=allowOnlyFullLinkage,
+                                  performInternalLinkage=performInternalLinkage)
+    self._caseInstanceLinker = CaseInstanceLinker(allowOnlyFullLinkage=allowOnlyFullLinkage,
+                                  performInternalLinkage=performInternalLinkage)
+    self._timePointLinker = TimePointLinker(allowOnlyFullLinkage=allowOnlyFullLinkage,
+                                  performInternalLinkage=performInternalLinkage)
 
-    
-  def getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-    
-    linker = CaseLinker() + CaseInstanceLinker()
-    
-    if not self._useClosestPast:
-      linker = linker + TimePointLinker()
+  def _findLinkedArtefactOptions(self, primaryArtefact, secondarySelection):
 
-    resultSelections = linker.getLinkedSelection(primaryIndex, primarySelections, secondarySelections)
-    
-    if self._useClosestPast and len(resultSelections)>0:
-      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelections[primaryIndex][0], artefactProps.TIMEPOINT))
-      bestSelection = None
-      bestTimePoint = -1
-      #search for the best time fit
-      for aLink in resultSelections:
+    preFilteredResult = self._caseLinker._findLinkedArtefactOptions(primaryArtefact=primaryArtefact,
+                                                         secondarySelection=secondarySelection)
+    preFilteredResult = self._caseInstanceLinker._findLinkedArtefactOptions(primaryArtefact=primaryArtefact,
+                                                         secondarySelection=preFilteredResult)
+    result = list()
+
+    if self._useClosestPast:
+      masterTimePoint = float(artefactHelper.getArtefactProperty(primaryArtefact, artefactProps.TIMEPOINT))
+      bestArtefact = None
+      bestTimePoint = float('-inf')
+      # search for the best time fit
+      for secondaryArtefact in preFilteredResult:
         try:
-          timePoint = float(artefactHelper.getArtefactProperty(aLink[0],artefactProps.TIMEPOINT))
+          timePoint = float(artefactHelper.getArtefactProperty(secondaryArtefact, artefactProps.TIMEPOINT))
           if timePoint > bestTimePoint and timePoint <= masterTimePoint:
             bestTimePoint = timePoint
-            bestSelection = aLink
+            bestArtefact = secondaryArtefact
         except:
           pass
-        
-      resultSelections = [bestSelection]
-         
-    return resultSelections
-  
+
+      if bestArtefact is not None:
+        result.append(bestArtefact)
+    else:
+      result = self._timePointLinker._findLinkedArtefactOptions(primaryArtefact=primaryArtefact,
+                                                                secondarySelection=preFilteredResult)
+    return result
+
+  def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
+    '''Filters the given list of entries and returns all selected entries to ensure only selections that are as
+    close as possible in time can pass.
+    In the current implementation it is simplfied by just checking the timepoint of the first artefact of each
+    selection.'''
+    preFilterdResult = InnerLinkerBase._getLinkedSelection(self,primaryIndex=primaryIndex, primarySelections=primarySelections,
+                                                 secondarySelections=secondarySelections)
+    primarySelection = primarySelections[primaryIndex]
+    preFilterdResult = self._sanityCheck(primarySelection=primarySelection, linkedSelections=preFilterdResult)
+
+    result = list()
+
+    try:
+      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelection[0], artefactProps.TIMEPOINT))
+      bestTimePoint = float('-inf')
+      for selection in preFilterdResult:
+        try:
+          timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
+          if timePoint >= bestTimePoint and timePoint <= masterTimePoint:
+            if timePoint > bestTimePoint:
+              result.clear()
+            bestTimePoint = timePoint
+            result.append(selection)
+        except:
+          pass
+    except:
+      pass
+
+    return result
