@@ -43,8 +43,8 @@ class CLIActionBase(SingleActionBase):
     self._actionID = actionID
     self._actionConfig = actionConfig
     self._cwd = cwd
-    if self._cwd is None:
-      self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "matchR", actionConfig))
+    if self._cwd is None and self._actionID is not None:
+      self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, actionID, actionConfig))
 
     self._logFilePath = None
     self._logErrorFilePath = None
