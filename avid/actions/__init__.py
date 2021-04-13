@@ -185,6 +185,22 @@ class SingleActionBase(ActionBase):
             logger.warning("Action %s only supports one artefact as %s. Use first one.".format(self.__class__.__name__,name))
         return artefacts[0]
 
+    def _ensureArtefacts(self, artefacts, name):
+        """Helper method that can be used by actions to ensure that a list of artefacts was passed or None."""
+        if artefacts is None:
+            return None
+        if len(artefacts) == 0:
+            return None
+        from avid.common.artefact import Artefact
+        for artefact in artefacts:
+            if artefact is not None and not isinstance(artefact, Artefact):
+                logger.warning(
+                    "An instance that is not of class Artefact was passed to the action {} as {}. Illegal element: {}.".format(
+                        self.__class__.__name__, name, artefact))
+                return None
+
+        return artefacts
+
     def _addInputArtefacts(self, **inputs):
         '''This function should be used in the init of derived actions to register
         artefacts as input artefacts for the action instance. This will be used for several
