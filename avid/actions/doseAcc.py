@@ -79,7 +79,7 @@ class DoseAccAction(CLIActionBase):
     self._doses = self._ensureArtefacts(doses, "doses")
 
     if len(self._doses)<2:
-      raise RuntimeError('Cannot performe dose accumulation. Need at least to dose artefacts.')
+      raise RuntimeError('Cannot performe dose accumulation. Need at least two dose artefacts.')
 
     self._registrations = self._ensureArtefacts(registrations, "registrations")
     if self._registrations is not None:
@@ -141,7 +141,6 @@ class DoseAccAction(CLIActionBase):
     return name
 
   def _indicateOutputs(self):
-
     if self._resultArtefact is None:
       self._resultArtefact = self.generateArtefact(self._doses[-1],
                                                    userDefinedProps={
@@ -236,7 +235,6 @@ class DoseAccAction(CLIActionBase):
     return content
 
   def _prepareCLIExecution(self):
-
     resultArtefacts = self._interimArtefacts + [self._resultArtefact]
     dose1Artefacts = [self._doses[0]] + self._interimArtefacts
     weight2s = self._getFractionWeights()
