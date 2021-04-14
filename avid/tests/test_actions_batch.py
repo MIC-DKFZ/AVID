@@ -30,6 +30,7 @@ class TestSelector(SelectorBase):
 
   def __init__(self, legalArtefacts):
     ''' init '''
+    super().__init__()
     self._legalArtefacts = legalArtefacts
 
   def getSelection(self, workflowData):

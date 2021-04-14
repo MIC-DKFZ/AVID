@@ -15,8 +15,9 @@ from avid.sorter import BaseSorter
 
 class KeyValueSorter(BaseSorter):
   '''Sorts the selection by the values of a passed property key.'''
-  def __init__(self, key, reverse = False, asNumbers = False):
+  def __init__(self, key, reverse=False, asNumbers=False):
     '''@param asNumbers: If true the sort values will be converted to numbers before sorting and not sorted as strings.'''
+    super().__init__()
     self._key = key
     self._reverse = reverse
     self._asNumbers = asNumbers

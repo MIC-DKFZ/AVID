@@ -37,6 +37,7 @@ class GenerateBBoxAction(SingleActionBase):
     self._outputextension = outputextension
     self._dilation = dilation
     self._addInputArtefacts(maskImage=self._maskImage)
+    self._resultArtefact = None
 
   def _generateName(self):
 

@@ -16,19 +16,17 @@
   tis responsible to add new dict entries in the flat file data container 
 '''
 
-from builtins import str
-from builtins import object
-import sys
+import collections
+import logging
 import os
 import platform
-import uuid
+import threading
 import time
-import logging
-
-import collections
+import uuid
+from builtins import object
+from builtins import str
 
 from . import defaultProps
-import threading
 
 logger = logging.getLogger(__name__)
 

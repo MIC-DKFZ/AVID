@@ -31,8 +31,8 @@ class IsInputSelector(SelectorBase):
   ''' Convenience selector to select only artefacts that are inputs of other artefacts in the given workflow data.'''
   def __init__(self):
     ''' init '''
-    pass
-    
+    super().__init__()
+
   def getSelection(self, workflowData):
     '''Filters the given list of entries and returns all selected entries'''
     outList = list(dict(),)
@@ -49,7 +49,7 @@ class IsPrimeInvalidSelector(SelectorBase):
 
   def __init__(self):
     ''' init '''
-    pass
+    super().__init__()
 
   def getSelection(self, workflowData):
     '''Filters the given list of entries and returns all selected entries'''
@@ -77,7 +77,7 @@ class RootSelector(SelectorBase):
   ''' Convenience selector to select all artefacts that have no inputs.'''
   def __init__(self):
     ''' init '''
-    pass
+    super().__init__()
 
   def getSelection(self, workflowData):
     '''Filters the given list of entries and returns all selected entries'''

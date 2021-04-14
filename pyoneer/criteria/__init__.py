@@ -11,15 +11,14 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-from builtins import object
 import logging
-from avid.selectors import ValidResultSelector
+from builtins import object
+from builtins import str
+
 from avid.selectors import AndSelector
-from avid.common.artefact import defaultProps
+from avid.selectors import ValidResultSelector
 from avid.statistics import mean
 from avid.statistics import sd
-
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ class MetricCriterionBase(object):
           pass
 
 
-  def evaluateInstance(self, instaceArtefacts):
+  def evaluateInstance(self, instanceArtefacts):
     '''evaluates an instance/case represented by the passed artefact list.
     @note: The selection of the artefacts is handled by derived criterion classes 
     @param instanceArtefacts: List of avid artefacts that should/could be used for the evaluation.
@@ -67,7 +66,7 @@ class MetricCriterionBase(object):
     
     relevantArtefacts = dict()
     for name in self._selectors:
-      relevantArtefacts[name] = self._selectors[name].getSelection(instaceArtefacts)
+      relevantArtefacts[name] = self._selectors[name].getSelection(instanceArtefacts)
       if len(relevantArtefacts[name]) == 0:
         insufficientData = True
         logger.debug('Insufficent data for instance evaluation: No data for slot "%s"',name)

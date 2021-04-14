@@ -39,6 +39,7 @@ class PointSetConversionAction(SingleActionBase):
 
     self._targetformat = targetformat
     self._addInputArtefacts(pointset=self._pointset)
+    self._resultArtefact = None
 
   def _generateName(self):
     return "Conversion_to_{}".format(self._targetformat)

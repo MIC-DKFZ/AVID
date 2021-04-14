@@ -28,9 +28,11 @@ class DataSetEvaluator (object):
   that instances will be defined by the 'case' property, so each case will be evaluated
   as an instance.'''
   
-  def __init__(self, metricCriteria, instanceDefiningProps = [defaultProps.CASE], instanceDefiningSelector = SelectorBase()):
+  def __init__(self, metricCriteria, instanceDefiningProps = None, instanceDefiningSelector = SelectorBase()):
     self._metricCriteria = metricCriteria
     self._instanceDefiningProps = instanceDefiningProps
+    if self._instanceDefiningProps is None:
+      self._instanceDefiningProps = [defaultProps.CASE]
     self._instanceDefiningSelector = instanceDefiningSelector
     
     

@@ -20,8 +20,9 @@ class MultiKeyValueSelector(SelectorBase):
       key = "tag", value = "CCT"
       the selectors extracts all rows, which have a key tag, and the value is CCT.
   '''
-  def __init__(self,selectionDict):
+  def __init__(self, selectionDict):
     ''' init '''
+    super().__init__()
     self.__selectionDict = selectionDict
 
   def getKeyValueList(self):
