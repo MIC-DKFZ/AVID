@@ -19,13 +19,14 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
 from avid.common import osChecker, AVIDUrlLocater
+from avid.splitter import BaseSplitter
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from avid.sorter import TimePointSorter
 from .simpleScheduler import SimpleScheduler
-from .doseMap import _getArtefactLoadStyle 
+from .doseMap import _getArtefactLoadStyle
 from avid.externals.matchPoint import ensureMAPRegistrationArtefact
 import avid.common.demultiplexer as demux
 
@@ -34,179 +35,175 @@ logger = logging.getLogger(__name__)
 class ImageAccAction(CLIActionBase):
   '''Class that wraps the single action for the tool imageAcc.'''
 
-  def __init__(self, image1, image2, registration = None, weight1 = None,
-               weight2 = None, interpolator = "linear", operator="+",  outputExt = "nrrd",
-               actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
-                           propInheritanceDict = propInheritanceDict)
-    self._addInputArtefacts(image1 = image1, image2 = image2, registration=registration)
+  def __init__(self, images, registrations = None, weight = None,
+               interpolator = "linear", operator="+",  outputExt = "nrrd",
+               actionTag = "imageAcc", alwaysDo = False, session = None,
+               additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="doseAcc",
+                           actionConfig = actionConfig, propInheritanceDict = propInheritanceDict)
+    self._addInputArtefacts(images = images, registrations=registrations)
         
-    self._image1 = image1
-    self._registration = registration
-    self._image2 = image2
-    self._weight1 = weight1
-    self._weight2 = weight2
+    self._images = self._ensureArtefacts(images, "images")
+
+    if len(self._images)<2:
+      raise RuntimeError('Cannot performe image accumulation. Need at least two image artefacts.')
+
+    self._registrations = self._ensureArtefacts(registrations, "registrations")
+    if self._registrations is not None:
+      if len(self._registrations) == len(self._images):
+        logger.info("Number of images ({}) equal the number of registrations. Assume that the first registration is"
+                    " linked to the first image. This registration will therefore be skipped.".format(len(self._images)))
+        self._registrations = self._registrations[1:]
+      elif len(self._registrations)+1 == len(self._images):
+        logger.info("Number of images ({}) exceeds the number of registrations ({}) by 1. Assume that the first"
+                    " image has no registration. This registration will therefore be skipped.".format(len(self._images),
+                                                                                                     len(self._registrations)))
+      else:
+        error ="Number of images ({}) does not fit to number of registrations ({}); registration count must either be" \
+               " equal or smaller by 1 (assuming that first image is never mapped). Cannot performe action because" \
+               " linking of the registrations to the images is unclear.".format(len(self._images),len(self._registrations))
+        logger.error(error)
+        raise RuntimeError(error)
+    else:
+      self._registrations = (len(self._images)-1)*[None]
+
+    self._weight = weight
+    if self._weight is not None:
+      self._weight = 1 / len(self._images)
+
     self._interpolator = interpolator
     self._operator = operator
     self._outputExt = outputExt
-    self._accumulationNR = additionalActionProps[artefactProps.ACC_ELEMENT]
-    self._resultArtefact = None;
+    self._resultArtefact = None
     
     
   def _generateName(self):
     #need to define the outputs
-    name = "imageAcc_"+str(artefactHelper.getArtefactProperty(self._image1,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._image1,artefactProps.TIMEPOINT))
+    name = "imageAcc"
 
-    if (self._operator == "+"):
-      name += "_a_"
-    elif (self._operator == "*"):
-      name += "_m_"
+    if self._operator == "+":
+      name += "_add_"
+    elif self._operator == "*":
+      name += "_multiply_"
     else:
       logger.error("operator %s not known.", self._operator)
       raise
 
-    name += str(artefactHelper.getArtefactProperty(self._image2,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._image2,artefactProps.TIMEPOINT))
+    name += artefactHelper.getArtefactShortName(self._images[0])
+    name += "to_"+artefactHelper.getArtefactShortName(self._images[-1])
 
-    if self._registration is not None:
-      name += "_by_"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._registration,artefactProps.TIMEPOINT))
+    if self._registrations is not None:
+      name += "_by_registration"
     else:
       name += "_by_identity"
 
-    name += "_"+str(self._accumulationNR)
     return name
    
   def _indicateOutputs(self):
-    
     if self._resultArtefact is None:
-      self._resultArtefact = self.generateArtefact(self._image2,
+      self._resultArtefact = self.generateArtefact(self._images[-1],
                                                    userDefinedProps={
                                                      artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                                                     artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK},
+                                                     artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+                                                     artefactProps.ACC_ELEMENT: str(len(self._images)-2)},
                                                    urlHumanPrefix=self.instanceName,
                                                    urlExtension=self._outputExt)
 
+      self._interimArtefacts = list()
+      for index, image in enumerate(self._images[1:-1]):
+        self._interimArtefacts.append(self.generateArtefact(image,
+                                       userDefinedProps={
+                                         artefactProps.TYPE: artefactProps.TYPE_VALUE_INTERIM,
+                                         artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+                                         artefactProps.ACC_ELEMENT: str(index)},
+                                       urlHumanPrefix=self.instanceName+"_interim_{}".format(index),
+                                       urlExtension=self._outputExt))
+
     return [self._resultArtefact]
- 
-                
-  def _prepareCLIExecution(self):
-    
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    image1Path = artefactHelper.getArtefactProperty(self._image1,artefactProps.URL)
-    image2Path = artefactHelper.getArtefactProperty(self._image2,artefactProps.URL)
-    registrationPath = artefactHelper.getArtefactProperty(self._registration,artefactProps.URL)
-    
-    result = ensureMAPRegistrationArtefact(self._registration, self.generateArtefact(self._image2), self._session)
+
+  def _generateCall(self, result, image1, image2, registration, weight1, weight2):
+    resultPath = artefactHelper.getArtefactProperty(result, artefactProps.URL)
+    image1Path = artefactHelper.getArtefactProperty(image1, artefactProps.URL)
+    image2Path = artefactHelper.getArtefactProperty(image2, artefactProps.URL)
+    registrationPath = artefactHelper.getArtefactProperty(registration, artefactProps.URL)
+
+    result = ensureMAPRegistrationArtefact(registration, self.generateArtefact(image2), self._session)
     if result[0]:
       if result[1] is None:
-        logger.error("Image accumulation will fail. Given registration is not MatchPoint compatible and cannot be converted.")
+        logger.error("Dose accumulation will fail. Given registration is not MatchPoint compatible and cannot be converted.")
       else:
-        registrationPath = artefactHelper.getArtefactProperty(result[1],artefactProps.URL)
-        logger.debug("Converted/Wrapped given registration artefact to be MatchPoint compatible. Wrapped artefact path: "+registrationPath)    
-    
+        registrationPath = artefactHelper.getArtefactProperty(result[1], artefactProps.URL)
+        logger.debug("Converted/Wrapped given registration artefact to be MatchPoint compatible. Wrapped artefact path: " + registrationPath)
+
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
-    
+
     execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", self._actionConfig)
-    
-    content = '"'+execURL + '"' + ' "' + image1Path + '"'+ ' "' + image2Path + '"' + ' "' + resultPath + '"'
+
+    content = '"'+execURL + '"' + ' "' + image1Path + '"' + ' "' + image2Path + '"' + ' "' + resultPath + '"'
 
     if registrationPath is not None:
-      content += ' -r "' + registrationPath +'"'
-    
-    if self._weight1 is not None:
-      content += ' --weight1 "' + str(self._weight1) + '"'
+      content += ' --registration "' + registrationPath + '"'
 
-    if self._weight2 is not None:
-      content += ' --weight2 "' + str(self._weight2) + '"'
-      
+    if weight1 is not None:
+      content += ' --weight1 "' + str(weight1) + '"'
+
+    if weight2 is not None:
+      content += ' --weight2 "' + str(weight2) + '"'
+
     content += ' --interpolator ' + self._interpolator
 
     content += ' --operator ' + self._operator
-    
-    content += ' --loadStyle1 ' + _getArtefactLoadStyle(self._image1)
-    content += ' --loadStyle2 ' + _getArtefactLoadStyle(self._image2)
+
+    content += ' --loadStyle1 ' + _getArtefactLoadStyle(image1)
+    content += ' --loadStyle2 ' + _getArtefactLoadStyle(image2)
 
     return content
 
+  def _prepareCLIExecution(self):
+    resultArtefacts = self._interimArtefacts + [self._resultArtefact]
+    image1Artefacts = [self._images[0]] + self._interimArtefacts
+    weight2s = len(self._images)*[self._weight]
+    weight1s = [self._weight] + len(self._interimArtefacts)*[1]
+
+    content = ""
+
+    for index,resultArtefact in enumerate(resultArtefacts):
+      if not len(content) == 0:
+        content += os.linesep
+      line = self._generateCall(result=resultArtefact, image1=image1Artefacts[index], image2=self._images[index+1],
+                                registration=self._registrations[index], weight1=weight1s[index], weight2=weight2s[index+1])
+      content += line
+
+    return content
 
 class ImageAccBatchAction(BatchActionBase):    
   '''This action accumulates a whole selection of images and stores the result.'''
   
   def __init__(self,  imageSelector, registrationSelector = None, regLinker = FractionLinker(),
-               imageSorter = TimePointSorter(), imageSplitProperty = None,
-               actionTag = "imageAcc", alwaysDo = False,
-               session = None, additionalActionProps = None, **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, SimpleScheduler(), session, additionalActionProps)
+               imageSorter = None, imageSplitter = None, regSorter=None, regSplitter = None,
+               actionTag = "imageAcc", session=None, additionalActionProps=None,
+               scheduler = SimpleScheduler(), **singleActionParameters):
 
-    self._images = imageSelector.getSelection(self._session.artefacts)
+    if imageSorter is None:
+      imageSorter = TimePointSorter()
+    if imageSplitter is None:
+      imageSplitter = BaseSplitter()
 
-    self._registrations = list()
-    if registrationSelector is not None:
-      self._registrations = registrationSelector.getSelection(self._session.artefacts)
- 
-    self._regLinker = regLinker
-    self._imageSorter = imageSorter
-    self._imageSplitProperty = imageSplitProperty
-    self._singleActionParameters = singleActionParameters
+    if regSorter is None:
+      regSorter = imageSorter
+    if regSplitter is None:
+      regSplitter = imageSplitter
 
-        
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    allImages = self.ensureRelevantArtefacts(self._images, resultSelector, "imageAcc images")
-    regs = self.ensureRelevantArtefacts(self._registrations, resultSelector, "imageAcc regs")
-        
-    splittedImages = list()
-    
-    if self._imageSplitProperty is not None:
-      splitDict = demux.getSelectors(str(self._imageSplitProperty), workflowData = allImages)
-      for splitID in splitDict:
-        relevantImageSelector = splitDict[splitID]
-        relevantInputs = relevantImageSelector.getSelection(allImages)
-        splittedImages.append(relevantInputs)
-    else:
-      splittedImages.append(allImages)        
-    
-    actions = list()
-       
-    for images in splittedImages:
-      images = self._imageSorter.sortSelection(images)
-      for (pos,image) in enumerate(images):
-        weight2 = 1.0/len(images)
-          
-        linkedRegs = self._regLinker.getLinkedSelection(pos, images, regs)
-        lReg = None
-        if len(linkedRegs) > 0:
-          lReg = linkedRegs[0]
-          if len(linkedRegs) > 1:
-            logger.warning("Improper selection of registrations. Multiple registrations for one image/fraction selected. Action assumes only one registration linked per image. Use first registration. Drop other registrations. Used registration: %s", lReg)
-                 
-        additionalActionProps = {artefactProps.ACC_ELEMENT: str(pos)}
-        
-        if self._additionalActionProps is not None:
-          additionalActionProps.update(self._additionalActionProps)
-          
-        if pos == 0:
-          # first element should be handled differently
-          action = ImageAccAction(image, image, lReg, 0.0, weight2,
-                                  actionTag = self._actionTag, alwaysDo = self._alwaysDo,
-                                  session = self._session,
-                                  additionalActionProps = additionalActionProps,
-                                  **self._singleActionParameters)
-        else:
-          interimImageArtefact = actions[-1]._resultArtefact #take the image result of the last action
-          action = ImageAccAction(interimImageArtefact, image, lReg, 1.0, weight2,
-                                  actionTag = self._actionTag, alwaysDo = self._alwaysDo,
-                                  session = self._session,
-                                  additionalActionProps = additionalActionProps,
-                                  **self._singleActionParameters)
-          
-        action._indicateOutputs() #call to ensure the result artefact is defined
-        actions.append(action)
-    
-    return actions
-  
+    if regLinker is None:
+      regLinker = FractionLinker(performInternalLinkage=True, allowOnlyFullLinkage=False)
+
+    additionalInputSelectors = {"registrations": registrationSelector}
+    linker = {"registrations": regLinker}
+    sorter = {"images": imageSorter, "registrations": regSorter}
+    splitter = {"images": imageSplitter, "registrations": regSplitter}
+
+    BatchActionBase.__init__(self, actionTag= actionTag, actionClass=ImageAccAction, primaryInputSelector= imageSelector,
+                             primaryAlias="images", additionalInputSelectors = additionalInputSelectors,
+                             linker = linker, sorter=sorter, splitter=splitter, session= session,
+                             relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                             scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)

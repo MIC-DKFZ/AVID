@@ -58,6 +58,7 @@ class PythonAction(SingleActionBase):
 
     self._inputArgs = dict()
     self._args = dict()
+    self._resultArtefact = None
 
     for name in scriptArgs:
         if name.startswith('inputs'):

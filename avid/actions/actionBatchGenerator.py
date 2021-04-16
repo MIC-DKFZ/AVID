@@ -100,8 +100,12 @@ class ActionBatchGenerator(object):
         for key in self._additionalInputSelectors:
             if not key in self._splitter:
                 self._splitter[key] = SingleSplitter()
+        if self._primaryAlias in self._splitter:
+            self._splitter[self.PRIMARY_INPUT_KEY] = self._splitter[self._primaryAlias]
+            self._splitter.pop(self._primaryAlias)
+            logger.debug("Splitter for primary alias detected. Corrected to default PRIMAR_INPUT_KEY.")
         if not self.PRIMARY_INPUT_KEY in self._splitter:
-            self._splitter["primaryInput"] = SingleSplitter()
+            self._splitter[self.PRIMARY_INPUT_KEY] = SingleSplitter()
 
         self._sorter = dict()
         if sorter is not None:
@@ -109,15 +113,18 @@ class ActionBatchGenerator(object):
         for key in self._additionalInputSelectors:
             if not key in self._sorter:
                 self._sorter[key] = BaseSorter()
-
+        if self._primaryAlias in self._sorter:
+            self._sorter[self.PRIMARY_INPUT_KEY] = self._sorter[self._primaryAlias]
+            self._sorter.pop(self._primaryAlias)
+            logger.debug("Sorter for primary alias detected. Corrected to default PRIMAR_INPUT_KEY.")
         if not self.PRIMARY_INPUT_KEY in self._sorter:
-            self._sorter["primaryInput"] = BaseSorter()
+            self._sorter[self.PRIMARY_INPUT_KEY] = BaseSorter()
 
         self._linker = dict()
         if linker is not None:
             self._linker = linker.copy()
         if self.PRIMARY_INPUT_KEY in self._linker:
-            raise ValueError('Primary input can not have a linkage. Invalid linker setting. Check passed dictionary %s.'.format(self._dependentLinker))
+            raise ValueError('Primary input can not have a linkage. Invalid linker setting. Check passed dictionary {}.'.format(self._dependentLinker))
 
         for key in self._additionalInputSelectors:
             if not key in self._linker:
@@ -127,11 +134,11 @@ class ActionBatchGenerator(object):
         if dependentLinker is not None:
             self._dependentLinker = dependentLinker.copy()
         if self.PRIMARY_INPUT_KEY in self._dependentLinker:
-            raise ValueError('Primary input can not have a linkage. Invalid dependentLinker setting. Check passed dictionary %s.'.format(self._dependentLinker))
+            raise ValueError('Primary input can not have a linkage. Invalid dependentLinker setting. Check passed dictionary {}.'.format(self._dependentLinker))
 
         for key in self._dependentLinker:
             if self._dependentLinker[key][0] is key:
-                raise ValueError('Recursive linkage dependency. Input indicates to depend on itself. Check passed dependentLinker dictionary %s.'.format(
+                raise ValueError('Recursive linkage dependency. Input indicates to depend on itself. Check passed dependentLinker dictionary {}.'.format(
                         self._dependentLinker))
 
         self._relevanceSelector = relevanceSelector

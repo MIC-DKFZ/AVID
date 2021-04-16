@@ -22,8 +22,9 @@ class KeyMultiValueSelector(SelectorBase):
       key = "tag", value = "CCT", "MRI"
       the selectors extracts all artefacts, which have a key "tag", and the value "CCT" or "MRI".
   '''
-  def __init__(self, key, values, negate = False, allowStringCompare = False):
+  def __init__(self, key, values, negate=False, allowStringCompare=False):
     ''' init '''
+    super().__init__()
     self.__key = key
     self.__values = values
     self.__allowStringCompare = allowStringCompare

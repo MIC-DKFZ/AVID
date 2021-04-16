@@ -83,7 +83,7 @@ class MR2SignalConcentrationMiniAppAction(CLIActionBase):
         if self._conversiontype == self.CONVERSION_T1_ABSOLUTE or self._conversiontype == self.CONVERSION_T1_RELATIVE:
             content += ' -k "{}" '.format(self._k)
         elif self._conversiontype == self.CONVERSION_T1_FLASH:
-            content += ' -k "{}" --TE "{}"'.format(self._k)
+            content += ' -k "{}" --TE "{}"'.format(self._k, self._te)
         elif self._conversiontype == self.CONVERSION_T2:
             content += ' --relaxivity "{}" --recovery-time "{}" --relaxation-time "{}"'.format(self._relaxivity, self._recoveryTime, self._relaxationTime)
 

@@ -53,7 +53,7 @@ ACTION_INSTANCE_UID = "action_instance_uid"
 '''Defines a reference to a plan file the artefact is associated with. Normaly
 this could be found as optional property for virtuos dose artefacts.'''
 VIRTUOS_PLAN_REF = "virtuos_plan_ref"
-'''Property containes the number of planned fraction associated with a artefact
+'''Property containes the number of planned fractions associated with a artefact
  (typically a plan). The value of the property should be of type int.'''
 PLANNED_FRACTIONS = "planned_fractions"
 '''Property containes the prescribed dose associated with a artefact
@@ -78,6 +78,9 @@ by an action.'''
 TYPE_VALUE_CONFIG = "config"
 ''' Standard type value. Indicating any result artefacts produced by an action.'''
 TYPE_VALUE_RESULT = "result"
+''' Standard type value. Indicating any result artefacts that is produced by an action as an interim result
+when the extion is processed. It is not the final result of the action and should not be used in normal workflows.'''
+TYPE_VALUE_INTERIM = "interim_result"
 
 '''Standard type value. Indicating the artefact is stored as DICOM iod.'''
 FORMAT_VALUE_DCM = "dcm"

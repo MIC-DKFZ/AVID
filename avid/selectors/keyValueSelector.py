@@ -22,8 +22,9 @@ class KeyValueSelector(SelectorBase):
       key = "tag", value = "CCT"
       the selectors extracts all rows, which have a key tag, and the value is CCT.
   '''
-  def __init__(self, key, value, negate = False, allowStringCompare = False):
+  def __init__(self, key, value, negate=False, allowStringCompare=False):
     ''' init '''
+    super().__init__()
     self.__key = key
     self.__value = value
     self.__allowStringCompare = allowStringCompare

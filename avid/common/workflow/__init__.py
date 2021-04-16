@@ -11,19 +11,19 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-from builtins import object
+import argparse
 import logging
 import os
-import sys
 import shutil
-import argparse
+import sys
 import threading
-import avid.common.patientNumber as patientNumber
+from builtins import object
+from builtins import str
+
 import avid.common.artefact.fileHelper as fileHelper
-from avid.common.artefact import ensureValidPath
-from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
+import avid.common.patientNumber as patientNumber
 from avid.common import artefact
+from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
 '''set when at least one session was initialized to ensure this stream is only
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''

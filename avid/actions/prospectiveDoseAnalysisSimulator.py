@@ -173,8 +173,8 @@ class ProspectiveDoseAnalysisSimulatorAction(SingleActionBase):
           orderedValues = collections.OrderedDict(sorted(value.items()))
           row = list()
           row.append(key)
-          for key, value in orderedValues.items():
-            row.append(value)
+          for key, value2 in orderedValues.items():
+            row.append(value2)
           writer.writerow(row)
               
     except:

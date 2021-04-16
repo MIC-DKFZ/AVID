@@ -35,7 +35,7 @@ class invertRAction(CLIActionBase):
   '''Class that wrapps the single action for the tool invertR.'''
 
   def __init__(self, registration, templateImage=None, directMapping=False, inverseMapping=False, actionTag="invertR", alwaysDo=False,
-               session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=dict()):
+               session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
                            propInheritanceDict=propInheritanceDict)
     self._addInputArtefacts(registration=registration, templateImage=templateImage)

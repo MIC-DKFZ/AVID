@@ -17,8 +17,9 @@ from avid.common.artefact import getArtefactProperty
 
 class ValiditySelector(SelectorBase):
   ''' Convenience selector to select only artefacts that are not invalid.'''
-  def __init__(self, negate = False):
+  def __init__(self, negate=False):
     ''' init '''
+    super().__init__()
     self._negate = negate
     
   def getSelection(self, workflowData):

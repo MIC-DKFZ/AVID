@@ -54,7 +54,7 @@ class FractionLinker(InnerLinkerBase):
       for secondaryArtefact in preFilteredResult:
         try:
           timePoint = float(artefactHelper.getArtefactProperty(secondaryArtefact, artefactProps.TIMEPOINT))
-          if timePoint > bestTimePoint and timePoint <= masterTimePoint:
+          if bestTimePoint < timePoint <= masterTimePoint:
             bestTimePoint = timePoint
             bestArtefact = secondaryArtefact
         except:
@@ -85,7 +85,7 @@ class FractionLinker(InnerLinkerBase):
       for selection in preFilterdResult:
         try:
           timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
-          if timePoint >= bestTimePoint and timePoint <= masterTimePoint:
+          if bestTimePoint <= timePoint <= masterTimePoint:
             if timePoint > bestTimePoint:
               result.clear()
             bestTimePoint = timePoint

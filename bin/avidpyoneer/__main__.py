@@ -119,7 +119,7 @@ def doReport(inputFilePath, resultPath, args_dict):
     from pyoneer import htmlreport
 
     if args_dict['report'] is not None:
-        logging.warn("Report flag is ignored when using the report command.")
+        logging.warning("Report flag is ignored when using the report command.")
 
     validReport = False
 

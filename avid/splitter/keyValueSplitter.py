@@ -21,6 +21,7 @@ class KeyValueSplitter(BaseSplitter):
   def __init__(self, *splitArgs):
     '''@param splitArgs the function assumes that all unkown arguments passed to the function should be handeled as split
      properties keys that are used to specify the split.'''
+    super().__init__()
     self._key = splitArgs
 
   def splitSelection(self, selection):

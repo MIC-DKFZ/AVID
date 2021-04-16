@@ -138,8 +138,7 @@ class LinearFitBatchAction(BatchActionBase):
                               self._actionTag,
                               alwaysDo = self._alwaysDo,
                               session = self._session,
-                              additionalActionProps = self._additionalActionProps,
-                              miniapp =self._miniapp)
+                              additionalActionProps = self._additionalActionProps)
         actions.append(action)
               
     return actions

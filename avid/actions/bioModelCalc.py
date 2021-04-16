@@ -25,7 +25,7 @@ from avid.sorter import BaseSorter
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 from .doseMap import _getArtefactLoadStyle
-from .doseAcc import _getFractionWeight
+from .doseAcc import _getFractionWeightByArtefact
 import avid.externals.virtuos as virtuos
 
 logger = logging.getLogger(__name__)
@@ -61,17 +61,13 @@ class BioModelCalcAction(CLIActionBase):
 
     if self._plan is not None:
       # deduce weight by planned fraction number
-      planWeight = _getFractionWeight(self._plan)
+      planWeight = _getFractionWeightByArtefact(self._plan)
       if planWeight is None:
         logger.warning(
-          "Selected plan has no fraction number information. Cannot determine fraction weight. Fall back to default strategy (weight: %s). Used plan artefact: %s",
+          "Selected plan has no fraction number information. Cannot determine fraction weight. Fall back to default strategy (user defined weight: %s). Used plan artefact: %s",
           self._weight, self._plan)
       else:
         self._weight = planWeight
-    else:
-      logger.info(
-        "No plan selected, no fraction number information available. Cannot determine fraction weight. Fall back to default strategy (1/number of selected doses => weight: %s).",
-        weight)
 
     if self._plan is None:
       if self._weight is None:

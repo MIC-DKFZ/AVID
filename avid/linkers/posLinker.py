@@ -19,7 +19,7 @@ class PosLinker(LinkerBase):
     of the slave selection.
   '''
   def __init__(self):
-    LinkerBase.__init__(allowOnlyFullLinkage=False)
+    LinkerBase.__init__(self, allowOnlyFullLinkage=False)
 
   def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
     index = primaryIndex

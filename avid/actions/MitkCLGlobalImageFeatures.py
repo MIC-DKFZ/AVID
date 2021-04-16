@@ -125,7 +125,7 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
 
             for inputPair in inputPairs:
                 if not len(content)==0:
-                    content+='\n'
+                    content+=os.linesep
 
                 content += '"{}" -i "{}" -m "{}" -o "{}"'.format(execURL, inputPair[0], inputPair[1], resultPath)
                 if not self._legacyOutput:
@@ -175,7 +175,7 @@ class MitkCLGlobalImageFeaturesLegacyCSVBatchAction(BatchActionBase):
                  actionTag="MITKCLGlobalImageFeatures", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         if maskLinker is None:
-            maskLinker = FractionLinker()
+            maskLinker = FractionLinker(allowOnlyFullLinkage=False)
 
         splitter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSplitter(), "masks": BaseSplitter()}
         if splitProperties is not None:

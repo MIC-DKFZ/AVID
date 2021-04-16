@@ -40,6 +40,7 @@ class AndSelector(SelectorBase):
   '''
   def __init__(self, selector1, selector2):
     ''' init '''
+    super().__init__()
     self._selector1 = selector1
     self._selector2 = selector2
 
@@ -67,6 +68,7 @@ class OrSelector(SelectorBase):
 
   def __init__(self, selector1, selector2):
     ''' init '''
+    super().__init__()
     self._selector1 = selector1
     self._selector2 = selector2
 
@@ -91,6 +93,7 @@ class LambdaSelector(SelectorBase):
 
   def __init__(self, selectionFunction):
     ''' init '''
+    super().__init__()
     self._selectionFunction = selectionFunction
 
   def getSelection(self, workflowData):
