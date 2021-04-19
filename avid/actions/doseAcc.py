@@ -212,7 +212,7 @@ class DoseAccAction(CLIActionBase):
 
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "DoseAcc", self._actionConfig)
+    execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
 
     content = '"'+execURL + '"' + ' "' + dose1Path + '"' + ' "' + dose2Path + '"' + ' "' + resultPath + '"'
 

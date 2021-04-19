@@ -45,10 +45,10 @@ class PythonAction(SingleActionBase):
     (= all arguments passed to the action)
    @param passOnlyURLs If set to true only URLs of the artefacts, instead of the artefacts themself, will be passed to
     generateCallable.
-   @scriptedParameters Every unkown parameters that will be passed to generateCallable.
    @defaultoutputextension Output extension that should be used if no indicateCallable is defined.'''
 
-  def __init__(self, generateCallable, indicateCallable = None, passOnlyURLs = True, defaultoutputextension = 'nrrd',actionTag="Python", alwaysDo=True, session=None, additionalActionProps=None,
+  def __init__(self, generateCallable, indicateCallable = None, passOnlyURLs = True, defaultoutputextension = 'nrrd',
+               actionTag="Python", alwaysDo=True, session=None, additionalActionProps=None,
                propInheritanceDict = None, **scriptArgs):
     SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._generateCallable = generateCallable
@@ -58,7 +58,7 @@ class PythonAction(SingleActionBase):
 
     self._inputArgs = dict()
     self._args = dict()
-    self._resultArtefact = None
+    self._resultArtefacts = None
 
     for name in scriptArgs:
         if name.startswith('inputs'):

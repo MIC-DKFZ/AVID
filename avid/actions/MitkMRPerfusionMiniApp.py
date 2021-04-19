@@ -42,7 +42,8 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
     def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask = None, aifmask = None, aifimage = None,
                  hematocrit=0.45, roibased=False, constraints = False, actionTag="MRPerfusion", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
+        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
+                               actionID="MitkMRPerfusionMiniApp",nactionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict)
 
         if aifimage is not None and aifmask is None:
@@ -66,9 +67,6 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
                                                          artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK},
                                                      urlHumanPrefix=self.instanceName,
                                                      urlExtension='nrrd')
-
-        if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkMRPerfusionMiniApp", actionConfig))
 
     def _generateName(self):
         style = ''
@@ -106,7 +104,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
         aifMaskPath = artefactHelper.getArtefactProperty(self._aifmask, artefactProps.URL)
         aifPath = artefactHelper.getArtefactProperty(self._aifimage, artefactProps.URL)
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "MitkMRPerfusionMiniApp", self._actionConfig)
+        execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
 
         result = list()
         result.append(execURL)

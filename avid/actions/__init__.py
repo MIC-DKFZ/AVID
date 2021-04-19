@@ -192,6 +192,12 @@ class SingleActionBase(ActionBase):
         if len(artefacts) == 0:
             return None
         from avid.common.artefact import Artefact
+        if isinstance(artefacts, Artefact):
+            logger.warning(
+                'Action {} was init in an deprecated style for input "{}"; not an list of artefacts where passed but'
+                ' only an artefact. Check usage. Illegal artefact: {}.'.format(
+                    self.__class__.__name__, name, artefacts))
+            return [artefacts]
         for artefact in artefacts:
             if artefact is not None and not isinstance(artefact, Artefact):
                 logger.warning(
