@@ -11,124 +11,65 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-import os
 import logging
+import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+import avid.common.artefact.defaultProps as artefactProps
+from avid.common import osChecker
+from avid.externals.doseTool import saveSimpleDictAsResultXML
+from avid.externals.plastimatch import parseDiceResult
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
+from . import BatchActionBase
+from .genericCLIAction import GenericCLIAction
 from .simpleScheduler import SimpleScheduler
-from avid.externals.plastimatch import parseDiceResult
-from avid.externals.doseTool import saveSimpleDictAsResultXML
 
 logger = logging.getLogger(__name__)
 
-class plmDiceAction(CLIActionBase):
-  '''Class that wraps the single action for the tool plastimatch dice.'''
 
-  def __init__(self, refImage, testImage, 
-               actionTag = "plmDice", alwaysDo = False, 
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
-    self._addInputArtefacts(refImage=refImage, testImage = testImage)
-    self._refImage = refImage
-    self._testImage = testImage
-    
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", actionConfig))
-    self._cwd = cwd    
-    
-  def _generateName(self):
-    name = "plmDice_"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.ACTIONTAG))
+class PlmDiceAction(GenericCLIAction):
+    """Class that wraps the single action for the tool plastimatch dice."""
 
-    objective = artefactHelper.getArtefactProperty(self._refImage,artefactProps.OBJECTIVE)
-    if not objective is None:
-        name += '-%s'%objective
+    def __init__(self, refImage, inputImage,
+                 actionTag="plmDice", alwaysDo=False,
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+        refImage = self._ensureSingleArtefact(refImage, "refImage")
+        inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
 
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._refImage,artefactProps.TIMEPOINT))\
-            +"_vs_"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.ACTIONTAG))
+        GenericCLIAction.__init__(self, refImage=refImage, inputImage=inputImage, actionID="plastimatch",
+                                  noOutputArgs=True,
+                                  additionalArgs={'command': 'dice', 'all': None},
+                                  argPositions=['command', 'refImage', 'inputImage'],
+                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
+                                  propInheritanceDict=propInheritanceDict,
+                                  defaultoutputextension='xml')
 
-    objective = artefactHelper.getArtefactProperty(self._testImage,artefactProps.OBJECTIVE)
-    if not objective is None:
-        name += '-%s'%objective
+    def _postProcessCLIExecution(self):
+        resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
+        osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._testImage,artefactProps.TIMEPOINT))
+        with open(self._logFilePath) as logFile:
+            result = parseDiceResult(logFile.read())
+            saveSimpleDictAsResultXML(result, resultPath)
 
-    return name
-   
-  def _indicateOutputs(self):
-    
-    self._resultArtefact = self.generateArtefact(self._testImage,
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension='xml')
 
-    return [self._resultArtefact]
+class PlmDiceBatchAction(BatchActionBase):
+    """Batch action for PlmDiceAction."""
 
-      
-  def _prepareCLIExecution(self):
-    
-    inputPath = artefactHelper.getArtefactProperty(self._refImage,artefactProps.URL)
-    input2Path = artefactHelper.getArtefactProperty(self._testImage,artefactProps.URL)
-    
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
-    
-    content = '"' + execURL + '" dice ' + ' "' + inputPath + '"' + ' "' + input2Path +'" --all'
-      
-    return content
-  
-  
-  def _postProcessCLIExecution(self):
-    
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
+    def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmCompare", session=None,
+                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+        if inputLinker is None:
+            inputLinker = CaseLinker()
 
-    with open(self._logFilePath) as logFile:
-      result = parseDiceResult(logFile.read())
-      saveSimpleDictAsResultXML(result, resultPath)
-   
+        additionalInputSelectors = {"inputImage": inputSelector}
+        linker = {"inputImage": inputLinker}
 
-class plmDiceBatchAction(BatchActionBase):    
-  '''Base class for action objects that are used together with selectors and
-    should therefore able to process a batch of SingleActionBased actions.'''
-  
-  def __init__(self,  refSelector, testSelector,
-               inputLinker = CaseLinker(), 
-               actionTag = "plmDice", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
-
-    self._refImages = refSelector.getSelection(self._session.artefacts)
-    self._testImages = testSelector.getSelection(self._session.artefacts)
-    
-    self._inputLinker = inputLinker
-    self._singleActionParameters = singleActionParameters
-
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    refs = self.ensureRelevantArtefacts(self._refImages, resultSelector, "plm dice 1st input")
-    tests = self.ensureRelevantArtefacts(self._testImages, resultSelector, "plm dice 2nd input")
-    
-    actions = list()
-    
-    for (pos,refImage) in enumerate(refs):
-      linked2 = self._inputLinker.getLinkedSelection(pos,refs,tests)
-           
-      for lt in linked2:
-        action = plmDiceAction(refImage, lt,
-                            self._actionTag, alwaysDo = self._alwaysDo,
-                            session = self._session,
-                            additionalActionProps = self._additionalActionProps,
-                            **self._singleActionParameters)
-        actions.append(action)
-    
-    return actions
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PlmDiceAction,
+                                 primaryInputSelector=refSelector,
+                                 primaryAlias="refImage", additionalInputSelectors=additionalInputSelectors,
+                                 linker=linker, session=session,
+                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 **singleActionParameters)

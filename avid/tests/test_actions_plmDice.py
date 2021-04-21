@@ -15,7 +15,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.plmDice import plmDiceBatchAction as plmDice
+from avid.actions.plmDice import PlmDiceBatchAction as plmDice
 from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
@@ -46,15 +46,19 @@ class TestPlmDice(unittest.TestCase):
                     
       self.assertEqual(token.isSuccess(), True)
 
-      refFile = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#1_ref.xml")
-      resultFile = artefactHelper.getArtefactProperty(action._actions[0]._resultArtefact,
+      refFilePath = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#1_ref.xml")
+      resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
                                                       artefactProps.URL)
-      self.assertEqual(open(refFile).read(), open(resultFile).read())
+      with open(refFilePath) as refFile:
+          with open(resultFilePath) as resultFile:
+              self.assertEqual(refFile.read(), resultFile.read())
 
-      refFile = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#2_ref.xml")
-      resultFile = artefactHelper.getArtefactProperty(action._actions[1]._resultArtefact,
+      refFilePath = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#2_ref.xml")
+      resultFilePath = artefactHelper.getArtefactProperty(action._actions[1].outputArtefacts[0],
                                                       artefactProps.URL)
-      self.assertEqual(open(refFile).read(), open(resultFile).read())
+      with open(refFilePath) as refFile:
+          with open(resultFilePath) as resultFile:
+              self.assertEqual(refFile.read(), resultFile.read())
 
       token = action.do()
       self.assertEqual(token.isSkipped(), True)

@@ -57,8 +57,7 @@ class PlmCompareAction(GenericCLIAction):
 
 
 class PlmCompareBatchAction(BatchActionBase):
-    """Base class for action objects that are used together with selectors and
-    should therefore able to process a batch of SingleActionBased actions."""
+    """Batch action for PlmCompareAction."""
 
     def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmCompare", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
