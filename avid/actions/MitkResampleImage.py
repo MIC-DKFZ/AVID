@@ -31,12 +31,13 @@ from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
+
 class MitkResampleImageAction(GenericCLIAction):
     '''Class that wraps the single action for the tool MITKResampleImage.'''
-    def __init__(self, images, cliArgs= None, defaultoutputextension = 'nrrd', actionTag="MitkResampleImage",
+    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkResampleImage",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
         GenericCLIAction.__init__(self, i=images, actionID="MitkResampleImage", outputFlags=['o'],
-                                  cliArgs=cliArgs, illegalArgs= ['output','input'], actionTag= actionTag,
+                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
                                   defaultoutputextension=defaultoutputextension)

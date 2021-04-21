@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 class MitkResampleMaskAction(GenericCLIAction):
     '''Class that wraps the single action for the tool MITKResampleMask.'''
 
-    def __init__(self, images, cliArgs= None, defaultoutputextension = 'nrrd', actionTag="MITKResampleMask",
+    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MITKResampleMask",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
         GenericCLIAction.__init__(self, i=images, actionID="MITKResampleMask", outputFlags=['o'],
-                                  cliArgs=cliArgs, illegalArgs= ['output','input'], actionTag= actionTag,
+                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
                                   defaultoutputextension=defaultoutputextension)
