@@ -70,16 +70,14 @@ class DoseMapAction(CLIActionBase):
 
     artefactRef = self._inputDose
 
-    self._resultArtefact = self.generateArtefact(artefactRef,
-                                                 userDefinedProps = userDefinedProps,
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension=self._outputExt)
-    return [self._resultArtefact]
- 
+    resultArtefact = self.generateArtefact(artefactRef, userDefinedProps = userDefinedProps,
+                                           urlHumanPrefix=self.instanceName, urlExtension=self._outputExt)
+    return [resultArtefact]
+
                 
   def _prepareCLIExecution(self):
     
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+    resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
     templatePath = artefactHelper.getArtefactProperty(self._templateDose,artefactProps.URL)
     registrationPath = artefactHelper.getArtefactProperty(self._registration,artefactProps.URL)

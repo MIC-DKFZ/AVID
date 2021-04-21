@@ -52,48 +52,48 @@ class Test(unittest.TestCase):
 
     def test_generate_cli_call(self):
         ref = '"cli.exe" -i "{}" "{}"'.format(self.getURL(self.a1), self.getURL(self.a2))
-        call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1,self.a2]}, cli_args=None,
+        call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1,self.a2]}, additional_args=None,
                                  arg_positions=None)
         self.assertEqual(ref, call)
 
         ref = '"cli.exe" -i "{}" -a "A" --bb "BB" -c "C"'.format(self.getURL(self.a1))
         call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1]},
-                                 cli_args={'a': 'A', 'bb': 'BB', 'c':'C'}, arg_positions=None)
+                                 additional_args={'a': 'A', 'bb': 'BB', 'c': 'C'}, arg_positions=None)
         self.assertEqual(ref, call)
 
         ref = '"cli.exe" -i "{}" "{}" --out "{}" -a "A" --bb "BB" -c "C"'.format(self.getURL(self.a1),
                                                                                  self.getURL(self.a2),
                                                                                  self.getURL(self.a3))
         call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1,self.a2], 'out': [self.a3]},
-                                 cli_args={'a': 'A', 'bb': 'BB', 'c':'C'}, arg_positions=None)
+                                 additional_args={'a': 'A', 'bb': 'BB', 'c': 'C'}, arg_positions=None)
         self.assertEqual(ref, call)
 
         ref = '"cli.exe" -i "{}" -a "A" --bb "BB" -c "C"'.format(self.getURL(self.a1))
         call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1, None], 'out': [None]},
-                                 cli_args={'a': 'A', 'bb': 'BB', 'c':'C'}, arg_positions=None)
+                                 additional_args={'a': 'A', 'bb': 'BB', 'c': 'C'}, arg_positions=None)
         self.assertEqual(ref, call)
 
         ref = '"cli.exe" "{}" "{}" "BB" --out "{}" -a "A" -c "C"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                          self.getURL(self.a3))
         call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1,self.a2], 'out': [self.a3]},
-                                 cli_args={'a': 'A', 'bb': 'BB', 'c':'C'}, arg_positions=['i', 'bb'])
+                                 additional_args={'a': 'A', 'bb': 'BB', 'c': 'C'}, arg_positions=['i', 'bb'])
         self.assertEqual(ref, call)
 
         ref = '"cli.exe" "C" "{}" "{}" "{}" -a "A" --bb "BB" --None'.format(self.getURL(self.a3),self.getURL(self.a1),
                                                                             self.getURL(self.a2))
         call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': [self.a1,self.a2], 'out': [self.a3]},
-                                 cli_args={'a': 'A', 'bb': 'BB', 'c':'C', 'None': None},
+                                 additional_args={'a': 'A', 'bb': 'BB', 'c': 'C', 'None': None},
                                  arg_positions=['c', 'out', 'i', 'unkown_arg'])
         self.assertEqual(ref, call)
 
         ref = '"cli.exe"'
-        call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': None}, cli_args=None, arg_positions=None)
+        call = generate_cli_call(exec_url="cli.exe", artefact_args={'i': None}, additional_args=None, arg_positions=None)
         self.assertEqual(ref, call)
 
     def test_GenericCLIAction(self):
         action = GenericCLIAction(actionID="TestCLI", input=[self.a1], session=self.session)
 
-        outputs = action._indicateOutputs()
+        outputs = action.outputArtefacts
         self.assertEqual('Case1',outputs[0][artefactProps.CASE])
         self.assertEqual('GenericCLI',outputs[0][artefactProps.ACTIONTAG])
 
@@ -103,26 +103,51 @@ class Test(unittest.TestCase):
 
         action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   session=self.session)
-        outputs = action._indicateOutputs()
+        outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
         ref = '"test.exe" --input "{}" -x "{}" "{}" --out "{}"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", cliArgs={'a':'A', 'bb':'BB'}, input=[self.a1],
+        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
+                                  noOutputArgs=True, session=self.session)
+        call = action._prepareCLIExecution()
+        ref = '"test.exe" --input "{}" -x "{}" "{}"'.format(self.getURL(self.a1),self.getURL(self.a2),
+                                                                       self.getURL(self.a3))
+        self.assertEqual(ref,call)
+
+        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], session=self.session)
-        outputs = action._indicateOutputs()
+        outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
         ref = '"test.exe" --input "{}" -x "{}" "{}" -o "{}" -a "A" --bb "BB"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", cliArgs={'a':'A', 'bb':'BB'}, input=[self.a1],
+        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], illegalArgs=['not_existant'], session=self.session)
-        outputs = action._indicateOutputs()
+        outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
         ref = '"test.exe" --input "{}" -x "{}" "{}" -o "{}" -a "A" --bb "BB"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
+        self.assertEqual(ref,call)
+
+        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+                                  x=[self.a2, self.a3], outputFlags=['o'], argPositions=['o','bb','input'],
+                                  session=self.session)
+        outputs = action.outputArtefacts
+        call = action._prepareCLIExecution()
+        ref = '"test.exe" "{}" "BB" "{}" -x "{}" "{}" -a "A"'.format(self.getURL(outputs[0]), self.getURL(self.a1),
+                                                                   self.getURL(self.a2), self.getURL(self.a3))
+        self.assertEqual(ref,call)
+
+        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+                                  x=[self.a2, self.a3], outputFlags=['o'], argPositions=['o','bb','input'],
+                                  noOutputArgs=True, session=self.session)
+        outputs = action.outputArtefacts
+        call = action._prepareCLIExecution()
+        ref = '"test.exe" "BB" "{}" -x "{}" "{}" -a "A"'.format(self.getURL(self.a1), self.getURL(self.a2),
+                                                              self.getURL(self.a3))
         self.assertEqual(ref,call)
 
         #invalid inputs
@@ -130,10 +155,10 @@ class Test(unittest.TestCase):
         #no inputs
         self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", session=self.session)
         #illegal inputs cli arg collision
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], cliArgs={'input':None},
+        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], additionalArgs={'input':None},
                           session=self.session)
         # illegal cli arg
-        self.assertRaises(RuntimeError, GenericCLIAction ,actionID="TestCLI", input=[self.a1], cliArgs={'a':None},
+        self.assertRaises(RuntimeError, GenericCLIAction ,actionID="TestCLI", input=[self.a1], additionalArgs={'a':None},
                           illegalArgs=['a'],session=self.session)
         #invalid inputs
         self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], illegalArgs=['input'],

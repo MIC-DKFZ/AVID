@@ -48,7 +48,24 @@ class CLIActionBase(SingleActionBase):
 
     self._logFilePath = None
     self._logErrorFilePath = None
-    
+
+  @property
+  def cwd(self):
+    '''returns the current working directory that is used by the action when executing the tool.'''
+    return self._cwd
+
+  @property
+  def logFilePath(self):
+    '''Returns the path of the log file that contains the std::out stream of the execution, the action instance
+    is associated with. If it is None the action was not executed so far.'''
+    return self._logFilePath
+
+  @property
+  def logErrorFilePath(self):
+    '''Returns the path of the error log file that contains the std::error stream of the execution, the action
+    instance is associated with. If it is None the action was not executed so far.'''
+    return self._logErrorFilePath
+
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed
     for the CLI call to run properly (e.g. the batch/bash file that should be

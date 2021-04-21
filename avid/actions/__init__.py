@@ -81,10 +81,10 @@ class ActionBase(object):
         return self._outputArtefacts
 
     def _indicateOutputs(self):
-        ''' Internl function that is called by indicate outputs if no output artefact
+        ''' Internal function that is called by indicate outputs if no output artefact
           list exists yet. Return a list of artefact entries the action will produce
           if do() is called. The method should
-          return complete entries. Therefore the enties should already contain the
+          return complete entries. Therefore the entries should already contain the
           url where they *will* be stored if the action is executed.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
         # Implement: return a list of valid artefact entries

@@ -30,7 +30,7 @@ def _generateFlag(flagName):
     else:
         return '--{}'.format(flagName)
 
-def generate_cli_call(exec_url, artefact_args, cli_args=None, arg_positions=None):
+def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positions=None):
     '''Helper that generates the the cli call string for a given set of artefact selection arguments and normal
      arguments.
      :param exec_url: The argument for the cli itself.
@@ -38,11 +38,11 @@ def generate_cli_call(exec_url, artefact_args, cli_args=None, arg_positions=None
       added outamatically depending on the size of the key; one character keys will completed with "-", others with
       "--"). If the selection contains more then one artefact all artefact urls will be added as single arguments after
       the flag.
-     :param cliArgs: Dictionary with all arguments (except the artefact inputs and outputs) that should be passed to
-      the cli. The key is the argument/flag name (without "-" or "--"; they will be
+     :param additional_args: Dictionary with all additional arguments (except the artefact inputs and outputs) that
+      should be passed to the cli. The key is the argument/flag name (without "-" or "--"; they will be
       added outamatically depending on the size of the key; one character keys will completed with "-", others with
       "--"). If the value is not None it will be also added after the argument.
-     :param arg_positions list that contains the keys of all arguments (from artefact_args and cli_args) that
+     :param arg_positions list that contains the keys of all arguments (from artefact_args and additional_args) that
       are not flag based but positional arguments. Those arguments will be added in the order of the list before the
       positional arguments.
       '''
@@ -56,8 +56,8 @@ def generate_cli_call(exec_url, artefact_args, cli_args=None, arg_positions=None
                 artefactPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
                 if artefactPath is not None:
                     content += ' "{}"'.format(artefactPath)
-        elif cli_args is not None and key in cli_args:
-            content += ' "{}"'.format(cli_args[key])
+        elif additional_args is not None and key in additional_args:
+            content += ' "{}"'.format(additional_args[key])
 
     for pos, artefactKey in enumerate(artefact_args):
         if not artefactKey in arg_positions and artefact_args[artefactKey] is not None:
@@ -70,12 +70,12 @@ def generate_cli_call(exec_url, artefact_args, cli_args=None, arg_positions=None
             if len(artefact_content)>0:
                 content += ' {}'.format(_generateFlag(artefactKey))+artefact_content
 
-    if cli_args is not None:
-        for argKey in cli_args:
+    if additional_args is not None:
+        for argKey in additional_args:
             if not argKey in arg_positions:
                 content += ' {}'.format(_generateFlag(argKey))
-                if cli_args[argKey] is not None:
-                    content += ' "{}"'.format(cli_args[argKey])
+                if additional_args[argKey] is not None:
+                    content += ' "{}"'.format(additional_args[argKey])
 
     return content
 
@@ -89,8 +89,8 @@ class GenericCLIAction(CLIActionBase):
      to a certain executable.
      For more details see the documentation of __init_.'''
 
-    def __init__(self, actionID, outputFlags = None, indicateCallable = None, cliArgs= None, illegalArgs=None,
-                 argPositions = None, defaultoutputextension = 'nrrd', actionTag="GenericCLI", alwaysDo=False,
+    def __init__(self, actionID, outputFlags = None, indicateCallable = None, additionalArgs= None, illegalArgs=None,
+                 argPositions = None, noOutputArgs=False, defaultoutputextension = 'nrrd', actionTag="GenericCLI", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, **inputArgs):
         '''
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
@@ -103,8 +103,9 @@ class GenericCLIAction(CLIActionBase):
          The signature of indicateCallable is: indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
           (= all arguments passed to the action)
         :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
-        :param cliArgs: Dictionary with all arguments (except the artefact inputs and outputs) that should be passed to
-        the cli. The key is the argument/flag name (without "-" or "--"; the will be added outamatically). If the value is not
+        :param additionalArgs: Dictionary with all additional arguments (except the artefact inputs and outputs) that
+         should be passed to the cli. The key is the argument/flag name (without "-" or "--"; the will be added
+         outamatically). If the value is not
         None it will be also added after the argument.
         :param illegalArgs: List that can be used to add additional forbidden argument names, that may not be
         contained in cliArgs.
@@ -116,10 +117,10 @@ class GenericCLIAction(CLIActionBase):
 
         self._indicateCallable = indicateCallable
         self._outputextension = defaultoutputextension
+        self._noOutputArgs = noOutputArgs
 
         self._inputs = dict()
         self._args = dict()
-        self._resultArtefacts = None
 
         self._argPositions = argPositions
         if argPositions is None:
@@ -155,50 +156,50 @@ class GenericCLIAction(CLIActionBase):
                                    ' for an input.'.format(flag))
 
 
-        self._cliArgs = dict()
-        if cliArgs is not None:
+        self._additionalArgs = dict()
+        if additionalArgs is not None:
             allIllegalArgs = list(self._inputs.keys())+illegalArgs
             if self._outputFlags is not None:
                 allIllegalArgs = allIllegalArgs+self._outputFlags
 
-            for argName in cliArgs:
+            for argName in additionalArgs:
                 if argName not in allIllegalArgs:
-                    self._cliArgs[argName] = cliArgs[argName]
+                    self._additionalArgs[argName] = additionalArgs[argName]
                 else:
                     raise RuntimeError('Action is initalized with illegal argument "{}". The argument will be set by'
                                        'the action (either as input and output or is explicitly defined illegal argument.'.format(argName))
 
     def _generateName(self):
-        name = '{}'.format(self._actionID)
+        name = '{}_{}'.format(self._actionID,self._actionTag)
         for inputKey in self._inputs:
             name += '_{}'.format(artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
         return name
 
     def _indicateOutputs(self):
         allargs = self._inputs.copy()
-        allargs.update(self._cliArgs)
+        allargs.update(self._additionalArgs)
+        resultArtefacts = None
         if self._indicateCallable is not None:
-            self._resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
+            resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
             # check if its really a list of artefacts
             try:
-                for artifact in self._resultArtefacts:
+                for artifact in resultArtefacts:
                     if not isinstance(artifact, artefactHelper.Artefact):
                         raise TypeError(
-                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                self._resultArtefacts))
+                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(artifact))
             except:
                 raise TypeError(
                     'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                        self._resultArtefacts))
+                        resultArtefacts))
 
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
-            self._resultArtefacts = [
+            resultArtefacts = [
                 self.generateArtefact(self._inputs[sorted(self._inputs.keys())[0]][0],
                                       userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
                                       urlHumanPrefix=self.instanceName,
                                       urlExtension=self._outputextension)]
-        return self._resultArtefacts
+        return resultArtefacts
 
     def _prepareCLIExecution(self):
         try:
@@ -207,18 +208,19 @@ class GenericCLIAction(CLIActionBase):
             artefactArgs = self._inputs.copy()
             argPositions = self._argPositions.copy()
 
-            for pos, resultArtefact in enumerate(self._resultArtefacts):
-                resultPath = artefactHelper.getArtefactProperty(resultArtefact, artefactProps.URL)
-                osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
+            if not self._noOutputArgs:
+                for pos, resultArtefact in enumerate(self.outputArtefacts):
+                    resultPath = artefactHelper.getArtefactProperty(resultArtefact, artefactProps.URL)
+                    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-                key = "output_{}".format(pos)
-                try:
-                    key = self._outputFlags[pos]
-                except:
-                    argPositions.append(key)
-                artefactArgs[key] = [resultArtefact]
+                    key = "output_{}".format(pos)
+                    try:
+                        key = self._outputFlags[pos]
+                    except:
+                        argPositions.append(key)
+                    artefactArgs[key] = [resultArtefact]
 
-            content = generate_cli_call(exec_url=execURL, artefact_args=artefactArgs, cli_args=self._cliArgs,
+            content = generate_cli_call(exec_url=execURL, artefact_args=artefactArgs, additional_args=self._additionalArgs,
                                         arg_positions=argPositions)
 
         except:
