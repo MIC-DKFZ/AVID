@@ -39,7 +39,8 @@ class CLIActionBase(SingleActionBase):
   def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionID = None, actionConfig = None, propInheritanceDict = None):
     '''@param cwd Specifies the current working directory that should be used for the cli call.
     if not set explicitly, it will be deduced automatically by the specified tool/action '''
-    SingleActionBase.__init__(self, actionTag,alwaysDo, session, additionalActionProps, propInheritanceDict = propInheritanceDict)
+    SingleActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                              additionalActionProps=additionalActionProps, propInheritanceDict = propInheritanceDict)
     self._actionID = actionID
     self._actionConfig = actionConfig
     self._cwd = cwd

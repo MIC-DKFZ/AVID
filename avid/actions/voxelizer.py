@@ -11,146 +11,99 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-import os
 import logging
 import re
 
 import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
+from . import BatchActionBase
+from .genericCLIAction import GenericCLIAction
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
-class VoxelizerAction(CLIActionBase):
-  '''Class that wraps the single action for the tool rttb VoxelizerTool.'''
 
-  def __init__(self, structSet, referenceImage, structName,
-               actionTag = "Voxelizer", allowIntersections = True,
-               booleanMask = False, outputExt = 'nrrd', alwaysDo = False, session = None,
-               additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict = propInheritanceDict)
-    self._addInputArtefacts(structSet = structSet, referenceImage = referenceImage)
-    self._referenceImage = referenceImage
-    self._structSet = structSet
-    self._structName = structName
-    self._outputExt = outputExt
-    self._booleanMask = booleanMask
-    self._allowIntersections = allowIntersections
-    
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "VoxelizerTool", actionConfig))
-    self._cwd = cwd    
-    
-  def _generateName(self):
-    name = "voxelize_"+artefactHelper.ensureValidPath(str(self._structName))
+class VoxelizerAction(GenericCLIAction):
+    """Class that wraps the single action for the tool rttb VoxelizerTool."""
 
-    name += "_in_"+str(artefactHelper.getArtefactProperty(self._structSet,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._structSet,artefactProps.TIMEPOINT))
+    def __init__(self, structSet, referenceImage, structName,
+                 actionTag='Voxelizer', allowIntersections=True,
+                 booleanMask=False, outputExt='nrrd', alwaysDo=False, session=None,
+                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
 
-    name += "_to_"+str(artefactHelper.getArtefactProperty(self._referenceImage,artefactProps.ACTIONTAG))\
-              +"_#"+str(artefactHelper.getArtefactProperty(self._referenceImage,artefactProps.TIMEPOINT))
+        structSet = self._ensureSingleArtefact(structSet, "structSet")
+        referenceImage = self._ensureSingleArtefact(referenceImage, "referenceImage")
+        self._structName = structName
+        self._init_session(session)
 
-    return name
+        additionalArgs = {'y': 'itk', 'a': None, 'e': self._getStructPattern()}
+        if allowIntersections:
+            additionalArgs['i'] = None
+        if booleanMask:
+            additionalArgs['z'] = None
 
-   
-  def _indicateOutputs(self):    
-    self._resultArtefact = self.generateArtefact(self._structSet,
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                   artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
-                                                                   artefactProps.OBJECTIVE: self._structName},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension=self._outputExt)
-    return [self._resultArtefact]
- 
-                
-  def _prepareCLIExecution(self):
-    
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    refPath = artefactHelper.getArtefactProperty(self._referenceImage,artefactProps.URL)
-    structPath = artefactHelper.getArtefactProperty(self._structSet,artefactProps.URL)
-    
-    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
-    
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "VoxelizerTool", self._actionConfig)
-    
-    content = '"' + execURL + '"' + ' -s "' + structPath + '" -r "' + refPath + '" -o "' + resultPath + '"'
+        internalActionProps = {artefactProps.OBJECTIVE: self._structName,
+                               artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK}
 
-    content += ' -y itk -a'
+        if additionalActionProps is not None:
+            internalActionProps.update(additionalActionProps)
 
-    if self._allowIntersections:
-      content += ' -i'
-      
-    if self._booleanMask:
-      content += ' -z'
-      
-    content += ' -e "'+self._getStructPattern()+'"'
+        GenericCLIAction.__init__(self, s=[structSet], r=[referenceImage], actionID="VoxelizerTool",
+                                  outputFlags=['o'],
+                                  outputReferenceArtefactName='s',
+                                  additionalArgs=additionalArgs,
+                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                                  additionalActionProps=internalActionProps, actionConfig=actionConfig,
+                                  propInheritanceDict=propInheritanceDict,
+                                  defaultoutputextension=outputExt)
 
-    return content
-  
-  
-  def _getStructPattern(self):
-    pattern = self._structName
-    if self._session.hasStructurePattern(self._structName):
-      pattern = self._session.structureDefinitions[self._structName]
-    else:
-      #we stay with the name, but be sure that it is a valid regex. because it
-      #is expected by the doseTool
-      pattern = re.escape(pattern)
-    
-    return pattern
-    
+    def _getStructPattern(self):
+        pattern = self._structName
+        if self._session.hasStructurePattern(self._structName):
+            pattern = self._session.structureDefinitions[self._structName]
+        else:
+            # we stay with the name, but be sure that it is a valid regex. because it
+            # is expected by the doseTool
+            pattern = re.escape(pattern)
 
-class VoxelizerBatchAction(BatchActionBase):    
-  '''Batch action for the voxelizer tool..'''
-  
-  def __init__(self, structSetSelector, referenceSelector, structNames = None,
-               referenceLinker = CaseLinker(), 
-               actionTag = "doseStat", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
-    ''' Batch action for the voxelizer tool.
+        return pattern
+
+
+def _voxelizer_creation_delegate(structNames, **kwargs):
+    actions = list()
+    actionArgs = kwargs.copy()
+    for name in structNames:
+        actionArgs['structName'] = name
+        actions.append(VoxelizerAction(**actionArgs))
+    return actions
+
+
+class VoxelizerBatchAction(BatchActionBase):
+    """Batch action for the voxelizer tool.."""
+
+    def __init__(self, structSetSelector, referenceSelector, structNames=None,
+                 referenceLinker=None,
+                 actionTag="doseStat",
+                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+        """ Batch action for the voxelizer tool.
     @param structNames: List of the structures names that should be voxelized.
      If none is passed all structures defined in current session's structure
-     definitions. 
-    '''
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+     definitions.
+    """
+        if referenceLinker is None:
+            referenceLinker = CaseLinker()
 
-    self._references = referenceSelector.getSelection(self._session.artefacts)
-    self._structSets = structSetSelector.getSelection(self._session.artefacts)
+        additionalInputSelectors = {"referenceImage": referenceSelector}
+        linker = {"referenceImage": referenceLinker}
 
-    self._refLinker = referenceLinker
-    self._structNames = structNames
-    if (self._structNames is None):
-      self._structNames = list(self._session.structureDefinitions.keys())
-    self._singleActionParameters = singleActionParameters
+        self._init_session(session)
+        if structNames is None:
+            structNames = list(self._session.structureDefinitions.keys())
 
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    refs = self.ensureRelevantArtefacts(self._references, resultSelector, "reference images")
-    structs = self.ensureRelevantArtefacts(self._structSets, resultSelector, "doseStat structSets")
-       
-    actions = list()
-    
-    for (pos,struct) in enumerate(structs):
-      linkedRefs = self._refLinker.getLinkedSelection(pos,structs, refs)
-      if len(linkedRefs)==0:
-        logger.warning("No linked references found for voxelization. Skipped voxelization. Struct: %s", struct)
-        
-      for lr in linkedRefs:
-        for name in self._structNames:
-          action = VoxelizerAction(struct, lr, name,
-                              self._actionTag, alwaysDo = self._alwaysDo,
-                              session = self._session,
-                              additionalActionProps = self._additionalActionProps,
-                              **self._singleActionParameters)
-          actions.append(action)
-    
-    return actions
+        BatchActionBase.__init__(self, actionTag=actionTag, actionCreationDelegate=_voxelizer_creation_delegate,
+                                 primaryInputSelector=structSetSelector, primaryAlias="structSet",
+                                 additionalInputSelectors=additionalInputSelectors, linker=linker,
+                                 session=session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 structNames=structNames, **singleActionParameters)

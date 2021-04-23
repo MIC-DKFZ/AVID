@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
 
         self.a1 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "a1.txt"))
         self.a2 = artefactGenerator.generateArtefactEntry("Case1", None, 1, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "a2.txt"))
-        self.a3 = artefactGenerator.generateArtefactEntry("Case2", None, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "a3.txt"))
+        self.a3 = artefactGenerator.generateArtefactEntry("Case2", None, 2, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "a3.txt"))
         self.a4 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action2", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "a4.txt"))
 
         self.session = workflow.Session("session1", self.sessionDir)
@@ -108,6 +108,16 @@ class Test(unittest.TestCase):
         ref = '"test.exe" --input "{}" -x "{}" "{}" --out "{}"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
         self.assertEqual(ref,call)
+        self.assertEqual(outputs[0][artefactProps.TIMEPOINT],0, msg='Timpoint of output should be 0 because "input" should be used as default ref (picked by alphabetic order.')
+
+        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
+                                  outputReferenceArtefactName='x', session=self.session)
+        outputs = action.outputArtefacts
+        call = action._prepareCLIExecution()
+        ref = '"test.exe" --input "{}" -x "{}" "{}" --out "{}"'.format(self.getURL(self.a1),self.getURL(self.a2),
+                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
+        self.assertEqual(ref,call)
+        self.assertEqual(outputs[0][artefactProps.TIMEPOINT],1, msg='Timpoint of output should be 1 because "x" was indicated as ref.')
 
         action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   noOutputArgs=True, session=self.session)
@@ -169,6 +179,9 @@ class Test(unittest.TestCase):
         # illegal output arg
         self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], outputFlags=['illegal'],
                           illegalArgs=['illegal'], session=self.session)
+        #invalid outputRefernceArtefactName
+        self.assertRaises(ValueError, GenericCLIAction, actionID="TestCLI", input=[self.a1],
+                          outputReferenceArtefactName='invalidInput', session=self.session)
 
 
 if __name__ == "__main__":

@@ -90,8 +90,9 @@ class GenericCLIAction(CLIActionBase):
      For more details see the documentation of __init_.'''
 
     def __init__(self, actionID, outputFlags = None, indicateCallable = None, additionalArgs= None, illegalArgs=None,
-                 argPositions = None, noOutputArgs=False, defaultoutputextension = 'nrrd', actionTag="GenericCLI", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, **inputArgs):
+                 argPositions = None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension ='nrrd',
+                 actionTag="GenericCLI", alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None,
+                 propInheritanceDict=None, **inputArgs):
         '''
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added outamatically) of the output.
@@ -102,16 +103,22 @@ class GenericCLIAction(CLIActionBase):
          is not set, the default is one output that will be defined by the action and uses the first input artefact as reference.
          The signature of indicateCallable is: indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
           (= all arguments passed to the action)
+        :param noOutputArgs: If set to true the output artefacts of the action will not be added as output args.
+         In this case outputFlags will be ignored.
+        :param outputReferenceArtefactName: Name of the inputArgs that will be used as template when generating the output
+         artefacts. If not set (None), the first input selection (in alphabetic order) will be used. If indicateCallable
+         is set, this argument has only impact if the callable makes use of it.
         :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
         :param additionalArgs: Dictionary with all additional arguments (except the artefact inputs and outputs) that
          should be passed to the cli. The key is the argument/flag name (without "-" or "--"; the will be added
-         outamatically). If the value is not
+         automatically). If the value is not
         None it will be also added after the argument.
         :param illegalArgs: List that can be used to add additional forbidden argument names, that may not be
         contained in cliArgs.
         :param inputArgs: It is assumed that all unkown named arguments are inputs with artefact lists.
         '''
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
+        CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                               additionalActionProps=additionalActionProps,
                                actionID=actionID, actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict)
 
@@ -155,7 +162,6 @@ class GenericCLIAction(CLIActionBase):
                 raise RuntimeError('Action is initalized with violating output flag "{}". The is already reserved/used'
                                    ' for an input.'.format(flag))
 
-
         self._additionalArgs = dict()
         if additionalArgs is not None:
             allIllegalArgs = list(self._inputs.keys())+illegalArgs
@@ -169,10 +175,16 @@ class GenericCLIAction(CLIActionBase):
                     raise RuntimeError('Action is initalized with illegal argument "{}". The argument will be set by'
                                        'the action (either as input and output or is explicitly defined illegal argument.'.format(argName))
 
+        self._outputReferenceArtefactName = outputReferenceArtefactName
+        if self._outputReferenceArtefactName is not None:
+            if not self._outputReferenceArtefactName in self._inputs:
+                raise ValueError('Action cannot be initialized. Defined OutputTemplatName ("{}") does not exist in the inputs dictionary: {}'.format(self._outputReferenceArtefactName, self._inputs.keys()))
+
+
     def _generateName(self):
         name = '{}_{}'.format(self._actionID,self._actionTag)
         for inputKey in self._inputs:
-            name += '_{}'.format(artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
+            name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
         return name
 
     def _indicateOutputs(self):
@@ -194,8 +206,12 @@ class GenericCLIAction(CLIActionBase):
 
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
+            reference = self._inputs[sorted(self._inputs.keys())[0]][0]
+            if self._outputReferenceArtefactName is not None:
+                reference = self._inputs[self._outputReferenceArtefactName][0]
+
             resultArtefacts = [
-                self.generateArtefact(self._inputs[sorted(self._inputs.keys())[0]][0],
+                self.generateArtefact(reference=reference,
                                       userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
                                       urlHumanPrefix=self.instanceName,
                                       urlExtension=self._outputextension)]

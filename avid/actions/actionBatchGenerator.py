@@ -28,12 +28,17 @@ class ActionBatchGenerator(object):
 
     PRIMARY_INPUT_KEY = "primaryInput"
 
-    def __init__(self, actionClass, primaryInputSelector, primaryAlias = None, additionalInputSelectors = None,
-                 splitter = None, sorter = None, linker = None, dependentLinker = None, session=None,
-                 relevanceSelector = None, **actionParameters):
+    def __init__(self, primaryInputSelector, actionClass = None, actionCreationDelegate = None, primaryAlias = None,
+                 additionalInputSelectors = None, splitter = None, sorter = None, linker = None, dependentLinker = None,
+                 session=None, relevanceSelector = None, **actionParameters):
         """init the generator.
           @param actionClass: Class of the action that should be generated
           @param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
+          :param actionCreationDelegate: Callable delegate that, if set, will be used to generate the action classes.
+          Either actionClass or actionCreationDelegate have to be set; but only one of them. ActionBatchGenerator
+          assumes that the delegate returns a list of generate action instances. The delegate will be called like the
+          action class. A delegate can be used to manipulate the generation of the action instances after the whole
+          splitting, sorting, selecting and linking is done.
           @param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
           If not set PRIMARY_INPUT_KEY will be used.
           @param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
@@ -78,6 +83,13 @@ class ActionBatchGenerator(object):
             self._session = session
 
         self._actionClass = actionClass
+        self._actionCreationDelegate = actionCreationDelegate
+
+        if (not self._actionClass is None) and (not self._actionCreationDelegate is None):
+            raise RuntimeError('Cannot init ActionBatchGenerator. Both actionClass and actionCreationDelegate are defined.')
+
+        if (self._actionClass is None) and (self._actionCreationDelegate is None):
+            raise RuntimeError('Cannot init ActionBatchGenerator. Neither actionClass nor actionCreationDelegate is defined.')
 
         self._singleActionParameters = actionParameters
 
@@ -236,8 +248,12 @@ class ActionBatchGenerator(object):
 
         if leftInputNames is None or len(leftInputNames) == 0:
             singleActionParameters = {**self._singleActionParameters, **relevantAdditionalInputs}
-            action = self._actionClass(**singleActionParameters)
-            actions.append(action)
+            if self._actionClass is not None:
+                action = self._actionClass(**singleActionParameters)
+                actions.append(action)
+            else:
+                newActions = self._actionCreationDelegate(**singleActionParameters)
+                actions.extend(newActions)
         else:
             currentName = leftInputNames[0]
             currentInputs = additionalInputs[currentName]

@@ -95,16 +95,16 @@ class BioModelCalcAction(CLIActionBase):
    
   def _indicateOutputs(self):
 
-    self._resultArtefact = self.generateArtefact(self._inputDose,
+    resultArtefact = self.generateArtefact(self._inputDose,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
                                                  urlHumanPrefix=self.instanceName,
                                                  urlExtension=self._outputExt)
-    return [self._resultArtefact]
+    return [resultArtefact]
  
                 
   def _prepareCLIExecution(self):
     
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+    resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL)
     inputPath = artefactHelper.getArtefactProperty(self._inputDose,artefactProps.URL)
 
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
