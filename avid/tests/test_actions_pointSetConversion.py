@@ -42,39 +42,48 @@ class TestPointSetConversion(unittest.TestCase):
 
     def test_to_simpleMatchPoint(self):
       
-      action = psConversion(ActionTagSelector("SourcePS"), targetformat = FORMAT_VALUE_MATCHPOINT_POINTSET, actionTag = "TestToMatchPoint")
+      action = psConversion(ActionTagSelector("SourcePS"), targetformat=FORMAT_VALUE_MATCHPOINT_POINTSET,
+                            actionTag="TestToMatchPoint", alwaysDo=False)
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
 
-      refFile = os.path.join(self.testDataDir, "refMatchPoint"+os.extsep+"txt")
-      resultFile = artefactHelper.getArtefactProperty(action._actions[0]._resultArtefact,
+      refFilePath = os.path.join(self.testDataDir, "refMatchPoint"+os.extsep+"txt")
+      resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
                                                       artefactProps.URL)
-      self.assertEqual(open(refFile).read(), open(resultFile).read())
+      with open(refFilePath) as refFile:
+          with open(resultFilePath) as resultFile:
+              self.assertEqual(refFile.read(), resultFile.read())
 
-      resultFile = artefactHelper.getArtefactProperty(action._actions[1]._resultArtefact,
+      resultFilePath = artefactHelper.getArtefactProperty(action._actions[1].outputArtefacts[0],
                                                       artefactProps.URL)
-      self.assertEqual(open(refFile).read(), open(resultFile).read())
+      with open(refFilePath) as refFile:
+          with open(resultFilePath) as resultFile:
+              self.assertEqual(refFile.read(), resultFile.read())
 
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
     def test_to_fcsv(self):
         action = psConversion(ActionTagSelector("SourcePS"), targetformat=FORMAT_VALUE_SLICER_POINTSET,
-                              actionTag="TestToFCSV")
+                              actionTag="TestToFCSV", alwaysDo=False)
         token = action.do()
 
         self.assertEqual(token.isSuccess(), True)
 
-        refFile = os.path.join(self.testDataDir, "refMatchPoint" + os.extsep + "fcsv")
-        resultFile = artefactHelper.getArtefactProperty(action._actions[0]._resultArtefact,
+        refFilePath = os.path.join(self.testDataDir, "refMatchPoint" + os.extsep + "fcsv")
+        resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
                                                         artefactProps.URL)
-        self.assertEqual(open(refFile).read(), open(resultFile).read())
+        with open(refFilePath) as refFile:
+            with open(resultFilePath) as resultFile:
+                self.assertEqual(refFile.read(), resultFile.read())
 
-        refFile = os.path.join(self.testDataDir, "ref3dslicer" + os.extsep + "fcsv")
-        resultFile = artefactHelper.getArtefactProperty(action._actions[1]._resultArtefact,
+        refFilePath = os.path.join(self.testDataDir, "ref3dslicer" + os.extsep + "fcsv")
+        resultFilePath = artefactHelper.getArtefactProperty(action._actions[1].outputArtefacts[0],
                                                         artefactProps.URL)
-        self.assertEqual(open(refFile).read(), open(resultFile).read())
+        with open(refFilePath) as refFile:
+            with open(resultFilePath) as resultFile:
+                self.assertEqual(refFile.read(), resultFile.read())
 
         token = action.do()
         self.assertEqual(token.isSkipped(), True)
