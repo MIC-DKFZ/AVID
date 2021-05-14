@@ -15,7 +15,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.plmRTSSMap import plmRTSSMapBatchAction as plmRTTSMap
+from avid.actions.plmRTSSMap import PlmRTSSMapBatchAction as plmRTTSMap
 from avid.common.artefact.defaultProps import FORMAT_VALUE_DCM
 from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.selectors.keyValueSelector import ActionTagSelector

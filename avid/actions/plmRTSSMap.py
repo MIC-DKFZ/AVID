@@ -11,156 +11,117 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-import os
 import logging
+import os
 from shutil import copyfile
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater
+import avid.common.artefact.defaultProps as artefactProps
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT, getDeformationFieldPath
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
+from . import BatchActionBase
+from .genericCLIAction import GenericCLIAction, extract_artefact_arg_urls_default
 from .simpleScheduler import SimpleScheduler
-from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 
 logger = logging.getLogger(__name__)
 
-class plmRTSSMapAction(CLIActionBase):
-  '''Class that wraps the single action for the tool plastimatch convert in order to map DICOM RT SS via a registration.'''
 
-  def __init__(self, rtss, reg, outputFormat = artefactProps.FORMAT_VALUE_DCM,
-               actionTag = "plmRTSSMap", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
-    self._addInputArtefacts(rtss=rtss, reg = reg)
-    self._rtss = rtss
-    self._reg = reg
-    self._outputFormat = outputFormat
+class PlmRTSSMapAction(GenericCLIAction):
+    """Class that wraps the single action for the tool plastimatch convert in order to map DICOM RT SS via a
+    registration. """
 
-    self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", actionConfig))
-    
-  def _generateName(self):
-    name = "plmRTSSMap_"+str(artefactHelper.getArtefactProperty(self._rtss,artefactProps.ACTIONTAG))
-
-    objective = artefactHelper.getArtefactProperty(self._rtss,artefactProps.OBJECTIVE)
-    if not objective is None:
-        name += '-%s'%objective
-
-    name += "_#"+str(artefactHelper.getArtefactProperty(self._rtss,artefactProps.TIMEPOINT))
-
-    if self._reg is not  None:
-      name += "_by_"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.ACTIONTAG))
-
-      objective = artefactHelper.getArtefactProperty(self._reg,artefactProps.OBJECTIVE)
-      if not objective is None:
-          name += '-%s'%objective
-
-      name += "_#"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.TIMEPOINT))
-
-    return name
-
-  def _getOutputExtension(self):
-    if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
-      return 'dcm'
-    elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
-      return 'cxt'
-    else:
-      raise ValueError('Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
-
-  def _indicateOutputs(self):
-    
-    self._resultArtefact = self.generateArtefact(self._rtss,
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                   artefactProps.FORMAT: self._outputFormat},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension=self._getOutputExtension())
-
-    return [self._resultArtefact]
-
-      
-  def _prepareCLIExecution(self):
-    
-    rtssPath = artefactHelper.getArtefactProperty(self._rtss,artefactProps.URL)
-    regPath = artefactHelper.getArtefactProperty(self._reg,artefactProps.URL)
-    regFormat = artefactHelper.getArtefactProperty(self._reg,artefactProps.FORMAT)
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "plastimatch", self._actionConfig)
-    
-    content = '"' + execURL + '" convert ' + ' --input "' + rtssPath + '"'
-
-    if self._reg is not  None:
-      if regFormat == FORMAT_VALUE_MATCHPOINT:
-        fieldPath = getDeformationFieldPath(regPath)
-        if fieldPath is None:
-          raise RuntimeError("Cannot extract deformation field path from the given registration. Reg File: {}".format(regPath))
+    @staticmethod
+    def _plmRTSS_url_extraction_delegate(arg_name, arg_value):
+        result = list()
+        if arg_name == 'xf':
+            for arg_artefact in arg_value:
+                regPath = artefactHelper.getArtefactProperty(arg_artefact, artefactProps.URL)
+                regFormat = artefactHelper.getArtefactProperty(arg_artefact, artefactProps.FORMAT)
+                if regFormat == FORMAT_VALUE_MATCHPOINT:
+                    fieldPath = getDeformationFieldPath(regPath)
+                    if fieldPath is None:
+                        raise RuntimeError(
+                            "Cannot extract deformation field path from the given registration. Reg File: {}".format(
+                                regPath))
+                    else:
+                        regPath = fieldPath
+                result.append(regPath)
         else:
-          regPath = fieldPath
-      content += ' --xf "' + regPath + '"'
+            result = extract_artefact_arg_urls_default(arg_name=arg_name, arg_value=arg_value)
 
-    if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
-      content += ' --output-dicom "'+os.path.splitext(resultPath)[0]+'"'
-    elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
-      content += ' --output-cxt "'+resultPath+'"'
-    else:
-      raise ValueError('Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
-      
-    return content
+        return result
 
-  def _postProcessCLIExecution(self):
-    if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
-      resultPath = artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.URL)
-      dicomDir = os.path.splitext(resultPath)[0]
+    def __init__(self, rtss, registration, outputFormat=artefactProps.FORMAT_VALUE_DCM,
+                 actionTag="plmRTSSMap", alwaysDo=False,
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
 
-      for file in os.listdir(dicomDir):
-        copyfile(os.path.join(dicomDir,file), resultPath)
-        break #we assume that plastimatch outputs only on file (the warpped/mapped RT structure set) in the result dir
+        rtss = self._ensureSingleArtefact(rtss, "rtss")
+        registration = self._ensureSingleArtefact(registration, "registration")
+        self._outputFormat = outputFormat
+
+        inputArgs = {'input': [rtss]}
+        if registration is not None:
+            inputArgs['xf'] = [registration]
+
+        GenericCLIAction.__init__(self, **inputArgs, actionID="plastimatch",
+                                  noOutputArgs=True,
+                                  argPositions=['command'],
+                                  additionalArgsAsURL=['output-dicom', 'output-cxt'],
+                                  inputArgsURLExtractionDelegate=self._plmRTSS_url_extraction_delegate,
+                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
+                                  propInheritanceDict=propInheritanceDict,
+                                  defaultoutputextension=self._getOutputExtension())
+
+        additionalArgs = {'command': 'convert'}
+        resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
+        if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+            additionalArgs['output-dicom'] = os.path.splitext(resultPath)[0]
+        elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
+            additionalArgs['output-cxt'] = resultPath
+        else:
+            raise ValueError(
+                'Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
+
+        self.setAdditionalArguments(additionalArgs=additionalArgs)
+
+    def _getOutputExtension(self):
+        if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+            return 'dcm'
+        elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
+            return 'cxt'
+        else:
+            raise ValueError(
+                'Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
+
+    def _postProcessCLIExecution(self):
+        if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+            resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
+            dicomDir = os.path.splitext(resultPath)[0]
+
+            for file in os.listdir(dicomDir):
+                copyfile(os.path.join(dicomDir, file), resultPath)
+                break  # we assume that plastimatch outputs only on file (the warpped/mapped RT structure set) in the
+                # result dir
 
 
-class plmRTSSMapBatchAction(BatchActionBase):
-  '''Base class for action objects that are used together with selectors and
-    should therefore able to process a batch of SingleActionBased actions.'''
-  
-  def __init__(self,  rtssSelector, regSelector = None,
-               regLinker = CaseLinker(),
-               actionTag = "plmRTSSMap", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(), **singleActionParameters):
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+class PlmRTSSMapBatchAction(BatchActionBase):
+    """Batch action for PlmRTSSMapAction."""
 
-    self._rttss = rtssSelector.getSelection(self._session.artefacts)
-    self._regs = list()
-    if regSelector is not None:
-      self._regs = regSelector.getSelection(self._session.artefacts)
-    
-    self._regLinker = regLinker
-    self._singleActionParameters = singleActionParameters
+    def __init__(self, rtssSelector, regSelector=None, regLinker=None, actionTag="plmRTSSMap", session=None,
+                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+        if regLinker is None:
+            regLinker = CaseLinker()
 
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    rtssList = self.ensureRelevantArtefacts(self._rttss, resultSelector, "RTSS input")
-    regs = self.ensureRelevantArtefacts(self._regs, resultSelector, "Registrations input")
-    
-    actions = list()
-    
-    for (pos,rtss) in enumerate(rtssList):
-      linked = self._regLinker.getLinkedSelection(pos,rtssList,regs)
-      if len(linked) == 0:
-        linked = [None]
+        additionalInputSelectors = {"registration": regSelector}
+        linker = {"registration": regLinker}
 
-      for lr in linked:
-        action = plmRTSSMapAction(rtss, lr,
-                            actionTag=self._actionTag, alwaysDo = self._alwaysDo,
-                            session = self._session,
-                            additionalActionProps = self._additionalActionProps,
-                            **self._singleActionParameters)
-        actions.append(action)
-    
-    return actions
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PlmRTSSMapAction,
+                                 primaryInputSelector=rtssSelector,
+                                 primaryAlias="rtss", additionalInputSelectors=additionalInputSelectors,
+                                 linker=linker, session=session,
+                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 **singleActionParameters)
