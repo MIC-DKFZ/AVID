@@ -11,135 +11,92 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-from builtins import str
-from builtins import range
-import os
 import logging
+from builtins import range
 
 import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
-
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
+from . import BatchActionBase
+from .genericCLIAction import GenericCLIAction
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
 
-class RegVarToolAction(CLIActionBase):
-  '''Class that wrapps the single action for the tool regVarTool.'''
+class RegVarToolAction(GenericCLIAction):
+    """Class that wrapps the single action for the tool regVarTool."""
 
-  def __init__(self, reg, instanceNr, algorithmDLL, parameters = None, templateImage = None, actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig, propInheritanceDict = propInheritanceDict)
-    self._addInputArtefacts(reg = reg)
-    self._reg = reg
-    self._algorithmDLL = algorithmDLL
-    self._parameters = parameters
-    self._templateImage = templateImage
-    self._instanceNr = instanceNr
-    
-    if self._caseInstance is not None and not instanceNr == self._caseInstance:
-      logger.warning("Case instance conflict between input artefacts (%s) and instance that should be defined by action (%s).",self._caseInstance, instanceNr)
-  
-  def _generateName(self):
-    name = "reg_var_"+str(self._instanceNr)+"_of_"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.ACTIONTAG))\
-            +"_#"+str(artefactHelper.getArtefactProperty(self._reg,artefactProps.TIMEPOINT))
-     
-    return name
-    
-  def _indicateOutputs(self):
-    self._resultArtefact = self.generateArtefact(self._reg,
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                   artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT,
-                                                                   artefactProps.CASEINSTANCE: str(self._instanceNr)},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension='mapr')
-    return [self._resultArtefact]
-        
-  def _prepareCLIExecution(self):
-    
-    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
-    regPath = artefactHelper.getArtefactProperty(self._reg, artefactProps.URL)
-    templatePath = artefactHelper.getArtefactProperty(self._templateImage,artefactProps.URL)
-    
-    osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
-    if self._parameters is not None:
-      parametersAsString = self._toString(self._parameters)
-    
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "RegVarTool", self._actionConfig)
-    
-    content = '"' + execURL + '"'
-    content += ' -a ' + '"' + self._algorithmDLL + '"'
-    content += ' -o ' + '"' + resultPath + '"'
-    content += ' -r ' + '"' + regPath + '"'
-    if self._parameters is not None:
-      content += ' -p ' + parametersAsString
-    if templatePath is not None:
-      content += ' -i ' + '"' + templatePath + '"'
+    def __init__(self, registration, instanceNr, algorithmDLL, regParameters=None, templateImage=None,
+                 actionTag="regVarTool",
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
 
-    return content
+        registration = self._ensureSingleArtefact(registration, "registration")
+        templateImage = self._ensureSingleArtefact(templateImage, "templateImage")
 
-  def _toString(self, parameters):
-    parametersString = ""
-    for key, value in parameters.items():
-      parametersString += key + " " + value
-      parametersString += " "
-    parametersString = parametersString.strip()
-    return parametersString
+        inputArgs = {'r': [registration]}
+        if templateImage is not None:
+            inputArgs['i'] = [templateImage]
 
+        additionalArgs = {'a': algorithmDLL}
+        if regParameters is not None:
+            argVal = list()
+            for pKey in regParameters:
+                argVal.append(pKey)
+                argVal.append(regParameters[pKey])
+            additionalArgs['p'] = argVal
+
+        if additionalActionProps is None:
+            additionalActionProps = dict()
+        additionalActionProps[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
+
+        GenericCLIAction.__init__(self, **inputArgs, actionID="RegVarTool",
+                                  additionalArgs=additionalArgs,
+                                  outputFlags=['o'],
+                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
+                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
+                                  propInheritanceDict=propInheritanceDict,
+                                  defaultoutputextension='mapr')
+
+        if self._caseInstance is not None and not instanceNr == self._caseInstance:
+            logger.warning(
+                "Case instance conflict between input artefacts (%s) and instance that should be defined by action (%s).",
+                self._caseInstance, instanceNr)
+        self._instanceNr = instanceNr
+        self._caseInstance = instanceNr
+
+    def _generateName(self):
+        return super()._generateName() + '_Var#{}'.format(self._instanceNr)
 
 
 class RegVarToolBatchAction(BatchActionBase):
-  '''Action for batch processing of the regVarTool.'''
+    """Action for batch processing of the RegVarTool."""
 
-  def __init__(self, regs, variationCount, templateSelector = None,
-               templateLinker = CaseLinker(),
-               actionTag = "regVarTool", alwaysDo = False,
-               session = None, additionalActionProps = None, scheduler = SimpleScheduler(),
-               **singleActionParameters):
-    
-    BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+    @staticmethod
+    def _regvar_creation_delegate(instanceNr, **kwargs):
+        actions = list()
+        actionArgs = kwargs.copy()
+        for pos in range(0, instanceNr):
+            actionArgs['instanceNr'] = pos
+            actions.append(RegVarToolAction(**actionArgs))
+        return actions
 
-    self._regs = regs.getSelection(self._session.artefacts)
+    def __init__(self, regSelector, variationCount, templateSelector=None,
+                 templateLinker=None,
+                 actionTag="regVarTool",
+                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(),
+                 **singleActionParameters):
 
-    self._templateImages = list()
-    if templateSelector is not None:
-      self._templateImages = templateSelector.getSelection(self._session.artefacts)
-    self._templateLinker = templateLinker
-    
-    self._variationCount = variationCount
-    self._singleActionParameters = singleActionParameters
+        if templateLinker is None:
+            templateLinker = CaseLinker()
 
-      
-  def _generateActions(self):
-    #filter only type result. Other artefact types are not interesting
-    resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
-    
-    regs = self.ensureRelevantArtefacts(self._regs, resultSelector, "regVarTool regs")
-    temps = self.ensureRelevantArtefacts(self._templateImages, resultSelector, "regVarTool templates")
-      
-    actions = list()
-    
-    for (regpos, reg) in enumerate(regs):
-      linkedTemps = self._templateLinker.getLinkedSelection(regpos,regs,temps)
-      if len(linkedTemps) == 0:
-        linkedTemps = [None]
+        additionalInputSelectors = {"templateImage": templateSelector}
+        linker = {"templateImage": templateLinker}
 
-      for pos in range(0, self._variationCount):
-        for lt in linkedTemps:
-          action = RegVarToolAction(reg, pos,
-                                    templateImage = lt,
-                                    actionTag = self._actionTag,
-                                    alwaysDo = self._alwaysDo,
-                                    session = self._session,
-                                    additionalActionProps = self._additionalActionProps,
-                                    **self._singleActionParameters)
-          actions.append(action)
-    
-    return actions
+        BatchActionBase.__init__(self, actionTag=actionTag, actionCreationDelegate=self._regvar_creation_delegate,
+                                 primaryInputSelector=regSelector, primaryAlias="registration",
+                                 additionalInputSelectors=additionalInputSelectors, linker=linker,
+                                 session=session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
+                                 instanceNr=variationCount, **singleActionParameters)

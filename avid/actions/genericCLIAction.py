@@ -31,6 +31,17 @@ def _generateFlag(flagName):
         return '--{}'.format(flagName)
 
 
+def _generateAdditionalArgValueString(arg_value):
+    result = ''
+    if isinstance(arg_value, list):
+        for value in arg_value:
+            result += '"{}" '.format(value)
+        result.strip()
+    else:
+        result = '"{}"'.format(arg_value)
+    return result
+
+
 def extract_artefact_arg_urls_default(arg_name, arg_value):
     """Default implementation of the extraction of the urls of a passed artefact arg.
        It just retrieves the URL of each artefact and passes it back."""
@@ -53,7 +64,8 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
     :param additional_args: Dictionary with all additional arguments (except the artefact inputs and outputs) that
     should be passed to the cli. The key is the argument/flag name (without "-" or "--"; they will be added
     automatically depending on the size of the key; one character keys will completed with "-", others with "--"). If
-    the value is not None it will be also added after the argument.
+    the value is not None it will be also added after the argument. If the value of an additional argument is an
+    list each list element will be added as escaped value.
     :param arg_positions list that contains the keys of all arguments (from artefact_args and additional_args) that are
     not flag based but positional arguments. Those arguments will be added in the order of the list before the
     positional arguments.
@@ -78,7 +90,7 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
                 if artefactPath is not None:
                     content += ' "{}"'.format(artefactPath)
         elif additional_args is not None and key in additional_args:
-            content += ' "{}"'.format(additional_args[key])
+            content += ' {}'.format(_generateAdditionalArgValueString(additional_args[key]))
 
     for pos, artefactKey in enumerate(artefact_args):
         if artefactKey not in arg_positions and artefact_args[artefactKey] is not None:
@@ -96,7 +108,7 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
             if argKey not in arg_positions:
                 content += ' {}'.format(_generateFlag(argKey))
                 if additional_args[argKey] is not None:
-                    content += ' "{}"'.format(additional_args[argKey])
+                    content += ' {}'.format(_generateAdditionalArgValueString(additional_args[argKey]))
 
     return content
 

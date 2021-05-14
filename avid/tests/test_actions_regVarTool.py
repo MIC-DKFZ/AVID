@@ -65,7 +65,7 @@ class TestRegVarTool(unittest.TestCase):
 
     def test_simple_regvar_action_parameters(self):
       action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
-                          algorithmDLL=self.algorithmDLLEuler, parameters = self.parameters, actionTag="TestRegVarParam")
+                          algorithmDLL=self.algorithmDLLEuler, regParameters = self.parameters, actionTag="TestRegVarParam")
       token = action.do()
 
       self.assertEqual(token.isSuccess(), True)
