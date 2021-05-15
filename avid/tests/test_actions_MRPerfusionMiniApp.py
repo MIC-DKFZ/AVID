@@ -19,7 +19,7 @@ from avid.actions.MitkMRPerfusionMiniApp import MitkMRPerfusionMiniAppBatchActio
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getExecutableURL(None,'MRPerfusionMiniApp') is None, 'Tool MRPerfusionMiniApp is not installed on the system.')
+@unittest.skipIf(getExecutableURL(None,'MitkMRPerfusionMiniApp') is None, 'Tool MRPerfusionMiniApp is not installed on the system.')
 class TestMRPerfusionMiniApp(unittest.TestCase):
 
 

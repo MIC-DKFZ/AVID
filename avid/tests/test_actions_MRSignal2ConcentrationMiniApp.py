@@ -15,11 +15,11 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MRSignal2ConcentrationMiniApp import MR2SignalConcentrationMiniAppBatchAction as conversion
+from avid.actions.MitkMRSignal2ConcentrationMiniApp import MitkMRSignal2ConcentrationMiniAppBatchAction as conversion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getExecutableURL(None,'MRSignal2ConcentrationMiniApp') is None, 'Tool MRSignal2ConcentrationMiniApp is not installed on the system.')
+@unittest.skipIf(getExecutableURL(None,'MitkMRSignal2ConcentrationMiniApp') is None, 'Tool MRSignal2ConcentrationMiniApp is not installed on the system.')
 class TestMRPerfusionMiniApp(unittest.TestCase):
 
 

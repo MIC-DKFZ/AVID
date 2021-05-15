@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class RegVarToolAction(GenericCLIAction):
-    """Class that wrapps the single action for the tool regVarTool."""
+    """Class that wraps the single action for the tool regVarTool."""
 
     def __init__(self, registration, instanceNr, algorithmDLL, regParameters=None, templateImage=None,
                  actionTag="regVarTool",
