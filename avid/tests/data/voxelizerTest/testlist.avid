@@ -4,7 +4,7 @@
 		<avid:property key="timePoint">0</avid:property>
 		<avid:property key="actionTag">Reference</avid:property>
 		<avid:property key="type">result</avid:property>
-		<avid:property key="format">dicom</avid:property>
+		<avid:property key="format">itk</avid:property>
 		<avid:property key="url">./ref_geometry.nrrd</avid:property>
 	</avid:artefact>
 	<avid:artefact>
@@ -12,7 +12,7 @@
 		<avid:property key="timePoint">0</avid:property>
 		<avid:property key="actionTag">Struct</avid:property>
 		<avid:property key="type">result</avid:property>
-		<avid:property key="format">dicom</avid:property>
+		<avid:property key="format">dcm</avid:property>
 		<avid:property key="url">./rtss.dcm</avid:property>
 	</avid:artefact>
 </avid:artefacts>

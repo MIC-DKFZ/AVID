@@ -21,10 +21,10 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.common import osChecker, AVIDUrlLocater
 
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.actions import BatchActionBase
+from avid.actions.cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
+from avid.actions.simpleScheduler import SimpleScheduler
 from avid.linkers import FractionLinker
 from avid.selectors.keyValueSelector import FormatSelector
 from avid.common.AVIDUrlLocater import getAVIDProjectRootPath

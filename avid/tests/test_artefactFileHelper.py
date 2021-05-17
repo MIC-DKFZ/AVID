@@ -97,7 +97,6 @@ class TestArtefactFileHelper(unittest.TestCase):
 
       fileHelper.saveArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"),self.data, rootPath = self.testDataDir)
       artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
-
       self.assertListEqual(self.data_loaded, artefacts)
 
 
