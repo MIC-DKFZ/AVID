@@ -11,47 +11,44 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-import os
 import logging
+import os
+import re
 import subprocess
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-import re
-
+import avid.common.artefact.defaultProps as artefactProps
 from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import CaseLinker
 from avid.linkers import FractionLinker
-
+from avid.selectors import TypeSelector
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
-from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
 
 class MitkMRPerfusionMiniAppAction(CLIActionBase):
-    '''Class that wrapps the single action for the tool MRPerfusionMiniApp.'''
+    """Class that wrapps the single action for the tool MRPerfusionMiniApp."""
     MODEL_DESCRIPTIVE = "descriptive"
     MODEL_TOFTS = "tofts"
     MODEL_2CX = "2CX"
     MODEL_3SL = "3SL"
     MODEL_2SL = "2SL"
 
-    def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask = None, aifmask = None, aifimage = None,
-                 hematocrit=0.45, roibased=False, constraints = False, actionTag="MRPerfusion", alwaysDo=False,
+    def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask=None, aifmask=None, aifimage=None,
+                 hematocrit=0.45, roibased=False, constraints=False, actionTag="MRPerfusion", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                               actionID="MitkMRPerfusionMiniApp",nactionConfig=actionConfig,
+                               actionID="MitkMRPerfusionMiniApp", actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict)
 
         if aifimage is not None and aifmask is None:
             raise RuntimeError("Cannot use an AIF image without and AIF mask. Please specify mask.")
 
-        self._addInputArtefacts(signal=signal, mask = mask, aifmask = aifmask, aifimage = aifimage)
+        self._addInputArtefacts(signal=signal, mask=mask, aifmask=aifmask, aifimage=aifimage)
 
-        self._signal = self._ensureSingleArtefact(signal, "signal");
+        self._signal = self._ensureSingleArtefact(signal, "signal")
         self._model = model
         self._injectiontime = injectiontime
         self._aifmask = self._ensureSingleArtefact(aifmask, "aifmask")
@@ -137,7 +134,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
             result.append('--injectiontime')
             result.append('{}'.format(self._injectiontime))
 
-        if not self._model == self.MODEL_DESCRIPTIVE or not self._model == self.MODEL_2SL\
+        if not self._model == self.MODEL_DESCRIPTIVE or not self._model == self.MODEL_2SL \
                 or not self._model == self.MODEL_3SL:
             result.append('--hematocrit')
             result.append('{}'.format(self._hematocrit))
@@ -145,7 +142,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
         return result
 
     def _previewResult(self):
-        '''Helper function that call the MiniApp in preview mode to depict the results. Returns a list of trippels (type, name, url).'''
+        """Helper function that call the MiniApp in preview mode to depict the results. Returns a list of trippels (type, name, url)."""
         results = list()
         try:
             args = self._generateCLIArguments()
@@ -158,26 +155,25 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
                     regResults = re.findall('Store result (.*): (.*) -> (.*)', stringLine)
 
                     try:
-                        type = regResults[0][0]
+                        paramtype = regResults[0][0]
                         name = regResults[0][1]
                         url = regResults[0][2]
-                        results.append((type,name,url))
+                        results.append((paramtype, name, url))
                     except:
                         raise RuntimeError('Failed to parse storage info line: {}'.format(stringLine))
 
-        except subprocess.CalledProcessError as err:
+        except subprocess.CalledProcessError:
             pass
 
         return results
 
-
     def _prepareCLIExecution(self):
         args = self._generateCLIArguments()
-        #escape everything to be sure that no propblem in the batch file (reserved charactars) or with the pathes occure.
-        #cannot be done in _generateCLIArguments because the direct call used by preview does not like the escapation.
-        #should be handled soundly by reworking prepareCLIExecution not returning the content string, but all arguments
-        #of the call. Then escaption etc can be handled in the base class.
-        content = args[0] + ' "' +'" "'.join(args[1:])+'"'
+        # escape everything to be sure that no propblem in the batch file (reserved charactars) or with the pathes occure.
+        # cannot be done in _generateCLIArguments because the direct call used by preview does not like the escapation.
+        # should be handled soundly by reworking prepareCLIExecution not returning the content string, but all arguments
+        # of the call. Then escaption etc can be handled in the base class.
+        content = args[0] + ' "' + '" "'.join(args[1:]) + '"'
         resultPath = artefactHelper.getArtefactProperty(self._resultTemplate, artefactProps.URL)
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
@@ -185,7 +181,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
 
 
 class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
-    '''Batch action for MRPerfusionMiniApp.'''
+    """Batch action for MRPerfusionMiniApp."""
 
     MODEL_DESCRIPTIVE = MitkMRPerfusionMiniAppAction.MODEL_DESCRIPTIVE
     MODEL_TOFTS = MitkMRPerfusionMiniAppAction.MODEL_TOFTS
@@ -193,8 +189,8 @@ class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
     MODEL_2SL = MitkMRPerfusionMiniAppAction.MODEL_2SL
     MODEL_3SL = MitkMRPerfusionMiniAppAction.MODEL_3SL
 
-    def __init__(self, signalSelector, maskSelector=None, aifmaskSelector = None, aifSelector = None,
-                 maskLinker = None, aifLinker = None, aifmaskLinker = None,
+    def __init__(self, signalSelector, maskSelector=None, aifmaskSelector=None, aifSelector=None,
+                 maskLinker=None, aifLinker=None, aifmaskLinker=None,
                  actionTag="MRPerfusion", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
