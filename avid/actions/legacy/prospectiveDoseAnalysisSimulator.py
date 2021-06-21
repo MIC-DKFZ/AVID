@@ -23,10 +23,10 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.common import osChecker
 
-from . import BatchActionBase
-from . import SingleActionBase
+from avid.actions import BatchActionBase
+from avid.actions import SingleActionBase
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
+from avid.actions.simpleScheduler import SimpleScheduler
 from avid.selectors.keyValueSelector import FormatSelector
 from avid.probability.Logistic import LogisticProbabilityFunction
 from avid.probability.Logistic import LogisticProbabilityFunctionEstimator

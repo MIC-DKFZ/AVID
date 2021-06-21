@@ -17,7 +17,7 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.invertR import invertRBatchAction as invertR
+from avid.actions.unrefactored.invertR import invertRBatchAction as invertR
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 

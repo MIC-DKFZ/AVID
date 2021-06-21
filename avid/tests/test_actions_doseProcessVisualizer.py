@@ -18,7 +18,7 @@ import shutil
 import avid.common.workflow as workflow
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.actions.doseProcessVisualizer import doseProcessVisualizerBatchAction as doseProcessVisualizer
+from avid.actions.legacy.doseProcessVisualizer import doseProcessVisualizerBatchAction as doseProcessVisualizer
 from avid.selectors import ActionTagSelector
 from avid.common.AVIDUrlLocater import getAVIDProjectRootPath
 import avid.common.templateFileCustomizer as templateFileCustomizer

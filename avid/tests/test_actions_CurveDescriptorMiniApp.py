@@ -15,7 +15,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.CurveDescriptorMiniApp import CurveDescriptorMiniAppBatchAction as curveDescription
+from avid.actions.unrefactored.CurveDescriptorMiniApp import CurveDescriptorMiniAppBatchAction as curveDescription
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 
