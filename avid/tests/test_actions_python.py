@@ -96,7 +96,7 @@ class TestPythonAction(unittest.TestCase):
 
     def test_unary_action_with_user_argument(self):
 
-        action = unaryPython(ActionTagSelector("stats"), generateCallable=test_copy_script, times = 3,
+        action = unaryPython(ActionTagSelector("stats"), generateCallable=test_copy_script, additionalArgs={'times': 3},
                              passOnlyURLs=True, actionTag="TestUnary")
         token = action.do()
 
@@ -134,7 +134,7 @@ class TestPythonAction(unittest.TestCase):
     def test_binary_action_with_user_argument(self):
         action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"),
                               generateCallable=test_binary_copy_script, indicateCallable=indicate_nary_output_script,
-                             passOnlyURLs=True, actionTag="TestBinary", times=3)
+                              passOnlyURLs=True, actionTag="TestBinary", additionalArgs={'times':3})
         token = action.do()
 
         self.assertEqual(token.isSuccess(), True)
@@ -186,8 +186,8 @@ class TestPythonAction(unittest.TestCase):
 
 
     def test_unary_stack_action_with_user_argument(self):
-        action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script, times = 3,
-                             passOnlyURLs=True, actionTag="TestUnary")
+        action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script,
+                                  additionalArgs={'times': 3}, passOnlyURLs=True, actionTag="TestUnary")
         token = action.do()
 
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
