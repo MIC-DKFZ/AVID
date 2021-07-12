@@ -12,17 +12,13 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 from . import SingleActionBase
-import subprocess
 import logging
 import os
-import time
-import stat
-import math
 
-import avid.common.settings as AVIDSettings
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import osChecker, AVIDUrlLocater
+from avid.common import AVIDUrlLocater
+from avid.common.cliConnector import DefaultCLIConnector
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +32,9 @@ class CLIActionBase(SingleActionBase):
   for the CLI call to run properly. Then the call should be returned as result of
   the method.'''
 
-  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None, actionID = None, actionConfig = None, propInheritanceDict = None):
+  def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None,
+               actionID = None, actionConfig = None, propInheritanceDict = None,
+               cli_connector = None):
     '''@param cwd Specifies the current working directory that should be used for the cli call.
     if not set explicitly, it will be deduced automatically by the specified tool/action '''
     SingleActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
@@ -49,6 +47,10 @@ class CLIActionBase(SingleActionBase):
 
     self._logFilePath = None
     self._logErrorFilePath = None
+
+    self._cli_connector = cli_connector
+    if self._cli_connector is None:
+      self._cli_connector = DefaultCLIConnector()
 
   @property
   def cwd(self):
@@ -84,102 +86,23 @@ class CLIActionBase(SingleActionBase):
     #Implement: if something should be done after the execution, do it here
     pass  
 
-  def _generateCLIfile(self, content):
-    '''helper function to generate the appropriated CLI file that should be executed.
-       @return Returns the path to the file.'''
+
+  def _generateOutputs(self):
+    callcontent = self._prepareCLIExecution()
 
     #by policy the first artefact always determines the location and such.
     cliArtefact = self.generateArtefact(self.outputArtefacts[0], userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_MISC, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_BAT})
     path = artefactHelper.generateArtefactPath(self._session, cliArtefact)
     cliName = os.path.join(path, os.path.split(artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL))[1])
 
-    if osChecker.isWindows():
-      cliName = cliName + os.extsep + 'bat'
-    else:
-      cliName = cliName + os.extsep + 'sh'
-
-    try:
-      osChecker.checkAndCreateDir(path)
-      with open(cliName, "w") as outputFile:
-        outputFile.write(content)
-        outputFile.close()
-
-      if not osChecker.isWindows():
-        st = os.stat(cliName)
-        os.chmod(cliName,st.st_mode | stat.S_IXUSR )
-
-    except:
-      logger.error("Error when writing cli script. Location: %s.", cliName)
-      raise
-
-    return cliName
-
-  def _generateOutputs(self):
-    callcontent = self._prepareCLIExecution()
-    clicall = self._generateCLIfile(callcontent)
+    clicall = self._cli_connector.generate_cli_file(cliName, callcontent)
 
     global logger
-    
-    try:
-      filePath = clicall+os.extsep+"log"
-      logfile = open(filePath, "w")
-      self._logFilePath = filePath
-    except:
-      logfile = None
-      logger.debug('Unable to generate log file for call: %s', clicall)
-      
-    try:
-      filePath = clicall+os.extsep+"error.log"
-      errlogfile = open(filePath, "w")
-      self._logErrorFilePath = filePath
-    except:
-      errlogfile = None
-      logger.debug('Unable to generate error log file for call: %s', clicall)
-      
-    try:
-        returnValue = 0
-        
-        if os.path.isfile(clicall):
-          #Fix for T20136. Unsatisfying solution, but found no better way on
-          #windows. If you make the subprocess calls to batch files (thats the
-          #reason for the isfile() check) directly you get random "Error 32"
-          #file errors (File already opened by another process) caused
-          #by opening the bat files, which are normally produced by the actions.
-          #"os.rename" approach was the simpliest way to check os independent
-          #if the process can access the bat file or if there is still a racing
-          #condition.
-          pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE) 
-          max_pause_count = math.ceil( AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
-          pause_count = 0
-          time.sleep(0.1)
-          while True :
-            try:
-              os.rename(clicall, clicall)
-              break
-            except OSError as e:
-              if pause_count < max_pause_count:
-                time.sleep(pause_duration)
-                pause_count = pause_count + 1
-                logger.debug('"%s" is not accessible. Wait and try again.', clicall)
-              else:
-                break
 
-        useShell = not osChecker.isWindows()
-        if self._cwd is None:
-          subprocess.call(clicall, stdout = logfile, stderr = errlogfile, shell=useShell)
-        else:
-          subprocess.call(clicall, cwd = self._cwd, stdout = logfile, stderr = errlogfile, shell=useShell)
+    self._logFilePath = clicall+os.extsep+"log"
+    self._logErrorFilePath = clicall+os.extsep+"error.log"
 
-
-        if returnValue == 0:
-          logger.debug('Call "%s" finished and returned %s', clicall, returnValue)
-        else:
-          logger.error('Call "%s" finished and returned %s', clicall, returnValue)
-		  
-    finally:
-      if logfile is not None:
-        logfile.close()
-      if errlogfile is not None:
-        errlogfile.close()
+    self._cli_connector.execute(clicall, log_file_path=self._logFilePath, error_log_file_path=self._logErrorFilePath,
+                                cwd=self._cwd)
 
     self._postProcessCLIExecution()

@@ -43,8 +43,11 @@ def _generateAdditionalArgValueString(arg_value):
 
 
 def extract_artefact_arg_urls_default(arg_name, arg_value):
-    """Default implementation of the extraction of the urls of a passed artefact arg.
-       It just retrieves the URL of each artefact and passes it back."""
+    """Default implementation of the extraction of the urls of a passed list of artefacts.
+       It just retrieves the URL of each artefact and passes it back.
+       :param arg_name: Name/id of the argument
+       :param arg_value: list of artefacts that are associated with the argument.
+       :return: Returns the list of urls that are associated with the argument (its artefacts)."""
     result = list()
     for artefact in arg_value:
         artefactPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
@@ -66,7 +69,7 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
     automatically depending on the size of the key; one character keys will completed with "-", others with "--"). If
     the value is not None it will be also added after the argument. If the value of an additional argument is an
     list each list element will be added as escaped value.
-    :param arg_positions list that contains the keys of all arguments (from artefact_args and additional_args) that are
+    :param arg_positions: list that contains the keys of all arguments (from artefact_args and additional_args) that are
     not flag based but positional arguments. Those arguments will be added in the order of the list before the
     positional arguments.
     :param artefact_url_extraction_delegate: Delegate that can be used to change the way how urls are extracted from
@@ -124,8 +127,8 @@ class GenericCLIAction(CLIActionBase):
     def __init__(self, actionID, outputFlags=None, indicateCallable=None, additionalArgs=None, illegalArgs=None,
                  argPositions=None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension='nrrd',
                  postProcessCLIExecutionCallable=None, additionalArgsAsURL=None, inputArgsURLExtractionDelegate=None,
-                 actionTag="GenericCLI", alwaysDo=False, session=None,
-                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None, **inputArgs):
+                 actionTag="GenericCLI", alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None,
+                 propInheritanceDict=None, cli_connector=None, **inputArgs):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added outamatically) of the output.
@@ -166,7 +169,7 @@ class GenericCLIAction(CLIActionBase):
         CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                additionalActionProps=additionalActionProps,
                                actionID=actionID, actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict)
+                               propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         self._indicateCallable = indicateCallable
         self._postProcessCLIExecutionCallable = postProcessCLIExecutionCallable
@@ -193,12 +196,12 @@ class GenericCLIAction(CLIActionBase):
             if name in self._illegalArgs:
                 raise RuntimeError('Action is initalized with illegal argument "{}". The argument is explicitly defined'
                                    ' as illegal argument.'.format(name))
-            input = self._ensureArtefacts(inputArgs[name], name=name)
-            if input is None:
+            inputArtefacts = self._ensureArtefacts(inputArgs[name], name=name)
+            if inputArtefacts is None:
                 raise ValueError(
                     'Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}'.format(
                         name))
-            self._inputs[name] = input
+            self._inputs[name] = inputArtefacts
         self._addInputArtefacts(**self._inputs)
 
         if len(self._inputs) == 0:
@@ -217,6 +220,7 @@ class GenericCLIAction(CLIActionBase):
                 raise RuntimeError('Action is initalized with violating output flag "{}". The is already reserved/used'
                                    ' for an input.'.format(flag))
 
+        self._additionalArgs = dict()
         self.setAdditionalArguments(additionalArgs)
 
         self._outputReferenceArtefactName = outputReferenceArtefactName
@@ -304,7 +308,7 @@ class GenericCLIAction(CLIActionBase):
             content = generate_cli_call(exec_url=execURL, artefact_args=artefactArgs,
                                         additional_args=self._additionalArgs,
                                         arg_positions=argPositions,
-                                        artefact_url_extraction_delegate=self._inputArgsURLExtractionDelegate)
+                                        artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate(self._inputArgsURLExtractionDelegate))
 
         except Exception:
             logger.error("Error for getExecutable.")
