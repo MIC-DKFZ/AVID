@@ -13,7 +13,7 @@
 
 from builtins import object
 import logging
-from avid.linkers import CaseLinker
+from avid.linkers import CaseLinker, CaseInstanceLinker
 from avid.selectors import TypeSelector
 from avid.sorter import BaseSorter
 from avid.splitter import SingleSplitter
@@ -140,7 +140,7 @@ class ActionBatchGenerator(object):
 
         for key in self._additionalInputSelectors:
             if not key in self._linker:
-                self._linker[key] = CaseLinker()
+                self._linker[key] = CaseLinker() + CaseInstanceLinker()
 
         self._dependentLinker = dict()
         if dependentLinker is not None:

@@ -18,6 +18,7 @@ import avid.common.workflow as workflow
 from avid.actions.pythonAction import PythonUnaryBatchAction as unaryPython
 from avid.actions.pythonAction import PythonBinaryBatchAction as binaryPython
 from avid.actions.pythonAction import PythonNaryBatchAction as naryPython
+from avid.actions.pythonAction import PythonNaryBatchActionV2 as naryPythonV2
 from avid.actions.pythonAction import PythonUnaryStackBatchAction as unaryStackPython
 from avid.linkers import TimePointLinker
 
@@ -50,6 +51,18 @@ def test_ternary_copy_script(inputsMaster, inputsSecond, inputsThird, outputs, t
                     line2 = ifile2.read()
                     line3 = ifile3.read()
                     ofile.write(line1*times+'*'+line2*times+'+'+line3*times)
+
+def test_nary_v2_copy_script(aInput, bInput, cInput, outputs, times = 1):
+    '''Simple ternary python test script.'''
+    with open(outputs[0], "w") as ofile:
+        with open(aInput[0], "r") as ifile1:
+            with open(bInput[0], "r") as ifile2:
+                with open(cInput[0], "r") as ifile3:
+                    line1 = ifile1.read()
+                    line2 = ifile2.read()
+                    line3 = ifile3.read()
+                    ofile.write(line1*times+'*'+line2*times+'+'+line3*times)
+
 
 caseInstanceCount = 0
 def indicate_nary_output_script(actionInstance, **allargs):
@@ -205,6 +218,73 @@ class TestPythonAction(unittest.TestCase):
         self.assertEqual(result, '1', True)
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '23', True)
+
+    def test_nary_v2_action(self):
+        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
+                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
+                              generateCallable=test_nary_v2_copy_script, indicateCallable=indicate_nary_output_script,
+                              passOnlyURLs=True, actionTag="TestNaryV2")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(result, '1*2+1', True)
+        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        self.assertEqual(result, '1*2+2', True)
+        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        self.assertEqual(result, '1*3+1', True)
+        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
+        self.assertEqual(result, '1*3+2', True)
+        self.assertEqual(len(token.generatedArtefacts), 4)
+
+    def test_nary_v2_action_with_user_argument(self):
+        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
+                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
+                              additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
+                              indicateCallable=indicate_nary_output_script,
+                              passOnlyURLs=True, actionTag="TestNaryV2_times")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(result, '1111*2222+1111', True)
+        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        self.assertEqual(result, '1111*2222+2222', True)
+        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        self.assertEqual(result, '1111*3333+1111', True)
+        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
+        self.assertEqual(result, '1111*3333+2222', True)
+        self.assertEqual(len(token.generatedArtefacts), 4)
+
+    def test_nary_v2_action_with_user_argument_and_linker(self):
+        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
+                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
+                              linker={'bInput': TimePointLinker()},
+                              additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
+                              indicateCallable=indicate_nary_output_script,
+                              passOnlyURLs=True, actionTag="TestNaryV2_times_linker")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(result, '1111*2222+1111', True)
+        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        self.assertEqual(result, '1111*2222+2222', True)
+        self.assertEqual(len(token.generatedArtefacts), 2)
+
+    def test_nary_action_with_linker(self):
+        action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
+                            inputsThird = TimepointSelector(0), inputsSecondLinker=TimePointLinker(),
+                            generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
+                            passOnlyURLs=True, actionTag="TestNary")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(result, '1*2+1', True)
+        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        self.assertEqual(result, '1*2+2', True)
+        self.assertEqual(len(token.generatedArtefacts), 2)
 
 if __name__ == "__main__":
     unittest.main()

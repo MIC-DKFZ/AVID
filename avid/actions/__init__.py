@@ -476,38 +476,38 @@ class BatchActionBase(ActionBase):
                  scheduler=SimpleScheduler(), **actionParameters, ):
         '''init the action and setting the workflow session, the action is working
           in.
-          @param actionTag: Tag of the action within the session
-          @param additionalActionProps: Dictionary that can be used to define additional
+          :param actionTag: Tag of the action within the session
+          :param additionalActionProps: Dictionary that can be used to define additional
           properties that should be added to any artefact that are produced by the action.
-          @param actionClass: Class of the action that should be generated
+          :param actionClass: Class of the action that should be generated
           :param actionCreationDelegate: Callable delegate that, if set, will be used to generate the action classes.
           Either actionClass or actionCreationDelegate have to be set; but only one of them. ActionBatchGenerator
           assumes that the delegate returns a list of generate action instances. The delegate will be called like the
           action class. A delegate can be used to manipulate the generation of the action instances after the whole
           splitting, sorting, selecting and linking is done.
-          @param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
-          @param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
+          :param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
+          :param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
           If not set PRIMARY_INPUT_KEY will be used.
-          @param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
+          :param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
           be passed to an action instance. Key is the name of an additional input an also the argument name used to pass
           the input to the action instance. The associated dict value must be a selector instance or None to indicate
           that this input will have no data but exists.
-          @param splitter: Dictionary specifying a splitter that should be used for a specific input (primary or additional)
+          :param splitter: Dictionary specifying a splitter that should be used for a specific input (primary or additional)
           If no splitter is defined explicitly for an input SingleSplitter() will be assumed. The key indicates the
           input that should be associated with the splitter. To associate primary input use PRIMARY_INPUT_KEY as key.The
           values of the dict are the splitter instances that should be used for the respective key.
-          @param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
+          :param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
           If no sorter is defined explicitly for an input, BaseSorter() (so no sorting at all) will be assumed.
           The key indicates the input that should be associated with the sorter. To associate primary input use
           PRIMARY_INPUT_KEY as key. The values of the dict are the sorter instances that should be used for the
           respective key.
-          @param linker: Dictionary specifying a linker that should be used for a specific additional input
+          :param linker: Dictionary specifying a linker that should be used for a specific additional input
           to link it with the primary input. Thus the master selection passed to the linker will always be provided by
           the primary input.
           If no linker is defined explicitly for an input CaseLinker() (so all inputs must have the same case) will be
           assumed. The key indicates the input that should be associated with the linker. The values of the dict are the
           linker instances that should be used for the respective key.
-          @param dependentLinker: Allows to specify linkage for an additional input where the master selection must not
+          :param dependentLinker: Allows to specify linkage for an additional input where the master selection must not
           be the primary input (in contrast to using the linker argument). Thus you can specifies that an additional
           input A is (also) linked to an additional input B. The method assumes the following structure of the variable.
           It is a dictionary. The dictionary key indicates the input that should be linked. So it can be any additional
@@ -516,10 +516,10 @@ class BatchActionBase(ActionBase):
           (except itself = key of the value) or the primary input. The second element is the linker instance that should
           be used. You may combine linker and dependentLinker specifications for any additional input.
           To associate primary input as master use PRIMARY_INPUT_KEY as value.
-          @param relevanceSelector: Selector used to specify for all inputs of actions what is relevant. If not set
+          :param relevanceSelector: Selector used to specify for all inputs of actions what is relevant. If not set
           it is assumed that only artefact of type TYPE_VALUE_RESULT are relevant.
-          @param session: Session object of the workflow the action is working in
-          @param scheduler Strategy how to execute the single actions.
+          :param session: Session object of the workflow the action is working in
+          :param scheduler Strategy how to execute the single actions.
         '''
         ActionBase.__init__(self, actionTag, session, additionalActionProps)
         self._actions = None

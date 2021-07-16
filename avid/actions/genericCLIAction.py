@@ -145,7 +145,8 @@ class GenericCLIAction(CLIActionBase):
         postProcessCLIExecutionCallable(actionInstance = Instance of the calling action), **allArgs = all arguments
         passed to the action)
         :param noOutputArgs: If set to true the output artefacts of the action will not be added as output args. In this
-        case outputFlags will be ignored. :param outputReferenceArtefactName: Name of the inputArgs that will be used as
+        case outputFlags will be ignored.
+        :param outputReferenceArtefactName: Name of the inputArgs that will be used as
         template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
         order) will be used. If indicateCallable is set, this argument has only impact if the callable makes use of it.
         :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
@@ -227,7 +228,7 @@ class GenericCLIAction(CLIActionBase):
         if self._outputReferenceArtefactName is not None:
             if self._outputReferenceArtefactName not in self._inputs:
                 raise ValueError(
-                    'Action cannot be initialized. Defined OutputTemplatName ("{}") does not exist in the inputs dictionary: {}'.format(
+                    'Action cannot be initialized. Defined outputReferenceArtefactName ("{}") does not exist in the inputs dictionary: {}'.format(
                         self._outputReferenceArtefactName, self._inputs.keys()))
 
     def setAdditionalArguments(self, additionalArgs):
@@ -276,6 +277,7 @@ class GenericCLIAction(CLIActionBase):
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
             reference = self._inputs[sorted(self._inputs.keys())[0]][0]
+
             if self._outputReferenceArtefactName is not None:
                 reference = self._inputs[self._outputReferenceArtefactName][0]
 

@@ -45,6 +45,9 @@ class PythonAction(SingleActionBase):
      is not set, the default is one output that will be defined by the action and uses the first input artefact as reference.
      The signature of indicateCallable is: indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
       (= all arguments passed to the action)
+     :param outputReferenceArtefactName: Name of the inputArgs that will be used as
+        template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
+        order) will be used. If indicateCallable is set, this argument has only impact if the callable makes use of it.
      :param additionalArgs: Dictionary containing all arguments that should be passed to generateCallable and are no
       artefact input arguments.
      :param passOnlyURLs: If set to true only URLs of the artefacts, instead of the artefacts themself, will be passed to
@@ -55,7 +58,7 @@ class PythonAction(SingleActionBase):
     OUTPUTS_ARGUMENT_NAME = 'outputs'
 
     def __init__(self, generateCallable, indicateCallable=None, additionalArgs=None, passOnlyURLs=True,
-                 defaultoutputextension='nrrd',
+                 defaultoutputextension='nrrd', outputReferenceArtefactName=None,
                  actionTag="Python", alwaysDo=True, session=None, additionalActionProps=None,
                  propInheritanceDict=None, **inputArgs):
         SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
@@ -98,6 +101,14 @@ class PythonAction(SingleActionBase):
         if len(self._inputArgs) == 0:
             raise RuntimeError('Action is not initialized with any artefact inputs')
 
+        self._outputReferenceArtefactName = outputReferenceArtefactName
+        if self._outputReferenceArtefactName is not None:
+            if self._outputReferenceArtefactName not in self._inputs:
+                raise ValueError(
+                    'Action cannot be initialized. Defined outputReferenceArtefactName ("{}") does not exist in the inputs dictionary: {}'.format(
+                        self._outputReferenceArtefactName, self._inputs.keys()))
+
+
     def _generateName(self):
         name = 'script'
         try:
@@ -128,8 +139,13 @@ class PythonAction(SingleActionBase):
 
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
+            reference = self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]][0]
+
+            if self._outputReferenceArtefactName is not None:
+                reference = self._inputArtefacts[self._outputReferenceArtefactName][0]
+
             self._resultArtefacts = [
-                self.generateArtefact(self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]][0],
+                self.generateArtefact(reference=reference,
                                       userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
                                       urlHumanPrefix=self.instanceName,
                                       urlExtension=self._outputextension)]
@@ -210,7 +226,9 @@ class PythonNaryBatchAction(BatchActionBase):
       input is processed.
      The batch class assumes that the python script takes
      - the master input as "inputsMaster"
-     - all other inputs with the name they where passed to the batch action.'''
+     - all other inputs with the name they where passed to the batch action.
+     REMARK: If you want a batch action that allows more control over the callable's argument namings and is
+     close to the interface of the BatchActionBase, please see PythonNaryBatchActionV2.'''
 
     def __init__(self, inputsMaster, actionTag="NaryScript",
                  session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
@@ -238,6 +256,62 @@ class PythonNaryBatchAction(BatchActionBase):
                                  relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
                                  scheduler=scheduler, additionalActionProps=additionalActionProps,
                                  **newSingleActionParameters)
+
+
+class PythonNaryBatchActionV2(BatchActionBase):
+    """New python batch class that assumes an arbitrary number (>= 1) of input artefacts will be passed to the script.
+    In contrast to PythonNaryBatchAction, this class makes no assumption about the namings of selectors, linkers and
+    co. Thus you can specify them freely and are not bound to any conventions for your python callable's argument names.
+    In addition this class also allows to specify the splitter and sorter explicitly."""
+
+    def __init__(self, primaryInputSelector, actionTag="NaryScript",
+                 primaryAlias = None, additionalInputSelectors = None, splitter = None, sorter = None, linker = None,
+                 dependentLinker = None, session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+        """init the action and setting the workflow session, the action is working
+          in.
+          :param actionTag: Tag of the action within the session
+          :param additionalActionProps: Dictionary that can be used to define additional
+          properties that should be added to any artefact that are produced by the action.
+          :param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
+          :param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
+          If not set PRIMARY_INPUT_KEY will be used.
+          :param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
+          be passed to an action instance. Key is the name of an additional input an also the argument name used to pass
+          the input to the action instance. The associated dict value must be a selector instance or None to indicate
+          that this input will have no data but exists.
+          :param splitter: Dictionary specifying a splitter that should be used for a specific input (primary or additional)
+          If no splitter is defined explicitly for an input SingleSplitter() will be assumed. The key indicates the
+          input that should be associated with the splitter. To associate primary input use PRIMARY_INPUT_KEY as key.The
+          values of the dict are the splitter instances that should be used for the respective key.
+          :param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
+          If no sorter is defined explicitly for an input, BaseSorter() (so no sorting at all) will be assumed.
+          The key indicates the input that should be associated with the sorter. To associate primary input use
+          PRIMARY_INPUT_KEY as key. The values of the dict are the sorter instances that should be used for the
+          respective key.
+          :param linker: Dictionary specifying a linker that should be used for a specific additional input
+          to link it with the primary input. Thus the master selection passed to the linker will always be provided by
+          the primary input.
+          If no linker is defined explicitly for an input CaseLinker() (so all inputs must have the same case) will be
+          assumed. The key indicates the input that should be associated with the linker. The values of the dict are the
+          linker instances that should be used for the respective key.
+          :param dependentLinker: Allows to specify linkage for an additional input where the master selection must not
+          be the primary input (in contrast to using the linker argument). Thus you can specifies that an additional
+          input A is (also) linked to an additional input B. The method assumes the following structure of the variable.
+          It is a dictionary. The dictionary key indicates the input that should be linked. So it can be any additional
+          input. It must not be the primary input. The value associated with a dict key is an iterable (e.g. list) the
+          first element is the name of the input that serves as master for the linkage. It may be any additional input
+          (except itself = key of the value) or the primary input. The second element is the linker instance that should
+          be used. You may combine linker and dependentLinker specifications for any additional input.
+          To associate primary input as master use PRIMARY_INPUT_KEY as value.
+          :param session: Session object of the workflow the action is working in
+          :param scheduler Strategy how to execute the single actions.
+        """
+        BatchActionBase.__init__(self, primaryInputSelector=primaryInputSelector, actionTag=actionTag,
+                                 primaryAlias=primaryAlias, actionClass=PythonAction,
+                                 additionalInputSelectors=additionalInputSelectors,splitter=splitter,
+                                 sorter=sorter, linker=linker, dependentLinker=dependentLinker, session=session,
+                                 additionalActionProps=additionalActionProps,scheduler=scheduler,
+                                 **singleActionParameters)
 
 
 class PythonUnaryStackBatchAction(BatchActionBase):
