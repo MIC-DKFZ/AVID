@@ -105,7 +105,7 @@ def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
     return artefacts
 
 
-def saveArtefactList_xml(filePath, artefacts, rootPath=None):
+def saveArtefactList_xml(filePath, artefacts, rootPath=None, savePathsRelative=True):
     if rootPath is None:
         rootPath = os.path.split(filePath)[0]
 
@@ -126,13 +126,13 @@ def saveArtefactList_xml(filePath, artefacts, rootPath=None):
                                     xmlInput.text = id
                 else:
                     if key is defaultProps.URL:
-                        # make all paths relative
-                        try:
-                            value = os.path.relpath(artefact[key], rootPath)
-                        except:
-                            logging.warning(
-                                "Artefact URL cannot be converted to be realtive. Path is keept absolute. Artefact URL: %s",
-                                value)
+                        if savePathsRelative:
+                            try:
+                                value = os.path.relpath(artefact[key], rootPath)
+                            except:
+                                logging.warning(
+                                    "Artefact URL cannot be converted to be realtive. Path is keept absolute. Artefact URL: %s",
+                                    value)
                         value = value.replace("\\", "/")
                     xmlProp.text = str(value)
         for key in artefact._additionalProps:
