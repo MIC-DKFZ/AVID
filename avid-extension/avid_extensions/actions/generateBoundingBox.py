@@ -47,7 +47,7 @@ class GenerateBBoxAction(SingleActionBase):
 
     return name
 
-  def indicateOutputs(self):
+  def _indicateOutputs(self):
 
     self._resultArtefact = self.generateArtefact(self._maskImage,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT},

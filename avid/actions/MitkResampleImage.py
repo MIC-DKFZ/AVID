@@ -47,7 +47,7 @@ class MitkResampleImageBatchAction(BatchActionBase):
     '''Batch action for MitkResampleImage to produce XML results.'''
 
     def __init__(self, imageSelector,
-                 actionTag="MITKResampleImage", alwaysDo=False, session=None,
+                 actionTag="MITKResampleImage", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkResampleImageAction,

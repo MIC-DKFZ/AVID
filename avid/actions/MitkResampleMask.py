@@ -23,11 +23,11 @@ from .simpleScheduler import SimpleScheduler
 logger = logging.getLogger(__name__)
 
 class MitkResampleMaskAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MITKResampleMask.'''
+    '''Class that wraps the single action for the tool MitkResampleMask.'''
 
-    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MITKResampleMask",
+    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkResampleMask",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
-        GenericCLIAction.__init__(self, i=images, actionID="MITKResampleMask", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=images, actionID="MitkResampleMask", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
@@ -35,10 +35,10 @@ class MitkResampleMaskAction(GenericCLIAction):
 
 
 class MitkResampleMaskBatchAction(BatchActionBase):
-    '''Batch action for MITKResampleMask.'''
+    '''Batch action for MitkResampleMask.'''
 
     def __init__(self, imageSelector,
-                 actionTag="MITKResampleMask", alwaysDo=False, session=None,
+                 actionTag="MitkResampleMask", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkResampleMaskAction,
                                  primaryInputSelector=imageSelector,

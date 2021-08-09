@@ -66,7 +66,7 @@ class DoseStatsCollectorAction(SingleActionBase):
         name = "stat_collection_" + self._rowKey + "_x_" + self._columnKey
         return name
 
-    def indicateOutputs(self):
+    def _indicateOutputs(self):
         if self._keys is None:
             self._statsMatrix = self._generateStatsMatrix()
             self._keys = list(self._statsMatrix.keys())
