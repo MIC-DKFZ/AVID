@@ -126,24 +126,32 @@ class GenericCLIAction(CLIActionBase):
 
     def __init__(self, actionID, outputFlags=None, indicateCallable=None, additionalArgs=None, illegalArgs=None,
                  argPositions=None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension='nrrd',
-                 postProcessCLIExecutionCallable=None, additionalArgsAsURL=None, inputArgsURLExtractionDelegate=None,
-                 actionTag="GenericCLI", alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None,
-                 propInheritanceDict=None, cli_connector=None, **inputArgs):
+                 postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
+                 inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
+                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None,
+                 **inputArgs):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added outamatically) of the output.
         If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
         without a flag.
         :param indicateCallable: A callable that, if defined, will be called to query the outputs. The action assumes
-        that the callable returns a list of output artefacts (like self.indicateOutputs). If this callable is not set,
-        the default is one output that will be defined by the action and uses the first input artefact as reference. The
-        signature of indicateCallable is: indicateCallable(actionInstance = Instance of the calling action),
+        that the callable returns a list of output artefacts or None (if no indication can be made; like
+        self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
+        and uses the first input artefact as reference. The signature of indicateCallable is:
+        indicateCallable(actionInstance = Instance of the calling action),
         **allArgs = all arguments passed to the action))
         :param postProcessCLIExecutionCallable: A callable that, if defined, will be called to execute post processing
         code after the CLI Execution. If this callable is not set, no post processing will be done. The signature of
         postProcessCLIExecutionCallable is:
-        postProcessCLIExecutionCallable(actionInstance = Instance of the calling action), **allArgs = all arguments
+        postProcessCLIExecutionCallable(actionInstance = Instance of the calling action, **allArgs = all arguments
         passed to the action)
+        :param collectOutputsCallable: A callable that, if defined, will be called to collect/generate artefact
+        instances for all generated outputs after the CLI execution is post processed. For more details, See the
+        documentation of SingleActionBase._collectOutputs. If this callable is not said, nothing will be collected and
+        the indicated outputs are assumed to be still correct. The signature of the callable is:
+        collectOutputsCallable(actionInstance = instance of the calling action,
+         indicatedOutputs = outputs indicated so far, **allArgs = all arguments passed to the action )
         :param noOutputArgs: If set to true the output artefacts of the action will not be added as output args. In this
         case outputFlags will be ignored.
         :param outputReferenceArtefactName: Name of the inputArgs that will be used as
@@ -160,7 +168,7 @@ class GenericCLIAction(CLIActionBase):
         :param illegalArgs: List that can be used to add additional forbidden argument names, that may not be contained
         in additionalArgs or inputArgs.
         :param inputArgsURLExtractionDelegate: Delegate that can be used to change the way how urls are extracted from
-        artefacts that are provided for the argument or to over a way to manipulate them before generating the cli
+        artefacts that are provided for the argument or to offer a way to manipulate them before generating the cli
         call string. The default implementation (extract_artefact_arg_urls_default) does just return the URL of the
         artefact. The signature of the delegate is delegate(arg_name, arg_value). Arg_value is expected to be a list
         of artefacts. The return is expected to be a list of URL strings (or None for artefacts that should not
@@ -175,6 +183,7 @@ class GenericCLIAction(CLIActionBase):
         self._indicateCallable = indicateCallable
         self._postProcessCLIExecutionCallable = postProcessCLIExecutionCallable
         self._inputArgsURLExtractionDelegate = inputArgsURLExtractionDelegate
+        self._collectOutputsCallable = collectOutputsCallable
         self._outputextension = defaultoutputextension
         self._noOutputArgs = noOutputArgs
 
@@ -197,7 +206,12 @@ class GenericCLIAction(CLIActionBase):
             if name in self._illegalArgs:
                 raise RuntimeError('Action is initalized with illegal argument "{}". The argument is explicitly defined'
                                    ' as illegal argument.'.format(name))
-            inputArtefacts = self._ensureArtefacts(inputArgs[name], name=name)
+            try:
+                inputArtefacts = self._ensureArtefacts(inputArgs[name], name=name)
+            except Exception:
+                raise RuntimeError('Action is initalized with invalid argument "{}". The unkown argument is not a list of'
+                                   ' artefact and does not qualify as input. Value of invalid input argument: {}'.format(name, inputArgs[name]))
+
             if inputArtefacts is None:
                 raise ValueError(
                     'Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}'.format(
@@ -257,22 +271,23 @@ class GenericCLIAction(CLIActionBase):
         return name
 
     def _indicateOutputs(self):
-        allargs = self._inputs.copy()
-        allargs.update(self._additionalArgs)
         resultArtefacts = None
         if self._indicateCallable is not None:
+            allargs = self._inputs.copy()
+            allargs.update(self._additionalArgs)
             resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
-            # check if its really a list of artefacts
-            try:
-                for artifact in resultArtefacts:
-                    if not isinstance(artifact, artefactHelper.Artefact):
-                        raise TypeError(
-                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                artifact))
-            except Exception:
-                raise TypeError(
-                    'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                        resultArtefacts))
+            if self._resultArtefacts is not None:
+                # check if its really a list of artefacts
+                try:
+                    for artifact in resultArtefacts:
+                        if not isinstance(artifact, artefactHelper.Artefact):
+                            raise TypeError(
+                                'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                                    artifact))
+                except Exception:
+                    raise TypeError(
+                        'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                            resultArtefacts))
 
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
@@ -327,3 +342,27 @@ class GenericCLIAction(CLIActionBase):
         except Exception:
             logger.error("Error while post processing in generic CLI action: {}.".format(self))
             raise
+
+    def _collectOutputs(self, indicatedOutputs):
+        collectedArtefacts = None
+        if self._collectOutputsCallable is not None:
+            allargs = self._inputs.copy()
+            allargs.update(self._additionalArgs)
+
+            collectedArtefacts = self._collectOutputsCallable(actionInstance=self, indicatedOutputs=indicatedOutputs,
+                                                              **allargs)
+            # check if its really a list of artefacts
+            try:
+                for artifact in collectedArtefacts:
+                    if not isinstance(artifact, artefactHelper.Artefact):
+                        raise TypeError(
+                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                                artifact))
+            except Exception:
+                raise TypeError(
+                    'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                        collectedArtefacts))
+
+        else:
+            collectedArtefacts = super()._collectOutputs(indicatedOutputs=indicatedOutputs)
+        return collectedArtefacts

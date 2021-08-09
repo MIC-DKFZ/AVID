@@ -27,7 +27,7 @@ class CLIActionBase(SingleActionBase):
   They prepare the execution of an command line (e.g. by generating the needed
   batch file(s) or input data) and then the command line will be executed. This
   is standardized by this class. Derived classes just need to implement
-  indicateOutputs() and prepareCLIExecution(). The rest is done by the base class.
+  _indicateOutputs() and _prepareCLIExecution(). The rest is done by the base class.
   In _prepareCLIExecution() everything should be prepared/generated that is needed
   for the CLI call to run properly. Then the call should be returned as result of
   the method.'''

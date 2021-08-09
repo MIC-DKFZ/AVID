@@ -41,9 +41,10 @@ class PythonAction(SingleActionBase):
      :param generateCallable: A callable that will be called to generate the outputs. The action assumes that all outputs
      are generated an stored at their designated location.
      :param indicateCallable: A callable that, if defined, will be called (like generateCallable) to query the outputs.
-     The action assumes that the callable returns a list of output artefacts (like self.indicateOutputs). If this callable
-     is not set, the default is one output that will be defined by the action and uses the first input artefact as reference.
-     The signature of indicateCallable is: indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
+     The action assumes that the callable returns a list of output artefacts or None (if no indication can be made; like
+     self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
+     and uses the first input artefact as reference. The signature of indicateCallable is:
+     indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
       (= all arguments passed to the action)
      :param outputReferenceArtefactName: Name of the inputArgs that will be used as
         template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
@@ -120,23 +121,23 @@ class PythonAction(SingleActionBase):
                 pass
         return name
 
-    def indicateOutputs(self):
-        allargs = self._inputArgs.copy()
-        allargs.update(self._args)
+    def _indicateOutputs(self):
         if self._indicateCallable is not None:
+            allargs = self._inputArgs.copy()
+            allargs.update(self._args)
             self._resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
-            # check if its realy a list of artefacts
-            try:
-                for artifact in self._resultArtefacts:
-                    if not isinstance(artifact, artefactHelper.Artefact):
-                        raise TypeError(
-                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                self._resultArtefacts))
-            except:
-                raise TypeError(
-                    'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                        self._resultArtefacts))
-
+            if self._resultArtefacts is not None:
+                # check if its realy a list of artefacts
+                try:
+                    for artifact in self._resultArtefacts:
+                        if not isinstance(artifact, artefactHelper.Artefact):
+                            raise TypeError(
+                                'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                                    self._resultArtefacts))
+                except:
+                    raise TypeError(
+                        'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
+                            self._resultArtefacts))
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
             reference = self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]][0]
@@ -154,14 +155,14 @@ class PythonAction(SingleActionBase):
     def _generateOutputs(self):
         allargs = self._args.copy()
 
-        outputs = list()
-        for output in self._resultArtefacts:
-            if self._passOnlyURLs:
-                outputs.append(artefactHelper.getArtefactProperty(output, artefactProps.URL))
-            else:
-                outputs.append(output)
-
-        allargs[self.OUTPUTS_ARGUMENT_NAME] = outputs
+        if self._resultArtefacts is not None:
+            outputs = list()
+            for output in self._resultArtefacts:
+                if self._passOnlyURLs:
+                    outputs.append(artefactHelper.getArtefactProperty(output, artefactProps.URL))
+                else:
+                    outputs.append(output)
+            allargs[self.OUTPUTS_ARGUMENT_NAME] = outputs
 
         for name in self._inputArgs:
             if self._passOnlyURLs:
@@ -176,8 +177,9 @@ class PythonAction(SingleActionBase):
             else:
                 allargs[name] = self._inputArgs[name]
 
-        destPath = artefactHelper.getArtefactProperty(self._resultArtefacts[0], artefactProps.URL)
-        checkAndCreateDir(os.path.dirname(destPath))
+        if self._resultArtefacts is not None:
+            destPath = artefactHelper.getArtefactProperty(self._resultArtefacts[0], artefactProps.URL)
+            checkAndCreateDir(os.path.dirname(destPath))
         self._generateCallable(**allargs)
 
 
