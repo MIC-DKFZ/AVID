@@ -25,6 +25,7 @@ import time
 import uuid
 from builtins import object
 from builtins import str
+from copy import deepcopy
 
 from . import defaultProps
 
@@ -170,6 +171,10 @@ class Artefact(object):
 
     def __repr__(self):
         return 'Artefact(%s, %s)' % (self._defaultProps, self._additionalProps)
+
+    def __copy__(self):
+        newArtefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
+        return newArtefact
 
 
 def getArtefactProperty(artefact, key):
