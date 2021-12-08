@@ -22,7 +22,7 @@ from avid.common import osChecker, AVIDUrlLocater
 from avid.splitter import BaseSplitter
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
-from avid.linkers import FractionLinker, LinkerBase
+from avid.linkers import FractionLinker, LinkerBase, CaseLinker
 from avid.selectors import TypeSelector
 from avid.sorter import TimePointSorter
 from .simpleScheduler import SimpleScheduler
@@ -282,7 +282,7 @@ class DoseAccBatchAction(BatchActionBase):
     if planLinker is None:
       planLinker = FractionLinker(useClosestPast=True, performInternalLinkage=True, allowOnlyFullLinkage=False)
     if planRegLinker is None:
-      planRegLinker = LinkerBase()
+      planRegLinker = CaseLinker(performInternalLinkage=False, allowOnlyFullLinkage=False)
 
     additionalInputSelectors = {"registrations": registrationSelector, "plans": planSelector}
     linker = {"registrations": regLinker, "plans": planLinker}

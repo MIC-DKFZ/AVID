@@ -233,10 +233,10 @@ class ActionBatchGenerator(object):
             linkedAdditionals = dict()
             for additionalKey in additionalInputs:
                 secondSelections = additionalInputs[additionalKey]
-                if secondSelections is None:
-                    secondSelections= []
-                linkedAdditionals[additionalKey] = self._linker[additionalKey].getLinkedSelection(pos, primaryInput,
-                                                                              secondSelections)
+                linkedAdditionals[additionalKey] = None
+                if secondSelections is not None:
+                    linkedAdditionals[additionalKey] = self._linker[additionalKey].getLinkedSelection(pos, primaryInput,
+                                                                                                      secondSelections)
             actions.extend(self._generateActions_recursive({self._primaryAlias: primarySplit.copy()}, None, linkedAdditionals.copy(), depSequence))
 
         return actions
@@ -247,6 +247,10 @@ class ActionBatchGenerator(object):
             relevantAdditionalInputPos = dict()
 
         if leftInputNames is None or len(leftInputNames) == 0:
+            #check if all relevant inputs are valid
+            #emptyInputs = '' # [inputName for inputName in relevantAdditionalInputs if relevantAdditionalInputs[inputName] is None]
+
+            #if len(emptyInputs)>0:
             singleActionParameters = {**self._singleActionParameters, **relevantAdditionalInputs}
             if self._actionClass is not None:
                 action = self._actionClass(**singleActionParameters)
@@ -254,6 +258,11 @@ class ActionBatchGenerator(object):
             else:
                 newActions = self._actionCreationDelegate(**singleActionParameters)
                 actions.extend(newActions)
+            #else:
+            #    logger.debug('Action candidate was skipped because at least one of the additional inputs is undefined '
+            #                 '(empty selection) and therefore no valid action instance can be generated. HINT: If you'
+            #                 'want to allow combinations where "There is no valid artefact" (==[None] a as additional input is a '
+            #                 'valid option, yempty ')
         else:
             currentName = leftInputNames[0]
             currentInputs = additionalInputs[currentName]
@@ -266,16 +275,34 @@ class ActionBatchGenerator(object):
             if currentName in self._dependentLinker:
                 sourceName = self._dependentLinker[currentName][0]
                 linker = self._dependentLinker[currentName][1]
-                if relevantAdditionalInputPos[sourceName] is not None:
-                    currentInput = linker.getLinkedSelection(relevantAdditionalInputPos[sourceName], additionalInputs[sourceName], currentInputs)
-                    if currentInputs is None:
-                        currentInput = list()
+                if additionalInputs[sourceName] is None:
+                    currentInputs = None
+                    logger.debug('Dependend linkage has set the selections for input "{}" to None. Reason: Primary dependent'
+                                 'selection "{}" is also None. Thus no valid linkage can be established as no primary'
+                                 'input artefacts are defined.'.format(currentName,sourceName))
+                elif relevantAdditionalInputPos[sourceName] is None:
+                    raise RuntimeError('Cannot make dependend linkage for "{}". Inner state of the batch generator is invalid.'
+                                       'relevant dependent primary input "{}" is not processed yed, but should be.'
+                                       'Error in dependent linker definition. Seems to be invald or containes cyclic'
+                                       'dependencies.'.format(currentName, sourceName))
+                elif currentInputs is not None:
+                        currentInputs = linker.getLinkedSelection(relevantAdditionalInputPos[sourceName],
+                                                                  additionalInputs[sourceName], currentInputs)
+
                 newAdditionalInputs[currentName] = currentInputs
 
-            if len(currentInputs) == 0:
+            if currentInputs is None:
                 newRelPos[currentName] = None
-                newRelInputs[currentName] = list()
+                newRelInputs[currentName] = None
                 actions.extend(self._generateActions_recursive(newRelInputs, newRelPos, newAdditionalInputs, newLeftNames))
+            elif len(currentInputs) == 0:
+                logger.debug('Action candidate was skipped because at least one of the additional inputs (input name:'
+                             ' "{}") is undefined (empty selection) and therefore no valid action instance can be'
+                             ' generated.\n'
+                             'HINT: If you want to allow combinations where "There is no valid artefact" (==[None])'
+                             ' is a valid option, you have to configure the linker for the input accordingly to allow'
+                             ' also None as a valid linking option. For more details please see the linker'
+                             ' documentation.')
             else:
                 for (pos,aSplit) in enumerate(currentInputs):
                     newRelPos[currentName] = pos

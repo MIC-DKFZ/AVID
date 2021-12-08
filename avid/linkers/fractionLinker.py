@@ -68,10 +68,13 @@ class FractionLinker(InnerLinkerBase):
     return result
 
   def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-    '''Filters the given list of entries and returns all selected entries to ensure only selections that are as
-    close as possible in time can pass.
+    '''Filters the given primary selections and returns the selection that is as
+    close as possible in time to the primary selection.
     In the current implementation it is simplfied by just checking the timepoint of the first artefact of each
     selection.'''
+
+    #the following call finds all secondary collections that qualify as potantial fit.
+    #this is done by implicitly calling FractionLinker._findLinkedArtefactOptions
     preFilterdResult = InnerLinkerBase._getLinkedSelection(self,primaryIndex=primaryIndex, primarySelections=primarySelections,
                                                  secondarySelections=secondarySelections)
     primarySelection = primarySelections[primaryIndex]
@@ -79,12 +82,18 @@ class FractionLinker(InnerLinkerBase):
 
     result = list()
 
+    #now we have to find the secondary selection that is closest to the primary selection as FractionLinker always
+    #returns the closest option.
     try:
       masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelection[0], artefactProps.TIMEPOINT))
       bestTimePoint = float('-inf')
       for selection in preFilterdResult:
         try:
-          timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
+          if selection[0] is None:
+            timePoint = float('-inf')
+          else:
+            timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
+
           if bestTimePoint <= timePoint <= masterTimePoint:
             if timePoint > bestTimePoint:
               result.clear()

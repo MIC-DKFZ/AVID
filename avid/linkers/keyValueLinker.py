@@ -29,13 +29,14 @@ class KeyValueLinker(InnerLinkerBase):
 
   def _findLinkedArtefactOptions(self, primaryArtefact, secondarySelection):
     linkValue = None
-    if self._key in primaryArtefact:
+    if primaryArtefact is not None and self._key in primaryArtefact:
       linkValue = primaryArtefact[self._key]
 
     foundArtefacts = list()
 
     for secondaryArtefact in secondarySelection:
-      if self._key in secondaryArtefact:
+
+      if secondaryArtefact is not None and self._key in secondaryArtefact:
         if secondaryArtefact[self._key] == linkValue:
           foundArtefacts.append(secondaryArtefact)
       else:

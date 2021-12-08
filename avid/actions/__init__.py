@@ -419,14 +419,14 @@ class SingleActionBase(ActionBase):
 
     def _getInvalidInputs(self):
         '''Helper function that checks if registered inputs for the action are invalid.
-          :return: Returns a dict with all invalid inputs. An empty indicates that all inputs are valid.'''
+          :return: Returns a dict with all invalid inputs. An empty dict indicates that all inputs are valid.'''
 
         invalidInputs = dict()
 
         for key in self._inputArtefacts:
             if not self._inputArtefacts[key] is None:
                 for artefact in self._inputArtefacts[key]:
-                    if artefact.is_invalid():
+                    if artefact is not None and artefact.is_invalid():
                         invalidInputs[key] = self._inputArtefacts[key]
                         break;
 

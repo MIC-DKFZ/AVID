@@ -26,7 +26,7 @@ from avid.sorter import BaseSorter, KeyValueSorter
 from avid.splitter import BaseSplitter, KeyValueSplitter
 
 from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from .genericCLIAction import GenericCLIAction
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 
@@ -37,83 +37,41 @@ INTERPOLATOR_LINEAR = 1
 STITCH_STRATEGY_MEAN = 0
 STITCH_STRATEGY_BORDER_DISTANCE = 1
 
-class MitkStitchImagesMiniAppAction(CLIActionBase):
+class MitkStitchImagesMiniAppAction(GenericCLIAction):
     '''Class that wrapps the single action for the tool MitkStitchImagesMiniApp.'''
+
+    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkStitchImagesMiniApp",
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+        GenericCLIAction.__init__(self, i=images, actionID="MitkResampleImage", outputFlags=['o'],
+                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
+                                  alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
+                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
+                                  defaultoutputextension=defaultoutputextension)
 
     def __init__(self, images, template, registrations = None, actionTag="MitkStitchImagesMiniApp",
                  paddingValue = None, stitchStrategy=None, interpolator=None, alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict)
 
-        self._images = images
+        self._template = [self._ensureSingleArtefact(template, "template")]
         self._registrations = registrations
-        self._template = self._ensureSingleArtefact(template, "template");
+        if registrations is None:
+            self._registrations = [None]
         self._paddingValue = paddingValue
         self._stitchStrategy = stitchStrategy
         self._interpolator = interpolator
 
-        self._addInputArtefacts(images=images, registrations=registrations, template=template)
+        additionalArgs = dict()
+        if interpolator:
+            additionalArgs['interpolator'] = str(interpolator)
+        if paddingValue:
+            additionalArgs['p'] = str(paddingValue)
+        if stitchStrategy:
+            additionalArgs['s'] = str(stitchStrategy)
 
-        if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkStitchImagesMiniApp", actionConfig))
-
-
-    def _generateName(self):
-        name = "Stitched"
-        if len(self._registrations) != 0:
-            name += "_withReg"
-
-        return name
-
-    def _indicateOutputs(self):
-        # Specify result artefact
-        self._resultArtefact = self.generateArtefact(self._images[0],
-                                                        userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                        artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
-                                                        urlHumanPrefix=self.instanceName,urlExtension='nrrd')
-        return [self._resultArtefact]
-
-    def _generateInputInformation(self):
-        result = ''
-        for image in self._images:
-            imagePath = artefactHelper.getArtefactProperty(image, artefactProps.URL)
-            result += ' "{}"'.format(imagePath)
-        return result
-
-    def _generateRegInformation(self):
-        result = ''
-        for reg in self._registrations:
-            regPath = artefactHelper.getArtefactProperty(reg, artefactProps.URL)
-            result += ' "{}"'.format(regPath)
-        return result
-
-    def _prepareCLIExecution(self):
-
-        resultPath = artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.URL)
-        osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
-
-        templatePath = artefactHelper.getArtefactProperty(self._template, artefactProps.URL)
-
-        content = ""
-
-        try:
-            execURL = AVIDUrlLocater.getExecutableURL(self._session, "MitkStitchImagesMiniApp", self._actionConfig)
-
-            content += '"{}" -i{} -o "{}" -t "{}"'.format(execURL, self._generateInputInformation(), resultPath, templatePath)
-            if len(self._registrations)>0:
-                content += ' -r {}'.format(self._generateRegInformation())
-            if self._interpolator is not None:
-                content += ' --interpolator {}'.format(self._interpolator)
-            if self._paddingValue is not None:
-                content += ' -p {}'.format(self._paddingValue)
-            if self._stitchStrategy is not None:
-                content += ' -s {}'.format(self._stitchStrategy)
-        except:
-            logger.error("Error for getExecutable.")
-            raise
-
-        return content
+        GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, actionID="MitkStitchImagesMiniApp", outputFlags=['o'],
+                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
+                                  alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
+                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
 
 
 class MitkStitchImagesMiniAppBatchAction(BatchActionBase):

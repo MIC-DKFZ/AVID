@@ -46,19 +46,20 @@ class LinkerBase(object):
     return result
 
   def getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-    ''' Get the sub selections (splits)  of slave that has a meaningful semantic link
-        to the master selection/index. To change the behavior reimplement
+    ''' Get the subset (splits) of secondary selections that has a meaningful semantic link
+        to the primary selection/index. To change the behavior reimplement
         self._getLinkedSelection(). The default implementation just passes through
-        the secondarySelection (so everything gets linked).
-        Linker might alter a secondary selection before the is passed back as linked a
-        linked selection (e.g. change the order of the artefact in the selection or
+        the secondarySelections (so everything gets linked).
+        Linker might alter a secondary selections before they are passed back as
+        linked selections (e.g. change the order of the artefact in the selection or
         its content)
-        @result List of all linked artefacts. Therefore all artefacts from slave selection
-        that fullfill the link criterion in respect to the master artefact.
+        @result List of all valid selections (list) of linked artefacts.
+        Therefore all selections of artefacts from secondarySelections
+        that fullfill the link criterion in respect to the primary selection.
         @param primaryIndex index of the entry in the primarySelections that is defining
         for the link.
-        @param primarySelections the master selection that contains the master entry
-        @param secondarySelections that is used to generate the subset. '''
+        @param primarySelections the list of all selections that contain sets of primary artefacts
+        @param secondarySelections the list that is used to generate/pick the linked selections from. '''
     linkedSelections = self._getLinkedSelection(primaryIndex=primaryIndex, primarySelections=primarySelections,
                                                 secondarySelections=secondarySelections)
     primarySelection = primarySelections[primaryIndex]
@@ -66,15 +67,19 @@ class LinkerBase(object):
 
 
   def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-    ''' Get the sub selections (splits)  of slave that has a meaningful semantic link
-        to the master selection/index. The default implementation just passes through
-        the secondarySelection (so everything gets linked).
-        @result List of all linked artefacts. Therefore all artefacts from slave selection
-        that fullfill the link criterion in respect to the master artefact.
+    ''' Default implementation how to get the subset (splits) of secondary selections that has a meaningful
+        semantic lin to the primary selection/index. To change the behavior reimplement
+        this method.
+        Linker might alter a secondary selections before they are passed back as
+        linked selections (e.g. change the order of the artefact in the selection or
+        its content)
+        @result List of all valid selections (list) of linked artefacts.
+        Therefore all selections of artefacts from secondarySelections
+        that fullfill the link criterion in respect to the primary selection.
         @param primaryIndex index of the entry in the primarySelections that is defining
         for the link.
-        @param primarySelections the master selection that contains the master entry
-        @param secondarySelections that is used to generate the subset. '''
+        @param primarySelections the list of all selections that contain sets of primary artefacts
+        @param secondarySelections the list that is used to generate/pick the linked selections from. '''
     return secondarySelections
 
   def __add__(self,other):
@@ -137,7 +142,8 @@ class InnerLinkerBase(LinkerBase):
 
       for primeArtefact in primarySelection:
         try:
-          foundArtefact = self._findLinkedArtefactOptions(primeArtefact, secondarySelection)[0]
+          foundArtefact = self._findLinkedArtefactOptions(primeArtefact, secondarySelection)
+          foundArtefact = foundArtefact[0]
         except:
           foundArtefact = None
 
@@ -155,7 +161,7 @@ class InnerLinkerBase(LinkerBase):
         addSelection = len(
           [x for x in linkedSelection if x is not None]) > 0 and not linkedSelection in resultSelections
         # do not add if 1) all linked elements are none, then linkage has failed or 2) the selection is already in the
-        # result lest. The rest will be checked and sanatized by LinkerBase.
+        # result list. The rest will be checked and sanitized by LinkerBase.
 
       if addSelection:
         resultSelections.append(linkedSelection)

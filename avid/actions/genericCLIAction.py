@@ -132,7 +132,7 @@ class GenericCLIAction(CLIActionBase):
                  **inputArgs):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
-        :param outputFlags: The argument/flag name (without "-" or "--"; the will be added outamatically) of the output.
+        :param outputFlags: The argument/flag name (without "-" or "--"; the will be added automatically) of the output.
         If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
         without a flag.
         :param indicateCallable: A callable that, if defined, will be called to query the outputs. The action assumes
@@ -267,7 +267,8 @@ class GenericCLIAction(CLIActionBase):
     def _generateName(self):
         name = '{}_{}'.format(self._actionID, self._actionTag)
         for inputKey in self._inputs:
-            name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
+            if self._inputs[inputKey] is not None and self._inputs[inputKey][0] is not None:
+                name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
         return name
 
     def _indicateOutputs(self):
