@@ -4,7 +4,7 @@
 /build
 *.log
 /avid/tests/temporary*
-/avid/examples/output*
+/avid/examples/output/example_session*
 
 ########## Git related
 
