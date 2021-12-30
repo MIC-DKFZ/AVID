@@ -51,13 +51,6 @@ class TestDoseAcc(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
-      action = imageAcc(ActionTagSelector("Image"), ActionTagSelector("Registration"), actionTag = "Acc+Reg+Plan")
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
-
-
     def test_simple_image_acc_action_alwaysdo(self):
       
       action = imageAcc(ActionTagSelector("Image"), actionTag = "SimpleAcc", alwaysDo = True)

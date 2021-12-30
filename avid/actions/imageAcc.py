@@ -179,7 +179,7 @@ class ImageAccAction(CLIActionBase):
 class ImageAccBatchAction(BatchActionBase):    
   '''This action accumulates a whole selection of images and stores the result.'''
   
-  def __init__(self,  imageSelector, registrationSelector = None, regLinker = FractionLinker(),
+  def __init__(self,  imageSelector, registrationSelector = None, regLinker = None,
                imageSorter = None, imageSplitter = None, regSorter=None, regSplitter = None,
                actionTag = "imageAcc", session=None, additionalActionProps=None,
                scheduler = SimpleScheduler(), **singleActionParameters):

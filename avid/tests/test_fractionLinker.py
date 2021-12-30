@@ -137,7 +137,7 @@ class TestFractionLinker(unittest.TestCase):
     self.checkSelections([[self.a2, self.a2],[self.a2, self.a3]], selection)
 
 
-  def test_FractionLinker_empty_slaves(self):
+  def test_FractionLinker_empty_secondary(self):
     linker = FractionLinker()
     selection = linker.getLinkedSelection(2, self.selections1, [])
     self.assertEqual(len(selection), 0)

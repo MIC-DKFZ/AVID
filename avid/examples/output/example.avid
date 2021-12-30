@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<avid:artefacts version="1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">CT</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat1_TP1_CT.txt</avid:property>
+    <avid:property key="objective">CT</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232b8-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3330662</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat1_TP1_MR.txt</avid:property>
+    <avid:property key="objective">MR</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232b9-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3333993</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP2</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat1_TP2_MR.txt</avid:property>
+    <avid:property key="objective">MR</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232ba-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3335395</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">CT</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat2_TP1_CT.txt</avid:property>
+    <avid:property key="objective">CT</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232bb-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3336644</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat2_TP1_MR1.txt</avid:property>
+    <avid:property key="objective">MR1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232bc-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3337827</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat2_TP1_MR2.txt</avid:property>
+    <avid:property key="objective">MR2</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232bd-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3339067</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP2</avid:property>
+    <avid:property key="actionTag">CT</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat2_TP2_CT.txt</avid:property>
+    <avid:property key="objective">CT</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232be-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.334034</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP2</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat2_TP2_MR1.txt</avid:property>
+    <avid:property key="objective">MR1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232bf-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3341768</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat3</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">MR</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/img/pat3_TP1_MR.txt</avid:property>
+    <avid:property key="objective">MR</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c0-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3343294</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat1_TP1_Seg1.txt</avid:property>
+    <avid:property key="objective">Seg1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c1-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3352327</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat1_TP1_Seg2.txt</avid:property>
+    <avid:property key="objective">Seg2</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c2-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.335395</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat1</avid:property>
+    <avid:property key="timePoint">TP2</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat1_TP2_Seg1.txt</avid:property>
+    <avid:property key="objective">Seg1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c3-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3355489</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat2_TP1_Seg1.txt</avid:property>
+    <avid:property key="objective">Seg1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c4-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.335696</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat2</avid:property>
+    <avid:property key="timePoint">TP2</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat2_TP2_Seg1.txt</avid:property>
+    <avid:property key="objective">Seg1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c5-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.3358448</avid:property>
+  </avid:artefact>
+  <avid:artefact>
+    <avid:property key="case">pat3</avid:property>
+    <avid:property key="timePoint">TP1</avid:property>
+    <avid:property key="actionTag">Seg</avid:property>
+    <avid:property key="type">result</avid:property>
+    <avid:property key="format">itk</avid:property>
+    <avid:property key="url">../data/mask/pat3_TP1_Seg1.txt</avid:property>
+    <avid:property key="objective">Seg1</avid:property>
+    <avid:property key="invalid">False</avid:property>
+    <avid:property key="id">bbe232c6-5740-11ec-85a6-e9d058c65a83</avid:property>
+    <avid:property key="timestamp">1638869608.336004</avid:property>
+  </avid:artefact>
+</avid:artefacts>

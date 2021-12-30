@@ -16,7 +16,7 @@
   tis responsible to add new dict entries in the flat file data container 
 '''
 
-import collections
+from collections.abc import Mapping
 import logging
 import os
 import platform
@@ -136,7 +136,7 @@ class Artefact(object):
                 else:
                     value = False
             elif key == defaultProps.INPUT_IDS:
-                if isinstance(value, collections.Mapping):
+                if isinstance(value, Mapping):
                     value = dict(value)
                 elif value is not None:
                     raise ValueError(
@@ -182,7 +182,7 @@ def getArtefactProperty(artefact, key):
     key. If the artefact is None or the key does not exist it returns None.
     @param artefact Reference to the artefact entity that contains the wanted property value
     @param key Key of the value that is wanted.'''
-    result = None;
+    result = None
     if artefact is not None and key in artefact:
         result = artefact[key]
 
@@ -309,7 +309,7 @@ def ensureValidPath(unsafePath):
     import string
     validPathChars = ":-_.() #%s%s" % (string.ascii_letters, string.digits)
     validPathChars += os.sep
-    if platform.system() is 'Windows':
+    if platform.system() == 'Windows':
         # also add unix version because windows can handle it to.
         validPathChars += '/'
     cleanedFilename = unicodedata.normalize('NFKD', unsafePath).encode('ascii', 'ignore').decode('ascii')

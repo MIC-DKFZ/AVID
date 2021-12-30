@@ -95,7 +95,7 @@ class TestCaseInstanceLinker(unittest.TestCase):
     self.assertIn(self.a1, selection[0])
 
 
-  def test_FractionLinker_empty_slaves(self):
+  def test_CaseInstanceLinker_empty_secondary(self):
     linker = CaseInstanceLinker()
     selection = linker.getLinkedSelection(2, self.secondary, [])
     self.assertEqual(len(selection), 0)

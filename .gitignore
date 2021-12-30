@@ -4,6 +4,7 @@
 /build
 *.log
 /avid/tests/temporary*
+/avid/examples/output/example_session*
 
 ########## Git related
 
@@ -42,6 +43,10 @@ tramp
 # Org-mode
 .org-id-locations
 *_archive
+
+# PyCharm
+.idea*
+/avid/examples/.ipynb_checkpoints*
 
 ########## OS specific
 

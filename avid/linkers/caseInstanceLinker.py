@@ -32,12 +32,12 @@ class CaseInstanceLinker(InnerLinkerBase):
     def _findLinkedArtefactOptions(self, primaryArtefact, secondarySelection):
         linkValue = None
 
-        if artefactProps.CASEINSTANCE in primaryArtefact:
+        if primaryArtefact is not None and artefactProps.CASEINSTANCE in primaryArtefact:
             linkValue = primaryArtefact[artefactProps.CASEINSTANCE]
 
         result = list()
         for secondArtefact in secondarySelection:
-            if artefactProps.CASEINSTANCE in secondArtefact:
+            if secondArtefact is not None and artefactProps.CASEINSTANCE in secondArtefact:
                 itemValue = secondArtefact[artefactProps.CASEINSTANCE]
                 if itemValue == linkValue \
                         or (not self._useStrictLinkage \
