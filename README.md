@@ -12,11 +12,11 @@ AVID is a python framework for the **data-driven processing** of huge amounts of
 It provides a series of actions that can be used to process the data, including `resampling`, `registration`, `radiomics feature calculation` or `python-based actions`. These 
 are just examples, a more detailed list can be found [below](#available-actions). 
 
-AVID enables to select, link, sort, and split the data by user defines criteria, e.g. `case_id` and `timepoint`.
+AVID enables to select, link, sort, and split the data by user defined criteria, e.g. `case_id` and `timepoint`.
 
 ## Example
 
-In the following, an example use-case will be roughly described. This is a special project and may help new users. You can also skip this and start with our example scripts instead.
+In the following, an example use-case will be roughly described. This is a special project and may help some new users. You can also skip this and start with our example scripts instead.
 
 In the context of multiple myeloma (a type of bone cancer) image analysis, bone marrow compartments are automatically processed by a computational pipeline. The algorithms were 
 developed for three bone marrow compartments in the pelvis (see Figure 1). The three different bone marrow compartments are shown in three different colors.
@@ -33,10 +33,6 @@ a different color.
 ![img_1.png](wb_bm.png)
 
 Figure 2: Segmentation of 30 bone marrow compartments.
-
-<span style="color:red">
-TODO
-</span>
 
 An MRI scan can now contain an arbitrary number of those segmentations, depending on its field of view. This means, that for a particular MRI scan, there can be any number of 
 segmentations present, depending on what body bart is captured by the scan.
@@ -109,7 +105,10 @@ avidconfig settings avid.toolspath <your_desired_tools_path>
 Please have in mind that python/scripts has to be in PATH!
 
 ## Get the tools (for the AVID actions)
-_Is this still up to date?_
+<span style="color:red">
+Is this still up to date?
+</span>
+
 
 <span style="color:grey">
 REMARK: This tools feature is currently only supported for Windows systems.
