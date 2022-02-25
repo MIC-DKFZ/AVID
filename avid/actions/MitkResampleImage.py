@@ -56,4 +56,4 @@ class MitkResampleImageBatchAction(BatchActionBase):
                                  linker=None, session=session,
                                  relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
                                  scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 legacyOutput = False, **singleActionParameters)
+                                 **singleActionParameters)
