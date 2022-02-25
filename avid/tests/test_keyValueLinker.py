@@ -32,9 +32,10 @@ class TestKeyValueLinker(unittest.TestCase):
     self.a8 = artefactGenerator.generateArtefactEntry("Case2", None, 2, "Action2", "result", "dummy", None)
     self.a9 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "result", "dummy", None)
     self.a10 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", None)
+    self.a11 = artefactGenerator.generateArtefactEntry("CaseLonePrimary", "1", 0, "LoneAction", "result", "dummy", None)
 
     self.data = [[self.a1],[self.a2],[self.a3],[self.a4],[self.a5],[self.a6],[self.a7],[self.a8],[self.a9],[self.a10],
-                 [self.a1, self.a2],[self.a1, self.a2, self.a3],[self.a1, self.a5],[self.a5, self.a9]]
+                 [self.a1, self.a2],[self.a1, self.a2, self.a3],[self.a1, self.a5],[self.a5, self.a9],[self.a11]]
     self.data2 = [[self.a1, self.a2],[self.a3 , self.a4],[self.a4, self.a5],[self.a5, self.a6, self.a7],[self.a8, self.a9, self.a10]]
 
 
@@ -64,6 +65,13 @@ class TestKeyValueLinker(unittest.TestCase):
     selections = linker.getLinkedSelection(3, self.data2, self.data2)
     self.checkSelections([[self.a5, self.a6, self.a7], [self.a8, self.a9, self.a10]], selections)
 
+    selections = linker.getLinkedSelection(14, self.data, self.data2)
+    self.checkSelections([], selections)
+
+    selections = linker.getLinkedSelection(14, self.data, [])
+    self.checkSelections([], selections)
+
+
   def test_CaseLinker_internallinkageOn(self):
     linker = CaseLinker(performInternalLinkage=True, allowOnlyFullLinkage=True)
     selections = linker.getLinkedSelection(2, self.data,self.data)
@@ -81,6 +89,12 @@ class TestKeyValueLinker(unittest.TestCase):
     selections = linker.getLinkedSelection(3, self.data2, self.data2)
     self.checkSelections([[self.a5, self.a5, self.a5], [self.a8, self.a8, self.a8]], selections)
 
+    selections = linker.getLinkedSelection(14, self.data, self.data2)
+    self.checkSelections([], selections)
+
+    selections = linker.getLinkedSelection(14, self.data, [])
+    self.checkSelections([], selections)
+
     linker = CaseLinker(performInternalLinkage=True, allowOnlyFullLinkage=False)
     selections = linker.getLinkedSelection(2, self.data,self.data)
     self.checkSelections([[self.a1],[self.a2],[self.a3],[self.a4]], selections)
@@ -96,6 +110,12 @@ class TestKeyValueLinker(unittest.TestCase):
 
     selections = linker.getLinkedSelection(3, self.data2, self.data2)
     self.checkSelections([[self.a5, self.a5, self.a5], [self.a8, self.a8, self.a8]], selections)
+
+    selections = linker.getLinkedSelection(14, self.data, self.data2)
+    self.checkSelections([], selections)
+
+    selections = linker.getLinkedSelection(14, self.data, [])
+    self.checkSelections([], selections)
 
   def test_CaseLinker_internallinkageOff(self):
     linker = CaseLinker(performInternalLinkage=False, allowOnlyFullLinkage=True)
