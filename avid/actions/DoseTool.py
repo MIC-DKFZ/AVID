@@ -34,7 +34,7 @@ class DoseToolAction(GenericCLIAction):
 
     def __init__(self, inputDose, structSet, structName, computeDVH=True,
                  actionTag="DoseStat", alwaysDo=False, session=None,
-                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         self._inputDose = self._ensureSingleArtefact(inputDose, "inputDose")
         self._structSet = self._ensureSingleArtefact(structSet, "structSet")
@@ -57,7 +57,7 @@ class DoseToolAction(GenericCLIAction):
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   actionConfig=actionConfig,
                                   additionalActionProps=additionalActionProps,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension='xml')
 
     def _indicateOutputs(self):

@@ -34,9 +34,9 @@ class mapRAction(CLIActionBase):
     def __init__(self, inputImage, registration=None, templateImage=None,
                  interpolator="linear", outputExt="nrrd", paddingValue=None,
                  actionTag="mapR", inputIsReference=True, alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="mapR",
-                               actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
+                               actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
         self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
 
         self._inputImage = self._ensureSingleArtefact(inputImage, "inputImage")

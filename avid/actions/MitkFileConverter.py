@@ -57,7 +57,7 @@ class MitkFileConverterAction(GenericCLIAction):
     '''Class that wraps the single action for the tool MitkFileConverter.'''
 
     def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkFileConverter",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         addArgs = None
         if readerName is not None:
             addArgs = {'r':readerName}
@@ -65,7 +65,7 @@ class MitkFileConverterAction(GenericCLIAction):
         GenericCLIAction.__init__(self, i=inputs, actionID="MitkFileConverter", outputFlags=['o'],
                                   additionalArgs=addArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
+                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=defaultoutputextension,
                                   collectOutputsCallable=collectFileConverterOutputs)
 

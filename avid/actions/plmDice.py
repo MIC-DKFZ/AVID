@@ -33,7 +33,7 @@ class PlmDiceAction(GenericCLIAction):
 
     def __init__(self, refImage, inputImage,
                  actionTag="plmDice", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         refImage = self._ensureSingleArtefact(refImage, "refImage")
         inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
 
@@ -43,7 +43,7 @@ class PlmDiceAction(GenericCLIAction):
                                   argPositions=['command', 'refImage', 'inputImage'],
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension='xml')
 
     def _postProcessCLIExecution(self):

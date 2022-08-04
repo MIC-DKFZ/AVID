@@ -31,7 +31,7 @@ class MitkMRSignal2ConcentrationMiniAppAction(GenericCLIAction):
 
     def __init__(self, signal, conversiontype=CONVERSION_T1_ABSOLUTE, k=1, recoveryTime=None,
                  relaxivity=None, relaxationTime=None, te=None, actionTag="MitkMRSignal2Concentration", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         signal = self._ensureSingleArtefact(signal, "signal")
 
@@ -69,7 +69,7 @@ class MitkMRSignal2ConcentrationMiniAppAction(GenericCLIAction):
                                   additionalArgs=additionalArgs,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension='nrrd')
 
 

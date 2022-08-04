@@ -58,7 +58,7 @@ class DoseAccAction(CLIActionBase):
   def __init__(self, doses, registrations=None, plans=None, weight=None,
                planned_fraction_property= artefactProps.PLANNED_FRACTIONS, interpolator="linear", operator="+",
                outputExt="nrrd", actionTag="doseAcc", alwaysDo=False, session=None,
-               additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+               additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
     ''':param doses: List of dose artefacts that should be accumulated.
        :param registrations: List of registration artefacts that should be used to map the doses befor accumulation.
        It is expected that this list is either None, a list equal in size to doses or a list that has one item less
@@ -73,7 +73,7 @@ class DoseAccAction(CLIActionBase):
        :param operator: String that defines the type of accumulation. Is defined by doseAcc.
     '''
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID = "doseAcc",
-                           actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
+                           actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
     self._addInputArtefacts(doses=doses, registrations=registrations, plans= plans)
 
     self._doses = self._ensureArtefacts(doses, "doses")

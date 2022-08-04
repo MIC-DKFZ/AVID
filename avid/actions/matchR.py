@@ -37,10 +37,10 @@ class matchRAction(CLIActionBase):
   def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None, targetMask = None,  movingMask = None,
                targetPointSet = None, movingPointSet = None,
                targetIsReference = True, actionTag = "matchR", alwaysDo = False,
-               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None):
+               session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None, cli_connector = None):
        
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID= "matchR", actionConfig = actionConfig,
-                           propInheritanceDict = propInheritanceDict)
+                           propInheritanceDict = propInheritanceDict, cli_connector = cli_connector)
     self._addInputArtefacts(targetImage = targetImage, movingImage = movingImage, targetMask = targetMask,
                             movingMask = movingMask, targetPointSet = targetPointSet, movingPointSet = movingPointSet)
 

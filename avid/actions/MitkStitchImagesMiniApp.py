@@ -40,17 +40,9 @@ STITCH_STRATEGY_BORDER_DISTANCE = 1
 class MitkStitchImagesMiniAppAction(GenericCLIAction):
     '''Class that wrapps the single action for the tool MitkStitchImagesMiniApp.'''
 
-    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkStitchImagesMiniApp",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
-        GenericCLIAction.__init__(self, i=images, actionID="MitkResampleImage", outputFlags=['o'],
-                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
-                                  alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict,
-                                  defaultoutputextension=defaultoutputextension)
-
     def __init__(self, images, template, registrations = None, actionTag="MitkStitchImagesMiniApp",
                  paddingValue = None, stitchStrategy=None, interpolator=None, alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         self._template = [self._ensureSingleArtefact(template, "template")]
         self._registrations = registrations
@@ -71,7 +63,7 @@ class MitkStitchImagesMiniAppAction(GenericCLIAction):
         GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, actionID="MitkStitchImagesMiniApp", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict)
+                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
 
 class MitkStitchImagesMiniAppBatchAction(BatchActionBase):

@@ -30,7 +30,7 @@ class VoxelizerAction(GenericCLIAction):
     def __init__(self, structSet, referenceImage, structName,
                  actionTag='Voxelizer', allowIntersections=True,
                  booleanMask=False, outputExt='nrrd', alwaysDo=False, session=None,
-                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         structSet = self._ensureSingleArtefact(structSet, "structSet")
         referenceImage = self._ensureSingleArtefact(referenceImage, "referenceImage")
@@ -55,7 +55,7 @@ class VoxelizerAction(GenericCLIAction):
                                   additionalArgs=additionalArgs,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=internalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=outputExt)
 
     def _getStructPattern(self):

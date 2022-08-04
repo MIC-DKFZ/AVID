@@ -37,9 +37,9 @@ class BioModelCalcAction(CLIActionBase):
   def __init__(self, inputDose, weight=None, nFractions=None, modelParameters=None, modelParameterMaps = None,
                plan = None, modelName="LQ", normalizeFractions= True, useDoseScaling=True, outputExt="nrrd",
                actionTag = "DoseStat", alwaysDo = False, session = None, additionalActionProps = None,
-               actionConfig = None, propInheritanceDict = None):
+               actionConfig = None, propInheritanceDict = None, cli_connector = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig = actionConfig,
-                           propInheritanceDict = propInheritanceDict)
+                           propInheritanceDict = propInheritanceDict, cli_connector = cli_connector)
     self._addInputArtefacts(inputDose=inputDose, plan = plan, modelParameterMaps = modelParameterMaps)
     self._inputDose = self._ensureSingleArtefact(inputDose, "inputDose")
     self._plan = self._ensureSingleArtefact(plan, "plan")

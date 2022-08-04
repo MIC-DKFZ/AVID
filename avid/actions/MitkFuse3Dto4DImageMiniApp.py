@@ -37,9 +37,9 @@ class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
     '''Class that wrapps the single action for the tool MitkFuse3Dto4DImageMiniApp.'''
 
     def __init__(self, images, timeProperty = None, timeGenerationCallable = None, actionTag="MitkFuse3Dto4DImageMiniApp", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict)
+                               propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         self._images = {}
         if timeGenerationCallable is not None:

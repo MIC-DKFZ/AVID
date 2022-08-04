@@ -30,7 +30,7 @@ class RegVarToolAction(GenericCLIAction):
 
     def __init__(self, registration, instanceNr, algorithmDLL, regParameters=None, templateImage=None,
                  actionTag="regVarTool",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         registration = self._ensureSingleArtefact(registration, "registration")
         templateImage = self._ensureSingleArtefact(templateImage, "templateImage")
@@ -56,7 +56,7 @@ class RegVarToolAction(GenericCLIAction):
                                   outputFlags=['o'],
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension='mapr')
 
         if self._caseInstance is not None and not instanceNr == self._caseInstance:

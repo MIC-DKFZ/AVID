@@ -55,7 +55,7 @@ class PlmRTSSMapAction(GenericCLIAction):
 
     def __init__(self, rtss, registration, outputFormat=artefactProps.FORMAT_VALUE_DCM,
                  actionTag="plmRTSSMap", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         rtss = self._ensureSingleArtefact(rtss, "rtss")
         registration = self._ensureSingleArtefact(registration, "registration")
@@ -72,7 +72,7 @@ class PlmRTSSMapAction(GenericCLIAction):
                                   inputArgsURLExtractionDelegate=self._plmRTSS_url_extraction_delegate,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict,
+                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=self._getOutputExtension())
 
         additionalArgs = {'command': 'convert'}

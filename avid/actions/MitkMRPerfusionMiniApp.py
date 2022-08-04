@@ -38,10 +38,10 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
 
     def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask=None, aifmask=None, aifimage=None,
                  hematocrit=0.45, roibased=False, constraints=False, actionTag="MRPerfusion", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
+                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
                                actionID="MitkMRPerfusionMiniApp", actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict)
+                               propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         if aifimage is not None and aifmask is None:
             raise RuntimeError("Cannot use an AIF image without and AIF mask. Please specify mask.")
