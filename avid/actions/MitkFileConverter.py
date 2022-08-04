@@ -35,7 +35,7 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
 
     if os.path.isfile(file_path):
         # if indicated output exists, there is nothing to do.
-        output = indicatedOutputs
+        outputs = indicatedOutputs.copy()
     else:
         file_name, file_extension = os.path.splitext(file_path)
 
