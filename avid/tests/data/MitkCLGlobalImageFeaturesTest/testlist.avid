@@ -1,0 +1,45 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">image</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">../MRPerfusionMiniAppTest/LinearModel_pixel_offset.nrrd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">image</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">../MRPerfusionMiniAppTest/LinearModel_pixel_slope.nrrd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">roi</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="objective">roi1</avid:property>
+		<avid:property key="url">../MRPerfusionMiniAppTest/roi1.nrrd</avid:property>
+	</avid:artefact>		
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">roi</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="objective">roi2</avid:property>
+		<avid:property key="url">../MRPerfusionMiniAppTest/roi2.nrrd</avid:property>
+	</avid:artefact>		
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">roi</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="objective">roi1</avid:property>
+		<avid:property key="url">../MRPerfusionMiniAppTest/roi1.nrrd</avid:property>
+	</avid:artefact>		
+</avid:artefacts>
