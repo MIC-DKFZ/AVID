@@ -27,6 +27,7 @@ from avid.splitter import BaseSplitter, KeyValueSplitter
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
+from .genericCLIAction import generate_cli_call
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
@@ -127,15 +128,14 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
                 if not len(content)==0:
                     content+=os.linesep
 
-                content += '"{}" -i "{}" -m "{}" -o "{}"'.format(execURL, inputPair[0], inputPair[1], resultPath)
+                artefactArgs = {'i': inputPair[0], '-m': inputPair[1], 'o':self._resultCSVArtefact}
                 if not self._legacyOutput:
-                    resultXMLPath = artefactHelper.getArtefactProperty(self._resultXMLArtefact, artefactProps.URL)
-                    content += ' -x "{}"'.format(resultXMLPath)
+                    artefactArgs['x'] = self._resultXMLArtefact
 
-                for arg in self._cliArgs:
-                    content += ' -{}'.format(arg)
-                    if self._cliArgs[arg] is not None:
-                        content += ' {}'.format(self._cliArgs[arg])
+                content +=generate_cli_call(exec_url=execURL, artefact_args=artefactArgs,
+                                            additional_args=self._cliArgs,
+                                            artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate())
+
         except:
             logger.error("Error for getExecutable.")
             raise

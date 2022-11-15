@@ -20,9 +20,22 @@ import time
 
 from avid.common import osChecker, AVIDUrlLocater
 import avid.common.settings as AVIDSettings
+import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
 
 logger = logging.getLogger(__name__)
 
+def default_artefact_url_extraction_delegate(arg_name, arg_value):
+    """Default implementation of the extraction of the urls of a passed list of artefacts.
+       It just retrieves the URL of each artefact and passes it back.
+       :param arg_name: Name/id of the argument
+       :param arg_value: list of artefacts that are associated with the argument.
+       :return: Returns the list of urls that are associated with the argument (its artefacts)."""
+    result = list()
+    for artefact in arg_value:
+        artefactPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
+        result.append(artefactPath)
+    return result
 
 class DefaultCLIConnector(object):
     """Default implementation of a CLI connector. It is used to abstract between the action logic and the system
@@ -35,7 +48,10 @@ class DefaultCLIConnector(object):
         """Returns the URL extraction delegate that should be used when working with the connector.
         :param action_extraction_delegate: If the actions specifies its own delegate it can be passed
         and will be wrapped accordingly."""
-        return action_extraction_delegate
+        if action_extraction_delegate is not None:
+            return action_extraction_delegate
+        else:
+            return default_artefact_url_extraction_delegate
 
     def get_executable_url(self, workflow, actionID, actionConfig = None):
         """Returns url+executable for a actionID request that should be used in the cli file. This serves as an

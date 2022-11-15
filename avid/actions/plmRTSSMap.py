@@ -22,7 +22,8 @@ from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
 from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction, extract_artefact_arg_urls_default
+from .genericCLIAction import GenericCLIAction
+from ..common.cliConnector import default_artefact_url_extraction_delegate
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class PlmRTSSMapAction(GenericCLIAction):
                         regPath = fieldPath
                 result.append(regPath)
         else:
-            result = extract_artefact_arg_urls_default(arg_name=arg_name, arg_value=arg_value)
+            result = default_artefact_url_extraction_delegate(arg_name=arg_name, arg_value=arg_value)
 
         return result
 

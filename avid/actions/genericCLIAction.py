@@ -17,7 +17,7 @@ import logging
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
-from avid.common import osChecker, AVIDUrlLocater
+from avid.common import osChecker, AVIDUrlLocater, cliConnector
 
 from .cliActionBase import CLIActionBase
 
@@ -39,19 +39,6 @@ def _generateAdditionalArgValueString(arg_value):
         result.strip()
     else:
         result = '"{}"'.format(arg_value)
-    return result
-
-
-def extract_artefact_arg_urls_default(arg_name, arg_value):
-    """Default implementation of the extraction of the urls of a passed list of artefacts.
-       It just retrieves the URL of each artefact and passes it back.
-       :param arg_name: Name/id of the argument
-       :param arg_value: list of artefacts that are associated with the argument.
-       :return: Returns the list of urls that are associated with the argument (its artefacts)."""
-    result = list()
-    for artefact in arg_value:
-        artefactPath = artefactHelper.getArtefactProperty(artefact, artefactProps.URL)
-        result.append(artefactPath)
     return result
 
 
@@ -80,7 +67,7 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
     """
     extract_delegat = artefact_url_extraction_delegate
     if extract_delegat is None:
-        extract_delegat = extract_artefact_arg_urls_default
+        extract_delegat = cliConnector.default_artefact_url_extraction_delegate
 
     content = '"{}"'.format(exec_url)
     if arg_positions is None:
