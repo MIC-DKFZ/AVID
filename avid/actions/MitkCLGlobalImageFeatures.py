@@ -119,7 +119,7 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
         content = ""
 
         try:
-            execURL = AVIDUrlLocater.getExecutableURL(self._session, "MitkCLGlobalImageFeatures", self._actionConfig)
+            execURL = self._cli_connector.get_executable_url(self._session, "MitkCLGlobalImageFeatures", self._actionConfig)
 
             inputPairs = self._getAllInputCombinations()
 

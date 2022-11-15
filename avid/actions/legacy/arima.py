@@ -95,7 +95,7 @@ class ArimaAction(CLIActionBase):
 
     self._generateConfigFile(configPath)
 
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "Rscript", self._actionConfig)
+    execURL = self._cli_connector.get_executable_url(self._session, "Rscript", self._actionConfig)
 
     content = '"' + execURL + '"' + ' "' + configPath + '"'
 

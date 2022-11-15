@@ -18,7 +18,7 @@ import stat
 import subprocess
 import time
 
-from avid.common import osChecker
+from avid.common import osChecker, AVIDUrlLocater
 import avid.common.settings as AVIDSettings
 
 logger = logging.getLogger(__name__)
@@ -37,11 +37,19 @@ class DefaultCLIConnector(object):
         and will be wrapped accordingly."""
         return action_extraction_delegate
 
-    def generate_cli_file(self, file_path_base, content):
-        global logger
+    def get_executable_url(self, workflow, actionID, actionConfig = None):
+        """Returns url+executable for a actionID request that should be used in the cli file. This serves as an
+        abstraction, in order to allow the connector to change the deduction strategy for the executable url.
+        Default implementation just uses the AVIDUrlLocater.
+        :param workflow: session instance that should be used for deducing the executable url
+        :param actionID: actionID of the action that requests the URL
+        :param actionConfig: actionConfig specifies if a certian configuration of an action should be used."""
+        return AVIDUrlLocater.getExecutableURL(workflow=workflow, actionID=actionID, actionConfig=actionConfig)
 
+    def generate_cli_file(self, file_path_base, content):
         """Function generates the CLI file based on the passed file name base (w/o extension, extension will be added)
          and the content. It returns the full path to the CLI file."""
+        global logger
 
         if osChecker.isWindows():
             file_name = file_path_base + os.extsep + 'bat'

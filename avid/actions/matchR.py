@@ -93,7 +93,7 @@ class matchRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
       
     try:
-      execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
+      execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
       targetImageURL = artefactHelper.getArtefactProperty(self._targetImage,artefactProps.URL)
       movingImageURL = artefactHelper.getArtefactProperty(self._movingImage, artefactProps.URL)
     

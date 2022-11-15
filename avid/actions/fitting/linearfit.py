@@ -91,7 +91,7 @@ class LinearFitAction(CLIActionBase):
       
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, "GenericFittingMiniApp", self._actionConfig)
+    execURL = self._cli_connector.get_executable_url(self._session, "GenericFittingMiniApp", self._actionConfig)
     
     content = '"' + execURL + '" -f Linear -i "'+str(inputPath)+'" -o "'+ self._outputTemplatePath+'"'
     

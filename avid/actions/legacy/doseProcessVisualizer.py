@@ -128,7 +128,7 @@ class doseProcessVisualizerAction(CLIActionBase):
 
         self._generateConfigFile(configPath)
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "Rscript", self.rScriptExe)
+        execURL = self._cli_connector.get_executable_url(self._session, "Rscript", self.rScriptExe)
 
         content = '"' + execURL + '"' + ' "' + configPath + '"'
 

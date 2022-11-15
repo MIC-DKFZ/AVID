@@ -75,7 +75,7 @@ class invertRAction(CLIActionBase):
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
     try:
-      execURL = AVIDUrlLocater.getExecutableURL(self._session, "invertR", self._actionConfig)
+      execURL = self._cli_connector.get_executable_url(self._session, "invertR", self._actionConfig)
       registrationURL = artefactHelper.getArtefactProperty(self._registration, artefactProps.URL)
       if self._templateImage is not None:
         templateImageURL = artefactHelper.getArtefactProperty(self._templateImage, artefactProps.URL)

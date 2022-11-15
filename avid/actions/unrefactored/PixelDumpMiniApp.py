@@ -106,7 +106,7 @@ class PixelDumpMiniAppAction(CLIActionBase):
             signalPathes.append(artefactHelper.getArtefactProperty(self._signals[signalname], artefactProps.URL))
             captions.append(self._captionDelegate(self._signals[signalname]))
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "PixelDumpMiniApp", self._actionConfig)
+        execURL = self._cli_connector.get_executable_url(self._session, "PixelDumpMiniApp", self._actionConfig)
 
         result = list()
         result.append(execURL)

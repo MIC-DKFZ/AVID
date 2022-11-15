@@ -93,7 +93,7 @@ class DoseMapAction(CLIActionBase):
     
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
     
-    execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
+    execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
     
     content = '"' + execURL + '"' + ' "' + inputPath + '"' + ' "' + resultPath + '"'
     if registrationPath is not None:

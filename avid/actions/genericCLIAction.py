@@ -306,7 +306,7 @@ class GenericCLIAction(CLIActionBase):
 
     def _prepareCLIExecution(self):
         try:
-            execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
+            execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
 
             artefactArgs = self._inputs.copy()
             argPositions = self._argPositions.copy()

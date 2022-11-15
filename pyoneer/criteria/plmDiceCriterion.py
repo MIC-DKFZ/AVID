@@ -138,7 +138,7 @@ class PlmDiceCriterion(PlmDiceCriterionBase):
     refPath = getArtefactProperty(reference,artefactProps.URL)
     testPath = getArtefactProperty(test,artefactProps.URL)
     
-    execURL = AVIDUrlLocater.getExecutableURL(None, "plastimatch")
+    execURL = self._cli_connector.get_executable_url(None, "plastimatch")
     
     call = [execURL, 'dice', refPath, testPath,'--all']
     

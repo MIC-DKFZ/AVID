@@ -101,7 +101,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
         aifMaskPath = artefactHelper.getArtefactProperty(self._aifmask, artefactProps.URL)
         aifPath = artefactHelper.getArtefactProperty(self._aifimage, artefactProps.URL)
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, self._actionID, self._actionConfig)
+        execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
 
         result = list()
         result.append(execURL)

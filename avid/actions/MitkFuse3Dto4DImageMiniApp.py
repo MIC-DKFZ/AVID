@@ -103,7 +103,7 @@ class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
         content = ""
 
         try:
-            execURL = AVIDUrlLocater.getExecutableURL(self._session, "MitkFuse3Dto4DImageMiniApp", self._actionConfig)
+            execURL = self._cli_connector.get_executable_url(self._session, "MitkFuse3Dto4DImageMiniApp", self._actionConfig)
 
             content += '"{}" -i{} -o "{}" -t {}'.format(execURL, self._generateInputInformation(), resultPath, self._generateTimeInformation())
         except:
