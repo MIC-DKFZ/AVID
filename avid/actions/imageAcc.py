@@ -28,7 +28,6 @@ from avid.sorter import TimePointSorter
 from .simpleScheduler import SimpleScheduler
 from .doseMap import _getArtefactLoadStyle
 from avid.externals.matchPoint import ensureMAPRegistrationArtefact
-import avid.common.demultiplexer as demux
 
 logger = logging.getLogger(__name__)
 

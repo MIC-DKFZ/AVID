@@ -30,7 +30,7 @@ from avid.common.workflow.structure_definitions import loadStructurDefinition_xm
 stdoutlogstream = None
 
 def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
-                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False):
+                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False, initLogging = True):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
    @param sessionPath Path of the stored artefact list the session should use
@@ -68,17 +68,20 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if overwriteExistingSession:
     filemode = 'w'
     
-  logging.basicConfig(filename=sessionPath+".log", filemode = filemode, level=logginglevel, format='%(levelname)-8s %(asctime)s [MODULE] %(module)-20s [Message] %(message)s [Location] %(funcName)s in %(pathname)s %(lineno)d' )
+  if initLogging:
+    logging.basicConfig(filename=sessionPath+".log", filemode = filemode, level=logginglevel, format='%(levelname)-8s %(asctime)s [MODULE] %(module)-20s [Message] %(message)s [Location] %(funcName)s in %(pathname)s %(lineno)d' )
+
   rootlogger = logging.getLogger()
-  
-  global stdoutlogstream
-  
-  if stdoutlogstream is None:    
-    stdoutlogstream = logging.StreamHandler(sys.stdout)
-    stdoutlogstream.setLevel(logging.INFO)
-    streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
-    stdoutlogstream.setFormatter(streamFormater)
-    rootlogger.addHandler(stdoutlogstream)
+
+  if initLogging:
+    global stdoutlogstream
+
+    if stdoutlogstream is None:
+      stdoutlogstream = logging.StreamHandler(sys.stdout)
+      stdoutlogstream.setLevel(logging.INFO)
+      streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
+      stdoutlogstream.setFormatter(streamFormater)
+      rootlogger.addHandler(stdoutlogstream)
   
   #result path setup
   
@@ -237,7 +240,7 @@ class Session(object):
      
     logging.info("Successful actions: %s.", len(self.getSuccessfulActions()))
     logging.info("Skipped actions: %s.", len(self.getSkippedActions()))
-    if len(self.getFailedActions()) is 0:
+    if len(self.getFailedActions()) == 0:
       logging.info("Failed actions: 0.")
     else:
       logging.error("FAILED ACTIONS: %s.", len(self.getFailedActions()))
