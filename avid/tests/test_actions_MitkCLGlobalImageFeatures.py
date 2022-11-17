@@ -25,8 +25,8 @@ from avid.common.AVIDUrlLocater import getExecutableURL
 class TestMitkFileConverter(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeatures")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeatures", "testlist.avid")
+      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeaturesTest")
+      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeaturesTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MitkCLGlobalImageFeatures")
 
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
@@ -52,13 +52,13 @@ class TestMitkFileConverter(unittest.TestCase):
     def test_simple_gif_action_alwaysdo(self):
 
       action = radiomics(imageSelector=ActionTagSelector("image"), maskSelector=ActionTagSelector("roi"),
-                         actionTag = "TestGIF")
+                         actionTag = "TestGIF", alwaysDo=True)
       token = action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(True, token.isSuccess())
 
       token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(True, token.isSuccess())
 
 
 if __name__ == "__main__":

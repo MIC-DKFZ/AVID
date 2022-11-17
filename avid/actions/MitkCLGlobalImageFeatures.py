@@ -101,15 +101,15 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
         return result
 
     def _getAllInputCombinations(self):
+        """Helper that returns all combinations of masks and images that should be processed"""
         result = list()
         if self._legacyOutput:
             for image in self._images:
                 for mask in self._masks:
-                    result.append([artefactHelper.getArtefactProperty(image, artefactProps.URL),
-                                   artefactHelper.getArtefactProperty(mask, artefactProps.URL)])
+                    result.append([image, mask])
         else:
-            result.append([artefactHelper.getArtefactProperty(self._images, artefactProps.URL),
-                           artefactHelper.getArtefactProperty(self._masks, artefactProps.URL)])
+            #if not in legacy mode the variables contain only one artefact and this should be used.
+            result.append([self._images, self._masks])
         return result
 
     def _prepareCLIExecution(self):
@@ -121,24 +121,25 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
 
         try:
             execURL = self._cli_connector.get_executable_url(self._session, "MitkCLGlobalImageFeatures", self._actionConfig)
-
-            inputPairs = self._getAllInputCombinations()
-
-            for inputPair in inputPairs:
-                if not len(content)==0:
-                    content+=os.linesep
-
-                artefactArgs = {'i': inputPair[0], '-m': inputPair[1], 'o':self._resultCSVArtefact}
-                if not self._legacyOutput:
-                    artefactArgs['x'] = self._resultXMLArtefact
-
-                content +=generate_cli_call(exec_url=execURL, artefact_args=artefactArgs,
-                                            additional_args=self._cliArgs,
-                                            artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate())
-
         except:
             logger.error("Error for getExecutable.")
             raise
+
+        inputPairs = self._getAllInputCombinations()
+
+        for inputPair in inputPairs:
+            if not len(content)==0:
+                content+=os.linesep
+
+            artefactArgs = {'i': [inputPair[0]], 'm': [inputPair[1]], 'o':[self._resultCSVArtefact]}
+            if not self._legacyOutput:
+                artefactArgs['x'] = [self._resultXMLArtefact]
+
+            content +=generate_cli_call(exec_url=execURL, artefact_args=artefactArgs,
+                                        additional_args=self._cliArgs,
+                                        artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate())
+
+
 
         return content
 
@@ -147,7 +148,7 @@ class MitkCLGlobalImageFeaturesBatchAction(BatchActionBase):
     '''Batch action for MITKCLGlobalImageFeatures to produce XML results.'''
 
     def __init__(self, imageSelector, maskSelector, maskLinker = None,
-                 actionTag="MITKCLGlobalImageFeatures", alwaysDo=False, session=None,
+                 actionTag="MITKCLGlobalImageFeatures", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         if maskLinker is None:
