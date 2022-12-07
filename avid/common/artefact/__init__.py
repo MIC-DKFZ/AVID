@@ -256,6 +256,23 @@ def artefactExists(workflowData, artefactEntry):
     return findSimilarArtefact(workflowData, artefactEntry) is not None
 
 
+def update_artefacts(destination_list, source_list, update_existing=False):
+    """Helper function that updates the content of the destination list with the content of the source list."""
+    for artefact in source_list:
+        if findSimilarArtefact(destination_list,artefact) is None or update_existing:
+            addArtefactToWorkflowData(destination_list,artefact, removeSimelar=True)
+
+
+def get_all_values_of_a_property(workflow_data, property_key):
+    """Helper function that returns a list of all values found for a certain property in the passed collection
+    of artefact.
+    :param workflow_data: list of artefacts that should be evaluated.
+    :param property_key: the key of the property that should be evaluated.
+    :return Returns the list of values. Each value is only present once in the list, even if multiple artefacts
+    have this value."""
+    values = [a[property_key] for a in workflow_data if property_key in a]
+    return list(set(values))
+
 def generateVerboseArtefactPath(workflow, workflowArtefact):
     """ Generates the path derived from the workflow informations and the
         properties of the artefact. This default style will generate the following

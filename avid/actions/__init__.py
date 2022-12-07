@@ -245,7 +245,8 @@ class SingleActionBase(ActionBase):
         self._caseInstance = stubArtefact[artefactProps.CASEINSTANCE]
 
     # noinspection PyProtectedMember
-    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None, urlHumanPrefix = None, urlExtension = None):
+    def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None,
+                         urlHumanPrefix = None, urlExtension = None):
         '''Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
