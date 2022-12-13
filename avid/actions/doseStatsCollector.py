@@ -44,7 +44,8 @@ def _getColumnHeaderValues(matrix):
 
 
 class DoseStatsCollectorAction(SingleActionBase):
-    """Class that establishes a dose stats collection action. the result will be stored as CSV"""
+    """Class that establishes a dose stats collection action on result generate by DoseTool.
+       The result will be stored as CSV"""
     def __init__(self, doses, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
                  columnKey=artefactProps.TIMEPOINT,
                  withHeaders=True, actionTag="DoseStatCollector",

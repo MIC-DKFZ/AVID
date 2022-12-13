@@ -297,7 +297,7 @@ class ActionBatchGenerator(object):
                 actions.extend(self._generateActions_recursive(newRelInputs, newRelPos, newAdditionalInputs, newLeftNames))
             elif len(currentInputs) == 0:
                 logger.debug('Action candidate was skipped because at least one of the additional inputs (input name:'
-                             ' "{}") is undefined (empty selection) and therefore no valid action instance can be'
+                             f' "{currentName}") is undefined (empty selection) and therefore no valid action instance can be'
                              ' generated.\n'
                              'HINT: If you want to allow combinations where "There is no valid artefact" (==[None])'
                              ' is a valid option, you have to configure the linker for the input accordingly to allow'

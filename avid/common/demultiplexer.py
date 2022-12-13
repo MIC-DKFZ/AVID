@@ -14,6 +14,7 @@
 from builtins import str
 from builtins import object
 import avid.common.workflow as workflow
+from avid.common.artefact import get_all_values_of_a_property
 from avid.selectors.keyValueSelector import KeyValueSelector
 from avid.selectors import SelectorBase
         
@@ -35,9 +36,7 @@ class Demultiplexer(object):
 
 
   def getKeyValues(self):
-    relevantSelection = self._selector.getSelection(self._workflowData)
-    return [d[self._propKey] for d in relevantSelection if self._propKey in d]
-  
+    return get_all_values_of_a_property(workflow_data=self._workflowData, property_key=self._propKey)
   
   def getSelectors(self):
     

@@ -101,11 +101,11 @@ class TestPythonAction(unittest.TestCase):
                     
       self.assertEqual(token.isSuccess(), True)
       result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-      self.assertEqual(result, '1', True)
+      self.assertEqual(result, '1')
       result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-      self.assertEqual(result, '2', True)
+      self.assertEqual(result, '2')
       result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-      self.assertEqual(result, '3', True)
+      self.assertEqual(result, '3')
 
     def test_unary_action_with_user_argument(self):
 
@@ -115,11 +115,11 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '111', True)
+        self.assertEqual(result, '111')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '222', True)
+        self.assertEqual(result, '222')
         result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '333', True)
+        self.assertEqual(result, '333')
 
     def test_binary_action(self):
         action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"), generateCallable=test_binary_copy_script,
@@ -128,9 +128,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '12', True)
+        self.assertEqual(result, '12')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '13', True)
+        self.assertEqual(result, '13')
 
 
     def test_binary_action_with_linker(self):
@@ -141,7 +141,7 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '12', True)
+        self.assertEqual(result, '12')
         self.assertEqual(len(token.generatedArtefacts), 1)
 
     def test_binary_action_with_user_argument(self):
@@ -152,9 +152,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '111222', True)
+        self.assertEqual(result, '111222')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '111333', True)
+        self.assertEqual(result, '111333')
 
     def test_nary_action(self):
         action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
@@ -165,13 +165,13 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1', True)
+        self.assertEqual(result, '1*2+1')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2', True)
+        self.assertEqual(result, '1*2+2')
         result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1*3+1', True)
+        self.assertEqual(result, '1*3+1')
         result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1*3+2', True)
+        self.assertEqual(result, '1*3+2')
         self.assertEqual(len(token.generatedArtefacts), 4)
 
     def test_nary_action_with_linker(self):
@@ -183,9 +183,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1', True)
+        self.assertEqual(result, '1*2+1')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2', True)
+        self.assertEqual(result, '1*2+2')
         self.assertEqual(len(token.generatedArtefacts), 2)
 
     def test_unary_stack_action(self):
@@ -195,7 +195,7 @@ class TestPythonAction(unittest.TestCase):
 
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
         self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(result, '123', True)
+        self.assertEqual(result, '123')
 
 
     def test_unary_stack_action_with_user_argument(self):
@@ -205,7 +205,7 @@ class TestPythonAction(unittest.TestCase):
 
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
         self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(result, '111222333', True)
+        self.assertEqual(result, '111222333')
 
 
     def test_unary_stack_split_action(self):
@@ -215,9 +215,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1', True)
+        self.assertEqual(result, '1')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '23', True)
+        self.assertEqual(result, '23')
 
     def test_nary_v2_action(self):
         action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
@@ -228,13 +228,13 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1', True)
+        self.assertEqual(result, '1*2+1')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2', True)
+        self.assertEqual(result, '1*2+2')
         result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1*3+1', True)
+        self.assertEqual(result, '1*3+1')
         result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1*3+2', True)
+        self.assertEqual(result, '1*3+2')
         self.assertEqual(len(token.generatedArtefacts), 4)
 
     def test_nary_v2_action_with_user_argument(self):
@@ -247,13 +247,13 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+1111', True)
+        self.assertEqual(result, '1111*2222+1111')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+2222', True)
+        self.assertEqual(result, '1111*2222+2222')
         result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1111*3333+1111', True)
+        self.assertEqual(result, '1111*3333+1111')
         result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1111*3333+2222', True)
+        self.assertEqual(result, '1111*3333+2222')
         self.assertEqual(len(token.generatedArtefacts), 4)
 
     def test_nary_v2_action_with_user_argument_and_linker(self):
@@ -267,9 +267,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+1111', True)
+        self.assertEqual(result, '1111*2222+1111')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+2222', True)
+        self.assertEqual(result, '1111*2222+2222')
         self.assertEqual(len(token.generatedArtefacts), 2)
 
     def test_nary_action_with_linker(self):
@@ -281,9 +281,9 @@ class TestPythonAction(unittest.TestCase):
 
         self.assertEqual(token.isSuccess(), True)
         result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1', True)
+        self.assertEqual(result, '1*2+1')
         result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2', True)
+        self.assertEqual(result, '1*2+2')
         self.assertEqual(len(token.generatedArtefacts), 2)
 
 if __name__ == "__main__":

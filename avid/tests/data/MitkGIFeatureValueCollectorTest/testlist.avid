@@ -1,0 +1,74 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">A</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c1_t0_oA.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">B</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c1_t0_oB.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">C</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c1_t0_oC.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">A</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c1_t1_oA.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">A</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c2_t0_oA.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">B</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c2_t0_oB.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">C</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c2_t0_oC.xml</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">GIF</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="objective">B</avid:property>
+		<avid:property key="format">xml</avid:property>
+		<avid:property key="url">./c2_t1_oB.xml</avid:property>
+	</avid:artefact>
+</avid:artefacts>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mp:measurement xmlns:mp="https://www.mitk.org/Phenotyping">
+    <mp:measurementMethod>
+        <mp:name>CLGlobalImageFeatures</mp:name>
+        <mp:organisation>German Cancer Research Center (DKFZ)</mp:organisation>
+        <mp:version>Version: 1.23(mitk: 2022.10.99-51ababc0)</mp:version>
+    </mp:measurementMethod>
+    <mp:pipelineUID>testdummy</mp:pipelineUID>
+    <mp:parameters>
+    </mp:parameters>
+    <mp:features>
+        <mp:feature name="Mean" version="1" class="First Order Numeric" setting="fon">1.102</mp:feature>
+        <mp:feature name="Variance" version="1" class="First Order Numeric" setting="fon">2.102</mp:feature>
+        <mp:feature name="Skewness" version="1" class="First Order Numeric" setting="fon">3.102</mp:feature>
+        <mp:feature name="Minimum" version="1" class="First Order Numeric" setting="fon">4102</mp:feature>
+    </mp:features>
+    <mp:featureSettings>
+        <mp:featureSetting name="fon">
+            <mp:parameter name="bins">256</mp:parameter>
+        </mp:featureSetting>
+    </mp:featureSettings>
+</mp:measurement>
