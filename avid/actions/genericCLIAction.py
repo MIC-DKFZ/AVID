@@ -121,7 +121,12 @@ class GenericCLIAction(CLIActionBase):
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added automatically) of the output.
         If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
-        without a flag.
+        as the last parameters without a flag. If you don't want to use a flag, but control the position of the output
+        parameter. Define a output flag (or keep the default 'o') and use the argPositions to control the position
+        of all arguments.
+        :param argPositions: list that contains the keys of all arguments (from artefact_args and additional_args) that are
+        not flag based but positional arguments. Those arguments will be added in the order of the list before the
+        positional arguments.
         :param indicateCallable: A callable that, if defined, will be called to query the outputs. The action assumes
         that the callable returns a list of output artefacts or None (if no indication can be made; like
         self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
@@ -135,7 +140,7 @@ class GenericCLIAction(CLIActionBase):
         passed to the action)
         :param collectOutputsCallable: A callable that, if defined, will be called to collect/generate artefact
         instances for all generated outputs after the CLI execution is post processed. For more details, See the
-        documentation of SingleActionBase._collectOutputs. If this callable is not said, nothing will be collected and
+        documentation of SingleActionBase._collectOutputs. If this callable is not set, nothing will be collected and
         the indicated outputs are assumed to be still correct. The signature of the callable is:
         collectOutputsCallable(actionInstance = instance of the calling action,
          indicatedOutputs = outputs indicated so far, **allArgs = all arguments passed to the action )

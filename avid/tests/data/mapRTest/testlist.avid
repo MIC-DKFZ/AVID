@@ -33,7 +33,7 @@
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
-		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="timePoint">1</avid:property>
 		<avid:property key="actionTag">Registration</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">MatchPoint</avid:property>
@@ -41,7 +41,7 @@
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
-		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="timePoint">2</avid:property>
 		<avid:property key="actionTag">Registration</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">MatchPoint</avid:property>
@@ -49,7 +49,7 @@
 	</avid:artefact>
 	<avid:artefact>
 		<avid:property key="case">case1</avid:property>
-		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="timePoint">3</avid:property>
 		<avid:property key="actionTag">Registration</avid:property>
 		<avid:property key="type">result</avid:property>
 		<avid:property key="format">MatchPoint</avid:property>

@@ -11,18 +11,9 @@
 #
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
-import os
 import logging
-import subprocess
 
 import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
-import re
-
-from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import CaseLinker
-from avid.linkers import FractionLinker
-from avid.splitter import BaseSplitter, KeyValueSplitter
 
 from . import BatchActionBase
 from .genericCLIAction import GenericCLIAction

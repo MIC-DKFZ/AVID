@@ -17,7 +17,7 @@ import logging
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
-from avid.common import osChecker, AVIDUrlLocater
+from avid.common import osChecker
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
 from avid.linkers import CaseLinker, LinkerBase

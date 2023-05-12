@@ -17,6 +17,7 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.mapR import mapRBatchAction as mapR
 from avid.common.artefact.defaultProps import TIMEPOINT
+from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath
@@ -53,7 +54,7 @@ class TestMapR(unittest.TestCase):
 
     def test_simple_mapr_action_alwaysdo(self):
       
-      action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping")      
+      action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping_alwaysdo")
       token = action.do()
                     
       self.assertEqual(token.isSuccess(), True)
@@ -61,19 +62,30 @@ class TestMapR(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSuccess(), True)
 
+    def test_mapr_action_caselinking(self):
+
+        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
+                      regLinker= CaseLinker(), actionTag = "TestMapping_caselinking")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+
+        token = action.do()
+        self.assertEqual(token.isSkipped(), True)
+
     def test_mapr_action_inputIsReference(self):
 
         newsession = workflow.initSession(os.path.join(self.sessionDir, "testlist_2.avid"), expandPaths=True,
                                             bootstrapArtefacts=self.testArtefactFile2)
 
         action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      alwaysDo=True, actionTag="TestMapping")
+                      alwaysDo=True, actionTag="TestMapping_inputIsReference")
         token = action.do()
         self.assertEqual(token.isSuccess(), True)
         self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 1)
 
         action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      inputIsReference=False, alwaysDo=True, actionTag="TestMapping")
+                      inputIsReference=False, alwaysDo=True, actionTag="TestMapping_inputIsReference")
         token = action.do()
         self.assertEqual(token.isSuccess(), True)
         #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
