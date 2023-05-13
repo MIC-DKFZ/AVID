@@ -22,12 +22,13 @@ class KeyValueSelector(SelectorBase):
       key = "tag", value = "CCT"
       the selectors extracts all rows, which have a key tag, and the value is CCT.
   '''
-  def __init__(self, key, value, negate=False, allowStringCompare=False):
+  def __init__(self, key, value, negate=False, allowStringCompare=False, allowNoneEquality=False):
     ''' init '''
     super().__init__()
     self.__key = key
     self.__value = value
     self.__allowStringCompare = allowStringCompare
+    self.__allowNoneEquality = allowNoneEquality
     self.__negate = negate
     
   def getSelection(self, workflowData):
@@ -44,7 +45,10 @@ class KeyValueSelector(SelectorBase):
           if (not self.__negate and validValue) or (self.__negate and not validValue):
             outList.append(entry)
         else:
-          if (not self.__negate and entry[self.__key] == self.__value) or (self.__negate and not entry[self.__key] == self.__value) :
+          equalValue = entry[self.__key] == self.__value
+          if not equalValue and self.__allowNoneEquality and self.__value is None:
+            equalValue = entry[self.__key] is None
+          if (not self.__negate and equalValue) or (self.__negate and not equalValue) :
             outList.append(entry)
       else:
         if self.__value is None:
