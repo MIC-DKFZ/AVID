@@ -60,8 +60,7 @@ class CaseLinker(KeyValueLinker):
 
 class TimePointLinker(KeyValueLinker):
   '''
-      Links data on the basis of the artefactProps.TIMEPOINT entry 
-      usually the patient information is stored in case.
+      Links data on the basis of the artefactProps.TIMEPOINT entry.
   '''
   def __init__(self, allowOnlyFullLinkage = True, performInternalLinkage=False):
     KeyValueLinker.__init__(self, artefactProps.TIMEPOINT, allowOnlyFullLinkage=allowOnlyFullLinkage,

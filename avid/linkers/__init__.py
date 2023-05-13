@@ -203,3 +203,4 @@ from .keyValueLinker import CaseLinker
 from .keyValueLinker import TimePointLinker
 from .fractionLinker import FractionLinker
 from .caseInstanceLinker import CaseInstanceLinker
+from .proximityLinker import TimePointProximityLinker
