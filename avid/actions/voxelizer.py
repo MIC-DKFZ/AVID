@@ -15,6 +15,7 @@ import logging
 import re
 
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact as artefactHelper
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
 from . import BatchActionBase
@@ -64,11 +65,17 @@ class VoxelizerAction(GenericCLIAction):
             pattern = self._session.structureDefinitions[self._structName]
         else:
             # we stay with the name, but be sure that it is a valid regex. because it
-            # is expected by the doseTool
+            # is expected by the Voxelizer
             pattern = re.escape(pattern)
 
         return pattern
 
+    def _generateName(self):
+        name = 'voxelized_{}'.format(self._structName)
+        for inputKey in self._inputs:
+            if self._inputs[inputKey] is not None and self._inputs[inputKey][0] is not None:
+                name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
+        return name
 
 def _voxelizer_creation_delegate(structNames, **kwargs):
     actions = list()
@@ -84,7 +91,7 @@ class VoxelizerBatchAction(BatchActionBase):
 
     def __init__(self, structSetSelector, referenceSelector, structNames=None,
                  referenceLinker=None,
-                 actionTag="doseStat",
+                 actionTag="Voxelizer",
                  session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         """ Batch action for the voxelizer tool.
     @param structNames: List of the structures names that should be voxelized.

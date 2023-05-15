@@ -12,13 +12,10 @@
 # See LICENSE.txt or http://www.dkfz.de/en/sidt/index.html for details.
 
 from builtins import str
-import os
 import logging
 
 import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
 
-from avid.common import osChecker, AVIDUrlLocater
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 from . import BatchActionBase
@@ -86,7 +83,7 @@ class combineRBatchAction(BatchActionBase):
       BatchActionBase.__init__(self, actionTag=actionTag, actionClass=combineRAction,
                                primaryInputSelector=reg1sSelector,
                                primaryAlias="reg1", additionalInputSelectors = additionalInputSelectors,
-                               linker = linker, splitter=splitter, sorter=sorter,
-                               session=session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+                               linker = linker, splitter=splitter, sorter=sorter, session=session,
+                               relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT)+FormatSelector(FORMAT_VALUE_MATCHPOINT),
                                scheduler=scheduler, additionalActionProps=additionalActionProps,
                                **singleActionParameters)
