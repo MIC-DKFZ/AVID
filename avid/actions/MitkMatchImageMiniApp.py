@@ -14,27 +14,47 @@
 import logging
 
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact as artefactHelper
 from avid.linkers import CaseLinker
-from avid.linkers import FractionLinker
 
 from . import BatchActionBase
 from .genericCLIAction import GenericCLIAction
 from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
+from ..externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 logger = logging.getLogger(__name__)
 
 class MitkMatchImageMiniAppAction(GenericCLIAction):
     '''Class that wraps the single action for the tool MitkMatchImageMiniApp.'''
 
+    @staticmethod
+    def _indicate_outputs(actionInstance, **allActionArgs):
+        userDefinedProps = {artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT}
+
+        artefactRef = actionInstance._targetImage[0]
+        if actionInstance._targetIsArtefactReference is False:
+            if actionInstance._movingImage is None:
+                logger.error("Moving image is None and can't be used as Reference")
+                raise
+            else:
+                artefactRef = actionInstance._movingImage[0]
+
+        resultArtefact = actionInstance.generateArtefact(artefactRef,
+                                                         userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                                           artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT},
+                                                         urlHumanPrefix=actionInstance._generateName(),
+                                                         urlExtension='mapr')
+        return [resultArtefact]
+
     def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None,
                  targetIsArtefactReference = True, actionTag="MitkMatchImageMiniApp",
-                 paddingValue = None, stitchStrategy=None, interpolator=None, alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         self._targetImage = [self._ensureSingleArtefact(targetImage, "targetImage")]
         self._movingImage = [self._ensureSingleArtefact(movingImage, "movingImage")]
         self._algorithm = algorithm
+        self._targetIsArtefactReference = targetIsArtefactReference
 
         additionalArgs = {'a':self._algorithm}
         self._algorithmParameters = algorithmParameters
@@ -46,9 +66,16 @@ class MitkMatchImageMiniAppAction(GenericCLIAction):
 
         GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, actionID="MitkMatchImageMiniApp", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'moving', 'target'],
-                                  defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
+                                  defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session,
+                                  indicateCallable=self._indicate_outputs, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
+    def _generateName(self):
+        name = "reg_"+artefactHelper.getArtefactShortName(self._movingImage[0])
+
+        name += "_to_"+artefactHelper.getArtefactShortName(self._targetImage[0])
+
+        return name
 
 class MitkMatchImageMiniAppBatchAction(BatchActionBase):
     '''Batch action for MitkMatchImageMiniApp that produces a stitched 4D image.

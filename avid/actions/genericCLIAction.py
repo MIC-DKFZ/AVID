@@ -269,7 +269,7 @@ class GenericCLIAction(CLIActionBase):
             allargs = self._inputs.copy()
             allargs.update(self._additionalArgs)
             resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
-            if self._resultArtefacts is not None:
+            if resultArtefacts is not None:
                 # check if its really a list of artefacts
                 try:
                     for artifact in resultArtefacts:
