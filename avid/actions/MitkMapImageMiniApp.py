@@ -71,7 +71,7 @@ class MitkMapImageMiniAppAction(GenericCLIAction):
         if paddingValue:
             additionalArgs['p'] = str(paddingValue)
         if supersamplingFactor:
-            additionalArgs['s'] = str(supersamplingFactor)
+            additionalArgs['s'] = supersamplingFactor
 
         inputs = {'i':self._inputImage}
         if self._registration is not None:

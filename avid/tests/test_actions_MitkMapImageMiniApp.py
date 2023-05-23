@@ -92,6 +92,22 @@ class TestMitkMapImageMiniApp(unittest.TestCase):
         #the template
         self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 0)
 
+    def test_MitkMapImageMiniApp_action_supersampling(self):
+
+        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
+                     supersamplingFactor = 3, actionTag = "TestMapping_1ss")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+
+    def test_MitkMapImageMiniApp_action_supersampling3(self):
+
+        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
+                     supersamplingFactor = [3,2,1], actionTag = "TestMapping_3ss")
+        token = action.do()
+
+        self.assertEqual(token.isSuccess(), True)
+
 
 if __name__ == "__main__":
     unittest.main()
