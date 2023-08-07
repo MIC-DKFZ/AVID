@@ -30,7 +30,11 @@ class SelectorBase(object):
     '''Creates an AndSelector with self and other and returns it'''
     andSelector = AndSelector(self,other)
     return andSelector
-  
+
+  def __or__(self, other):
+    '''Creates an OrSelector with self and other and returns it'''
+    orSelector = OrSelector(self, other)
+    return orSelector
   
 class AndSelector(SelectorBase):
   '''
