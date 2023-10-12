@@ -116,7 +116,7 @@ class GenericCLIAction(CLIActionBase):
      configure it with avidconig (system wide) or at runtime for a specific session (setWorkflowActionTool()) to point
      to a certain executable. For more details see the documentation of __init_."""
 
-    def __init__(self, actionID, outputFlags=None, indicateCallable=None, additionalArgs=None, illegalArgs=None,
+    def __init__(self, actionID, outputFlags=None, indicateCallable=None, generateNameCallable=None, additionalArgs=None, illegalArgs=None,
                  argPositions=None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension='nrrd',
                  postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
                  inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
@@ -178,6 +178,7 @@ class GenericCLIAction(CLIActionBase):
                                propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         self._indicateCallable = indicateCallable
+        self._generateNameCallable = generateNameCallable
         self._postProcessCLIExecutionCallable = postProcessCLIExecutionCallable
         self._inputArgsURLExtractionDelegate = inputArgsURLExtractionDelegate
         self._collectOutputsCallable = collectOutputsCallable
@@ -262,10 +263,15 @@ class GenericCLIAction(CLIActionBase):
                         argName))
 
     def _generateName(self):
-        name = '{}_{}'.format(self._actionID, self._actionTag)
-        for inputKey in self._inputs:
-            if self._inputs[inputKey] is not None and self._inputs[inputKey][0] is not None:
-                name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
+        if self._generateNameCallable is not None:
+            allargs = self._inputs.copy()
+            allargs.update(self._additionalArgs)
+            name = self._generateNameCallable(actionInstance=self, **allargs)
+        else:
+            name = '{}_{}'.format(self._actionID, self._actionTag)
+            for inputKey in self._inputs:
+                if self._inputs[inputKey] is not None and self._inputs[inputKey][0] is not None:
+                    name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
         return name
 
     def _indicateOutputs(self):

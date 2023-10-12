@@ -52,9 +52,18 @@ class MitkMatchImageAction(GenericCLIAction):
                                                          urlExtension='mapr')
         return [resultArtefact]
 
+    @staticmethod
+    def _defaultNameCallable(actionInstance, **allActionArgs):
+        name = "reg_"+artefactHelper.getArtefactShortName(actionInstance._movingImage[0])
+
+        name += "_to_"+artefactHelper.getArtefactShortName(actionInstance._targetImage[0])
+
+        return name
+
     def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None,
                  targetIsArtefactReference = True, actionTag="MitkMatchImage",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
+                 generateNameCallable=None, cli_connector=None):
 
         self._targetImage = [self._ensureSingleArtefact(targetImage, "targetImage")]
         self._movingImage = [self._ensureSingleArtefact(movingImage, "movingImage")]
@@ -69,18 +78,16 @@ class MitkMatchImageAction(GenericCLIAction):
                 content += ' "' + key + '=' + value + '"'
             additionalArgs['parameters'] = str(content)
 
+        if generateNameCallable is None:
+            generateNameCallable = self._defaultNameCallable
+
         GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, actionID="MitkMatchImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'moving', 'target'],
                                   defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session,
-                                  indicateCallable=self._indicate_outputs, additionalActionProps=additionalActionProps,
+                                  indicateCallable=self._indicate_outputs, generateNameCallable=generateNameCallable,
+                                  additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
-    def _generateName(self):
-        name = "reg_"+artefactHelper.getArtefactShortName(self._movingImage[0])
-
-        name += "_to_"+artefactHelper.getArtefactShortName(self._targetImage[0])
-
-        return name
 
 class MitkMatchImageBatchAction(BatchActionBase):
     '''Batch action for MitkMatchImage that produces a stitched 4D image.
