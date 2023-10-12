@@ -105,6 +105,8 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
                 if additional_args[argKey] is not None:
                     content += ' {}'.format(_generateAdditionalArgValueString(additional_args[argKey]))
 
+    # escaping %-sign because of its usage in .bat scripts
+    content = content.replace('%', '%%')
     return content
 
 
