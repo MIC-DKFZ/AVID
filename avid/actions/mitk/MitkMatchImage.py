@@ -17,6 +17,7 @@
 # limitations under the License.
 
 import logging
+from json import dumps as jsonDumps
 
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
@@ -73,10 +74,7 @@ class MitkMatchImageAction(GenericCLIAction):
         additionalArgs = {'a':self._algorithm}
         self._algorithmParameters = algorithmParameters
         if not self._algorithmParameters is None:
-            content = ''
-            for key, value in self._algorithmParameters.items():
-                content += ' "' + key + '=' + value + '"'
-            additionalArgs['parameters'] = str(content)
+            additionalArgs['parameters'] = jsonDumps(self._algorithmParameters).replace('"', '\\"')
 
         if generateNameCallable is None:
             generateNameCallable = self._defaultNameCallable
