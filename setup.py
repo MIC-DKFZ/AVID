@@ -30,8 +30,8 @@ setup(
     long_description=readme,
     # if you want, put your own name here
     # (this would likely result in people sending you emails)
-    author='SIDT@DKFZ',
-    author_email='r.floca@dkfz.de',
+    author='MIC@DKFZ',
+    author_email='r.floca@dkfz-heidelberg.de',
     url='http://mitk.org',
     license=license,
     packages=find_packages(exclude=('tests', 'doc', 'tutorials', 'templates')),
