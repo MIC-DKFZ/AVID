@@ -46,6 +46,7 @@ def getAndUnpackMITK(mitkSourceConfigPath, toolsPath, update=False):
   url = mitkSourceConfig.get("windows", "url")
   filename = url.split("/")[-1]
   filepath = os.path.join(toolsPath, filename)
+  print("Downloading MITK installer.")
   #urlretrieve(url, filepath)
 
   with zipfile.ZipFile(filepath, "r") as zip_f:
@@ -105,12 +106,34 @@ def installTool(toolName, toolsPath, sourceConfigPath):
   sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
   sourceType = sourceConfig.get(toolName, 'preferred-source')
+  print("Install tool {}. Source = {}".format(toolName, sourceType))
 
-  if sourceType == "MITK-installer":
+  execPath = None
+
+  if sourceType == 'MITK-installer':
     mitkCmdAppsPath = os.path.join(toolsPath, MITK_CMDAPPS_FOLDER)
-  
-  toolPath = getToolConfigsPath(checkExistance=True, toolsPath=toolsPath)
-    
+    mitkCmdAppName = sourceConfig.get(toolName, 'appName')
+    execPath = os.path.join(mitkCmdAppsPath, 'bin', mitkCmdAppName)
+
+  if execPath is None:
+    print(
+      "Error. Executable for {} not provided. "
+      "Make sure your tool is correctly set up in the tools-sources.config."
+      .format(toolName)
+    )
+    return
+
+  toolConfigFilePath = getToolConfigPath(toolName, toolsPath=toolsPath, checkExistance=False)
+  if os.path.isfile(toolConfigFilePath):
+    print("Error. The config for this tool already exists. "
+          "To update an existing tool, use 'avidconfig tools update instead")
+
+  checkAndCreateDir(os.path.split(toolConfigFilePath)[0])
+  with open(toolConfigFilePath, 'w') as configFile:
+    config = configparser.ConfigParser()
+    config.set('', 'exe', execPath)
+    config.write(configFile)
+
 
 def main():
   mainDesc = "A simple tool to configure the avid pipeline and it tool stack."

@@ -92,6 +92,7 @@ def getToolsPath(checkExistance=True):
     return None
 
 
+# TODO remove?
 def getToolConfigsPath(checkExistance=True, toolsPath=None):
   if toolsPath is None:
     toolsPath = getToolsPath(checkExistance=False)
@@ -119,16 +120,16 @@ def getToolConfigPath(actionID, workflowRootPath=None, checkExistance=True, tool
   '''
 
   if workflowRootPath is not None:
-    testPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")
-    if os.path.isfile(testPath):
-      return testPath
+    configPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")
+    if os.path.isfile(configPath):
+      return configPath
 
   if toolsPath is None:
     toolsPath = getToolsPath()
-  toolConfigsPath = getToolConfigsPath()
-  testPath = os.path.join(toolConfigsPath, actionID, "avidtool.config")
-  if os.path.isfile(testPath) or not checkExistance:
-    return testPath
+  toolConfigsPath = getToolConfigsPath(checkExistance=False)
+  configPath = os.path.join(toolConfigsPath, actionID, "avidtool.config")
+  if os.path.isfile(configPath) or not checkExistance:
+    return configPath
   
   return None
 
