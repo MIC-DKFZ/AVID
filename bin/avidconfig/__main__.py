@@ -24,6 +24,7 @@ from avid.common.AVIDUrlLocater import getAVIDConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigPath
 from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
 from avid.common.AVIDUrlLocater import getMITKSourceConfigPath
+from avid.common.AVIDUrlLocater import getToolConfigsPath
 
 from avid.common.osChecker import checkAndCreateDir
 
@@ -33,6 +34,8 @@ import subprocess
 import zipfile
 from urllib.request import urlretrieve
 import shutil
+
+MITK_CMDAPPS_FOLDER = "MITK-CmdApps"
 
 
 def getAndUnpackMITK(mitkSourceConfigPath, toolsPath, update=False):
@@ -48,7 +51,7 @@ def getAndUnpackMITK(mitkSourceConfigPath, toolsPath, update=False):
   with zipfile.ZipFile(filepath, "r") as zip_f:
     zip_f.extractall(toolsPath)
 
-  miniAppDir = os.path.join(toolsPath, "MITK-MiniApps")
+  miniAppDir = os.path.join(toolsPath, MITK_CMDAPPS_FOLDER)
   if os.path.isdir(miniAppDir):
     if update:
       shutil.rmtree(miniAppDir)
@@ -79,7 +82,6 @@ def updateTool(toolName, toolsPath, sourceConfigPath):
   sourceType = sourceConfig.get(toolName, 'preferred-source')
 
   toolPath = os.path.join(toolsPath, toolName)
-  checkAndCreateDir(toolsPath)
 
   if sourceType == 'svn':
     if os.path.isdir(toolPath):
@@ -96,25 +98,18 @@ def updateTool(toolName, toolsPath, sourceConfigPath):
     print("Error. Subcommand 'update' is only possible for source type 'svn'. Skipped tool %s." % (toolName))
 
 
-
 def installTool(toolName, toolsPath, sourceConfigPath):
-  '''
+  """
   installs a tool in the given toolspath
-  '''
+  """
   sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
-  
-  svnURL = sourceConfig.get(toolName, 'svn')
   sourceType = sourceConfig.get(toolName, 'preferred-source')
+
+  if sourceType == "MITK-installer":
+    mitkCmdAppsPath = os.path.join(toolsPath, MITK_CMDAPPS_FOLDER)
   
-  toolPath = os.path.join(toolsPath, toolName)
-  checkAndCreateDir(toolsPath)
-  
-  if sourceType == 'svn':
-    print("Install tool %s. Source = svn:%s" % (toolName, svnURL))
-    p = subprocess.Popen("svn export "+svnURL+" "+toolPath)
-    (output, error) = p.communicate()
-    print("\n\n")
+  toolPath = getToolConfigsPath(checkExistance=True, toolsPath=toolsPath)
     
 
 def main():
@@ -140,21 +135,20 @@ def main():
         toolsPath = getToolsPath(False)
         if args_dict['toolspath']:
           toolsPath = args_dict['toolspath']
+        checkAndCreateDir(toolsPath)
 
         mitkSourceConfigPath = getMITKSourceConfigPath()
         getAndUnpackMITK(mitkSourceConfigPath, toolsPath, not doInstall)
-        raise Exception
-        sourceConfigPath = getDefaultToolsSourceConfigPath()
+        toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
 
-        # TODO we don't need this
         if len(tools) == 0:
-          tools = getAllKnownTools(sourceConfigPath)
+          tools = getAllKnownTools(toolsSourceConfigPath)
           print("No tool specified to be installed. Install all tools with defined sources: " + str(tools))
         for tool in tools:
           if doInstall:
-            installTool(tool, toolsPath, sourceConfigPath)
+            installTool(tool, toolsPath, toolsSourceConfigPath)
           else:
-            updateTool(tool, toolsPath, sourceConfigPath)
+            updateTool(tool, toolsPath, toolsSourceConfigPath)
       elif args_dict['subcommands'][0] == "add":
         if len(args_dict['subcommands']) < 3:
           print(
