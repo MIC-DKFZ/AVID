@@ -37,8 +37,8 @@ class TestRegVarTool(unittest.TestCase):
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
       self.numberOfVariations = 3
-      self.algorithmDLLEuler = os.path.join(AVIDUrlLocater.getUtilityPath(), "RegVarTool", "mdra-0-12_RegVariationRandomGaussianEuler.dll")
-      self.algorithmDLLTPS = os.path.join(AVIDUrlLocater.getUtilityPath(), "RegVarTool", "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll")
+      self.algorithmDLLEuler = os.path.join(AVIDUrlLocater.getToolsPath(), "RegVarTool", "mdra-0-12_RegVariationRandomGaussianEuler.dll")
+      self.algorithmDLLTPS = os.path.join(AVIDUrlLocater.getToolsPath(), "RegVarTool", "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll")
       self.parameters = {"MeanGlobal" : "0.0", "StandardDeviationGlobal" : "1.0", "Seed" : "0"}
 
               

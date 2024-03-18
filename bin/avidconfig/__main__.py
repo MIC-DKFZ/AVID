@@ -19,16 +19,43 @@
 
 from builtins import str
 import argparse
-from avid.common.AVIDUrlLocater import getUtilityPath
+from avid.common.AVIDUrlLocater import getToolsPath
 from avid.common.AVIDUrlLocater import getAVIDConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigPath
 from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
+from avid.common.AVIDUrlLocater import getMITKSourceConfigPath
 
 from avid.common.osChecker import checkAndCreateDir
 
 import os
 import configparser
 import subprocess
+import zipfile
+from urllib.request import urlretrieve
+import shutil
+
+
+def getAndUnpackMITK(mitkSourceConfigPath, toolsPath, update=False):
+  mitkSourceConfig = configparser.ConfigParser()
+  mitkSourceConfig.read(mitkSourceConfigPath)
+
+  # FOR NOW: ONLY WINDOWS
+  url = mitkSourceConfig.get("windows", "url")
+  filename = url.split("/")[-1]
+  filepath = os.path.join(toolsPath, filename)
+  #urlretrieve(url, filepath)
+
+  with zipfile.ZipFile(filepath, "r") as zip_f:
+    zip_f.extractall(toolsPath)
+
+  miniAppDir = os.path.join(toolsPath, "MITK-MiniApps")
+  if os.path.isdir(miniAppDir):
+    if update:
+      shutil.rmtree(miniAppDir)
+    else:
+      raise Exception("Error. MITK-MiniApps already present in tools directory. If you want to replace the existing MiniApps, use 'avidconfig tools update' instead.")
+
+  os.rename(filepath[:-4], miniAppDir)
 
 def getAllKnownTools(sourceConfigPath):
   '''
@@ -96,7 +123,7 @@ def main():
 
   parser.add_argument('command', help = "Specifies the type of configuration that should be done. tools", choices = ['tools', 'settings', 'tool-settings'])
   parser.add_argument('subcommands', nargs= '*', help = "Optional sub commands.")
-  parser.add_argument('--toolspath', help = 'Specifies the tools path root that should be used by avid. In mode "tools" this path will directly by used. In mode "settings" the file avid.config will be altered.')
+  parser.add_argument('--toolspath', help = 'Specifies the tools path root that should be used by avid. In mode "tools" this path will directly be used. In mode "settings" the file avid.config will be altered.')
   parser.add_argument('--force', action='store_true', help = 'Used in conjunction with the sub command "tool-settings". Forces the tools config file to be generated if it is not existing.')
 
   args_dict = vars(parser.parse_args())
@@ -110,15 +137,19 @@ def main():
       if args_dict['subcommands'][0] == "install" or args_dict['subcommands'][0] == "update":
         doInstall = args_dict['subcommands'][0] == "install"
         tools = args_dict['subcommands'][1:]
-        toolsPath = getUtilityPath(False)
-        if not args_dict['toolspath'] is None:
+        toolsPath = getToolsPath(False)
+        if args_dict['toolspath']:
           toolsPath = args_dict['toolspath']
 
+        mitkSourceConfigPath = getMITKSourceConfigPath()
+        getAndUnpackMITK(mitkSourceConfigPath, toolsPath, not doInstall)
+        raise Exception
         sourceConfigPath = getDefaultToolsSourceConfigPath()
 
+        # TODO we don't need this
         if len(tools) == 0:
           tools = getAllKnownTools(sourceConfigPath)
-          print("No tool specified to be installed. Install all tools with defined sources: "+ str(tools))
+          print("No tool specified to be installed. Install all tools with defined sources: " + str(tools))
         for tool in tools:
           if doInstall:
             installTool(tool, toolsPath, sourceConfigPath)
@@ -129,24 +160,24 @@ def main():
           print(
           "Error. Command 'tools add' needs two aditional positional arguments (tool/action id, path to the executable).")
           return
-        else:
-          actionID = args_dict['subcommands'][1]
-          execPath = args_dict['subcommands'][2]
 
-          configFilePath = getToolConfigPath(actionID)
+        actionID = args_dict['subcommands'][1]
+        execPath = args_dict['subcommands'][2]
 
-          if configFilePath is not None:
-            print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
-            return
-          else:
-            configFilePath = getToolConfigPath(actionID, checkExistance=False)
-            checkAndCreateDir(os.path.split(configFilePath)[0])
-            with open(configFilePath, 'w') as configFile:
-              config = configparser.ConfigParser()
-              config.set('', 'exe', execPath)
-              config.write(configFile)
+        configFilePath = getToolConfigPath(actionID)
 
-              print("Added tool {} with executable {}.".format(actionID, execPath))
+        if configFilePath is not None:
+          print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
+          return
+
+        configFilePath = getToolConfigPath(actionID, checkExistance=False)
+        checkAndCreateDir(os.path.split(configFilePath)[0])
+        with open(configFilePath, 'w') as configFile:
+          config = configparser.ConfigParser()
+          config.set('', 'exe', execPath)
+          config.write(configFile)
+
+          print("Added tool {} with executable {}.".format(actionID, execPath))
 
 
       else:

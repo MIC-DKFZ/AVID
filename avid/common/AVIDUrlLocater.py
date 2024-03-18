@@ -54,7 +54,15 @@ def getAVIDConfigPath():
   Gets the path to the AVID config file.
   '''
   return os.path.join(getAVIDProjectRootPath(), "avid.config")
-   
+
+
+def getMITKSourceConfigPath():
+  """
+  Gets the path to the MITK sources config file.
+  """
+  return os.path.join(getAVIDProjectRootPath(), "mitk-sources.config")
+
+
 def getDefaultToolsSourceConfigPath():
   '''
   Gets the path to the AVID config file.
@@ -62,7 +70,7 @@ def getDefaultToolsSourceConfigPath():
   return os.path.join(getAVIDProjectRootPath(), "tools-sources.config")
    
       
-def getUtilityPath(checkExistance = True): 
+def getToolsPath(checkExistance = True):
   '''
      identify the Utility root dir (here are the specific action subdirs located)
   '''
@@ -105,7 +113,7 @@ def getToolConfigPath(actionID, workflowRootPath = None, checkExistance = True):
 
   if configPath is None:
     try:
-      testPath = os.path.join(getUtilityPath(), actionID, "avidtool.config")
+      testPath = os.path.join(getToolsPath(), actionID, "avidtool.config")
       if os.path.isfile(testPath) or not checkExistance:
         configPath = testPath
     except:
@@ -192,4 +200,4 @@ def getDefaultPath():
      returns a default path for actions
      This method is called if the action executable can't be found elsewhere see getExecutablePath()
   '''
-  return getUtilityPath()
+  return getToolsPath()
