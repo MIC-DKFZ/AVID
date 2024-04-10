@@ -30,36 +30,40 @@ from avid.common.osChecker import checkAndCreateDir
 
 import os
 import configparser
-import subprocess
 import zipfile
 from urllib.request import urlretrieve
 import shutil
 
-MITK_CMDAPPS_FOLDER = "MITK-CmdApps"
 
-
-def getAndUnpackMITK(mitkSourceConfigPath, toolsPath, update=False):
+def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
   mitkSourceConfig = configparser.ConfigParser()
   mitkSourceConfig.read(mitkSourceConfigPath)
 
   # FOR NOW: ONLY WINDOWS
   url = mitkSourceConfig.get("windows", "url")
   filename = url.split("/")[-1]
-  filepath = os.path.join(toolsPath, filename)
+  filepath = os.path.join(packagesPath, filename)
   print("Downloading MITK installer.")
-  #urlretrieve(url, filepath)
+  urlretrieve(url, filepath)
 
   with zipfile.ZipFile(filepath, "r") as zip_f:
-    zip_f.extractall(toolsPath)
+    zip_f.extractall(packagesPath)
 
-  miniAppDir = os.path.join(toolsPath, MITK_CMDAPPS_FOLDER)
-  if os.path.isdir(miniAppDir):
+  mitkDir = os.path.join(packagesPath, "MITK")
+  if os.path.isdir(mitkDir):
     if update:
-      shutil.rmtree(miniAppDir)
+      shutil.rmtree(mitkDir)
     else:
-      raise Exception("Error. MITK-MiniApps already present in tools directory. If you want to replace the existing MiniApps, use 'avidconfig tools update' instead.")
+      raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
+                      "CmdApps, use 'avidconfig tools update' instead.")
 
-  os.rename(filepath[:-4], miniAppDir)
+  os.rename(filepath[:-4], mitkDir)
+  os.remove(filepath)   # delete .zip file
+
+
+def getAllKnownPackages():
+  return ["MITK"]
+
 
 def getAllKnownTools(sourceConfigPath):
   '''
@@ -71,32 +75,20 @@ def getAllKnownTools(sourceConfigPath):
   return sourceConfig.sections()
 
 
-def updateTool(toolName, toolsPath, sourceConfigPath):
-  '''
-  Updates the tool. Supported only for svn. Function does an svn update
-  for the tool or and svn checkout if the tool is not available yet.
-  '''
+def installPackage(packageName, toolsPath, sourceConfigPath):
+  checkAndCreateDir(os.path.join(toolsPath, "packages"))
+  packagesPath = os.path.join(toolsPath, "packages")
+
+  if packageName == "MITK":
+    mitkSourceConfigPath = getMITKSourceConfigPath()
+    getAndUnpackMITK(mitkSourceConfigPath, packagesPath, False)
+
   sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
-
-  svnURL = sourceConfig.get(toolName, 'svn')
-  sourceType = sourceConfig.get(toolName, 'preferred-source')
-
-  toolPath = os.path.join(toolsPath, toolName)
-
-  if sourceType == 'svn':
-    if os.path.isdir(toolPath):
-      print("Update tool %s" % (toolName))
-      p = subprocess.Popen("svn update "+toolPath)
-      (output, error) = p.communicate()
-      print("\n\n")
-    else:
-      print("Update tool %s. Commencing initial checkout. Source = svn:%s" % (toolName, svnURL))
-      p = subprocess.Popen("svn checkout "+svnURL+" "+toolPath)
-      (output, error) = p.communicate()
-      print("\n\n")
-  else:
-    print("Error. Subcommand 'update' is only possible for source type 'svn'. Skipped tool %s." % (toolName))
+  for toolName in sourceConfig.sections():
+    source = sourceConfig.get(toolName, "preferred-source")
+    if source == packageName:
+      installTool(toolName, toolsPath, sourceConfigPath)
 
 
 def installTool(toolName, toolsPath, sourceConfigPath):
@@ -105,15 +97,15 @@ def installTool(toolName, toolsPath, sourceConfigPath):
   """
   sourceConfig = configparser.ConfigParser()
   sourceConfig.read(sourceConfigPath)
-  sourceType = sourceConfig.get(toolName, 'preferred-source')
-  print("Install tool {}. Source = {}".format(toolName, sourceType))
+  source = sourceConfig.get(toolName, 'preferred-source')
+  print("Install tool {}. Source = {}".format(toolName, source))
 
   execPath = None
 
-  if sourceType == 'MITK-installer':
-    mitkCmdAppsPath = os.path.join(toolsPath, MITK_CMDAPPS_FOLDER)
+  if source == 'MITK':
+    mitkCmdAppsPath = os.path.join(toolsPath, "packages", "MITK")
     mitkCmdAppName = sourceConfig.get(toolName, 'appName')
-    execPath = os.path.join(mitkCmdAppsPath, 'bin', mitkCmdAppName)
+    execPath = os.path.join(mitkCmdAppsPath, "bin", mitkCmdAppName+".exe")
 
   if execPath is None:
     print(
@@ -151,58 +143,48 @@ def main():
     if len(args_dict['subcommands']) == 0:
       print("Error. Command 'tools' has to specify a subcommand ('update', 'install', 'add').")
       return
+    if args_dict['subcommands'][0] == "install":
+      packages = args_dict['subcommands'][1:]
+      toolsPath = getToolsPath(False)
+      if args_dict['toolspath']:
+        toolsPath = args_dict['toolspath']
+      checkAndCreateDir(toolsPath)
+      toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
+
+      if len(packages) == 0:
+        packages = getAllKnownPackages()
+        print("No tool package specified to be installed. Install all tool packages with defined sources: " + str(packages))
+      for package in packages:
+        installPackage(package, toolsPath, toolsSourceConfigPath)
+    elif args_dict['subcommands'][0] == "add":
+      if len(args_dict['subcommands']) < 3:
+        print(
+        "Error. Command 'tools add' needs two aditional positional arguments (tool/action id, path to the executable).")
+        return
+
+      actionID = args_dict['subcommands'][1]
+      execPath = args_dict['subcommands'][2]
+
+      configFilePath = getToolConfigPath(actionID)
+
+      if configFilePath is not None:
+        print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
+        return
+
+      configFilePath = getToolConfigPath(actionID, checkExistance=False)
+      checkAndCreateDir(os.path.split(configFilePath)[0])
+      with open(configFilePath, 'w') as configFile:
+        config = configparser.ConfigParser()
+        config.set('', 'exe', execPath)
+        config.write(configFile)
+
+        print("Added tool {} with executable {}.".format(actionID, execPath))
+
     else:
-      if args_dict['subcommands'][0] == "install" or args_dict['subcommands'][0] == "update":
-        doInstall = args_dict['subcommands'][0] == "install"
-        tools = args_dict['subcommands'][1:]
-        toolsPath = getToolsPath(False)
-        if args_dict['toolspath']:
-          toolsPath = args_dict['toolspath']
-        checkAndCreateDir(toolsPath)
-
-        mitkSourceConfigPath = getMITKSourceConfigPath()
-        getAndUnpackMITK(mitkSourceConfigPath, toolsPath, not doInstall)
-        toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
-
-        if len(tools) == 0:
-          tools = getAllKnownTools(toolsSourceConfigPath)
-          print("No tool specified to be installed. Install all tools with defined sources: " + str(tools))
-        for tool in tools:
-          if doInstall:
-            installTool(tool, toolsPath, toolsSourceConfigPath)
-          else:
-            updateTool(tool, toolsPath, toolsSourceConfigPath)
-      elif args_dict['subcommands'][0] == "add":
-        if len(args_dict['subcommands']) < 3:
-          print(
-          "Error. Command 'tools add' needs two aditional positional arguments (tool/action id, path to the executable).")
-          return
-
-        actionID = args_dict['subcommands'][1]
-        execPath = args_dict['subcommands'][2]
-
-        configFilePath = getToolConfigPath(actionID)
-
-        if configFilePath is not None:
-          print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
-          return
-
-        configFilePath = getToolConfigPath(actionID, checkExistance=False)
-        checkAndCreateDir(os.path.split(configFilePath)[0])
-        with open(configFilePath, 'w') as configFile:
-          config = configparser.ConfigParser()
-          config.set('', 'exe', execPath)
-          config.write(configFile)
-
-          print("Added tool {} with executable {}.".format(actionID, execPath))
-
-
-      else:
-        print("Error. Subcommand '%s' is not supported for command avidconfig tools." % args_dict['subcommands'][0])
-
+      print("Error. Subcommand '%s' is not supported for command avidconfig tools." % args_dict['subcommands'][0])
 
   elif args_dict['command'] == "tool-settings":
-    if len(args_dict['subcommands'])<3:
+    if len(args_dict['subcommands']) < 3:
       print("Error. Command 'settings' needs three additional positional arguments (tool id, settings name and value).")
       return
     else:
@@ -269,9 +251,7 @@ def main():
       print("Set [%s] %s = %s" % (section, name, value))
     
   print('Config command finished.')
- 
-   
-    
+
 
 if __name__ == "__main__":
   main()

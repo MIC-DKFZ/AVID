@@ -60,7 +60,7 @@ def getMITKSourceConfigPath():
   """
   Gets the path to the MITK sources config file.
   """
-  return os.path.join(getAVIDProjectRootPath(), "mitk-sources.config")
+  return os.path.join(getAVIDProjectRootPath(), "tool-packages", "MITK", "mitk-sources.config")
 
 
 def getDefaultToolsSourceConfigPath():
@@ -80,11 +80,11 @@ def getToolsPath(checkExistance=True):
   if os.path.isfile(configPath):
     config = configparser.ConfigParser()
     config.read(configPath)
-    toolspath = config.get('avid','toolspath') 
+    toolspath = config.get('avid', 'toolspath')
           
   if toolspath is None:
     rootPath = getAVIDProjectRootPath()
-    toolspath = os.path.join(rootPath,"Utilities")
+    toolspath = os.path.join(rootPath, "Utilities")
   
   if os.path.isdir(toolspath) or not checkExistance:
     return toolspath
