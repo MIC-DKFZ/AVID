@@ -75,23 +75,24 @@ def getAllKnownTools(sourceConfigPath):
   return sourceConfig.sections()
 
 
-def installPackage(packageName, toolsPath, sourceConfigPath):
-  checkAndCreateDir(os.path.join(toolsPath, "packages"))
-  packagesPath = os.path.join(toolsPath, "packages")
+def installPackage(packageName, toolsPath, sourceConfigPath, localMITKPath):
+    checkAndCreateDir(os.path.join(toolsPath, "packages"))
+    packagesPath = os.path.join(toolsPath, "packages")
 
-  if packageName == "MITK":
-    mitkSourceConfigPath = getMITKSourceConfigPath()
-    getAndUnpackMITK(mitkSourceConfigPath, packagesPath, False)
+    if packageName == "MITK":
+      if localMITKPath is None:
+        mitkSourceConfigPath = getMITKSourceConfigPath()
+        getAndUnpackMITK(mitkSourceConfigPath, packagesPath, False)
 
-  sourceConfig = configparser.ConfigParser()
-  sourceConfig.read(sourceConfigPath)
-  for toolName in sourceConfig.sections():
-    source = sourceConfig.get(toolName, "preferred-source")
-    if source == packageName:
-      installTool(toolName, toolsPath, sourceConfigPath)
+    sourceConfig = configparser.ConfigParser()
+    sourceConfig.read(sourceConfigPath)
+    for toolName in sourceConfig.sections():
+      source = sourceConfig.get(toolName, "preferred-source")
+      if source == packageName:
+        installTool(toolName, toolsPath, sourceConfigPath, localMITKPath)
 
 
-def installTool(toolName, toolsPath, sourceConfigPath):
+def installTool(toolName, toolsPath, sourceConfigPath, localMITKPath):
   """
   installs a tool in the given toolspath
   """
@@ -103,9 +104,12 @@ def installTool(toolName, toolsPath, sourceConfigPath):
   execPath = None
 
   if source == 'MITK':
-    mitkCmdAppsPath = os.path.join(toolsPath, "packages", "MITK")
     mitkCmdAppName = sourceConfig.get(toolName, 'appName')
-    execPath = os.path.join(mitkCmdAppsPath, "bin", mitkCmdAppName+".exe")
+    if localMITKPath is not None:
+      execPath = os.path.join(localMITKPath, mitkCmdAppName+".bat")
+    else:
+      mitkCmdAppsPath = os.path.join(toolsPath, "packages", "MITK")
+      execPath = os.path.join(mitkCmdAppsPath, "bin", mitkCmdAppName+".exe")
 
   if execPath is None:
     print(
@@ -135,6 +139,7 @@ def main():
   parser.add_argument('subcommands', nargs= '*', help = "Optional sub commands.")
   parser.add_argument('--toolspath', help = 'Specifies the tools path root that should be used by avid. In mode "tools" this path will directly be used. In mode "settings" the file avid.config will be altered.')
   parser.add_argument('--force', action='store_true', help = 'Used in conjunction with the sub command "tool-settings". Forces the tools config file to be generated if it is not existing.')
+  parser.add_argument ('--localMITKpath', help = 'Here you can provide a path to MITK in case you a already have a version installed locally.')
 
   args_dict = vars(parser.parse_args())
 
@@ -150,12 +155,12 @@ def main():
         toolsPath = args_dict['toolspath']
       checkAndCreateDir(toolsPath)
       toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
-
+      localMITKPath = args_dict.get('localMITKpath')
       if len(packages) == 0:
         packages = getAllKnownPackages()
         print("No tool package specified to be installed. Install all tool packages with defined sources: " + str(packages))
       for package in packages:
-        installPackage(package, toolsPath, toolsSourceConfigPath)
+        installPackage(package, toolsPath, toolsSourceConfigPath, localMITKPath)
     elif args_dict['subcommands'][0] == "add":
       if len(args_dict['subcommands']) < 3:
         print(
@@ -166,6 +171,8 @@ def main():
       execPath = args_dict['subcommands'][2]
 
       configFilePath = getToolConfigPath(actionID)
+
+
 
       if configFilePath is not None:
         print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
