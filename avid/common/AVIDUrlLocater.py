@@ -55,12 +55,30 @@ def getAVIDConfigPath():
   '''
   return os.path.join(getAVIDProjectRootPath(), "avid.config")
 
+def ensureExistance(func):
+  def inner(*args, **kwargs):
+    result = func(*args, **kwargs)
+    if os.path.isdir(result) or os.path.isfile(result):
+      return result
+    else:
+      raise Exception("Tried to get path {} that does not exist.".format(result))
 
-def getMITKSourceConfigPath():
-  """
-  Gets the path to the MITK sources config file.
-  """
-  return os.path.join(getAVIDProjectRootPath(), "tool-packages", "MITK", "mitk-sources.config")
+  return inner
+
+
+@ensureExistance
+def getPackagePath(package):
+  return os.path.join(getAVIDProjectRootPath(), "tool-packages", package)
+
+
+@ensureExistance
+def getPackageSourcePath(package):
+  return os.path.join(getPackagePath(package), "sources.config")
+
+
+@ensureExistance
+def getPackageToolsConfigPath(package):
+  return os.path.join(getPackagePath(package), "tools.config")
 
 
 def getDefaultToolsSourceConfigPath():

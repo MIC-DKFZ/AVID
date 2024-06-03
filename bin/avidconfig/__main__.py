@@ -25,6 +25,7 @@ from avid.common.AVIDUrlLocater import getToolConfigPath
 from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
 from avid.common.AVIDUrlLocater import getMITKSourceConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigsPath
+from avid.common.AVIDUrlLocater import getPackageSourcePath, getPackageToolsConfigPath
 
 from avid.common.osChecker import checkAndCreateDir
 
@@ -59,6 +60,7 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
 
   os.rename(filepath[:-4], mitkDir)
   os.remove(filepath)   # delete .zip file
+  return mitkDir
 
 
 def getAllKnownPackages():
@@ -75,47 +77,48 @@ def getAllKnownTools(sourceConfigPath):
   return sourceConfig.sections()
 
 
-def installPackage(packageName, toolsPath, sourceConfigPath, localMITKPath):
+def installPackage(packageName, toolsPath, localPackagePath):
     checkAndCreateDir(os.path.join(toolsPath, "packages"))
     packagesPath = os.path.join(toolsPath, "packages")
 
+    packagePath = localPackagePath
     if packageName == "MITK":
-      if localMITKPath is None:
-        mitkSourceConfigPath = getMITKSourceConfigPath()
-        getAndUnpackMITK(mitkSourceConfigPath, packagesPath, False)
+      if packagePath is None:
+        mitkSourceConfigPath = getPackageSourcePath("MITK")
+        packagePath = getAndUnpackMITK(mitkSourceConfigPath, packagesPath, False)
 
     sourceConfig = configparser.ConfigParser()
-    sourceConfig.read(sourceConfigPath)
+    sourceConfig.read(getPackageToolsConfigPath(packageName))
     for toolName in sourceConfig.sections():
-      source = sourceConfig.get(toolName, "preferred-source")
-      if source == packageName:
-        installTool(toolName, toolsPath, sourceConfigPath, localMITKPath)
+      installTool(toolName, toolsPath, packageName, packagePath)
 
 
-def installTool(toolName, toolsPath, sourceConfigPath, localMITKPath):
+def installTool(toolName, toolsPath, packageName, packagePath):
   """
   installs a tool in the given toolspath
   """
   sourceConfig = configparser.ConfigParser()
-  sourceConfig.read(sourceConfigPath)
-  source = sourceConfig.get(toolName, 'preferred-source')
-  print("Install tool {}. Source = {}".format(toolName, source))
+  sourceConfig.read(getPackageToolsConfigPath(packageName))
+  print("Install tool {}. Package = {}".format(toolName, packageName))
 
   execPath = None
 
-  if source == 'MITK':
-    mitkCmdAppName = sourceConfig.get(toolName, 'appName')
-    if localMITKPath is not None:
-      execPath = os.path.join(localMITKPath, mitkCmdAppName+".bat")
-    else:
-      mitkCmdAppsPath = os.path.join(toolsPath, "packages", "MITK")
-      execPath = os.path.join(mitkCmdAppsPath, "bin", mitkCmdAppName+".exe")
+  if packageName == 'MITK':
+    mitkCmdAppName = sourceConfig.get(toolName, 'executableName')
+    execPath = os.path.join(packagePath, mitkCmdAppName + ".bat")
 
   if execPath is None:
     print(
       "Error. Executable for {} not provided. "
       "Make sure your tool is correctly set up in the tools-sources.config."
       .format(toolName)
+    )
+    return
+
+  if not os.path.isfile(execPath):
+    print(
+      "Error. Executable {} not found. Please make sure you are using the correct path and a current version of "
+      "the package.".format(execPath)
     )
     return
 
@@ -139,7 +142,7 @@ def main():
   parser.add_argument('subcommands', nargs= '*', help = "Optional sub commands.")
   parser.add_argument('--toolspath', help = 'Specifies the tools path root that should be used by avid. In mode "tools" this path will directly be used. In mode "settings" the file avid.config will be altered.')
   parser.add_argument('--force', action='store_true', help = 'Used in conjunction with the sub command "tool-settings". Forces the tools config file to be generated if it is not existing.')
-  parser.add_argument ('--localMITKpath', help = 'Here you can provide a path to MITK in case you a already have a version installed locally.')
+  parser.add_argument ('--localPackagePath', help = 'Here you can provide a path to MITK in case you a already have a version installed locally.')
 
   args_dict = vars(parser.parse_args())
 
@@ -155,12 +158,15 @@ def main():
         toolsPath = args_dict['toolspath']
       checkAndCreateDir(toolsPath)
       toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
-      localMITKPath = args_dict.get('localMITKpath')
+      localPackagePath = args_dict.get('localPackagePath')
+      if len(packages) != 1 and localPackagePath:
+        print("Error. For command argument '--localPackagePath', a single package name must be specified.")
+        return
       if len(packages) == 0:
         packages = getAllKnownPackages()
         print("No tool package specified to be installed. Install all tool packages with defined sources: " + str(packages))
       for package in packages:
-        installPackage(package, toolsPath, toolsSourceConfigPath, localMITKPath)
+        installPackage(package, toolsPath, localPackagePath)
     elif args_dict['subcommands'][0] == "add":
       if len(args_dict['subcommands']) < 3:
         print(
