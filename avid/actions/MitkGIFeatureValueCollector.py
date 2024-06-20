@@ -227,7 +227,7 @@ def _generate_statistics(outputs, feature_files, selected_features, value_table,
 
 
 class MitkGIFeatureValueCollectorAction(PythonAction):
-    """Class that establishes a dose stats collection action on result generate by DoseTool.
+    """Class that establishes an action that collects the results of the MITKCLGlobalImageFeature app and gerates a csv out of them.
        The result will be stored as CSV"""
     def __init__(self, feature_files, selected_features = None, value_table = True, row_keys = None,
                  column_key = None, with_headers=True, fail_on_value_collision = True, collision_signature = 'ERROR', actionTag="MitkGIFeatureValueCollector",

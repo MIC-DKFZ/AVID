@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class PythonAction(SingleActionBase):
-    """Action that offers a generic wrapper arround any python callable. The basic idea is to have a simple possibility
+    """Action that offers a generic wrapper around any python callable. The basic idea is to have a simple possibility
      to define action that execute a python script. The python script that should be executed must be passed as callable.
      The action will call the callable with the following arguments:
      1. all unknown keyword arguments that are passed to the action (inputArgs).
@@ -44,7 +44,7 @@ class PythonAction(SingleActionBase):
      not "outputs". Additionally the action checks name collisions of inputArgs and additionalArgs and will raise an
      exception if needed.
      :param generateCallable: A callable that will be called to generate the outputs. The action assumes that all outputs
-     are generated an stored at their designated location.
+     are generated and stored at their designated location.
      :param indicateCallable: A callable that, if defined, will be called (like generateCallable) to query the outputs.
      The action assumes that the callable returns a list of output artefacts or None (if no indication can be made; like
      self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
@@ -132,7 +132,7 @@ class PythonAction(SingleActionBase):
             allargs.update(self._args)
             self._resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
             if self._resultArtefacts is not None:
-                # check if its realy a list of artefacts
+                # check if its really a list of artefacts
                 try:
                     for artifact in self._resultArtefacts:
                         if not isinstance(artifact, artefactHelper.Artefact):
