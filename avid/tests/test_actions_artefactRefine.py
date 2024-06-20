@@ -20,77 +20,48 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.pythonAction import PythonUnaryBatchAction as unaryPython
-from avid.actions.pythonAction import PythonBinaryBatchAction as binaryPython
-from avid.actions.pythonAction import PythonNaryBatchAction as naryPython
-from avid.actions.pythonAction import PythonNaryBatchActionV2 as naryPythonV2
-from avid.actions.pythonAction import PythonUnaryStackBatchAction as unaryStackPython
+from avid.actions.artefactRefine import ArtefactRefineBatchAction as artefactRefine
 from avid.linkers import TimePointLinker
 
 from avid.selectors.keyValueSelector import ActionTagSelector, ObjectiveSelector, TimepointSelector
 from avid.common.artefact import defaultProps as artefactProps
 
-def test_copy_script(inputs, outputs, times = 1):
-    '''Simple python test script.'''
-    with open(outputs[0], "w") as ofile:
-        for input in inputs:
-            with open(input, "r") as ifile:
-                line = ifile.read()
-                ofile.write(line*times)
+def is_similar(reference, other, ignore_keys=None):
+    rkeys = list(reference.keys())
+    okeys = list(other.keys())
 
-def test_binary_copy_script(inputs1, inputs2, outputs, times = 1):
-    '''Simple binary python test script.'''
-    with open(outputs[0], "w") as ofile:
-        for input in [inputs1[0],inputs2[0]]:
-            with open(input, "r") as ifile:
-                line = ifile.read()
-                ofile.write(line*times)
+    if ignore_keys is None:
+        ignore_keys = list()
 
-def test_ternary_copy_script(inputsMaster, inputsSecond, inputsThird, outputs, times = 1):
-    '''Simple ternary python test script.'''
-    with open(outputs[0], "w") as ofile:
-        with open(inputsMaster[0], "r") as ifile1:
-            with open(inputsSecond[0], "r") as ifile2:
-                with open(inputsThird[0], "r") as ifile3:
-                    line1 = ifile1.read()
-                    line2 = ifile2.read()
-                    line3 = ifile3.read()
-                    ofile.write(line1*times+'*'+line2*times+'+'+line3*times)
+    for key in rkeys:
+        if not (key in ignore_keys) and not (reference[key] == other[key]):
+            # Both have defined the property but values differ -> false
+            return False
+    for key in okeys:
+        if not (key in ignore_keys) and not (reference[key] == other[key]):
+            # Both have defined the property but values differ -> false
+            return False
 
-def test_nary_v2_copy_script(aInput, bInput, cInput, outputs, times = 1):
-    '''Simple ternary python test script.'''
-    with open(outputs[0], "w") as ofile:
-        with open(aInput[0], "r") as ifile1:
-            with open(bInput[0], "r") as ifile2:
-                with open(cInput[0], "r") as ifile3:
-                    line1 = ifile1.read()
-                    line2 = ifile2.read()
-                    line3 = ifile3.read()
-                    ofile.write(line1*times+'*'+line2*times+'+'+line3*times)
+    return True
 
+def custom_refinement_script(primaryInputs, outputs,**kwargs):
+    '''Simple refinement.'''
+    for output in outputs:
+        if output[artefactProps.TIMEPOINT] == 0:
+            output['baseline'] = '1';
+        else:
+            output['baseline'] = '0';
 
-caseInstanceCount = 0
-def indicate_nary_output_script(actionInstance, **allargs):
-    global caseInstanceCount #used to ensure unique instances as result when testing
-    caseInstanceCount += 1
-    result = actionInstance.generateArtefact(actionInstance._inputArtefacts[sorted(actionInstance._inputArtefacts.keys())[0]][0],
-                                             userDefinedProps={artefactProps.CASEINSTANCE: str(caseInstanceCount)},
-                                             urlHumanPrefix=actionInstance.instanceName,
-                                             urlExtension='txt')
-    return [result]
-
-def get_content(input):
-    with open(input, "r") as ifile:
-        line = ifile.read()
-        return line
-
-class TestPythonAction(unittest.TestCase):
+class TestArtefactRefineAction(unittest.TestCase):
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "pythonActionTest")
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "pythonActionTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_pythonAction")
       
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+      self.refArtefact1 = self.session.artefacts[0]
+      self.refArtefact2 = self.session.artefacts[1]
+      self.refArtefact3 = self.session.artefacts[2]
 
     def tearDown(self):
       try:
@@ -98,198 +69,53 @@ class TestPythonAction(unittest.TestCase):
       except:
         pass
 
-    def test_unary_action(self):
+    def test_simple_refine_action(self):
 
-      action = unaryPython(ActionTagSelector("stats"), generateCallable = test_copy_script,
-                           passOnlyURLs = True, actionTag = "TestUnary")
+      action = artefactRefine(ActionTagSelector("stats"), actionTag = "TestRefine")
       token = action.do()
-                    
+
+      changedProps = [artefactProps.ACTIONTAG, artefactProps.ACTION_CLASS, artefactProps.ACTION_INSTANCE_UID,
+                      artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
+                      artefactProps.EXECUTION_DURATION]
       self.assertEqual(token.isSuccess(), True)
-      result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-      self.assertEqual(result, '1')
-      result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-      self.assertEqual(result, '2')
-      result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-      self.assertEqual(result, '3')
-
-    def test_unary_action_with_user_argument(self):
-
-        action = unaryPython(ActionTagSelector("stats"), generateCallable=test_copy_script, additionalArgs={'times': 3},
-                             passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '222')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '333')
-
-    def test_binary_action(self):
-        action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"), generateCallable=test_binary_copy_script,
-                              indicateCallable=indicate_nary_output_script, passOnlyURLs=True, actionTag="TestBinary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '12')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '13')
+      result = token.generatedArtefacts[0]
+      self.assertTrue(is_similar(self.refArtefact1, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
+      result = token.generatedArtefacts[1]
+      self.assertTrue(is_similar(self.refArtefact2, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
+      result = token.generatedArtefacts[2]
+      self.assertTrue(is_similar(self.refArtefact3, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
 
 
-    def test_binary_action_with_linker(self):
-        action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"),
-                              inputLinker=TimePointLinker(), generateCallable=test_binary_copy_script,
-                              indicateCallable=indicate_nary_output_script, passOnlyURLs=True, actionTag="TestBinary")
-        token = action.do()
+    def test_custom_refine_action(self):
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '12')
-        self.assertEqual(len(token.generatedArtefacts), 1)
+      action = artefactRefine(ActionTagSelector("stats"), actionTag = "TestRefine", generateCallable = custom_refinement_script)
+      token = action.do()
 
-    def test_binary_action_with_user_argument(self):
-        action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"),
-                              generateCallable=test_binary_copy_script, indicateCallable=indicate_nary_output_script,
-                              passOnlyURLs=True, actionTag="TestBinary", additionalArgs={'times':3})
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '111222')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '111333')
-
-    def test_nary_action(self):
-        action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
-                            inputsThird = TimepointSelector(0),
-                            generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
-                            passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1*3+1')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1*3+2')
-        self.assertEqual(len(token.generatedArtefacts), 4)
-
-    def test_nary_action_with_linker(self):
-        action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
-                            inputsThird = TimepointSelector(0), inputsSecondLinker=TimePointLinker(),
-                            generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
-                            passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2')
-        self.assertEqual(len(token.generatedArtefacts), 2)
-
-    def test_unary_stack_action(self):
-        action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script,
-                             passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
-
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(result, '123')
-
-
-    def test_unary_stack_action_with_user_argument(self):
-        action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script,
-                                  additionalArgs={'times': 3}, passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
-
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(result, '111222333')
-
-
-    def test_unary_stack_split_action(self):
-        action = unaryStackPython(ActionTagSelector("stats"), splitProperties = [artefactProps.OBJECTIVE],
-                            generateCallable=test_copy_script, passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '23')
-
-    def test_nary_v2_action(self):
-        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
-                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
-                              generateCallable=test_nary_v2_copy_script, indicateCallable=indicate_nary_output_script,
-                              passOnlyURLs=True, actionTag="TestNaryV2")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1*3+1')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1*3+2')
-        self.assertEqual(len(token.generatedArtefacts), 4)
-
-    def test_nary_v2_action_with_user_argument(self):
-        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
-                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
-                              additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
-                              indicateCallable=indicate_nary_output_script,
-                              passOnlyURLs=True, actionTag="TestNaryV2_times")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+1111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+2222')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
-        self.assertEqual(result, '1111*3333+1111')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
-        self.assertEqual(result, '1111*3333+2222')
-        self.assertEqual(len(token.generatedArtefacts), 4)
-
-    def test_nary_v2_action_with_user_argument_and_linker(self):
-        action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
-                              additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
-                              linker={'bInput': TimePointLinker()},
-                              additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
-                              indicateCallable=indicate_nary_output_script,
-                              passOnlyURLs=True, actionTag="TestNaryV2_times_linker")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+1111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1111*2222+2222')
-        self.assertEqual(len(token.generatedArtefacts), 2)
-
-    def test_nary_action_with_linker(self):
-        action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
-                            inputsThird = TimepointSelector(0), inputsSecondLinker=TimePointLinker(),
-                            generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
-                            passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
-
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
-        self.assertEqual(result, '1*2+2')
-        self.assertEqual(len(token.generatedArtefacts), 2)
+      changedProps = [artefactProps.ACTIONTAG, artefactProps.ACTION_CLASS, artefactProps.ACTION_INSTANCE_UID,
+                      artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
+                      artefactProps.EXECUTION_DURATION, 'baseline']
+      self.assertEqual(token.isSuccess(), True)
+      result = token.generatedArtefacts[0]
+      self.assertTrue(is_similar(self.refArtefact1, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
+      self.assertEqual(result['baseline'], '1')
+      result = token.generatedArtefacts[1]
+      self.assertTrue(is_similar(self.refArtefact2, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
+      self.assertEqual(result['baseline'], '1')
+      result = token.generatedArtefacts[2]
+      self.assertTrue(is_similar(self.refArtefact3, result, changedProps))
+      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
+      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
+      self.assertEqual(result['baseline'], '0')
 
 if __name__ == "__main__":
     unittest.main()
