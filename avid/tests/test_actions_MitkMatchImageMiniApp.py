@@ -21,12 +21,12 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.MitkMatchImageMiniApp import MitkMatchImageMiniAppBatchAction as mitkMatch
+from avid.actions.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
 from avid.common.AVIDUrlLocater import getUtilityPath
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath
 
-@unittest.skipIf(getToolConfigPath('MitkMatchImageMiniApp') is None, 'Tool MitkMatchImageMiniApp not installed on the system.')
+@unittest.skipIf(getToolConfigPath('MitkMatchImage') is None, 'Tool MitkMatchImage not installed on the system.')
 class TestMatchR(unittest.TestCase):
 
 
@@ -35,7 +35,7 @@ class TestMatchR(unittest.TestCase):
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "matchRTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_matchR")
 
-      self.dllPath = os.path.join(getUtilityPath(), "MitkMatchImageMiniApp")
+      self.dllPath = os.path.join(getUtilityPath(), "MitkMatchImage")
       self.itkAlgorithm = "mdra-0-14_MITK_MultiModal_rigid_default.dll"
 
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)

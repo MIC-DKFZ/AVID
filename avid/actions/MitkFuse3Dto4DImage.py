@@ -38,10 +38,10 @@ from .simpleScheduler import SimpleScheduler
 logger = logging.getLogger(__name__)
 
 
-class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
-    '''Class that wrapps the single action for the tool MitkFuse3Dto4DImageMiniApp.'''
+class MitkFuse3Dto4DImageAction(CLIActionBase):
+    '''Class that wrapps the single action for the tool MitkFuse3Dto4DImage.'''
 
-    def __init__(self, images, timeProperty = None, timeGenerationCallable = None, actionTag="MitkFuse3Dto4DImageMiniApp", alwaysDo=False,
+    def __init__(self, images, timeProperty = None, timeGenerationCallable = None, actionTag="MitkFuse3Dto4DImage", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
@@ -54,13 +54,13 @@ class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
             for image in images:
                 self._images[int(artefactHelper.getArtefactProperty(image, timeProperty))] = image
         else:
-            raise RuntimeError('Cannot initiate MitkFuse3Dto4DImageMiniAppAction. Either "timeProperty" or'
+            raise RuntimeError('Cannot initiate MitkFuse3Dto4DImageAction. Either "timeProperty" or'
                                ' "timeGenerationCallable" must be defined, but both are None.')
 
         self._addInputArtefacts(images=images)
 
         if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkFuse3Dto4DImageMiniApp", actionConfig))
+            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkFuse3Dto4DImage", actionConfig))
 
 
     def _getFirstImageKey(self):
@@ -108,7 +108,7 @@ class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
         content = ""
 
         try:
-            execURL = self._cli_connector.get_executable_url(self._session, "MitkFuse3Dto4DImageMiniApp", self._actionConfig)
+            execURL = self._cli_connector.get_executable_url(self._session, "MitkFuse3Dto4DImage", self._actionConfig)
 
             content += '"{}" -i{} -o "{}" -t {}'.format(execURL, self._generateInputInformation(), resultPath, self._generateTimeInformation())
         except:
@@ -118,13 +118,13 @@ class MitkFuse3Dto4DImageMiniAppAction(CLIActionBase):
         return content
 
 
-class MitkFuse3Dto4DImageMiniAppBatchAction(BatchActionBase):
-    '''Batch action for MitkFuse3Dto4DImageMiniApp that produces a fused 4D image.
+class MitkFuse3Dto4DImageBatchAction(BatchActionBase):
+    '''Batch action for MitkFuse3Dto4DImage that produces a fused 4D image.
         @param splitProperties You can define a list of split properties (list of property names)
         to separate images. All artefacts of one action will be fused into one 4D image.'''
 
     def __init__(self, imageSelector, timeProperty = None, splitProperties = None,
-                 actionTag="MitkFuse3Dto4DImageMiniApp", session=None,
+                 actionTag="MitkFuse3Dto4DImage", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         sorter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSorter()}
@@ -135,7 +135,7 @@ class MitkFuse3Dto4DImageMiniAppBatchAction(BatchActionBase):
         if splitProperties is not None:
             splitter = {BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSplitter(*splitProperties)}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkFuse3Dto4DImageMiniAppAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkFuse3Dto4DImageAction,
                                  primaryInputSelector=imageSelector,
                                  primaryAlias="images", splitter=splitter, sorter=sorter, session=session,
                                  relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),

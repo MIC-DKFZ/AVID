@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkStitchImagesMiniApp import MitkStitchImagesMiniAppBatchAction as stitch
+from avid.actions.MitkStitchImages import MitkStitchImagesMiniAppBatchAction as stitch
 from avid.common.artefact.defaultProps import TIMEPOINT
 from avid.selectors.keyValueSelector import ActionTagSelector
 

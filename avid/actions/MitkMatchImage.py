@@ -30,8 +30,8 @@ from ..externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 logger = logging.getLogger(__name__)
 
-class MitkMatchImageMiniAppAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MitkMatchImageMiniApp.'''
+class MitkMatchImageAction(GenericCLIAction):
+    '''Class that wraps the single action for the tool MitkMatchImage.'''
 
     @staticmethod
     def _indicate_outputs(actionInstance, **allActionArgs):
@@ -53,7 +53,7 @@ class MitkMatchImageMiniAppAction(GenericCLIAction):
         return [resultArtefact]
 
     def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None,
-                 targetIsArtefactReference = True, actionTag="MitkMatchImageMiniApp",
+                 targetIsArtefactReference = True, actionTag="MitkMatchImage",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
         self._targetImage = [self._ensureSingleArtefact(targetImage, "targetImage")]
@@ -69,7 +69,7 @@ class MitkMatchImageMiniAppAction(GenericCLIAction):
                 content += ' "' + key + '=' + value + '"'
             additionalArgs['parameters'] = str(content)
 
-        GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, actionID="MitkMatchImageMiniApp", outputFlags=['o'],
+        GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, actionID="MitkMatchImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'moving', 'target'],
                                   defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session,
                                   indicateCallable=self._indicate_outputs, additionalActionProps=additionalActionProps,
@@ -82,8 +82,8 @@ class MitkMatchImageMiniAppAction(GenericCLIAction):
 
         return name
 
-class MitkMatchImageMiniAppBatchAction(BatchActionBase):
-    '''Batch action for MitkMatchImageMiniApp that produces a stitched 4D image.
+class MitkMatchImageBatchAction(BatchActionBase):
+    '''Batch action for MitkMatchImage that produces a stitched 4D image.
         @param imageSpltter specify the splitter that should be used to seperate the images into "input selection" that
         should be stitched. Default is a single split which leads to the same behavior like a simple 1 image mapping.
         @param regSplitter specify the splitter that should be used to seperate the registrations into "input selection"
@@ -97,7 +97,7 @@ class MitkMatchImageMiniAppBatchAction(BatchActionBase):
         the corresponding registration for each image.'''
 
     def __init__(self, targetSelector, movingSelector, movingLinker = None,
-                 actionTag="MitkMatchImageMiniApp", session=None,
+                 actionTag="MitkMatchImage", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         if movingLinker is None:
@@ -106,7 +106,7 @@ class MitkMatchImageMiniAppBatchAction(BatchActionBase):
         additionalInputSelectors = {"movingImage": movingSelector}
         linker = {"movingImage": movingLinker}
 
-        BatchActionBase.__init__(self, actionTag= actionTag, actionClass=MitkMatchImageMiniAppAction,
+        BatchActionBase.__init__(self, actionTag= actionTag, actionClass=MitkMatchImageAction,
                                  primaryInputSelector= targetSelector,
                                  primaryAlias="targetImage", additionalInputSelectors = additionalInputSelectors,
                                  linker = linker, session= session,
