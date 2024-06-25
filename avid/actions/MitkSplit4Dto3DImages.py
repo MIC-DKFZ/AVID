@@ -20,6 +20,7 @@ import logging
 import os
 from copy import copy
 from glob import glob
+from pathlib import Path
 
 import avid.common.artefact.defaultProps as artefactProps
 
@@ -32,35 +33,39 @@ from ..common.artefact import getArtefactProperty
 logger = logging.getLogger(__name__)
 
 def collectSplitOutputs(actionInstance, indicatedOutputs, i, artefactHelper=None, **allArgs):
-    outputs = list()
+    outputs = indicatedOutputs.copy()
 
     temp_output = indicatedOutputs[0]
 
-    file_path = getArtefactProperty(temp_output, artefactProps.URL)
+    file_url = getArtefactProperty(temp_output, artefactProps.URL)
 
-    if os.path.isfile(file_path):
-        # if indicated output exists, there is nothing to do.
-        outputs = indicatedOutputs.copy()
-    else:
+    if not os.path.isfile(file_url):
         # if indicated output does not exists, the input was splitted.
-        file_name, file_extension = os.path.splitext(file_path)
+        multi_volume_outputs = list()
 
-        search_pattern = file_name+'_*'+file_extension
+        file_path = Path(file_url)
+        file_full_extension = ''.join(file_path.suffixes)
+        file_stem = file_url[:-len(file_full_extension)]
+
+        search_pattern = file_stem+'_*'+file_full_extension
 
         find_files = glob(search_pattern)
 
-        for file in find_files:
+        for new_file in find_files:
             # Search for the time step in the file path
-            new_file_name, new_file_extension = os.path.splitext(file)
-            timestep_str = new_file_name[new_file_name.rfind('_')+1:]
+            new_file_stem = new_file[:-len(file_full_extension)]
+            timestep_str = new_file_stem[new_file_stem.rfind('_')+1:]
 
             new_artefact = copy(temp_output)
             new_artefact[artefactProps.RESULT_SUB_TAG] = timestep_str
-            new_artefact[artefactProps.URL] = file
+            new_artefact[artefactProps.URL] = new_file
             new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_DYNAMIC_SOURCE] = i[0][artefactProps.ID]
             new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_ORIGINAL_TIME_STEP] = timestep_str
+            multi_volume_outputs.append(new_artefact)
 
-            outputs.append(new_artefact)
+        if len(multi_volume_outputs) > 0:
+            # only replace outputs if we realy have found something
+            outputs = multi_volume_outputs
 
     return outputs
 

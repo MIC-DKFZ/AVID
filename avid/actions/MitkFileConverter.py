@@ -20,6 +20,7 @@ import logging
 import os
 from copy import copy
 from glob import glob
+from pathlib import Path
 
 import avid.common.artefact.defaultProps as artefactProps
 
@@ -32,19 +33,20 @@ from ..common.artefact import getArtefactProperty
 logger = logging.getLogger(__name__)
 
 def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper=None, **allArgs):
-    outputs = list()
+    outputs = indicatedOutputs.copy()
 
     temp_output = indicatedOutputs[0]
 
-    file_path = getArtefactProperty(temp_output, artefactProps.URL)
+    file_url = getArtefactProperty(temp_output, artefactProps.URL)
 
-    if os.path.isfile(file_path):
-        # if indicated output exists, there is nothing to do.
-        outputs = indicatedOutputs.copy()
-    else:
-        file_name, file_extension = os.path.splitext(file_path)
+    if not os.path.isfile(file_url):
+        # if indicated output does not exists, there are potentially multiple volumes.
+        multi_volume_outputs = list()
+        file_path = Path(file_url)
+        file_full_extension = ''.join(file_path.suffixes)
+        file_stem = file_url[:-len(file_full_extension)]
 
-        search_pattern = file_name+'_*'+file_extension
+        search_pattern = file_stem+'_*'+file_full_extension
 
         find_files = glob(search_pattern)
 
@@ -54,7 +56,11 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
             new_artefact[artefactProps.RESULT_SUB_TAG] = result_sub_tag
             new_artefact[artefactProps.URL] = file
             result_sub_tag += 1
-            outputs.append(new_artefact)
+            multi_volume_outputs.append(new_artefact)
+
+        if len(multi_volume_outputs)>0:
+            #only replace outputs if we realy have found something
+            outputs = multi_volume_outputs
 
     return outputs
 
