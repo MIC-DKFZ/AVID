@@ -76,7 +76,7 @@ class ArtefactRefineAction(PythonAction):
 
 
 class ArtefactRefineBatchAction(BatchActionBase):
-    """Simple Batch class for the ArtefactRefineAction that only has the primary input and uses single splitt."""
+    """Simple Batch class for the ArtefactRefineAction that only has the primary input and uses single split."""
 
     def __init__(self, inputSelector, actionTag="ArtefactRefine", session=None, additionalActionProps=None,
                  scheduler=SimpleScheduler(), **singleActionParameters):

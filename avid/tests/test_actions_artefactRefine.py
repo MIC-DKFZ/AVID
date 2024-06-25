@@ -48,9 +48,9 @@ def custom_refinement_script(primaryInputs, outputs,**kwargs):
     '''Simple refinement.'''
     for output in outputs:
         if output[artefactProps.TIMEPOINT] == 0:
-            output['baseline'] = '1';
+            output['baseline'] = 'true'
         else:
-            output['baseline'] = '0';
+            output['baseline'] = 'false'
 
 class TestArtefactRefineAction(unittest.TestCase):
     def setUp(self):
@@ -105,17 +105,17 @@ class TestArtefactRefineAction(unittest.TestCase):
       self.assertTrue(is_similar(self.refArtefact1, result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], '1')
+      self.assertEqual(result['baseline'], 'true')
       result = token.generatedArtefacts[1]
       self.assertTrue(is_similar(self.refArtefact2, result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], '1')
+      self.assertEqual(result['baseline'], 'true')
       result = token.generatedArtefacts[2]
       self.assertTrue(is_similar(self.refArtefact3, result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], '0')
+      self.assertEqual(result['baseline'], 'false')
 
 if __name__ == "__main__":
     unittest.main()
