@@ -396,7 +396,8 @@ class SingleActionBase(ActionBase):
           are marked as invalid.
           :return: a tuple as result. 1st value indicates if all outputs are valid. 2nd value is the
           output list with updated validity state.'''
-        valid = True
+        valid = not len(outputs) == 0
+
         result = list()
         for output in outputs:
             if os.path.isfile(output[artefactProps.URL]):

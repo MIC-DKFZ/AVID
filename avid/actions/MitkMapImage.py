@@ -36,8 +36,8 @@ INTERPOLATOR_LINEAR = 1
 STITCH_STRATEGY_MEAN = 0
 STITCH_STRATEGY_BORDER_DISTANCE = 1
 
-class MitkMapImageMiniAppAction(GenericCLIAction):
-    '''Class that wrapps the single action for the tool MitkMapImageMiniApp.'''
+class MitkMapImageAction(GenericCLIAction):
+    '''Class that wrapps the single action for the tool MitkMapImage.'''
 
     @staticmethod
     def _indicate_outputs(actionInstance, **allActionArgs):
@@ -57,7 +57,7 @@ class MitkMapImageMiniAppAction(GenericCLIAction):
                                                urlExtension=actionInstance._outputExt)
         return [resultArtefact]
 
-    def __init__(self, inputImage, registration = None, templateImage=None, actionTag="MitkMapImageMiniApp",
+    def __init__(self, inputImage, registration = None, templateImage=None, actionTag="MitkMapImage",
                  paddingValue = None, interpolator=None, supersamplingFactor=None, outputExt="nrrd", inputIsArtefactReference=True,
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
@@ -84,7 +84,7 @@ class MitkMapImageMiniAppAction(GenericCLIAction):
         if self._templateImage is not None:
             inputs['t'] = [self._templateImage]
 
-        GenericCLIAction.__init__(self, **inputs, actionID="MitkMapImageMiniApp", outputFlags=['o'],
+        GenericCLIAction.__init__(self, **inputs, actionID="MitkMapImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input', 'template', 'registration'],
                                   actionTag= actionTag, alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
                                   additionalActionProps=additionalActionProps,
@@ -103,8 +103,8 @@ class MitkMapImageMiniAppAction(GenericCLIAction):
 
         return name
 
-class MitkMapImageMiniAppBatchAction(BatchActionBase):
-    '''Batch action for MitkMapImageMiniApp that maps images by a given registration into a given reference geometry.
+class MitkMapImageBatchAction(BatchActionBase):
+    '''Batch action for MitkMapImage that maps images by a given registration into a given reference geometry.
         @param imageSpltter specify the splitter that should be used to seperate the images into "input selection" that
         should be stitched. Default is a single split which leads to the same behavior like a simple 1 image mapping.
         @param regSplitter specify the splitter that should be used to seperate the registrations into "input selection"
@@ -119,7 +119,7 @@ class MitkMapImageMiniAppBatchAction(BatchActionBase):
 
     def __init__(self, inputSelector, registrationSelector=None, templateSelector=None,
                  regLinker=None, templateLinker=None, templateRegLinker=None,
-                 actionTag="MitkMapImageMiniApp", session=None,
+                 actionTag="MitkMapImage", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         if regLinker is None:
@@ -133,7 +133,7 @@ class MitkMapImageMiniAppBatchAction(BatchActionBase):
         linker = {"registration": regLinker, "templateImage": templateLinker}
         dependentLinker = {"registration": ("templateImage", templateRegLinker)}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMapImageMiniAppAction, primaryInputSelector=inputSelector,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMapImageAction, primaryInputSelector=inputSelector,
                                  primaryAlias="inputImage", additionalInputSelectors=additionalInputSelectors,
                                  linker=linker, dependentLinker=dependentLinker, session=session,
                                  relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),

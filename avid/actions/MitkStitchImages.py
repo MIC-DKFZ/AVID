@@ -42,10 +42,10 @@ INTERPOLATOR_LINEAR = 1
 STITCH_STRATEGY_MEAN = 0
 STITCH_STRATEGY_BORDER_DISTANCE = 1
 
-class MitkStitchImagesMiniAppAction(GenericCLIAction):
-    '''Class that wrapps the single action for the tool MitkStitchImagesMiniApp.'''
+class MitkStitchImagesAction(GenericCLIAction):
+    '''Class that wrapps the single action for the tool MitkStitchImages.'''
 
-    def __init__(self, images, template, registrations = None, actionTag="MitkStitchImagesMiniApp",
+    def __init__(self, images, template, registrations = None, actionTag="MitkStitchImages",
                  paddingValue = None, stitchStrategy=None, interpolator=None, alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
 
@@ -65,14 +65,14 @@ class MitkStitchImagesMiniAppAction(GenericCLIAction):
         if stitchStrategy:
             additionalArgs['s'] = str(stitchStrategy)
 
-        GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, actionID="MitkStitchImagesMiniApp", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, actionID="MitkStitchImages", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
 
-class MitkStitchImagesMiniAppBatchAction(BatchActionBase):
-    '''Batch action for MitkStitchImagesMiniApp that produces a stitched 4D image.
+class MitkStitchImagesBatchAction(BatchActionBase):
+    '''Batch action for MitkStitchImages that produces a stitched 4D image.
         @param imageSpltter specify the splitter that should be used to seperate the images into "input selection" that
         should be stitched. Default is a single split which leads to the same behavior like a simple 1 image mapping.
         @param regSplitter specify the splitter that should be used to seperate the registrations into "input selection"
@@ -87,7 +87,7 @@ class MitkStitchImagesMiniAppBatchAction(BatchActionBase):
 
     def __init__(self, imagesSelector, templateSelector, regsSelector = None, templateLinker = None, regLinker=None,
                  templateRegLinker=None, imageSplitter = None, regSplitter = None, imageSorter = None, regSorter = None,
-                 actionTag="MitkStitchImagesMiniApp", session=None,
+                 actionTag="MitkStitchImages", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
         if templateLinker is None:
@@ -117,7 +117,7 @@ class MitkStitchImagesMiniAppBatchAction(BatchActionBase):
             if regSplitter is not None:
                 splitter['registrations'] = regSplitter
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkStitchImagesMiniAppAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkStitchImagesAction,
                                  primaryInputSelector=imagesSelector,
                                  primaryAlias="images", additionalInputSelectors = additionalInputSelectors,
                                  linker = linker, dependentLinker=dependentLinker, splitter=splitter, sorter=sorter,

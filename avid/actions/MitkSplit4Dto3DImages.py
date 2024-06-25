@@ -32,7 +32,7 @@ from ..common.artefact import getArtefactProperty
 
 logger = logging.getLogger(__name__)
 
-def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper=None, **allArgs):
+def collectSplitOutputs(actionInstance, indicatedOutputs, i, artefactHelper=None, **allArgs):
     outputs = indicatedOutputs.copy()
 
     temp_output = indicatedOutputs[0]
@@ -40,8 +40,9 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
     file_url = getArtefactProperty(temp_output, artefactProps.URL)
 
     if not os.path.isfile(file_url):
-        # if indicated output does not exists, there are potentially multiple volumes.
+        # if indicated output does not exists, the input was splitted.
         multi_volume_outputs = list()
+
         file_path = Path(file_url)
         file_full_extension = ''.join(file_path.suffixes)
         file_stem = file_url[:-len(file_full_extension)]
@@ -50,44 +51,52 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
 
         find_files = glob(search_pattern)
 
-        result_sub_tag = 0
-        for file in find_files:
+        for new_file in find_files:
+            # Search for the time step in the file path
+            new_file_stem = new_file[:-len(file_full_extension)]
+            timestep_str = new_file_stem[new_file_stem.rfind('_')+1:]
+
             new_artefact = copy(temp_output)
-            new_artefact[artefactProps.RESULT_SUB_TAG] = result_sub_tag
-            new_artefact[artefactProps.URL] = file
-            result_sub_tag += 1
+            new_artefact[artefactProps.RESULT_SUB_TAG] = timestep_str
+            new_artefact[artefactProps.URL] = new_file
+            new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_DYNAMIC_SOURCE] = i[0][artefactProps.ID]
+            new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_ORIGINAL_TIME_STEP] = timestep_str
             multi_volume_outputs.append(new_artefact)
 
-        if len(multi_volume_outputs)>0:
-            #only replace outputs if we realy have found something
+        if len(multi_volume_outputs) > 0:
+            # only replace outputs if we realy have found something
             outputs = multi_volume_outputs
 
     return outputs
 
-class MitkFileConverterAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MitkFileConverter.'''
+class MitkSplit4Dto3DImagesAction(GenericCLIAction):
+    '''Class that wraps the single action for the tool MitkSplit4Dto3DImages.'''
 
-    def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkFileConverter",
+    '''In case actions produce more then one result artefact, this property may be used to make the results distinguishable.'''
+    PROPERTY_DYNAMIC_SOURCE = "MitkSplit4Dto3DImagesAction_dynamic_source"
+    PROPERTY_ORIGINAL_TIME_STEP = "MitkSplit4Dto3DImagesAction_original_time_step"
+
+    def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkSplit4Dto3DImages",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         addArgs = None
         if readerName is not None:
             addArgs = {'r':readerName}
 
-        GenericCLIAction.__init__(self, i=inputs, actionID="MitkFileConverter", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=inputs, actionID="MitkSplit4Dto3DImages", outputFlags=['o'],
                                   additionalArgs=addArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=defaultoutputextension,
-                                  collectOutputsCallable=collectFileConverterOutputs)
+                                  collectOutputsCallable=collectSplitOutputs)
 
 
-class MitkFileConverterBatchAction(BatchActionBase):
-    '''Batch action for MitkFileConverter.'''
+class MitkSplit4Dto3DImagesBatchAction(BatchActionBase):
+    '''Batch action for MitkSplit4Dto3DImages.'''
 
     def __init__(self, inputSelector,
-                 actionTag="MitkFileConverter", session=None,
+                 actionTag="MitkSplit4Dto3DImages", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkFileConverterAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkSplit4Dto3DImagesAction,
                                  primaryInputSelector=inputSelector,
                                  primaryAlias="inputs", additionalInputSelectors=None,
                                  linker=None, session=session,
