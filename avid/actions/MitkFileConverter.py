@@ -32,6 +32,16 @@ from ..common.artefact import getArtefactProperty
 
 logger = logging.getLogger(__name__)
 
+def findAddtionalConversionOutputs(file_url):
+    file_path = Path(file_url)
+    file_full_extension = ''.join(file_path.suffixes)
+    file_stem = file_url[:-len(file_full_extension)]
+
+    search_pattern = file_stem + '_*' + file_full_extension
+
+    find_additional_files = glob(search_pattern)
+    return find_additional_files
+
 def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper=None, **allArgs):
     outputs = indicatedOutputs.copy()
 
@@ -39,28 +49,21 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
 
     file_url = getArtefactProperty(temp_output, artefactProps.URL)
 
-    if not os.path.isfile(file_url):
-        # if indicated output does not exists, there are potentially multiple volumes.
-        multi_volume_outputs = list()
-        file_path = Path(file_url)
-        file_full_extension = ''.join(file_path.suffixes)
-        file_stem = file_url[:-len(file_full_extension)]
+    # MitkFileConverter might also produce additional volumes if
+    # they are splitted on loading (e.g. for dcm). We have to check for these additonal files.
+    additional_files = findAddtionalConversionOutputs(file_url=file_url)
 
-        search_pattern = file_stem+'_*'+file_full_extension
+    if len(additional_files)>0:
+        outputs[0][artefactProps.RESULT_SUB_TAG] = 0
 
-        find_files = glob(search_pattern)
-
-        result_sub_tag = 0
-        for file in find_files:
+        #there are additional outputs also add them
+        result_sub_tag = 1
+        for file in additional_files:
             new_artefact = copy(temp_output)
             new_artefact[artefactProps.RESULT_SUB_TAG] = result_sub_tag
             new_artefact[artefactProps.URL] = file
             result_sub_tag += 1
-            multi_volume_outputs.append(new_artefact)
-
-        if len(multi_volume_outputs)>0:
-            #only replace outputs if we realy have found something
-            outputs = multi_volume_outputs
+            outputs.append(new_artefact)
 
     return outputs
 

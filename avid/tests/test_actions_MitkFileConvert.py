@@ -24,13 +24,13 @@ from avid.actions.MitkFileConverter import MitkFileConverterBatchAction as conve
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getExecutableURL
+import avid.common.artefact.defaultProps as artefactProps
 
 @unittest.skipIf(getExecutableURL(None, 'MitkFileConverter') is None, 'Tool MitkFileConverter not installed on the system.')
 class TestMitkFileConverter(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
+      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MitkFileConverterTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MitkFileConvert")
 
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
@@ -44,7 +44,7 @@ class TestMitkFileConverter(unittest.TestCase):
 
     def test_simple_convert_action(self):
 
-      action = convert(inputSelector=ActionTagSelector("Moving"), actionTag = "TestConvert")
+      action = convert(inputSelector=ActionTagSelector("Simple"), actionTag = "TestConvert")
       token = action.do()
 
       self.assertEqual(token.isSuccess(), True)
@@ -52,7 +52,7 @@ class TestMitkFileConverter(unittest.TestCase):
       token = action.do()
       self.assertEqual(token.isSkipped(), True)
 
-      action = convert(ActionTagSelector("Moving"), defaultoutputextension='nii',
+      action = convert(ActionTagSelector("Simple"), defaultoutputextension='nii',
                       actionTag="TestConvert2")
       token = action.do()
 
@@ -60,13 +60,24 @@ class TestMitkFileConverter(unittest.TestCase):
 
     def test_simple_convert_action_alwaysdo(self):
 
-      action = convert(inputSelector=ActionTagSelector("Moving"), actionTag = "TestConvertAlwaysDo", alwaysDo=True)
+      action = convert(inputSelector=ActionTagSelector("Simple"), actionTag = "TestConvertAlwaysDo", alwaysDo=True)
       token = action.do()
 
       self.assertEqual(token.isSuccess(), True)
 
       token = action.do()
       self.assertEqual(token.isSuccess(), True)
+
+    def test_splitting_convert_action(self):
+
+      action = convert(inputSelector=ActionTagSelector("Splitting"), actionTag = "TestConvertSplitting")
+      token = action.do()
+
+      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(len(token.generatedArtefacts), 3)
+      self.assertEqual(token.generatedArtefacts[0][artefactProps.RESULT_SUB_TAG], '0')
+      self.assertEqual(token.generatedArtefacts[1][artefactProps.RESULT_SUB_TAG], '1')
+      self.assertEqual(token.generatedArtefacts[2][artefactProps.RESULT_SUB_TAG], '2')
 
 
 if __name__ == "__main__":

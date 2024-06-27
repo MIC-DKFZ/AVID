@@ -1,0 +1,18 @@
+<avid:artefacts version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
+	<avid:artefact>
+		<avid:property key="case">case1</avid:property>
+		<avid:property key="timePoint">0</avid:property>
+		<avid:property key="actionTag">Simple</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">itk</avid:property>
+		<avid:property key="url">../mapRTest/MatchPointLogo.mhd</avid:property>
+	</avid:artefact>
+	<avid:artefact>
+		<avid:property key="case">case2</avid:property>
+		<avid:property key="timePoint">1</avid:property>
+		<avid:property key="actionTag">Splitting</avid:property>
+		<avid:property key="type">result</avid:property>
+		<avid:property key="format">dcm</avid:property>
+		<avid:property key="url">./001</avid:property>
+	</avid:artefact>
+</avid:artefacts>
