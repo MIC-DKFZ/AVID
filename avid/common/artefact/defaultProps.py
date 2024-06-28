@@ -87,6 +87,8 @@ TYPE_VALUE_RESULT = "result"
 when the extion is processed. It is not the final result of the action and should not be used in normal workflows.'''
 TYPE_VALUE_INTERIM = "interim_result"
 
+'''Standard type value. Indicating the format of the artefact is not specified.'''
+FORMAT_VALUE_UNDEFINED = None
 '''Standard type value. Indicating the artefact is stored as DICOM iod.'''
 FORMAT_VALUE_DCM = "dcm"
 '''Standard type value. Indicating the artefact is stored as an itk supported image format (e.g. NRRD, MetaImage,...).'''
