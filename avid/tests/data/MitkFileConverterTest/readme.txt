@@ -1,0 +1,1 @@
+Files 001...025 are DICOM files taken from MitkData.

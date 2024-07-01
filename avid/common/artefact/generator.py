@@ -16,16 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
   This module offers methods for correct generation ore adding of artefact entries
-  tis responsible to add new dict entries in the flat file data container 
-'''
+  tis responsible to add new dict entries in the flat file data container
+"""
 
 from . import defaultProps
 from avid.common.artefact import Artefact
 
 def generateArtefactEntry(case, caseInstance, timePoint, actionTag, artefactType, artefactFormat, url = None, objective= None, invalid = False, **additionalProps):
-  ''' 
+  '''
+  REMARK: This is a deprecated verion. With less default and different order of arguments in signature.
+  Use the new version generate_artefact_entry if possible.
       This is a generic method to generate an arbitrary artefact entry. 
       dict (**kwargs)  can be used to pass additional infos for the dict entry
       @param case Case ID for the artefact (e.g. Patient ID). May be set to None
@@ -57,4 +59,39 @@ def generateArtefactEntry(case, caseInstance, timePoint, actionTag, artefactType
   for key in (additionalProps):
     artefact[key] = additionalProps[key]
   
-  return artefact 
+  return artefact
+
+
+def generate_artefact_entry(case, time_point, action_tag, artefact_type=defaultProps.TYPE_VALUE_RESULT,
+                            case_instance=None, url=None, objective=None, invalid=False, **additional_props):
+    """
+        This is a generic method to generate an arbitrary artefact entry.
+        dict (**kwargs)  can be used to pass additional infos for the dict entry
+        @param case Case ID for the artefact (e.g. Patient ID). May be set to None
+        to indicate that it is a general artefact (not case specific).
+        @param case_instance ID of a case instance. May be set to None to indicate
+        that the artefact has/is no variation
+        @param time_point Timepoint the artefact is correlated with. Should be an
+        ordinal type (e.g. int or str)
+        @param action_tag Tag of the action that generates/generated the artefact.
+        @param artefact_type Type of the artefact (e.g. "result", "config", "misc")
+        @param url Location where the artefact is stored
+        @param objective the objective of the artefact (may be set to None)
+        @param invalid Indicates if the artefact is valid (e.g. correctly stored)
+        @param **additional_props additional properties you want to add to the artefact entry
+    """
+    artefact = Artefact()
+
+    artefact[defaultProps.CASE] = case
+    artefact[defaultProps.CASEINSTANCE] = case_instance
+    artefact[defaultProps.TIMEPOINT] = time_point
+    artefact[defaultProps.ACTIONTAG] = action_tag
+    artefact[defaultProps.TYPE] = artefact_type
+    artefact[defaultProps.URL] = url
+    artefact[defaultProps.OBJECTIVE] = objective
+    artefact[defaultProps.INVALID] = invalid
+
+    for key in additional_props:
+      artefact[key] = additional_props[key]
+
+    return artefact

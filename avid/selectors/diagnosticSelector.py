@@ -15,38 +15,51 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from avid.selectors import KeyValueSelector
+
 from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common.artefact import getArtefactProperty
+from avid.common.artefact import getArtefactProperty, Artefact
 from avid.selectors import ValiditySelector
 
-def getInputArtefactIDs(workflowData):
-  inputs = set()
+def get_input_artefact_ids(workflow_data: list[Artefact], input_keys: list[str] = None):
+    """Helper that gets all input artefact ids of the passed workflow_data.
+    The relevant inputs can be limited by passing a list of relevant input keys."""
+    inputs = set()
 
-  for entry in workflowData:
-    value = getArtefactProperty(entry, artefactProps.INPUT_IDS)
+    for entry in workflow_data:
+        inputs_dict = getArtefactProperty(entry, artefactProps.INPUT_IDS)
 
-    for ID in list(value.values()):
-      inputs.add(ID)
+        if inputs_dict is not None:
+            for input_key in inputs_dict:
+                if input_keys is None or input_key in input_keys:
+                    for ID in inputs_dict[input_key]:
+                        inputs.add(ID)
 
-  return list(inputs)
+    return list(inputs)
 
 class IsInputSelector(SelectorBase):
-  ''' Convenience selector to select only artefacts that are inputs of other artefacts in the given workflow data.'''
-  def __init__(self):
-    ''' init '''
-    super().__init__()
+    """ Convenience selector to select only artefacts that are inputs of other artefacts (derived artefacts) in
+     the given workflow data. You can narrow down the relevant derived artefacts by providing a derivative selector
+     or specifying the input keys that are relevant."""
+    def __init__(self, input_keys: list[str] = None, derivative_selector: SelectorBase = None):
+        ''' init '''
+        super().__init__()
+        self.input_keys = input_keys
+        self.derivative_selector = derivative_selector
 
-  def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
-    outList = list(dict(),)
+    def getSelection(self, workflow_data: list[Artefact]):
+        '''Filters the given list of entries and returns all selected entries'''
+        outList = list(dict(),)
 
-    inputs = getInputArtefactIDs(workflowData)
+        relevant_data = workflow_data
+        if self.derivative_selector is not None:
+          relevant_data = self.derivative_selector.getSelection(workflowData=workflow_data)
 
-    [outList.append(x) for x in workflowData if x[artefactProps.ID] in inputs]
+        inputs = get_input_artefact_ids(relevant_data, self.input_keys)
 
-    return outList
+        [outList.append(x) for x in workflow_data if x[artefactProps.ID] in inputs]
+
+        return outList
 
 
 class IsPrimeInvalidSelector(SelectorBase):
@@ -67,12 +80,13 @@ class IsPrimeInvalidSelector(SelectorBase):
     for entry in workflowData:
       input_ids = getArtefactProperty(entry, artefactProps.INPUT_IDS)
 
-      found = False
-      if input_ids is not None and entry[artefactProps.INVALID]:
+      found = entry[artefactProps.INVALID]
+      if found and input_ids is not None:
         found = True
-        for ID in list(input_ids.values()):
-          if not ID in valid_ids:
-            found = False
+        for input_key in input_ids:
+          for ID in input_ids[input_key]:
+              if not ID in valid_ids:
+                found = False
       if found:
         outList.append(entry)
 

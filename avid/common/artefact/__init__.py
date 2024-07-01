@@ -225,7 +225,7 @@ def ensureCaseInstanceValidity(checkedArtefact, *otherArtefacts):
 
 def addArtefactToWorkflowData(workflowData, artefactEntry, removeSimelar=False):
     '''
-        This method adds an arbitrary artefact entry to the workflowData list.
+        This method adds an arbitrary artefact entry to the workflow_data list.
         @param removeSimelar If True the method checks if the session data contains
         a simelar entry. If yes the simelar entry will be removed.
     '''
