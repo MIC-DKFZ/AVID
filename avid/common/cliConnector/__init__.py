@@ -95,6 +95,34 @@ class DefaultCLIConnector(object):
 
         return file_name
 
+    @staticmethod
+    def ensure_file_availability(cli_file_path):
+        """Helper used to enusre that a generated cli file is accessable for the execution."""
+        if os.path.isfile(cli_file_path):
+            # Fix for T20136. Unsatisfying solution, but found no better way on
+            # windows. If you make the subprocess calls to batch files (thats the
+            # reason for the isfile() check) directly you get random "Error 32"
+            # file errors (File already opened by another process) caused
+            # by opening the bat files, which are normally produced by the actions.
+            # "os.rename" approach was the simpliest way to check os independent
+            # if the process can access the bat file or if there is still a racing
+            # condition.
+            pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE)
+            max_pause_count = math.ceil(AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
+            pause_count = 0
+            time.sleep(0.1)
+            while True:
+                try:
+                    os.rename(cli_file_path, cli_file_path)
+                    break
+                except OSError:
+                    if pause_count < max_pause_count:
+                        time.sleep(pause_duration)
+                        pause_count = pause_count + 1
+                        logger.debug('"%s" is not accessible. Wait and try again.', cli_file_path)
+                    else:
+                        break
+
     def execute(self, cli_file_path, log_file_path=None, error_log_file_path=None, cwd=None):
         global logger
 
@@ -119,36 +147,13 @@ class DefaultCLIConnector(object):
         try:
             returnValue = 0
 
-            if os.path.isfile(cli_file_path):
-                # Fix for T20136. Unsatisfying solution, but found no better way on
-                # windows. If you make the subprocess calls to batch files (thats the
-                # reason for the isfile() check) directly you get random "Error 32"
-                # file errors (File already opened by another process) caused
-                # by opening the bat files, which are normally produced by the actions.
-                # "os.rename" approach was the simpliest way to check os independent
-                # if the process can access the bat file or if there is still a racing
-                # condition.
-                pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE)
-                max_pause_count = math.ceil(AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
-                pause_count = 0
-                time.sleep(0.1)
-                while True:
-                    try:
-                        os.rename(cli_file_path, cli_file_path)
-                        break
-                    except OSError:
-                        if pause_count < max_pause_count:
-                            time.sleep(pause_duration)
-                            pause_count = pause_count + 1
-                            logger.debug('"%s" is not accessible. Wait and try again.', cli_file_path)
-                        else:
-                            break
+            DefaultCLIConnector.ensure_file_availability(cli_file_path)
 
             useShell = not osChecker.isWindows()
             if cwd is None:
-                subprocess.call(cli_file_path, stdout=logfile, stderr=errlogfile, shell=useShell)
+                returnValue = subprocess.call(cli_file_path, stdout=logfile, stderr=errlogfile, shell=useShell)
             else:
-                subprocess.call(cli_file_path, cwd=cwd, stdout=logfile, stderr=errlogfile, shell=useShell)
+                returnValue = subprocess.call(cli_file_path, cwd=cwd, stdout=logfile, stderr=errlogfile, shell=useShell)
 
             if returnValue == 0:
                 logger.debug('Call "%s" finished and returned %s', cli_file_path, returnValue)
@@ -160,3 +165,51 @@ class DefaultCLIConnector(object):
                 logfile.close()
             if errlogfile is not None:
                 errlogfile.close()
+
+
+class URLMappingCLIConnectorBase(DefaultCLIConnector):
+    """Base Implementation for CLIConnectors that allow the mapping of URLs (e.g. for container connectors)."""
+
+    def __init__(self, mount_map = None):
+        """:param mount_map: Dictionary that contains the mapping between relevant paths
+         outside of the container (those stored in the session) and the pathes that will
+         be known in the container. Needed to properly convert artefact urls.
+         Key of the map is the mount path inside of the container, the value is the respective
+         path outside."""
+        super().__init__()
+        self.mount_map=mount_map
+        if self.mount_map is None:
+            self.mount_map = dict()
+        pass
+
+    @staticmethod
+    def apply_mount_map(mount_map, filepath):
+        mappedPath = filepath
+
+        for mountPath in mount_map:
+            try:
+                if filepath.find(mount_map[mountPath])==0:
+                    mappedPath = mappedPath.replace(mount_map[mountPath], mountPath)
+                    break
+            except Exception:
+                pass
+        return mappedPath
+
+    def get_artefact_url_extraction_delegate(self, action_extraction_delegate=None):
+        """Returns the URL extraction delegate that should be used when working with the connector.
+        :param action_extraction_delegate: If the actions specifies its own delegate it can be passed
+        and will be wrapped accordingly."""
+
+        if action_extraction_delegate is None:
+            action_extraction_delegate = default_artefact_url_extraction_delegate
+
+        def extractionWrapper(arg_name, arg_value):
+            results = action_extraction_delegate(arg_name, arg_value)
+
+            mappedResults = list()
+            for result in results:
+                mappedResults.append(ContainerCLIConnectorBase.apply_mount_map(mount_map=self.mount_map, filepath=result))
+
+            return mappedResults
+
+        return extractionWrapper
