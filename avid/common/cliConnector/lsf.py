@@ -47,7 +47,7 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
     @staticmethod
     def generate_lsf_log_file_path(log_file_path):
         path = Path(log_file_path)
-        file_extension = path.suffixe()
+        file_extension = path.suffix
         file_stem = log_file_path[:-len(file_extension)]
 
         return file_stem+'.lsf'+file_extension
@@ -78,7 +78,7 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
         try:
             DefaultCLIConnector.ensure_file_availability(cli_file_path)
 
-            run_arg = ['bsub', cli_file_path]
+            run_arg = ['bsub']
 
             if self.additional_bsub_arguments:
                 run_arg.extend(self.additional_bsub_arguments)
@@ -90,9 +90,9 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
             if error_log_file_path is not None:
                 run_arg.append('-e')
                 run_arg.append(error_log_file_path)
+            run_arg.append(cli_file_path)
 
-            use_shell = not osChecker.isWindows()
-            run_result = subprocess.run(run_arg, capture_output=True, text=True, shell=use_shell)
+            run_result = subprocess.run(run_arg, capture_output=True, text=True)
             # Assuming job ID is in the format "Job <job_id> is submitted ..."
             job_id_line = run_result.stdout.strip()
             job_id = job_id_line.split()[1].strip('<>').strip()
@@ -108,7 +108,7 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
             is_running = True
             is_successful = False
             wait_rounds = 0
-            while not is_running:
+            while is_running:
                 if lsf_logfile is not None and wait_rounds%10==0:
                     lsf_logfile.write('.')
 
@@ -123,9 +123,9 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
 
                 is_successful = "DONE" in status_result.stdout
 
-                if not is_running and lsf_logfile is not None and run_result.stdcout:
+                if not is_running and lsf_logfile is not None and run_result.stdout:
                     lsf_logfile.write('\n\n')
-                    lsf_logfile.write(run_result.stdcout)
+                    lsf_logfile.write(run_result.stdout)
 
             if is_successful:
                 logger.debug('Call "%s" finished normally', cli_file_path)

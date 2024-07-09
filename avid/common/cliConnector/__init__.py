@@ -208,7 +208,7 @@ class URLMappingCLIConnectorBase(DefaultCLIConnector):
 
             mappedResults = list()
             for result in results:
-                mappedResults.append(ContainerCLIConnectorBase.apply_mount_map(mount_map=self.mount_map, filepath=result))
+                mappedResults.append(URLMappingCLIConnectorBase.apply_mount_map(mount_map=self.mount_map, filepath=result))
 
             return mappedResults
 
