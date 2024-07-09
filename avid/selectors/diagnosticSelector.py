@@ -21,7 +21,7 @@ import avid.common.artefact.defaultProps as artefactProps
 from avid.common.artefact import getArtefactProperty, Artefact
 from avid.selectors import ValiditySelector
 
-def get_input_artefact_ids(workflow_data: list[Artefact], input_keys: list[str] = None):
+def get_input_artefact_ids(workflow_data, input_keys=None):
     """Helper that gets all input artefact ids of the passed workflow_data.
     The relevant inputs can be limited by passing a list of relevant input keys."""
     inputs = set()
@@ -41,13 +41,13 @@ class IsInputSelector(SelectorBase):
     """ Convenience selector to select only artefacts that are inputs of other artefacts (derived artefacts) in
      the given workflow data. You can narrow down the relevant derived artefacts by providing a derivative selector
      or specifying the input keys that are relevant."""
-    def __init__(self, input_keys: list[str] = None, derivative_selector: SelectorBase = None):
+    def __init__(self, input_keys=None, derivative_selector=None):
         ''' init '''
         super().__init__()
         self.input_keys = input_keys
         self.derivative_selector = derivative_selector
 
-    def getSelection(self, workflow_data: list[Artefact]):
+    def getSelection(self, workflow_data):
         '''Filters the given list of entries and returns all selected entries'''
         outList = list(dict(),)
 

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class LSFCLIConnector(URLMappingCLIConnectorBase):
     """Implementation that allows to execute an action on an lsf cluster."""
 
-    def __init__(self, mount_map: dict[str, str] = None, additional_bsub_arguments: list[str] = None):
+    def __init__(self, mount_map=None, additional_bsub_arguments=None):
         """:param mount_map: Dictionary that contains the mapping between relevant paths
          outside of the container (those stored in the session) and the pathes that will
          be known in the container. Needed to properly convert artefact urls.
