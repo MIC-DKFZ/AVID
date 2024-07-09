@@ -23,7 +23,6 @@ from avid.common.AVIDUrlLocater import getToolsPath
 from avid.common.AVIDUrlLocater import getAVIDConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigPath
 from avid.common.AVIDUrlLocater import getDefaultToolsSourceConfigPath
-from avid.common.AVIDUrlLocater import getMITKSourceConfigPath
 from avid.common.AVIDUrlLocater import getToolConfigsPath
 from avid.common.AVIDUrlLocater import getPackageSourcePath, getPackageToolsConfigPath
 
