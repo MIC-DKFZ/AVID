@@ -47,17 +47,17 @@ class IsInputSelector(SelectorBase):
         self.input_keys = input_keys
         self.derivative_selector = derivative_selector
 
-    def getSelection(self, workflow_data):
+    def getSelection(self, workflowData):
         '''Filters the given list of entries and returns all selected entries'''
         outList = list(dict(),)
 
-        relevant_data = workflow_data
+        relevant_data = workflowData
         if self.derivative_selector is not None:
-          relevant_data = self.derivative_selector.getSelection(workflowData=workflow_data)
+          relevant_data = self.derivative_selector.getSelection(workflowData=workflowData)
 
         inputs = get_input_artefact_ids(relevant_data, self.input_keys)
 
-        [outList.append(x) for x in workflow_data if x[artefactProps.ID] in inputs]
+        [outList.append(x) for x in workflowData if x[artefactProps.ID] in inputs]
 
         return outList
 
