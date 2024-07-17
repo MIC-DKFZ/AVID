@@ -31,34 +31,57 @@ from avid.common.osChecker import checkAndCreateDir
 import os
 import configparser
 import zipfile
+import tarfile
 from urllib.request import urlretrieve
 import shutil
+import platform
 
 
 def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
   mitkSourceConfig = configparser.ConfigParser()
   mitkSourceConfig.read(mitkSourceConfigPath)
 
-  # FOR NOW: ONLY WINDOWS
-  url = mitkSourceConfig.get("windows", "url")
-  filename = url.split("/")[-1]
-  filepath = os.path.join(packagesPath, filename)
-  print("Downloading MITK installer.")
-  urlretrieve(url, filepath)
+  os_name = platform.system()
+  if os_name == "Windows":
+    url = mitkSourceConfig.get(os_name, "url")
+    filename = url.split("/")[-1]
+    filepath = os.path.join(packagesPath, filename)
+    print("Downloading MITK installer.")
+    urlretrieve(url, filepath)
 
-  with zipfile.ZipFile(filepath, "r") as zip_f:
-    zip_f.extractall(packagesPath)
+    with zipfile.ZipFile(filepath, "r") as zip_f:
+      zip_f.extractall(packagesPath)
 
-  mitkDir = os.path.join(packagesPath, "MITK")
-  if os.path.isdir(mitkDir):
-    if update:
-      shutil.rmtree(mitkDir)
-    else:
-      raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
+    mitkDir = os.path.join(packagesPath, "MITK")
+    if os.path.isdir(mitkDir):
+      if update:
+        shutil.rmtree(mitkDir)
+      else:
+        raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
                       "CmdApps, use 'avidconfig tools update' instead.")
+    os.rename(filepath[:-4], mitkDir)
+    os.remove(filepath)   # delete .zip file
 
-  os.rename(filepath[:-4], mitkDir)
-  os.remove(filepath)   # delete .zip file
+  elif os_name == "Linux":
+    url = mitkSourceConfig.get(os_name, "url")
+    filename = url.split("/")[-1]
+    filepath = os.path.join(packagesPath, filename)
+    print("Downloading MITK installer.")
+    urlretrieve(url, filepath)
+
+    with tarfile.open(filepath, 'r:gz') as tar_f:
+      tar_f.extractall(packagesPath)
+
+    mitkDir = os.path.join(packagesPath, "MITK")
+    if os.path.isdir(mitkDir):
+      if update:
+        shutil.rmtree(mitkDir)
+      else:
+        raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
+                      "CmdApps, use 'avidconfig tools update' instead.")
+    os.rename(filepath[:-7], mitkDir)
+    os.remove(filepath)   # delete .tar.gz file
+
   return mitkDir
 
 
