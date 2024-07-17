@@ -30,6 +30,7 @@ import avid.common.artefact.defaultProps as artefactProps
 from .simpleScheduler import SimpleScheduler
 import avid.common.workflow as workflow
 from .actionBatchGenerator import ActionBatchGenerator
+from ..selectors import ActionTagSelector
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,10 @@ class ActionBase(object):
         return self._actionTag
 
     @property
+    def actionTagSelector(self):
+        return ActionTagSelector(self._actionTag)
+
+    @property
     def actionInstanceUID(self):
         return str(self._instanceUID)
 
@@ -76,7 +81,8 @@ class ActionBase(object):
             if workflow.currentGeneratedSession is not None:
                 self._session = workflow.currentGeneratedSession
             else:
-                raise ValueError("Session passed to the action is invalid. Session is None.")
+                raise ValueError("Session passed to the action is invalid and no global session found."
+                                 "Cannot init action.")
         else:
             self._session = session
 
@@ -556,6 +562,7 @@ class BatchActionBase(ActionBase):
         ActionBase.__init__(self, actionTag, session, additionalActionProps)
         self._actions = None
         self._scheduler = scheduler  # scheduler that should be used to execute the jobs
+        self._session.registerBatchAction(self)
 
         actionParameters["actionTag"] = actionTag
         actionParameters["additionalActionProps"] = additionalActionProps
