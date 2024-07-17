@@ -37,11 +37,17 @@ def my_function(outputs, **kwargs):
 with workflow.initSession(bootstrapArtefacts=os.path.join(os.getcwd(),'output', 'example.avid'),
                           sessionPath=os.path.join(os.getcwd(),'output', 'example'),
                           expandPaths=True) as session:
-    PythonNaryBatchActionV2(primaryInputSelector=mr_image_selector,
+    action1 = PythonNaryBatchActionV2(primaryInputSelector=mr_image_selector,
                             primaryAlias='mr_images',
                             additionalInputSelectors = {'ct_images': ct_image_selector},
-                            # additionalInputSelectors = {'masks': mask_selector},
-                            # linker={'additional': CaseLinker(allowOnlyFullLinkage=False)+CaseInstanceLinker(allowOnlyFullLinkage=False)},
-                            actionTag="example_3",
+                            actionTag="action_1",
                             generateCallable=my_function,
-                            passOnlyURLs=True).do().tagSelector
+                            passOnlyURLs=True)
+
+    action2 = PythonNaryBatchActionV2(primaryInputSelector=action1.actionTagSelector,
+                            primaryAlias='action1_images',
+                            additionalInputSelectors = {'masks': mask_selector},
+                            actionTag="action_2",
+                            generateCallable=my_function,
+                            passOnlyURLs=True)
+    session.run_batches()

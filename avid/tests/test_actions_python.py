@@ -215,7 +215,7 @@ class TestPythonAction(unittest.TestCase):
 
     def test_unary_stack_split_action(self):
         action = unaryStackPython(ActionTagSelector("stats"), splitProperties = [artefactProps.OBJECTIVE],
-                            generateCallable=test_copy_script, passOnlyURLs=True, actionTag="TestUnary")
+                            generateCallable=test_copy_script, passOnlyURLs=True, actionTag="TestUnarySplit")
         token = action.do()
 
         self.assertEqual(token.isSuccess(), True)
