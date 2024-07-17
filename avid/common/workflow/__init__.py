@@ -83,7 +83,7 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
 
     if stdoutlogstream is None:
       stdoutlogstream = logging.StreamHandler(sys.stdout)
-      stdoutlogstream.setLevel(logging.INFO)
+      stdoutlogstream.setLevel(logging.WARNING)
       streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
       stdoutlogstream.setFormatter(streamFormater)
       rootlogger.addHandler(stdoutlogstream)
@@ -218,6 +218,9 @@ class Session(object):
 
     self.actions = dict()
     self.artefacts = list()
+
+    #That is a list of all batch actions assigned to this session.
+    self._batch_actions = list()
     
     self.numberOfPatients = self.getNumberOfPatientsDecorator(patientNumber.getNumberOfPatients)
 
@@ -366,5 +369,13 @@ class Session(object):
       failedActions = self.getFailedActions()
               
       return len(failedActions) != 0
+
+  def registerBatchAction(self, batch_action):
+      self._batch_actions.append(batch_action)
+
+  def run_batches(self):
+    for batch_action in self._batch_actions:
+      batch_action.do()
+
 
 currentGeneratedSession = None
