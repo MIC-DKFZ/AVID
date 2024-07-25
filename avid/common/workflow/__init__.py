@@ -216,7 +216,8 @@ class Session(object):
     #be processed by the action if nothing is explicitly defined by the user. 
     self.structureDefinitions = dict()
 
-    self.actions = dict()
+    #List of all executed (SingleActionBase based) actions that where executed for that session
+    self.executed_actions = list()
     self.artefacts = list()
 
     #That is a list of all batch actions assigned to this session.
@@ -305,14 +306,21 @@ class Session(object):
     with self.lock:    
       self.actionTools[actionID] = entry
 
-  def addActionToken(self, actionToken):
+  def addProcessedActionInstance(self, action):
       """Adds a action token to a workflow (with the session info)"""
       with self.lock:
-        self.actions[actionToken.getActionTag()] = actionToken
-        logging.debug("stored action token: %s",actionToken)
-        
-        return actionToken
-    
+          self.executed_actions.append(action)
+          logging.debug("stored action token: %s", action)
+          if action.isSuccess:
+              if len(action._last_warnings)>0:
+                  print('W', end='')
+              else:
+                print('.', end='')
+          elif action.isSkipped:
+              print('S', end='')
+          else:
+              print('E', end='')
+
   def addArtefact(self, artefactEntry, removeSimelar = False):
     ''' 
         This method adds an arbitrary artefact entry to the artefact list.
@@ -332,11 +340,11 @@ class Session(object):
       """Returns all actions of the session that have failed."""
       failedActions = []
       
-      for anActionID in list(self.actions.keys()):
-          #check each action
-          actionToken = self.actions[anActionID]
-          if actionToken.isFailure():
-              failedActions.append(actionToken)
+      with self.lock:
+          for action in self.executed_actions:
+              #check each action
+              if action.isFailure:
+                  failedActions.append(action)
       
       return failedActions
 
@@ -344,11 +352,10 @@ class Session(object):
     """Returns all actions of the session that have been skipped."""
     skippedActions = []
 
-    for anActionID in list(self.actions.keys()):
-      # check each action
-      actionToken = self.actions[anActionID]
-      if actionToken.isSkipped():
-        skippedActions.append(actionToken)
+    with self.lock:
+      for action in self.executed_actions:
+        if action.isSkipped:
+          skippedActions.append(action)
 
     return skippedActions
 
@@ -356,11 +363,10 @@ class Session(object):
     """Returns all actions of the session that have been successful."""
     succActions = []
 
-    for anActionID in list(self.actions.keys()):
-      # check each action
-      actionToken = self.actions[anActionID]
-      if actionToken.isSuccess():
-        succActions.append(actionToken)
+    with self.lock:
+      for action in self.executed_actions:
+        if action.isSuccess:
+          succActions.append(action)
 
     return succActions
 

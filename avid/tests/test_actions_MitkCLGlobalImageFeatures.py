@@ -47,23 +47,23 @@ class TestMitkFileConverter(unittest.TestCase):
 
       action = radiomics(imageSelector=ActionTagSelector("image"), maskSelector=ActionTagSelector("roi"),
                          actionTag = "TestGIF")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
     def test_simple_gif_action_alwaysdo(self):
 
       action = radiomics(imageSelector=ActionTagSelector("image"), maskSelector=ActionTagSelector("roi"),
                          actionTag = "TestGIF", alwaysDo=True)
-      token = action.do()
+      action.do()
 
-      self.assertEqual(True, token.isSuccess())
+      self.assertEqual(True, action.isSuccess)
 
-      token = action.do()
-      self.assertEqual(True, token.isSuccess())
+      action.do()
+      self.assertEqual(True, action.isSuccess)
 
 
 if __name__ == "__main__":

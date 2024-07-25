@@ -47,9 +47,9 @@ class TestPlmDice(unittest.TestCase):
     def test_simple_plm_dice_action(self):
       
       action = plmDice(ActionTagSelector("Target"), ActionTagSelector("Moving"), actionTag = "TestDice")      
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
       refFilePath = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#1_ref.xml")
       resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
@@ -65,19 +65,19 @@ class TestPlmDice(unittest.TestCase):
           with open(resultFilePath) as resultFile:
               self.assertEqual(refFile.read(), resultFile.read())
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_simple_plm_dice_action_alwaysdo(self):
       
       action = plmDice(ActionTagSelector("Target"), ActionTagSelector("Moving"), alwaysDo = True, actionTag = "TestDice")      
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

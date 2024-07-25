@@ -23,9 +23,6 @@ class SimpleScheduler(object):
     pass
   
   def execute(self, actionList):
-    tokens = list()
-    
+
     for action in actionList:
-      tokens += action.do(False),
-      
-    return tokens
+      action.do()

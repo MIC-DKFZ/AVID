@@ -60,7 +60,7 @@ class TestDoseProcessVisualizer(unittest.TestCase):
     def test_simple_batch_action(self):
 
       action = doseProcessVisualizer(ActionTagSelector("collector"), ActionTagSelector("plannedCollector"), None, self.rTemplateFile)
-      token = action.do()
+      action.do()
 
       refFile = os.path.join(self.testDataDir, "ref_vis_DoseStatsCollector_DoseStatsPlannedCollector.r")
       refCustomizedFile = os.path.join(self.tempRoot, "test_doseProcessVisualizer", "ref_vis_DoseStatsCollector_DoseStatsPlannedCollector.r")
@@ -81,7 +81,7 @@ class TestDoseProcessVisualizer(unittest.TestCase):
                          "@CSVBASELINE_FILE@" : csvBaselineFilename, "@PNG_FILE@" : os.path.basename(resultFile) }
       templateFileCustomizer.writeFileCustomized(refFile, refCustomizedFile, replacingDict)
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
       self.assertEqual(self.readFile(refCustomizedFile), self.readFile(configFile))
       self.assertEqual(os.path.isfile(resultFile), True)
       self.assertEqual(os.path.isfile(batchFile), True)
@@ -90,7 +90,7 @@ class TestDoseProcessVisualizer(unittest.TestCase):
     def test_batch_action_with_additional_data(self):
 
       action = doseProcessVisualizer(ActionTagSelector("collector"), ActionTagSelector("plannedCollector"),  ActionTagSelector("additionalCollector"), self.rTemplateAdditionalFile)
-      token = action.do()
+      action.do()
 
       refFile = os.path.join(self.testDataDir, "ref_vis_DoseStatsCollector_DoseStatsPlannedCollector_DoseStatsAdditonalCollector.r")
       refCustomizedFile = os.path.join(self.tempRoot, "test_doseProcessVisualizer", "ref_vis_DoseStatsCollector_DoseStatsPlannedCollector_DoseStatsAdditonalCollector.r")
@@ -112,7 +112,7 @@ class TestDoseProcessVisualizer(unittest.TestCase):
                          "@CSVBASELINE_FILE@" : csvBaselineFilename, "@PNG_FILE@" : os.path.basename(resultFile), "@CSVADDITIONAL_FILE@" : csvAdditionalFilename }
       templateFileCustomizer.writeFileCustomized(refFile, refCustomizedFile, replacingDict)
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
       self.assertEqual(self.readFile(refCustomizedFile), self.readFile(configFile))
       self.assertEqual(os.path.isfile(resultFile), True)
       self.assertEqual(os.path.isfile(batchFile), True)

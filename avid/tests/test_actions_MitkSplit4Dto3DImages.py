@@ -45,14 +45,14 @@ class TestMitkMRPerfusionMiniApp(unittest.TestCase):
     def test_simple_split_action(self):
       
       action = split(ActionTagSelector("Signal"), actionTag = "TestSplit")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
-      self.assertEqual(len(token.generatedArtefacts), 10)
-      for index, output in enumerate(token.generatedArtefacts):
-        self.assertEqual(token.generatedArtefacts[index][SplitAction.PROPERTY_ORIGINAL_TIME_STEP], str(index))
-        self.assertEqual(token.generatedArtefacts[index][artefacProps.RESULT_SUB_TAG], str(index))
-        self.assertEqual(token.generatedArtefacts[index][SplitAction.PROPERTY_DYNAMIC_SOURCE], token.generatedArtefacts[index][artefacProps.INPUT_IDS]['i'][0])
+      self.assertEqual(action.isSuccess, True)
+      self.assertEqual(len(action.outputArtefacts), 10)
+      for index, output in enumerate(action.outputArtefacts):
+        self.assertEqual(action.outputArtefacts[index][SplitAction.PROPERTY_ORIGINAL_TIME_STEP], str(index))
+        self.assertEqual(action.outputArtefacts[index][artefacProps.RESULT_SUB_TAG], str(index))
+        self.assertEqual(action.outputArtefacts[index][SplitAction.PROPERTY_DYNAMIC_SOURCE], action.outputArtefacts[index][artefacProps.INPUT_IDS]['i'][0])
 
 
 if __name__ == "__main__":

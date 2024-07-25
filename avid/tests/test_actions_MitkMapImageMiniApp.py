@@ -49,34 +49,34 @@ class TestMitkMapImage(unittest.TestCase):
     def test_simple_MitkMapImage_action(self):
       
       action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_simple_MitkMapImage_action_alwaysdo(self):
       
       action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping_alwaysdo")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
     def test_MitkMapImage_action_caselinking(self):
 
         action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       regLinker= CaseLinker(), actionTag = "TestMapping_caselinking")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
-        token = action.do()
-        self.assertEqual(token.isSkipped(), True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_MitkMapImage_action_inputIsReference(self):
 
@@ -85,33 +85,33 @@ class TestMitkMapImage(unittest.TestCase):
 
         action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       alwaysDo=True, actionTag="TestMapping")
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 1)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 1)
 
         action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       inputIsArtefactReference=False, alwaysDo=True, actionTag="TestMapping")
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
         #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
         #the template
-        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 0)
+        self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 0)
 
     def test_MitkMapImage_action_supersampling(self):
 
         action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                      supersamplingFactor = 3, actionTag = "TestMapping_1ss")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
     def test_MitkMapImage_action_supersampling3(self):
 
         action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                      supersamplingFactor = [3,2,1], actionTag = "TestMapping_3ss")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

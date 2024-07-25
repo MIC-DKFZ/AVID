@@ -47,39 +47,39 @@ class TestVoxelizer(unittest.TestCase):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          ['Heart'], actionTag = "TestVoxelizer")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
     def test_simple_action_session_struct(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          actionTag = "TestVoxelizer", alwaysDo = True)
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
     def test_simple_action_boolean(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          booleanMask = True, actionTag = "TestVoxelizer", alwaysDo = True)
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
     def test_simple_action_alwaysdo(self):
       
       action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
                          ['Heart'], actionTag = "TestVoxelizer", alwaysDo = True)
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

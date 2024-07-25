@@ -22,10 +22,9 @@ from threading import Thread
 import queue
 
 class Worker(Thread):
-    def __init__(self, actions, tokens):
+    def __init__(self, actions):
       Thread.__init__(self)
       self.actions = actions
-      self.tokens = tokens
       self.daemon = True
       self.start()
     
@@ -33,8 +32,7 @@ class Worker(Thread):
       try:
         while True:
           action = self.actions.get()
-          token = action.do(False)    
-          self.tokens.append(token)
+          action.do()
           self.actions.task_done()
       except queue.Empty:
         pass
@@ -48,7 +46,6 @@ class ThreadingScheduler(object):
   def execute(self, actionList):
     
     actionqueue = queue.Queue()
-    tokens = list()
 
     threadcount = self.threadcount
     if threadcount>len(actionList):
@@ -58,8 +55,6 @@ class ThreadingScheduler(object):
       actionqueue.put(action)
       
     for i in range(threadcount):
-      w = Worker(actionqueue, tokens)
+      w = Worker(actionqueue)
       
-    actionqueue.join();
-           
-    return tokens
+    actionqueue.join()

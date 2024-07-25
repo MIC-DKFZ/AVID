@@ -45,9 +45,9 @@ class TestMitkMRPerfusionMiniApp(unittest.TestCase):
     def test_simple_perf_descriptive_action(self):
       
       action = perfusion(ActionTagSelector("Signal"), model=perfusion.MODEL_DESCRIPTIVE, injectiontime = 0.1, actionTag = "TestPerf")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

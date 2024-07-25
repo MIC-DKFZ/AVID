@@ -54,7 +54,7 @@ class TestThreadingScheduler(unittest.TestCase):
     
     scheduler = ThreadingScheduler(3)
     
-    tokens = scheduler.execute(self.actionList)
+    scheduler.execute(self.actionList)
     
     self.assertIn(self.a1, self.session.artefacts)
     self.assertIn(self.a2, self.session.artefacts)
@@ -63,7 +63,7 @@ class TestThreadingScheduler(unittest.TestCase):
     self.assertIn(self.a5, self.session.artefacts)
     self.assertIn(self.a6, self.session.artefacts)
     
-    self.assertEqual(len(tokens), 6)
+    self.assertEqual(len(self.session.executed_actions), 6)
     self.assertFalse(self.session.hasFailedActions())
 
 if __name__ == '__main__':

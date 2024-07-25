@@ -45,9 +45,9 @@ class TestCurveDescriptorMiniApp(unittest.TestCase):
     def test_simple_perf_descriptive_action(self):
       
       action = curveDescription(ActionTagSelector("Signal"), actionTag = "TestCurve")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

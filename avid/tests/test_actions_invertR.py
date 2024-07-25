@@ -44,25 +44,25 @@ class TestInvertR(unittest.TestCase):
 
     def test_simple_inversion_action(self):
         action = invertR(ActionTagSelector("Registration"), actionTag="TestReg")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
-        token = action.do()
-        self.assertEqual(token.isSkipped(), True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_inversion_action_always_do(self):
         action = invertR(ActionTagSelector("Registration"), actionTag="TestReg", alwaysDo=True)
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
     def test_inversion_with_template_image_action(self):
         action = invertR(ActionTagSelector("Registration"), templateSelector=ActionTagSelector("Target"), actionTag="TestReg")
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 if __name__ == "__main__":
     unittest.main()

@@ -44,10 +44,10 @@ class TestBioModelCalc(unittest.TestCase):
   def test_simple_bio_model_calc_action(self):
 
     action = bioModelCalc(ActionTagSelector("Dose"), modelParameters=[0.1, 0.01], actionTag="SimpleBioModelCalc")
-    token = action.do()
-    self.assertEqual(token.isSuccess(), True)
-    token = action.do()
-    self.assertEqual(token.isSkipped(), True)
+    action.do()
+    self.assertEqual(action.isSuccess, True)
+    action.do()
+    self.assertEqual(action.isSkipped, True)
 
 
 if __name__ == "__main__":
