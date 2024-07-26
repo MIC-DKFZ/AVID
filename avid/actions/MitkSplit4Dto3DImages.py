@@ -56,7 +56,7 @@ def collectSplitOutputs(actionInstance, indicatedOutputs, i, artefactHelper=None
             new_file_stem = new_file[:-len(file_full_extension)]
             timestep_str = new_file_stem[new_file_stem.rfind('_')+1:]
 
-            new_artefact = copy(temp_output)
+            new_artefact = temp_output.clone()
             new_artefact[artefactProps.RESULT_SUB_TAG] = timestep_str
             new_artefact[artefactProps.URL] = new_file
             new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_DYNAMIC_SOURCE] = i[0][artefactProps.ID]
