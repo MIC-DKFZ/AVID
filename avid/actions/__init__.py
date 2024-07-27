@@ -67,7 +67,8 @@ class ActionBase(object):
         self._last_exec_state = self.ACTION_PENDING
 
         #list of all warnings captured since the last execution of the action. Elements of this list are
-        #pairs of detail strings and exception instances (if provided; if not provided the 2nd value is None).
+        #pair tuples of detail strings and exception instances (if provided; if not provided the 2nd
+        #value is None).
         self._last_warnings = list()
 
     @property
@@ -87,6 +88,18 @@ class ActionBase(object):
         if self._outputArtefacts is None and self.isPending:
             self.indicateOutputs()
         return self._outputArtefacts
+
+    @property
+    def last_exec_state(self):
+        return self._last_exec_state
+
+    @property
+    def last_warnings(self):
+        return self._last_warnings
+
+    @property
+    def has_warnings(self):
+        return len(self._last_warnings) > 0
 
     @property
     def isSuccess(self):
@@ -178,7 +191,7 @@ class ActionBase(object):
         reported.
         @param exception: If the warning was detected due to an exception it can also be passed
         with this parameter."""
-        self._last_warnings.append([details,exception])
+        self._last_warnings.append((details, exception))
         logger.warning(details)
 
     def _notifyActionFinished(self):
@@ -485,22 +498,54 @@ class SingleActionBase(ActionBase):
             
             invalidInputs = self._getInvalidInputs()
             if len(invalidInputs) == 0:
+                failure_occurred = False
                 try:
                     self._generateOutputs()
                     endtime = time.time()
-                    outputs = self._collectOutputs(indicatedOutputs = outputs)
-                    (isValid, outputs) = self._checkOutputsExistance(outputs)
                 except BaseException as e:
-                    self._reportWarning('(Action instance UID: {}) Error while generating outputs for action tag "{}".'
-                                       ' All outputs will be marked as invalid. Error details: {}'
-                                        .format(self.actionInstanceUID, self.actionTag, str(e)))
+                    self._reportWarning(f'Error occurred while generating outputs for action tag "{self.actionTag}".'
+                                        ' The error occurred in the class specific implementation of the'
+                                        f' _generateOutputs method of "{self.__class__}". Please check the'
+                                        ' implementation of the method or the class documentation.'
+                                        f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                        , exception=e)
+                    failure_occurred = True
                 except:
-                    self._reportWarning('(Action instance UID: {}) Unkown error while generating outputs for action tag'
-                                       ' "{}". All outputs will be marked as invalid.'
-                                        .format(self.actionInstanceUID, self.actionTag))
+                    self._reportWarning('Unknown error occurred while generating outputs for action tag'
+                                        f' "{self.actionTag}".'
+                                        ' The error occurred in the class specific implementation of the'
+                                        f' _generateOutputs method of "{self.__class__}". Please check the'
+                                        ' implementation of the method or the class documentation.'
+                                        ' All outputs will be marked as invalid.')
+                    failure_occurred = True
+
+                if not failure_occurred:
+                    try:
+                        outputs = self._collectOutputs(indicatedOutputs = outputs)
+                        (isValid, outputs) = self._checkOutputsExistance(outputs)
+                    except BaseException as e:
+                        self._reportWarning('Error occurred while collecting generated outputs for action tag'
+                                            f' "{self.actionTag}".'
+                                            f' If the action class "{self.__class__}" has a specific implementation of the'
+                                            f' _collectOutputs method, please check the'
+                                            ' implementation of the method or the class documentation.'
+                                            f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                            , exception=e)
+                        failure_occurred = True
+                    except:
+                        self._reportWarning('Unknown error occurred while collecting generated outputs for action tag'
+                                            f' "{self.actionTag}".'
+                                            f' If the action class "{self.__class__}" has a specific implementation of the'
+                                            f' _collectOutputs method, please check the'
+                                            ' implementation of the method or the class documentation.'
+                                            ' All outputs will be marked as invalid.')
+                        failure_occurred = True
+
             else:
                 self._reportWarning('Action failed due to at least one invalid input. All outputs are marked as invalid.'
-                                   ' Invalid inputs: {}'.format(self._inputArtefacts))
+                                    ' Typical reason for that error is that a preceding action (that generated inputs)'
+                                    ' failed and generated the invalid inputs.'
+                                    ' Invalid inputs: {}'.format(self._inputArtefacts))
 
             if not isValid:
                 for artefact in outputs:
@@ -703,7 +748,7 @@ class BatchActionBase(ActionBase):
 
         with self.lock:
             for action in self._actions:
-                if action.isSuccess and len(action._last_warnings) > 0:
+                if action.isSuccess and len(action.last_warnings) > 0:
                     succActions.append(action)
 
         return succActions
