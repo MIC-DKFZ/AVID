@@ -30,6 +30,14 @@ import avid.common.patientNumber as patientNumber
 from avid.common import artefact
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
+from rich.traceback import Traceback as RichTraceback
+from rich.progress import Progress
+from rich.console import Console
+from rich import inspect as rich_inspect
+from rich.panel import  Panel as RichPanel
+from rich.columns import Columns as RichColumns
+from rich.padding import Padding as RichPadding
+
 '''set when at least one session was initialized to ensure this stream is only
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
 stdoutlogstream = None
@@ -74,7 +82,7 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
     filemode = 'w'
     
   if initLogging:
-    logging.basicConfig(filename=sessionPath+".log", filemode = filemode, level=logginglevel, format='%(levelname)-8s %(asctime)s [MODULE] %(module)-20s [Message] %(message)s [Location] %(funcName)s in %(pathname)s %(lineno)d' )
+    logging.basicConfig(filename=sessionPath+".log", filemode = filemode, level=logginglevel, format='%(levelname)-8s %(asctime)s [Location] %(funcName)s in %(pathname)s %(lineno)d [Message] %(message)s' )
 
   rootlogger = logging.getLogger()
 
@@ -82,8 +90,10 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
     global stdoutlogstream
 
     if stdoutlogstream is None:
+      from rich.logging import RichHandler
+      #stdoutlogstream = RichHandler()
       stdoutlogstream = logging.StreamHandler(sys.stdout)
-      stdoutlogstream.setLevel(logging.WARNING)
+      stdoutlogstream.setLevel(logging.ERROR)
       streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
       stdoutlogstream.setFormatter(streamFormater)
       rootlogger.addHandler(stdoutlogstream)
@@ -231,6 +241,17 @@ class Session(object):
     #indicates that the session runs in debug mode
     self.debug = debug
 
+    #indicates if the session has a defined console where information should be printed to.
+    #This variabel can be explitly set but is also said by some methods if needed.
+    #Remark: Information will be always printed into the log (if said) indipendent from the console.
+    self._console = None
+
+    # indicates if the session has a progress indicator active that should be used (e.g. if processed actions are
+    # reported).
+    self._progress_indicator = None
+    # Lookup that is used to map an action tag to a task id for the progress indicator.
+    # This lookup is only valid and set if a progress indicator is defined.
+    self.__progress_task_lookup = dict()
 
   def __del__(self):
     global currentGeneratedSession
@@ -312,14 +333,18 @@ class Session(object):
           self.executed_actions.append(action)
           logging.debug("stored action token: %s", action)
           if action.isSuccess:
-              if len(action._last_warnings)>0:
-                  print('W', end='')
+              if action.has_warnings:
+                  self.print('W', end='')
               else:
-                print('.', end='')
+                self.print('.', end='')
           elif action.isSkipped:
-              print('S', end='')
+              self.print('S', end='')
           else:
-              print('E', end='')
+              self.print('E', end='')
+
+          if not self._progress_indicator is None:
+              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
+                                              advance=1)
 
   def addArtefact(self, artefactEntry, removeSimelar = False):
     ''' 
@@ -370,6 +395,17 @@ class Session(object):
 
     return succActions
 
+  def getSuccessfulActionsWithWarnings(self):
+    """Returns all actions of the session that have been successful but with warnings."""
+    succActions = []
+
+    with self.lock:
+      for action in self.executed_actions:
+        if action.isSuccess and len(action.last_warnings)>0:
+          succActions.append(action)
+
+    return succActions
+
   def hasFailedActions(self):
       """An project is defined as failed, if at least on action the project depends on has failed. Retruns true if the project is assumed as failed. Returns true if all actions were successful or skipped"""
       failedActions = self.getFailedActions()
@@ -380,8 +416,93 @@ class Session(object):
       self._batch_actions.append(batch_action)
 
   def run_batches(self):
-    for batch_action in self._batch_actions:
-      batch_action.do()
 
+    self.executed_actions = list()
+
+    if self._console is None:
+      self._console = Console()
+
+    if self._progress_indicator is None:
+      self._progress_indicator = Progress(console=self._console)
+
+    self.__progress_task_lookup = dict()
+    task_batches = self._progress_indicator.add_task('Batches', total=len(self._batch_actions))
+    for batch_action in self._batch_actions:
+      self.__progress_task_lookup[batch_action.actionTag] = self._progress_indicator.add_task(f'{batch_action.actionTag}', total=None)
+
+    self.print('AVID Perform batch actions on session "{}"'.format(self.name))
+    self._console.rule()
+    self.print_session_info()
+
+    with self._progress_indicator:
+      for batch_pos, batch_action in enumerate(self._batch_actions):
+        self._console.rule(title='Batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(self._batch_actions)) )
+        self.print('Start batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(self._batch_actions)))
+        self.print('Prepare actions ')
+        batch_action.generateActions()
+        self.print('Generated action instances: {}'.format(len(batch_action._actions)))
+        self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag], total=len(batch_action._actions))
+
+        self.print('Process actions ', end='')
+        batch_action.do()
+        self.print('\n')
+
+        if batch_action.isFailure:
+          self._console.rule(title=f'[red]Batch action "{batch_action.actionTag}" failed action diagnostics[/red]')
+          failed_actions = batch_action.getFailedActions()
+          for failed_action in failed_actions:
+            print_action_diagnostics(failed_action, self._console)
+            self._console.print('\n')
+
+        self._progress_indicator.update(task_batches, advance=1)
+
+
+  def print(self, *args,**nargs):
+    if not self._console is None:
+      self._console.print(*args, **nargs)
+
+  def print_session_info(self):
+    self.print(f'Session name: {self.name}')
+    self.print(f'Session path: {self.rootPath}')
+    self.print(f'Debug mode: {self.debug}')
+
+
+def print_action_diagnostics(action, console, debug=False):
+  console.print(f'Action tag: {action.actionTag}')
+  console.print(f'Action instance UID: {action.actionInstanceUID}')
+  color_modifier = ''
+  if action.isSuccess:
+    if action.has_warnings:
+      color_modifier = '[yellow]'
+    else:
+      color_modifier = '[green]'
+  elif action.isFailure:
+    color_modifier = '[red]'
+
+  console.print(f'Status: {color_modifier}{action.last_exec_state}')
+
+  if debug:
+    console.print('Instance inspection:')
+    rich_inspect(action, private=True, docs=False)
+
+  if action.has_warnings:
+    warning_panels = list()
+    for (pos, warning) in enumerate(action.last_warnings):
+      detail_panels = list()
+      (warn_detail, exception) = warning
+      detail_panels.append(f'[bold]Details:[/bold]\n{warn_detail}\n')
+      if not exception is None:
+        detail_panels.append('[bold]Exception:[/bold]')
+        detail_panels.append(RichTraceback.from_exception(exception.__class__, exception, exception.__traceback__))
+
+      panel_title = f'Warning #{pos}'
+      if action.isFailure:
+        panel_title = f'Error #{pos}'
+
+      warning_panels.append(RichPanel(RichColumns(detail_panels), title=panel_title))
+
+    console.print('Instance warnings/errors:')
+    warn_panel = RichPadding(RichColumns(warning_panels),pad=(0,0,0,4))
+    console.print(warn_panel)
 
 currentGeneratedSession = None

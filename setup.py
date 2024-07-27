@@ -47,7 +47,7 @@ setup(
     install_requires=[],
     # the requirements are only need for special configurations.
 	extras_require = {
-        'pyoneer':  ["pyhtml==0.7.0"],
+        'rich': ["rich==13.7.1"],
     },
     # after running setup.py, you will be able to call samplepackage_exe
     # from the console as if it was a normal binary. It will call the function
