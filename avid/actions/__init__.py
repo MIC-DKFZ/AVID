@@ -173,7 +173,7 @@ class ActionBase(object):
 
     def do(self):
         '''Triggers the processing of an action instance. This should be used as public
-        trigger of an action.'''
+        trigger of an action. Returns the action instance itself.'''
         global logger
         logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 
@@ -183,7 +183,7 @@ class ActionBase(object):
 
         logger.info(f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
         self._notifyActionFinished()
-        return self._last_exec_state
+        return self
 
     def _reportWarning(self, details, exception=None):
         """Helper function that is used to report a warning happening in an action.
@@ -730,13 +730,13 @@ class BatchActionBase(ActionBase):
         return skippedActions
 
 
-    def getSuccessfulActions(self):
+    def getSuccessfulActions(self, no_warnings=False):
         """Returns all actions of the session that have been successful."""
         succActions = []
 
         with self.lock:
             for action in self._actions:
-                if action.isSuccess:
+                if action.isSuccess and not (no_warnings and action.has_warnings):
                     succActions.append(action)
 
         return succActions
