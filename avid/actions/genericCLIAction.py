@@ -49,7 +49,7 @@ def _generateAdditionalArgValueString(arg_value):
 
 def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positions=None,
                       artefact_url_extraction_delegate=None):
-    """Helper that generates the the cli call string for a given set of artefact selection arguments and normal
+    """Helper that generates the cli call string for a given set of artefact selection arguments and normal
     arguments.
     :param exec_url: The argument for the cli itself.
     :param artefact_args: Dictionary of artefact selections as values. The key is the flag (without "-" or "--"; they

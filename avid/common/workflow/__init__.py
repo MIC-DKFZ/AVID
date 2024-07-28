@@ -327,25 +327,6 @@ class Session(object):
     with self.lock:    
       self.actionTools[actionID] = entry
 
-  def addProcessedActionInstance(self, action):
-      """Adds a action token to a workflow (with the session info)"""
-      with self.lock:
-          self.executed_actions.append(action)
-          logging.debug("stored action token: %s", action)
-          if action.isSuccess:
-              if action.has_warnings:
-                  self.print('W', end='')
-              else:
-                self.print('.', end='')
-          elif action.isSkipped:
-              self.print('S', end='')
-          else:
-              self.print('E', end='')
-
-          if not self._progress_indicator is None:
-              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
-                                              advance=1)
-
   def addArtefact(self, artefactEntry, removeSimelar = False):
     ''' 
         This method adds an arbitrary artefact entry to the artefact list.
@@ -412,49 +393,98 @@ class Session(object):
               
       return len(failedActions) != 0
 
+  def addProcessedActionInstance(self, action):
+      """Adds an action to the session instance as processed action"""
+      with self.lock:
+          self.executed_actions.append(action)
+          logging.debug("stored action token: %s", action)
+          if not self._console is None and not self._console.is_terminal:
+              #If console is not a terminal, the progressbars and live status want be
+              #shown, thus we indicate the progress with explizit print outs
+              if action.isSuccess:
+                  if action.has_warnings:
+                      self.print('W', end='')
+                  else:
+                    self.print('.', end='')
+              elif action.isSkipped:
+                  self.print('S', end='')
+              else:
+                  self.print('E', end='')
+
+          if not self._console is None and action.isFailure:
+            self._console.print(f'\n[red]Failed action diagnostics[/red]')
+            print_action_diagnostics(action, console=self._console, debug=self.debug)
+            self._console.print('\n')
+
+          if not self._progress_indicator is None:
+              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
+                                              advance=1)
+
   def registerBatchAction(self, batch_action):
       self._batch_actions.append(batch_action)
 
-  def run_batches(self):
 
-    self.executed_actions = list()
+  def run_batches(self, from_action=None, up_to_action=None):
+      """Method runs all registred batch actions of a session.
+      :param from_action: Controls from which batch action on the processing is started. None always starts at the first
+      action.
+      :param up_to_action: Controls up to which batch action the processing is conducted. The defined action will not
+      be processed. The processing will stop directly before the action. None will start a processing up to, including
+      the last batch action."""
+      relevant_batches = self._batch_actions.copy()
 
-    if self._console is None:
-      self._console = Console()
+      start_index = 0
+      if not from_action is None:
+          try:
+              start_index = relevant_batches.index(from_action)
+          except ValueError:
+              raise ValueError('Passed from_action instance is not registered for session')
+      stop_index = len(relevant_batches)
+      if not up_to_action is None:
+          try:
+              stop_index = relevant_batches.index(up_to_action)
+          except ValueError:
+              raise ValueError('Passed up_to_action instance is not registered for session')
 
-    if self._progress_indicator is None:
-      self._progress_indicator = Progress(console=self._console)
+      relevant_batches = relevant_batches[start_index:stop_index]
 
-    self.__progress_task_lookup = dict()
-    task_batches = self._progress_indicator.add_task('Batches', total=len(self._batch_actions))
-    for batch_action in self._batch_actions:
-      self.__progress_task_lookup[batch_action.actionTag] = self._progress_indicator.add_task(f'{batch_action.actionTag}', total=None)
+      self.executed_actions = list()
 
-    self.print('AVID Perform batch actions on session "{}"'.format(self.name))
-    self._console.rule()
-    self.print_session_info()
+      if self._console is None:
+        self._console = Console()
 
-    with self._progress_indicator:
-      for batch_pos, batch_action in enumerate(self._batch_actions):
-        self._console.rule(title='Batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(self._batch_actions)) )
-        self.print('Start batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(self._batch_actions)))
-        self.print('Prepare actions ')
-        batch_action.generateActions()
-        self.print('Generated action instances: {}'.format(len(batch_action._actions)))
-        self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag], total=len(batch_action._actions))
+      if self._progress_indicator is None:
+        self._progress_indicator = Progress(console=self._console,  transient=True)
 
-        self.print('Process actions ', end='')
-        batch_action.do()
-        self.print('\n')
+      self.__progress_task_lookup = dict()
+      task_batches = self._progress_indicator.add_task('Batches', total=len(relevant_batches))
+      for batch_action in relevant_batches:
+        self.__progress_task_lookup[batch_action.actionTag] = self._progress_indicator.add_task(f'{batch_action.actionTag}', total=None)
 
-        if batch_action.isFailure:
-          self._console.rule(title=f'[red]Batch action "{batch_action.actionTag}" failed action diagnostics[/red]')
-          failed_actions = batch_action.getFailedActions()
-          for failed_action in failed_actions:
-            print_action_diagnostics(failed_action, self._console)
-            self._console.print('\n')
+      self.print('AVID Perform batch actions on session "{}"'.format(self.name))
+      self._console.rule()
+      self.print_session_info()
 
-        self._progress_indicator.update(task_batches, advance=1)
+      with self._progress_indicator:
+        for batch_pos, batch_action in enumerate(relevant_batches):
+          self._console.rule(title='Batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(relevant_batches)) )
+          self.print('Start batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(relevant_batches)))
+          self.print('Prepare actions ')
+          batch_action.generateActions()
+          self.print('Generated action instances: {}'.format(len(batch_action._actions)))
+          self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag], total=len(batch_action._actions))
+
+          self.print('Process actions ', end='')
+          batch_action.do()
+          self.print('\n')
+
+          self.print(f'Batch summary:\n'
+                     f'Success: [green]{len(batch_action.getSuccessfulActions(no_warnings=True))}[/green]'
+                     f'   Skipped: {len(batch_action.getSkippedActions())}'
+                     f'   Warning: [yellow]{len(batch_action.getSuccessfulActionsWithWarnings())}[/yellow]'
+                     f'   Error: [red]{len(batch_action.getFailedActions())}[/red]\n')
+
+          self._progress_indicator.update(task_batches, advance=1)
 
 
   def print(self, *args,**nargs):
