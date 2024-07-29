@@ -90,7 +90,8 @@ def getDefaultToolsSourceConfigPath():
       
 def getToolsPath(checkExistance=True):
   '''
-     identify the Utility root dir (here are the specific action subdirs located)
+     identify the Tools root dir, which contains one folder for all the tool packages and
+     one for the specific action subdirs located
   '''
   toolspath = None
   configPath = getAVIDConfigPath()
