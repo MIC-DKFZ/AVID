@@ -54,7 +54,33 @@ def getAVIDConfigPath():
   Gets the path to the AVID config file.
   '''
   return os.path.join(getAVIDProjectRootPath(), "avid.config")
-   
+
+def ensureExistance(func):
+  def inner(*args, **kwargs):
+    result = func(*args, **kwargs)
+    if os.path.isdir(result) or os.path.isfile(result):
+      return result
+    else:
+      raise Exception("Tried to get path {} that does not exist.".format(result))
+
+  return inner
+
+
+@ensureExistance
+def getPackagePath(package):
+  return os.path.join(getAVIDProjectRootPath(), "tool-packages", package)
+
+
+@ensureExistance
+def getPackageSourcePath(package):
+  return os.path.join(getPackagePath(package), "sources.config")
+
+
+@ensureExistance
+def getPackageToolsConfigPath(package):
+  return os.path.join(getPackagePath(package), "tools.config")
+
+
 def getDefaultToolsSourceConfigPath():
   '''
   Gets the path to the AVID config file.
@@ -62,9 +88,10 @@ def getDefaultToolsSourceConfigPath():
   return os.path.join(getAVIDProjectRootPath(), "tools-sources.config")
    
       
-def getUtilityPath(checkExistance = True): 
+def getToolsPath(checkExistance=True):
   '''
-     identify the Utility root dir (here are the specific action subdirs located)
+     identify the Tools root dir, which contains one folder for all the tool packages and
+     one for the specific action subdirs located
   '''
   toolspath = None
   configPath = getAVIDConfigPath()
@@ -72,46 +99,57 @@ def getUtilityPath(checkExistance = True):
   if os.path.isfile(configPath):
     config = configparser.ConfigParser()
     config.read(configPath)
-    toolspath = config.get('avid','toolspath') 
+    toolspath = config.get('avid', 'toolspath')
           
   if toolspath is None:
     rootPath = getAVIDProjectRootPath()
-    toolspath = os.path.join(rootPath,"Utilities")
+    toolspath = os.path.join(rootPath, "Utilities")
   
   if os.path.isdir(toolspath) or not checkExistance:
     return toolspath
   else:
     return None
+
+
+def getToolConfigsPath(checkExistance=True, toolsPath=None):
+  if toolsPath is None:
+    toolsPath = getToolsPath(checkExistance=False)
+
+  toolPath = os.path.join(toolsPath, "tool-configs")
+
+  if os.path.isdir(toolPath) or not checkExistance:
+    return toolPath
+  else:
+    return None
+
   
-def getToolConfigPath(actionID, workflowRootPath = None, checkExistance = True):
+def getToolConfigPath(actionID, workflowRootPath=None, checkExistance=True, toolsPath=None):
   ''' Helper functions that gets the path to the config file for the passed actionID
       If workflowRootPath is set it will be also checked 
      @param actionID of the action that requests the URL
      @param workflowRootPath Path of the workflow. If none it will be ignored.
      @param checkExistance Indicates if only existing paths should be returned. If True and config path
      does not exist or can be determined, None will be returned.
-     The following rules will used to determine the tool config path.
+     The following rules will be used to determine the tool config path.
      1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
-     2. check the path:<AVID toolspath>/<actionID>/avidtool.config. If it is valid, return it else 2. 
+     2. check the path:<AVID toolspath>/tool-configs/<actionID>/avidtool.config. If it is valid, return it else 2.
      3. check path:avidRoot/Utilities/<actionID>/avidtool.config. If it is valid, return it else 4.
      4. return None      
   '''
-  configPath = None
 
-  if not workflowRootPath is None:
-    testPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")
-    if os.path.isfile(testPath):
-      configPath = testPath
+  if workflowRootPath is not None:
+    configPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")
+    if os.path.isfile(configPath):
+      return configPath
 
-  if configPath is None:
-    try:
-      testPath = os.path.join(getUtilityPath(), actionID, "avidtool.config")
-      if os.path.isfile(testPath) or not checkExistance:
-        configPath = testPath
-    except:
-      pass
+  if toolsPath is None:
+    toolsPath = getToolsPath()
+  toolConfigsPath = getToolConfigsPath(checkExistance=False)
+  configPath = os.path.join(toolConfigsPath, actionID, "avidtool.config")
+  if os.path.isfile(configPath) or not checkExistance:
+    return configPath
   
-  return configPath       
+  return None
 
 
 def getExecutableURL(workflow, actionID, actionConfig = None):
@@ -192,4 +230,4 @@ def getDefaultPath():
      returns a default path for actions
      This method is called if the action executable can't be found elsewhere see getExecutablePath()
   '''
-  return getUtilityPath()
+  return getToolsPath()
