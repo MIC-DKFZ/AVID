@@ -59,7 +59,7 @@ def collectFileConverterOutputs(actionInstance, indicatedOutputs, artefactHelper
         #there are additional outputs also add them
         result_sub_tag = 1
         for file in additional_files:
-            new_artefact = copy(temp_output)
+            new_artefact = temp_output.clone()
             new_artefact[artefactProps.RESULT_SUB_TAG] = result_sub_tag
             new_artefact[artefactProps.URL] = file
             result_sub_tag += 1

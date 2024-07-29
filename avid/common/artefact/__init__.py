@@ -62,7 +62,7 @@ class Artefact(object):
             self._defaultProps[defaultProps.CASE] = None
             self._defaultProps[defaultProps.CASEINSTANCE] = None
             self._defaultProps[defaultProps.TIMEPOINT] = 0
-            self._defaultProps[defaultProps.ACTIONTAG] = "unkown_tag"
+            self._defaultProps[defaultProps.ACTIONTAG] = "unknown_tag"
             self._defaultProps[defaultProps.TYPE] = None
             self._defaultProps[defaultProps.FORMAT] = None
             self._defaultProps[defaultProps.URL] = None
@@ -179,6 +179,12 @@ class Artefact(object):
 
     def __copy__(self):
         newArtefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
+        return newArtefact
+
+    def clone(self):
+        """ Create a copy of the artefact with its own uid """
+        newArtefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
+        newArtefact[defaultProps.ID] = str(uuid.uuid1())
         return newArtefact
 
 
