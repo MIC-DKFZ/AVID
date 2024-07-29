@@ -111,7 +111,6 @@ def getToolsPath(checkExistance=True):
     return None
 
 
-# TODO remove?
 def getToolConfigsPath(checkExistance=True, toolsPath=None):
   if toolsPath is None:
     toolsPath = getToolsPath(checkExistance=False)
