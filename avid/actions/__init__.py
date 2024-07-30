@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import threading
 from builtins import str
 from builtins import object
 import os
@@ -23,18 +23,28 @@ import logging
 import time
 import uuid
 
-from ..common import actionToken
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 from .simpleScheduler import SimpleScheduler
 import avid.common.workflow as workflow
 from .actionBatchGenerator import ActionBatchGenerator
+from ..selectors import ActionTagSelector
 
 logger = logging.getLogger(__name__)
 
 class ActionBase(object):
-    '''Base class for action objects used in the pipeline.'''
+    '''Base class for action objects used in AVID to do any kind of processing with/on artefacts.'''
+
+    """Indicating the success of the (last) execution of an action instance."""
+    ACTION_SUCCESS = "SUCCESS"
+    """Indicating the failure of the (last) execution of an action instance."""
+    ACTION_FAILURE = "FAILURE"
+    """Indicating the skipping of the (last) execution of an action. As any outputs the action instance
+    would produce are available and still up to date."""
+    ACTION_SKIPPED = "SKIPPED"
+    """Indicating that the action instance was not executed so far."""
+    ACTION_PENDING = "PENDING"
 
     def __init__(self, actionTag, session=None, additionalActionProps=None):
         '''init the action and setting the workflow session, the action is working
@@ -54,11 +64,20 @@ class ActionBase(object):
             self._additionalActionProps = {}
 
         self._outputArtefacts = None
-        self._lastToken = None
+        self._last_exec_state = self.ACTION_PENDING
+
+        #list of all warnings captured since the last execution of the action. Elements of this list are
+        #pair tuples of detail strings and exception instances (if provided; if not provided the 2nd
+        #value is None).
+        self._last_warnings = list()
 
     @property
     def actionTag(self):
         return self._actionTag
+
+    @property
+    def actionTagSelector(self):
+        return ActionTagSelector(self._actionTag)
 
     @property
     def actionInstanceUID(self):
@@ -66,9 +85,37 @@ class ActionBase(object):
 
     @property
     def outputArtefacts(self):
-        if self._outputArtefacts is None and self._lastToken is None:
+        if self._outputArtefacts is None and self.isPending:
             self.indicateOutputs()
         return self._outputArtefacts
+
+    @property
+    def last_exec_state(self):
+        return self._last_exec_state
+
+    @property
+    def last_warnings(self):
+        return self._last_warnings
+
+    @property
+    def has_warnings(self):
+        return len(self._last_warnings) > 0
+
+    @property
+    def isSuccess(self):
+        return self._last_exec_state == self.ACTION_SUCCESS
+
+    @property
+    def isFailure(self):
+        return self._last_exec_state == self.ACTION_FAILURE
+
+    @property
+    def isSkipped(self):
+        return self._last_exec_state == self.ACTION_SKIPPED
+
+    @property
+    def isPending(self):
+        return self._last_exec_state == self.ACTION_PENDING
 
     def _init_session(self, session = None):
         if session is None:
@@ -76,22 +123,22 @@ class ActionBase(object):
             if workflow.currentGeneratedSession is not None:
                 self._session = workflow.currentGeneratedSession
             else:
-                raise ValueError("Session passed to the action is invalid. Session is None.")
+                raise ValueError("Session passed to the action is invalid and no global session found."
+                                 "Cannot init action.")
         else:
             self._session = session
-
 
     def indicateOutputs(self):
         ''' Return a list of artefact entries the action will produce if do() is
           called. The method should return complete entries.
-          Therefore the entries should already contain the url where they
+          Therefore, the entries should already contain the url where they
           *will* be stored if the action is executed.
           Remark: The output indication might not represent the final result of an action
           (e.g. because an action is not able to determine the outputs before they are actually
           generated.). This the list might only indicate the assumed outputs. Also An action can return
           None to signal that it cannot indicate the outputs before generation.
           :return: Either a list of indicated outputs or None.'''
-        if self._outputArtefacts is None and self._lastToken is None:
+        if self._outputArtefacts is None and self.isPending:
             self._outputArtefacts = self._indicateOutputs()
 
         return self._outputArtefacts
@@ -121,43 +168,36 @@ class ActionBase(object):
           This Method is used internally (e.g. when ever an action is used by an other
           action; and no action tag should be added to the session. '''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
-        # Implement: what the action should realy do
+        # Implement: what the action should really do
         pass
 
-    def do(self, autoTokenAdding=True):
-        '''Triggers the processing of an action. This should be used as public
-        trigger of an action.
-        @param autoTokenAdding You can control if the resulting session token should
-        be automatically added to the session by the optional flag autoTokenAdding.
-        Normally it is activated, but may be useful to deactivate it if you trigger
-        an action within an other action. See the schedulers of batch actions for
-        example.'''
+    def do(self):
+        '''Triggers the processing of an action instance. This should be used as public
+        trigger of an action. Returns the action instance itself.'''
         global logger
         logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 
-        token = self._do()
+        self._last_warnings = list()
 
-        if autoTokenAdding:
-            self._session.addActionToken(token)
+        (self._last_exec_state, self._outputArtefacts) = self._do()
 
-        status = "SUCCESS"
-        if token.isSkipped():
-            status = "SKIPPED"
-        elif token.isFailure():
-            status = "FAILURE"
+        logger.info(f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
+        self._notifyActionFinished()
+        return self
 
-        self._lastToken = token
-        self._outputArtefacts = token.generatedArtefacts
-        logger.info("Finished action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") -> " + status)
-        return token
+    def _reportWarning(self, details, exception=None):
+        """Helper function that is used to report a warning happening in an action.
+        @param details: string containing the details for that warning that should be
+        reported.
+        @param exception: If the warning was detected due to an exception it can also be passed
+        with this parameter."""
+        self._last_warnings.append((details, exception))
+        logger.warning(details)
 
-    def generateActionToken(self, state=actionToken.ACTION_SUCCESS):
-        ''' Helper function that creates a action token (with the passed state
-        for the current action instance and pass the token back. '''
-        token = actionToken.ActionToken(self._session, self.actionTag, self.instanceName, state)
-
-        return token
-
+    def _notifyActionFinished(self):
+        """Method that is called by do() to signal the session that a certain action is finished.
+        Default implementation does nothing."""
+        pass
 
 class SingleActionBase(ActionBase):
     '''Base class for action that directly will work on artefact and generate them.'''
@@ -200,7 +240,7 @@ class SingleActionBase(ActionBase):
         if isinstance(artefacts, Artefact):
             return artefacts
         if len(artefacts) > 1:
-            logger.warning("Action %s only supports one artefact as %s. Use first one.".format(self.__class__.__name__,name))
+            self._reportWarning('Action class {} only supports one artefact as {}. Use first one.'.format(self.__class__.__name__, name))
         return artefacts[0]
 
     def _ensureArtefacts(self, artefacts, name):
@@ -211,16 +251,15 @@ class SingleActionBase(ActionBase):
             return None
         from avid.common.artefact import Artefact
         if isinstance(artefacts, Artefact):
-            logger.warning(
-                'Action {} was init in an deprecated style for input "{}"; not an list of artefacts where passed but'
-                ' only an artefact. Check usage. Illegal artefact: {}.'.format(
+            self._reportWarning('Action {} was init in an deprecated style for input "{}"; not an list of artefacts'
+                               ' where passed but only an artefact. Check usage. Illegal artefact: {}.'.format(
                     self.__class__.__name__, name, artefacts))
             return [artefacts]
         for artefact in artefacts:
             if artefact is not None and not isinstance(artefact, Artefact):
-                logger.warning(
-                    "An instance that is not of class Artefact was passed to the action {} as {}. Illegal element: {}.".format(
-                        self.__class__.__name__, name, artefact))
+                self._reportWarning(
+                    'An instance that is not of class Artefact was passed to the action {} as {}.'
+                    ' Illegal element: {}.'.format(self.__class__.__name__, name, artefact))
                 return None
 
         return artefacts
@@ -244,8 +283,8 @@ class SingleActionBase(ActionBase):
         stubArtefact[artefactProps.CASEINSTANCE] = None
         for inputKey in inputArtefacts:
             if not artefactHelper.ensureCaseInstanceValidity(stubArtefact, *inputArtefacts[inputKey]):
-                logger.warning("Case instance conflict raised by the input artefact of the action. Input artefacts %s",
-                               inputArtefacts)
+                self._reportWarning('Case instance conflict raised by the input artefact of the action.'
+                                   ' Input artefacts {}'.format(inputArtefacts))
 
         self._caseInstance = stubArtefact[artefactProps.CASEINSTANCE]
 
@@ -302,7 +341,10 @@ class SingleActionBase(ActionBase):
                     if propID in self._inputArtefacts[self._propInheritanceDict[propID]][0]:
                         result[propID] = artefactHelper.getArtefactProperty(self._inputArtefacts[self._propInheritanceDict[propID]][0],propID)
                     if len(self._inputArtefacts[self._propInheritanceDict[propID]])>1:
-                        logger.warning('Input %s has more then one artefact. Use only first artefact to inherit property "%s". Used artefact: %s', self._propInheritanceDict[propID], propID, self._inputArtefacts[self._propInheritanceDict[propID]][0])
+                        self._reportWarning('Input {} has more then one artefact. Use only first artefact to inherit'
+                                           ' property "{}". Used artefact: {}'
+                                            .format(self._propInheritanceDict[propID], propID,
+                                                   self._inputArtefacts[self._propInheritanceDict[propID]][0]))
                 except:
                     pass
 
@@ -446,7 +488,7 @@ class SingleActionBase(ActionBase):
         outputs = self.indicateOutputs()
         (isNeeded, alternatives) = self._checkNecessity(outputs)
 
-        token = self.generateActionToken()
+        state = ActionBase.ACTION_SUCCESS
 
         if self._alwaysDo or isNeeded:
             isValid = False
@@ -456,27 +498,60 @@ class SingleActionBase(ActionBase):
             
             invalidInputs = self._getInvalidInputs()
             if len(invalidInputs) == 0:
+                failure_occurred = False
                 try:
                     self._generateOutputs()
                     endtime = time.time()
-                    outputs = self._collectOutputs(indicatedOutputs = outputs)
-                    (isValid, outputs) = self._checkOutputsExistance(outputs)
                 except BaseException as e:
-                    logger.warning(
-                        '(Action instance UID: %s) Error while generating outputs for action tag "%s". All outputs will be marked as invalid. Error details: %s',
-                        self.actionInstanceUID, self.actionTag, str(e))
+                    self._reportWarning(f'Error occurred while generating outputs for action tag "{self.actionTag}".'
+                                        ' The error occurred in the class specific implementation of the'
+                                        f' _generateOutputs method of "{self.__class__}". Please check the'
+                                        ' implementation of the method or the class documentation.'
+                                        f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                        , exception=e)
+                    failure_occurred = True
                 except:
-                    logger.warning(
-                        '(Action instance UID: %s) Unkown error while generating outputs for action tag "%s". All outputs will be marked as invalid.',
-                        self.actionInstanceUID, self.actionTag)
+                    self._reportWarning('Unknown error occurred while generating outputs for action tag'
+                                        f' "{self.actionTag}".'
+                                        ' The error occurred in the class specific implementation of the'
+                                        f' _generateOutputs method of "{self.__class__}". Please check the'
+                                        ' implementation of the method or the class documentation.'
+                                        ' All outputs will be marked as invalid.')
+                    failure_occurred = True
+
+                if not failure_occurred:
+                    try:
+                        outputs = self._collectOutputs(indicatedOutputs = outputs)
+                        (isValid, outputs) = self._checkOutputsExistance(outputs)
+                    except BaseException as e:
+                        self._reportWarning('Error occurred while collecting generated outputs for action tag'
+                                            f' "{self.actionTag}".'
+                                            f' If the action class "{self.__class__}" has a specific implementation of the'
+                                            f' _collectOutputs method, please check the'
+                                            ' implementation of the method or the class documentation.'
+                                            f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                            , exception=e)
+                        failure_occurred = True
+                    except:
+                        self._reportWarning('Unknown error occurred while collecting generated outputs for action tag'
+                                            f' "{self.actionTag}".'
+                                            f' If the action class "{self.__class__}" has a specific implementation of the'
+                                            f' _collectOutputs method, please check the'
+                                            ' implementation of the method or the class documentation.'
+                                            ' All outputs will be marked as invalid.')
+                        failure_occurred = True
+
             else:
-                logger.warning("Action failed due to at least one invalid input. All outputs are marked as invalid. Invalid inputs: %s", str(self._inputArtefacts))
+                self._reportWarning('Action failed due to at least one invalid input. All outputs are marked as invalid.'
+                                    ' Typical reason for that error is that a preceding action (that generated inputs)'
+                                    ' failed and generated the invalid inputs.'
+                                    ' Invalid inputs: {}'.format(self._inputArtefacts))
 
             if not isValid:
                 for artefact in outputs:
                     artefact[artefactProps.INVALID] = True
 
-            token.generatedArtefacts = outputs
+            generatedArtefacts = outputs
       
             for artefact in outputs:
                 try:
@@ -487,13 +562,18 @@ class SingleActionBase(ActionBase):
                 self._session.addArtefact(artefact, True)
 
             if not isValid:
-                token.state = actionToken.ACTION_FAILUER
+                state = ActionBase.ACTION_FAILURE
 
         else:
-            token.generatedArtefacts = alternatives
-            token.state = actionToken.ACTION_SKIPPED
+            generatedArtefacts = alternatives
+            state = ActionBase.ACTION_SKIPPED
 
-        return token
+        return (state, generatedArtefacts)
+
+    def _notifyActionFinished(self):
+        """Method that is called by do() to signal the session that a certain action is finished.
+        Default implementation does nothing."""
+        self._session.addProcessedActionInstance(self)
 
 class BatchActionBase(ActionBase):
     '''Base class for action objects that resemble the logic to generate and
@@ -556,6 +636,9 @@ class BatchActionBase(ActionBase):
         ActionBase.__init__(self, actionTag, session, additionalActionProps)
         self._actions = None
         self._scheduler = scheduler  # scheduler that should be used to execute the jobs
+        self._session.registerBatchAction(self)
+
+        self.lock = threading.RLock()
 
         actionParameters["actionTag"] = actionTag
         actionParameters["additionalActionProps"] = additionalActionProps
@@ -575,8 +658,7 @@ class BatchActionBase(ActionBase):
           called. Reimplement this method for derived actions. The method should
           return complete entries. Therefore the enties should already contain the
           url where they *will* be stored if the action is executed.'''
-        if self._actions is None:
-            self._actions = self._generateActions()
+        self.generateActions()
 
         outputs = list()
 
@@ -584,6 +666,13 @@ class BatchActionBase(ActionBase):
             outputs += action.indicateOutputs()
 
         return outputs
+
+    def generateActions(self):
+        """ Function that (pre)generates the actions of the batch action.
+        If actions are already generated, nothing will happen."""
+        if self._actions is None:
+            with self.lock:
+                self._actions = self._generateActions()
 
     def _generateActions(self):
         ''' Internal method that should generate all single actions that should be
@@ -597,19 +686,69 @@ class BatchActionBase(ActionBase):
     def _do(self):
         ''' Triggers the processing of an action. '''
 
-        if self._actions is None:
-            self._actions = self._generateActions()
+        self.generateActions()
 
-        tokens = self._scheduler.execute(self._actions)
+        self._scheduler.execute(self._actions)
 
-        token = self.generateActionToken(actionToken.ACTION_SKIPPED)
+        state = ActionBase.ACTION_SKIPPED
+        generatedArtefacts = list()
 
-        for aToken in tokens:
-            if aToken.isSuccess() and not token.isFailure():
-                token.state = actionToken.ACTION_SUCCESS
-            elif aToken.isFailure():
-                token.state = actionToken.ACTION_FAILUER
+        with self.lock:
+            for action in self._actions:
+                if action.isSuccess and not state == ActionBase.ACTION_FAILURE:
+                    state = ActionBase.ACTION_SUCCESS
+                elif action.isFailure:
+                    state = ActionBase.ACTION_FAILURE
 
-            token.generatedArtefacts.extend(aToken.generatedArtefacts)
+                generatedArtefacts.extend(action.outputArtefacts)
 
-        return token
+        return (state, generatedArtefacts)
+
+
+    def getFailedActions(self):
+        """Returns all actions of the session that have failed."""
+        failedActions = []
+
+        with self.lock:
+            for action in self._actions:
+                # check each action
+                if action.isFailure:
+                    failedActions.append(action)
+
+        return failedActions
+
+
+    def getSkippedActions(self):
+        """Returns all actions of the session that have been skipped."""
+        skippedActions = []
+
+        with self.lock:
+            for action in self._actions:
+                if action.isSkipped:
+                    skippedActions.append(action)
+
+        return skippedActions
+
+
+    def getSuccessfulActions(self, no_warnings=False):
+        """Returns all actions of the session that have been successful."""
+        succActions = []
+
+        with self.lock:
+            for action in self._actions:
+                if action.isSuccess and not (no_warnings and action.has_warnings):
+                    succActions.append(action)
+
+        return succActions
+
+
+    def getSuccessfulActionsWithWarnings(self):
+        """Returns all actions of the session that have been successful but with warnings."""
+        succActions = []
+
+        with self.lock:
+            for action in self._actions:
+                if action.isSuccess and len(action.last_warnings) > 0:
+                    succActions.append(action)
+
+        return succActions

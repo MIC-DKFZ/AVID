@@ -185,7 +185,16 @@ class PythonAction(SingleActionBase):
         if self._resultArtefacts is not None:
             destPath = artefactHelper.getArtefactProperty(self._resultArtefacts[0], artefactProps.URL)
             checkAndCreateDir(os.path.dirname(destPath))
-        self._generateCallable(**allargs)
+
+        try:
+            self._generateCallable(**allargs)
+        except BaseException as e:
+            self._reportWarning('Error occurred while trying to execute custom python callable to generated outputs for'
+                                f' action tag "{self.actionTag}".'
+                                ' Check the implementation of the generateCallable passed to action class'
+                                f' "{self.__class__}" to.', exception=e)
+            raise
+
 
 
 class PythonUnaryBatchAction(BatchActionBase):

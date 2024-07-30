@@ -47,31 +47,31 @@ class TestDoseTool(unittest.TestCase):
     def test_simple_action(self):
         action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
                           ['Heart', 'Breast'], actionTag="TestDoseTool")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
         self.assertEqual(len(action.outputArtefacts), 4)
 
-        token = action.do()
-        self.assertEqual(token.isSkipped(), True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_action_noDVH(self):
         action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
                           ['Heart', 'Breast'], computeDVH=False, actionTag="TestDoseTool_noDVH")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
         self.assertEqual(len(action.outputArtefacts), 2)
 
     def test_simple_action_alwaysdo(self):
         action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
                           ['Heart'], actionTag="TestDoseTool_alwaysDo", alwaysDo=True)
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

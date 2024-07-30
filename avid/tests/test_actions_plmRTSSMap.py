@@ -47,20 +47,20 @@ class TestPlmRTSSMap(unittest.TestCase):
       
       action = plmRTTSMap(ActionTagSelector('Struct'), outputFormat = FORMAT_VALUE_DCM,
                           actionTag = "TestPlmRTSSMap")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_action_cxt(self):
         action = plmRTTSMap(ActionTagSelector('Struct'), outputFormat=FORMAT_VALUE_PLM_CXT,
                             actionTag="TestPlmRTSSMap")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
     #TODO ad test that checks mapping with reg
     #def test_action_with_reg(self):

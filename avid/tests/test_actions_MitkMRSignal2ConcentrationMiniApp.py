@@ -45,9 +45,9 @@ class TestMRPerfusionMiniApp(unittest.TestCase):
     def test_simple_perf_descriptive_action(self):
       
       action = conversion(ActionTagSelector("Signal"), conversiontype=conversion.CONVERSION_T1_RELATIVE, actionTag = "TestConversion")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(True, token.isSuccess())
+      self.assertEqual(True, action.isSuccess)
 
 
 if __name__ == "__main__":

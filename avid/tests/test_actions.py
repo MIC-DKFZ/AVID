@@ -49,11 +49,6 @@ class Test(unittest.TestCase):
             shutil.rmtree(self.sessionDir)
         except:
             pass
-
-
-    def testName(self):
-        return "Test basic actions"
-
     
     def test_ActionBase(self):
 
@@ -83,5 +78,4 @@ class Test(unittest.TestCase):
       
       
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

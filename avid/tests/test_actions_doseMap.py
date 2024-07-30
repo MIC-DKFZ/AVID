@@ -48,19 +48,19 @@ class TestDoseMap(unittest.TestCase):
     def test_simple_dose_map_action(self):
       
       action = doseMap(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")      
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
   
 
     def test_simple_dose_map_action_alwaysdo(self):
       
       action = doseMap(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping", alwaysDo = True)
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

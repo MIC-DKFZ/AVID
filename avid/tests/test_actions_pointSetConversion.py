@@ -49,9 +49,9 @@ class TestPointSetConversion(unittest.TestCase):
       
       action = psConversion(ActionTagSelector("SourcePS"), targetformat=FORMAT_VALUE_MATCHPOINT_POINTSET,
                             actionTag="TestToMatchPoint", alwaysDo=False)
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
       refFilePath = os.path.join(self.testDataDir, "refMatchPoint"+os.extsep+"txt")
       resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
@@ -66,15 +66,15 @@ class TestPointSetConversion(unittest.TestCase):
           with open(resultFilePath) as resultFile:
               self.assertEqual(refFile.read(), resultFile.read())
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
     def test_to_fcsv(self):
         action = psConversion(ActionTagSelector("SourcePS"), targetformat=FORMAT_VALUE_SLICER_POINTSET,
                               actionTag="TestToFCSV", alwaysDo=False)
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
         refFilePath = os.path.join(self.testDataDir, "refMatchPoint" + os.extsep + "fcsv")
         resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
@@ -90,8 +90,8 @@ class TestPointSetConversion(unittest.TestCase):
             with open(resultFilePath) as resultFile:
                 self.assertEqual(refFile.read(), resultFile.read())
 
-        token = action.do()
-        self.assertEqual(token.isSkipped(), True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
 if __name__ == "__main__":
     unittest.main()

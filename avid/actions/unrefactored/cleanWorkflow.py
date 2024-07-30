@@ -21,7 +21,6 @@ import sys, os, shutil, stat
 
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import actionToken 
 from . import ActionBase
 from . import BatchActionBase
 from .simpleScheduler import SimpleScheduler
@@ -68,11 +67,9 @@ class cleanWorkflowAction(ActionBase):
 
     except:
       logger.error("Unexpected error: %s", sys.exc_info()[0])
-      raise    
+      raise
     
-    token = self.generateActionToken()
-    
-    return token
+    return (ActionBase.ACTION_SUCCESS, list())
 
 
   def _getListOfFiles(self, directory):

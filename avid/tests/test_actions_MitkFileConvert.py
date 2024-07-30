@@ -45,39 +45,39 @@ class TestMitkFileConverter(unittest.TestCase):
     def test_simple_convert_action(self):
 
       action = convert(inputSelector=ActionTagSelector("Simple"), actionTag = "TestConvert")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
       action = convert(ActionTagSelector("Simple"), defaultoutputextension='nii',
                       actionTag="TestConvert2")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
     def test_simple_convert_action_alwaysdo(self):
 
       action = convert(inputSelector=ActionTagSelector("Simple"), actionTag = "TestConvertAlwaysDo", alwaysDo=True)
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
     def test_splitting_convert_action(self):
 
       action = convert(inputSelector=ActionTagSelector("Splitting"), actionTag = "TestConvertSplitting")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
-      self.assertEqual(len(token.generatedArtefacts), 3)
-      self.assertEqual(token.generatedArtefacts[0][artefactProps.RESULT_SUB_TAG], '0')
-      self.assertEqual(token.generatedArtefacts[1][artefactProps.RESULT_SUB_TAG], '1')
-      self.assertEqual(token.generatedArtefacts[2][artefactProps.RESULT_SUB_TAG], '2')
+      self.assertEqual(action.isSuccess, True)
+      self.assertEqual(len(action.outputArtefacts), 3)
+      self.assertEqual(action.outputArtefacts[0][artefactProps.RESULT_SUB_TAG], '0')
+      self.assertEqual(action.outputArtefacts[1][artefactProps.RESULT_SUB_TAG], '1')
+      self.assertEqual(action.outputArtefacts[2][artefactProps.RESULT_SUB_TAG], '2')
 
 
 if __name__ == "__main__":

@@ -47,23 +47,23 @@ class TestMapR(unittest.TestCase):
     def test_simple_combiner_action(self):
       
       action = combineR(ActionTagSelector("reg1"), ActionTagSelector("reg2"), actionTag = "TestCombination")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_simple_combiner_action_alwaysdo(self):
 
       action = combineR(ActionTagSelector("reg1"), ActionTagSelector("reg2"), alwaysDo=True, actionTag = "TestCombination_alwaysDo")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

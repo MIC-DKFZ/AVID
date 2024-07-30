@@ -49,34 +49,34 @@ class TestMapR(unittest.TestCase):
     def test_simple_mapr_action(self):
       
       action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")      
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_simple_mapr_action_alwaysdo(self):
       
       action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping_alwaysdo")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
     def test_mapr_action_caselinking(self):
 
         action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       regLinker= CaseLinker(), actionTag = "TestMapping_caselinking")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
+        self.assertEqual(action.isSuccess, True)
 
-        token = action.do()
-        self.assertEqual(token.isSkipped(), True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_mapr_action_inputIsReference(self):
 
@@ -85,17 +85,17 @@ class TestMapR(unittest.TestCase):
 
         action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       alwaysDo=True, actionTag="TestMapping_inputIsReference")
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
-        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 1)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 1)
 
         action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
                       inputIsReference=False, alwaysDo=True, actionTag="TestMapping_inputIsReference")
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
         #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
         #the template
-        self.assertEqual(token.generatedArtefacts[0][TIMEPOINT], 0)
+        self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 0)
 
 
 if __name__ == "__main__":

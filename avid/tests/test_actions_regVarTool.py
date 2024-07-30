@@ -50,37 +50,37 @@ class TestRegVarTool(unittest.TestCase):
 
     def test_simple_regvartool_action(self):
       action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, actionTag = "TestRegVar")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
 
     def test_simple_regvar_action_alwaysdo(self):
       
       action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, alwaysDo = True, actionTag = "TestRegVar")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
     def test_simple_regvar_action_parameters(self):
       action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
                           algorithmDLL=self.algorithmDLLEuler, regParameters = self.parameters, actionTag="TestRegVarParam")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
     def test_simple_regvar_action_image(self):
       action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
                           algorithmDLL=self.algorithmDLLTPS, templateSelector=ActionTagSelector("Target"), actionTag="TestRegVarImage")
-      token = action.do()
+      action.do()
 
-      self.assertEqual(token.isSuccess(), True)
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

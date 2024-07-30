@@ -58,8 +58,8 @@ class MitkGIFeatureValueCollector(unittest.TestCase):
       session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testSmallArtefactFile)
 
       action = collector(ActionTagSelector('GIF'))
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
       #refFile = os.path.join(self.testDataDir, "ref_simple_small_values.csv")
       #resultFile = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0], artefactProps.URL)
@@ -68,16 +68,16 @@ class MitkGIFeatureValueCollector(unittest.TestCase):
 
       action = collector(feature_selector=ActionTagSelector('GIF'),selected_features = ['Mean'], value_table = False,
                          column_key = artefactProps.OBJECTIVE)
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
     def test_batch_action(self):
         session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
         action = collector(ActionTagSelector('GIF'), row_keys = [artefactProps.CASE, artefactProps.OBJECTIVE, artefactProps.TIMEPOINT])
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
         #refFile = os.path.join(self.testDataDir, "ref_simple_small_values.csv")
         #resultFile = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0], artefactProps.URL)
@@ -86,14 +86,14 @@ class MitkGIFeatureValueCollector(unittest.TestCase):
 
         action = collector(feature_selector=ActionTagSelector('GIF'),selected_features = ['Mean'], value_table = False,
                            row_keys = [artefactProps.CASE, artefactProps.TIMEPOINT], column_key = artefactProps.OBJECTIVE)
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
         action = collector(feature_selector=ActionTagSelector('GIF'), feature_splitter=KeyValueSplitter(artefactProps.OBJECTIVE),
                            selected_features = ['Mean'], value_table = False,
                            row_keys = [artefactProps.CASE], column_key = artefactProps.TIMEPOINT)
-        token = action.do()
-        self.assertEqual(token.isSuccess(), True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

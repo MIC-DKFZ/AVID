@@ -42,10 +42,10 @@ class TestArima(unittest.TestCase):
   def test_simple_arima_action(self):
 
     action = arima(ActionTagSelector("collector")+DoseStatSelector("maximum"), planSelector=ActionTagSelector("plan"), selectedStats="maximum", actionTag="SimpleArima")
-    token = action.do()
-    self.assertEqual(token.isSuccess(), True)
-    token = action.do()
-    self.assertEqual(token.isSkipped(), True)
+    action.do()
+    self.assertEqual(action.isSuccess, True)
+    action.do()
+    self.assertEqual(action.isSkipped, True)
 
 
 if __name__ == "__main__":

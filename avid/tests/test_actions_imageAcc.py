@@ -45,24 +45,24 @@ class TestDoseAcc(unittest.TestCase):
     def test_simple_image_acc_action(self):
       
       action = imageAcc(ActionTagSelector("Image"), actionTag = "SimpleAcc")
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
   
       action = imageAcc(ActionTagSelector("Image"), ActionTagSelector("Registration"), actionTag = "Acc+Reg")
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSkipped(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
+      action.do()
+      self.assertEqual(action.isSkipped, True)
 
     def test_simple_image_acc_action_alwaysdo(self):
       
       action = imageAcc(ActionTagSelector("Image"), actionTag = "SimpleAcc", alwaysDo = True)
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
-      token = action.do()
-      self.assertEqual(token.isSuccess(), True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
+      action.do()
+      self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

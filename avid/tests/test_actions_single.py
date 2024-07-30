@@ -61,11 +61,6 @@ class Test(unittest.TestCase):
             shutil.rmtree(self.sessionDir)
         except:
             pass
-
-
-    def testName(self):
-        return "Test SingleActionBase"
-      
           
     def test_simelar_exisiting_alwaysDo(self):
       '''Test if always do enforces the computation/adding of an
@@ -73,13 +68,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid_new],"Action1", True)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_valid_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_valid_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -90,13 +84,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSkipped())
-      self.assertIn(self.a_valid, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSkipped)
+      self.assertIn(self.a_valid, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_valid, self.session.artefacts)
       self.assertFalse(self.a_valid_new in self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 0)
@@ -106,14 +99,13 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid_new, self.a_NoneURL_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_valid_new, token.generatedArtefacts)
-      self.assertIn(self.a_valid_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 2)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_valid_new, action1.outputArtefacts)
+      self.assertIn(self.a_valid_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 2)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertFalse(self.a_valid in self.session.artefacts)
       self.assertIn(self.a_NoneURL_new, self.session.artefacts)
@@ -125,13 +117,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_NoneURL_new],"Action1")
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_NoneURL_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_NoneURL_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_NoneURL_new, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -140,13 +131,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_NoneURL_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_NoneURL_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_NoneURL_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_NoneURL_new, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -155,13 +145,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_NoFile_new],"Action1")
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_NoFile_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_NoFile_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_NoFile_new, self.session.artefacts)
 
       
@@ -170,13 +159,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_NoFile_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_NoFile_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_NoFile_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_NoFile_new, self.session.artefacts)
 
 
@@ -185,13 +173,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_Invalid_new],"Action1")
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_Invalid_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_Invalid_new, self.session.artefacts)
 
       
@@ -200,13 +187,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_Invalid_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_Invalid_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_Invalid_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_Invalid_new, self.session.artefacts)
       
 
@@ -214,13 +200,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid2_new],"Action1")
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_valid2_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_valid2_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_valid2_new, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -228,13 +213,12 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid2_new],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSuccess())
-      self.assertIn(self.a_valid2_new, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSuccess)
+      self.assertIn(self.a_valid2_new, action1.outputArtefacts)
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_valid2_new, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -242,14 +226,13 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_NoFile2],"Action1")
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isFailure())
-      self.assertIn(self.a_NoFile2, token.generatedArtefacts)
-      self.assertTrue(token.generatedArtefacts[0][artefactProps.INVALID])
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(token.actionTag, action1.actionTag)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isFailure)
+      self.assertIn(self.a_NoFile2, action1.outputArtefacts)
+      self.assertTrue(action1.outputArtefacts[0][artefactProps.INVALID])
+      self.assertEqual(len(action1.outputArtefacts), 1)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertIn(self.a_NoFile2, self.session.artefacts)
       self.assertEqual(action1.callCount_generateOutputs, 1)
 
@@ -259,12 +242,11 @@ class Test(unittest.TestCase):
       workflow.currentGeneratedSession = self.session
       action1 = DummySingleAction([self.a_valid_new, self.a_NoResult],"Action1", False)
       
-      token = action1.do()
+      action1.do()
       
-      self.assertTrue(token.isSkipped())
-      self.assertIn(self.a_valid, token.generatedArtefacts)
-      self.assertEqual(len(token.generatedArtefacts), 1)
-      self.assertEqual(self.session.actions[action1.actionTag], token)
+      self.assertTrue(action1.isSkipped)
+      self.assertIn(self.a_valid, action1.outputArtefacts)
+      self.assertIn(action1,self.session.executed_actions)
       self.assertFalse(self.a_valid_new in self.session.artefacts)
       self.assertFalse(self.a_NoResult in self.session.artefacts)
       self.assertIn(self.a_valid, self.session.artefacts)
@@ -372,16 +354,15 @@ class Test(unittest.TestCase):
         workflow.currentGeneratedSession = self.session
         action1 = DummySingleAction([self.a_valid_new, self.a_NoFile], "Action1", True)
 
-        token = action1.do()
+        action1.do()
 
-        self.assertTrue(token.isFailure())
-        self.assertIn(self.a_valid_new, token.generatedArtefacts)
-        self.assertIn(self.a_NoFile, token.generatedArtefacts)
-        self.assertEqual(len(token.generatedArtefacts), 2)
-        self.assertTrue(token.generatedArtefacts[0].is_invalid())
-        self.assertTrue(token.generatedArtefacts[1].is_invalid())
+        self.assertTrue(action1.isFailure)
+        self.assertIn(self.a_valid_new, action1.outputArtefacts)
+        self.assertIn(self.a_NoFile, action1.outputArtefacts)
+        self.assertEqual(len(action1.outputArtefacts), 2)
+        self.assertTrue(action1.outputArtefacts[0].is_invalid())
+        self.assertTrue(action1.outputArtefacts[1].is_invalid())
         self.assertEqual(action1.callCount_generateOutputs, 0)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

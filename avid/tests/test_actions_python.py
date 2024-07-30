@@ -102,39 +102,39 @@ class TestPythonAction(unittest.TestCase):
 
       action = unaryPython(ActionTagSelector("stats"), generateCallable = test_copy_script,
                            passOnlyURLs = True, actionTag = "TestUnary")
-      token = action.do()
+      action.do()
                     
-      self.assertEqual(token.isSuccess(), True)
-      result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+      self.assertEqual(action.isSuccess, True)
+      result = get_content(action.outputArtefacts[0][artefactProps.URL])
       self.assertEqual(result, '1')
-      result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+      result = get_content(action.outputArtefacts[1][artefactProps.URL])
       self.assertEqual(result, '2')
-      result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+      result = get_content(action.outputArtefacts[2][artefactProps.URL])
       self.assertEqual(result, '3')
 
     def test_unary_action_with_user_argument(self):
 
         action = unaryPython(ActionTagSelector("stats"), generateCallable=test_copy_script, additionalArgs={'times': 3},
                              passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '222')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        result = get_content(action.outputArtefacts[2][artefactProps.URL])
         self.assertEqual(result, '333')
 
     def test_binary_action(self):
         action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"), generateCallable=test_binary_copy_script,
                               indicateCallable=indicate_nary_output_script, passOnlyURLs=True, actionTag="TestBinary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '12')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '13')
 
 
@@ -142,23 +142,23 @@ class TestPythonAction(unittest.TestCase):
         action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"),
                               inputLinker=TimePointLinker(), generateCallable=test_binary_copy_script,
                               indicateCallable=indicate_nary_output_script, passOnlyURLs=True, actionTag="TestBinary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '12')
-        self.assertEqual(len(token.generatedArtefacts), 1)
+        self.assertEqual(len(action.outputArtefacts), 1)
 
     def test_binary_action_with_user_argument(self):
         action = binaryPython(inputs1Selector = ObjectiveSelector("a"), inputs2Selector = ObjectiveSelector("b"),
                               generateCallable=test_binary_copy_script, indicateCallable=indicate_nary_output_script,
                               passOnlyURLs=True, actionTag="TestBinary", additionalArgs={'times':3})
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '111222')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '111333')
 
     def test_nary_action(self):
@@ -166,62 +166,62 @@ class TestPythonAction(unittest.TestCase):
                             inputsThird = TimepointSelector(0),
                             generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
                             passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1*2+2')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        result = get_content(action.outputArtefacts[2][artefactProps.URL])
         self.assertEqual(result, '1*3+1')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
+        result = get_content(action.outputArtefacts[3][artefactProps.URL])
         self.assertEqual(result, '1*3+2')
-        self.assertEqual(len(token.generatedArtefacts), 4)
+        self.assertEqual(len(action.outputArtefacts), 4)
 
     def test_nary_action_with_linker(self):
         action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
                             inputsThird = TimepointSelector(0), inputsSecondLinker=TimePointLinker(),
                             generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
                             passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1*2+2')
-        self.assertEqual(len(token.generatedArtefacts), 2)
+        self.assertEqual(len(action.outputArtefacts), 2)
 
     def test_unary_stack_action(self):
         action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script,
                              passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
+        action.do()
 
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(token.isSuccess(), True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
         self.assertEqual(result, '123')
 
 
     def test_unary_stack_action_with_user_argument(self):
         action = unaryStackPython(ActionTagSelector("stats"), generateCallable=test_copy_script,
                                   additionalArgs={'times': 3}, passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
+        action.do()
 
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
-        self.assertEqual(token.isSuccess(), True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
         self.assertEqual(result, '111222333')
 
 
     def test_unary_stack_split_action(self):
         action = unaryStackPython(ActionTagSelector("stats"), splitProperties = [artefactProps.OBJECTIVE],
-                            generateCallable=test_copy_script, passOnlyURLs=True, actionTag="TestUnary")
-        token = action.do()
+                            generateCallable=test_copy_script, passOnlyURLs=True, actionTag="TestUnarySplit")
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '23')
 
     def test_nary_v2_action(self):
@@ -229,18 +229,18 @@ class TestPythonAction(unittest.TestCase):
                               additionalInputSelectors={'bInput':ObjectiveSelector('b'),'cInput':TimepointSelector(0)},
                               generateCallable=test_nary_v2_copy_script, indicateCallable=indicate_nary_output_script,
                               passOnlyURLs=True, actionTag="TestNaryV2")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1*2+2')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        result = get_content(action.outputArtefacts[2][artefactProps.URL])
         self.assertEqual(result, '1*3+1')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
+        result = get_content(action.outputArtefacts[3][artefactProps.URL])
         self.assertEqual(result, '1*3+2')
-        self.assertEqual(len(token.generatedArtefacts), 4)
+        self.assertEqual(len(action.outputArtefacts), 4)
 
     def test_nary_v2_action_with_user_argument(self):
         action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
@@ -248,18 +248,18 @@ class TestPythonAction(unittest.TestCase):
                               additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
                               indicateCallable=indicate_nary_output_script,
                               passOnlyURLs=True, actionTag="TestNaryV2_times")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1111*2222+1111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1111*2222+2222')
-        result = get_content(token.generatedArtefacts[2][artefactProps.URL])
+        result = get_content(action.outputArtefacts[2][artefactProps.URL])
         self.assertEqual(result, '1111*3333+1111')
-        result = get_content(token.generatedArtefacts[3][artefactProps.URL])
+        result = get_content(action.outputArtefacts[3][artefactProps.URL])
         self.assertEqual(result, '1111*3333+2222')
-        self.assertEqual(len(token.generatedArtefacts), 4)
+        self.assertEqual(len(action.outputArtefacts), 4)
 
     def test_nary_v2_action_with_user_argument_and_linker(self):
         action = naryPythonV2(primaryInputSelector=ObjectiveSelector('a'), primaryAlias='aInput',
@@ -268,28 +268,28 @@ class TestPythonAction(unittest.TestCase):
                               additionalArgs = {'times':4}, generateCallable=test_nary_v2_copy_script,
                               indicateCallable=indicate_nary_output_script,
                               passOnlyURLs=True, actionTag="TestNaryV2_times_linker")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1111*2222+1111')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1111*2222+2222')
-        self.assertEqual(len(token.generatedArtefacts), 2)
+        self.assertEqual(len(action.outputArtefacts), 2)
 
     def test_nary_action_with_linker(self):
         action = naryPython(inputsMaster = ObjectiveSelector('a'), inputsSecond = ObjectiveSelector('b'),
                             inputsThird = TimepointSelector(0), inputsSecondLinker=TimePointLinker(),
                             generateCallable=test_ternary_copy_script, indicateCallable=indicate_nary_output_script,
                             passOnlyURLs=True, actionTag="TestNary")
-        token = action.do()
+        action.do()
 
-        self.assertEqual(token.isSuccess(), True)
-        result = get_content(token.generatedArtefacts[0][artefactProps.URL])
+        self.assertEqual(action.isSuccess, True)
+        result = get_content(action.outputArtefacts[0][artefactProps.URL])
         self.assertEqual(result, '1*2+1')
-        result = get_content(token.generatedArtefacts[1][artefactProps.URL])
+        result = get_content(action.outputArtefacts[1][artefactProps.URL])
         self.assertEqual(result, '1*2+2')
-        self.assertEqual(len(token.generatedArtefacts), 2)
+        self.assertEqual(len(action.outputArtefacts), 2)
 
 if __name__ == "__main__":
     unittest.main()
