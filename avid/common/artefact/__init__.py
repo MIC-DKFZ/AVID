@@ -282,7 +282,7 @@ def get_all_values_of_a_property(workflow_data, property_key):
     :return Returns the list of values. Each value is only present once in the list, even if multiple artefacts
     have this value."""
     values = [a[property_key] for a in workflow_data if property_key in a]
-    return list(set(values))
+    return sorted(list(set(values)))
 
 def generateVerboseArtefactPath(workflow, workflowArtefact):
     """ Generates the path derived from the workflow informations and the
