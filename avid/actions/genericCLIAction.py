@@ -140,7 +140,12 @@ class GenericCLIAction(CLIActionBase):
         self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
         and uses the first input artefact as reference. The signature of indicateCallable is:
         indicateCallable(actionInstance = Instance of the calling action, indicated_default_output = the artefact
-        produced by the default indication strategy, **allArgs = all arguments passed to the action)).
+        produced by the default indication strategy, **allArgs = all arguments passed to the action).
+        :param generateNameCallable: A callable that, if defined, will be called to specify the name(s) of output.
+        If this callable is not set, the default name will be constructed as <actionID>_<actionTag>_ followed by all
+        inputs. The signature of generateNameCallable is:
+        generateNameCallable(actionInstance = Instance of the calling action, **allArgs = all arguments passed to the action).
+        It is expected to return a string for the output name.
         :param postProcessCLIExecutionCallable: A callable that, if defined, will be called to execute post-processing
         code after the CLI Execution. If this callable is not set, no post-processing will be done. The signature of
         postProcessCLIExecutionCallable is:
