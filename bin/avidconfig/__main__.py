@@ -132,7 +132,7 @@ def installTool(toolName, toolsPath, packageName, packagePath):
       file_extension = '.bat'
     elif os_name == 'Linux':
       file_extension = '.sh'
-    execPath = os.path.join(packagePath, mitkCmdAppName + file_extension)
+    execPath = os.path.join(packagePath, 'apps', mitkCmdAppName + file_extension)
 
   if execPath is None:
     print(
