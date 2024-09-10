@@ -126,7 +126,13 @@ def installTool(toolName, toolsPath, packageName, packagePath):
 
   if packageName == 'MITK':
     mitkCmdAppName = sourceConfig.get(toolName, 'executableName')
-    execPath = os.path.join(packagePath, mitkCmdAppName + ".bat")
+    os_name = platform.system()
+    file_extension = ""
+    if os_name == 'Windows':
+      file_extension = '.bat'
+    elif os_name == 'Linux':
+      file_extension = '.sh'
+    execPath = os.path.join(packagePath, mitkCmdAppName + file_extension)
 
   if execPath is None:
     print(
