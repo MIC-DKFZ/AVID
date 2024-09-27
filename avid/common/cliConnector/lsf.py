@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 class LSFCLIConnector(URLMappingCLIConnectorBase):
     """Implementation that allows to execute an action on an lsf cluster."""
 
-    def __init__(self, mount_map=None, additional_bsub_arguments=None):
+    def __init__(self, mount_map=None, additional_bsub_arguments=None, polling_wait_time_pending=10,
+                 polling_wait_time_running=1):
         """:param mount_map: Dictionary that contains the mapping between relevant paths
          outside of the container (those stored in the session) and the pathes that will
          be known in the container. Needed to properly convert artefact urls.
@@ -39,9 +40,15 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
          path outside.
          :param additional_bsub_arguments: List of additional arguments that will be added to the bsub
          call directly after the cli_path.
-         "bsub <clipath> [<additional_bsub_arguments>] [-o <log_file>] [-e <error_log_file>]."""
+         "bsub <clipath> [<additional_bsub_arguments>] [-o <log_file>] [-e <error_log_file>].
+         :param polling_wait_time_pending: Time (in sec) the connector will wait between pollings of the status
+         of a submitted job, if the job is pending.
+         :param polling_wait_time_running: Time (in sec) the connector will wait between pollings of the status
+         of a submitted job, if the job is running."""
         super().__init__(mount_map)
         self.additional_bsub_arguments = additional_bsub_arguments
+        self.polling_wait_time_pending = polling_wait_time_pending
+        self.polling_wait_time_running = polling_wait_time_running
         pass
 
     @staticmethod
@@ -106,24 +113,28 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
 
             # now wait for the lsf job to be finished
             is_running = True
+            is_pending = False
             is_successful = False
             wait_rounds = 0
-            while is_running:
+            while is_running or is_pending:
                 if lsf_logfile is not None and wait_rounds%10==0:
                     lsf_logfile.write('.')
 
-                time.sleep(1)  # Wait befor checking again
+                if is_running:
+                    time.sleep(self.polling_wait_time_running)
+                else:
+                    time.sleep(self.polling_wait_time_pending)
 
                 status_result = subprocess.run(['bjobs', job_id], capture_output=True, text=True)
 
                 if lsf_error_logfile is not None and run_result.stderr:
                     lsf_error_logfile.write(run_result.stderr)
 
-                is_running = "RUN" in status_result.stdout or "PEND" in status_result.stdout
-
+                is_running = "RUN" in status_result.stdout
+                is_pending = "PEND" in status_result.stdout
                 is_successful = "DONE" in status_result.stdout
 
-                if not is_running and lsf_logfile is not None and run_result.stdout:
+                if not is_running and not is_pending and lsf_logfile is not None and run_result.stdout:
                     lsf_logfile.write('\n\n')
                     lsf_logfile.write(run_result.stdout)
 
