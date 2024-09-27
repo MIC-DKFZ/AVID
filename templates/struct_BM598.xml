@@ -1,6 +1,0 @@
-<avid:structure_definition version="-1.0" xmlns:avid="http://www.dkfz.de/en/sidt/avid">
-	<avid:structure name="GTV">
-		<avid:struct_pattern>GTV_Tu</avid:struct_pattern>
-	</avid:structure>
-	<avid:structure name="Mandibula"/>
-</avid:structure_definition>
