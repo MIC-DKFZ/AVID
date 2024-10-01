@@ -27,7 +27,7 @@ from avid.common.AVIDUrlLocater import getExecutableURL
 import avid.common.artefact.defaultProps as artefacProps
 
 @unittest.skipIf(getExecutableURL(None,'MitkSplit4Dto3DImages') is None, 'Tool MitkSplit4Dto3DImages is not installed on the system.')
-class TestMitkMRPerfusionMiniApp(unittest.TestCase):
+class TestMitkSplit4Dto3DImages(unittest.TestCase):
 
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")

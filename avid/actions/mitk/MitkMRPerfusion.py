@@ -33,7 +33,7 @@ from avid.actions.simpleScheduler import SimpleScheduler
 logger = logging.getLogger(__name__)
 
 
-class MitkMRPerfusionMiniAppAction(CLIActionBase):
+class MitkMRPerfusionAction(CLIActionBase):
     """Class that wrapps the single action for the tool MRPerfusionMiniApp."""
     MODEL_DESCRIPTIVE = "descriptive"
     MODEL_TOFTS = "tofts"
@@ -45,7 +45,7 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
                  hematocrit=0.45, roibased=False, constraints=False, actionTag="MRPerfusion", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                               actionID="MitkMRPerfusionMiniApp", actionConfig=actionConfig,
+                               actionID="MitkMRPerfusion", actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         if aifimage is not None and aifmask is None:
@@ -185,14 +185,14 @@ class MitkMRPerfusionMiniAppAction(CLIActionBase):
         return content
 
 
-class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
+class MitkMRPerfusionBatchAction(BatchActionBase):
     """Batch action for MRPerfusionMiniApp."""
 
-    MODEL_DESCRIPTIVE = MitkMRPerfusionMiniAppAction.MODEL_DESCRIPTIVE
-    MODEL_TOFTS = MitkMRPerfusionMiniAppAction.MODEL_TOFTS
-    MODEL_2CX = MitkMRPerfusionMiniAppAction.MODEL_2CX
-    MODEL_2SL = MitkMRPerfusionMiniAppAction.MODEL_2SL
-    MODEL_3SL = MitkMRPerfusionMiniAppAction.MODEL_3SL
+    MODEL_DESCRIPTIVE = MitkMRPerfusionAction.MODEL_DESCRIPTIVE
+    MODEL_TOFTS = MitkMRPerfusionAction.MODEL_TOFTS
+    MODEL_2CX = MitkMRPerfusionAction.MODEL_2CX
+    MODEL_2SL = MitkMRPerfusionAction.MODEL_2SL
+    MODEL_3SL = MitkMRPerfusionAction.MODEL_3SL
 
     def __init__(self, signalSelector, maskSelector=None, aifmaskSelector=None, aifSelector=None,
                  maskLinker=None, aifLinker=None, aifmaskLinker=None,
@@ -211,7 +211,7 @@ class MitkMRPerfusionMiniAppBatchAction(BatchActionBase):
         linker = {"mask": maskLinker, "aifmask": aifmaskLinker,
                   "aifimage": aifLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRPerfusionMiniAppAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRPerfusionAction,
                                  primaryInputSelector=signalSelector,
                                  primaryAlias="signal", additionalInputSelectors=additionalInputSelectors,
                                  linker=linker, session=session,

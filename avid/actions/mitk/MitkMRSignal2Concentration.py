@@ -27,8 +27,8 @@ from avid.actions.simpleScheduler import SimpleScheduler
 logger = logging.getLogger(__name__)
 
 
-class MitkMRSignal2ConcentrationMiniAppAction(GenericCLIAction):
-    """Class that wrapps the single action for the tool MitkMRSignal2ConcentrationMiniApp."""
+class MitkMRSignal2ConcentrationAction(GenericCLIAction):
+    """Class that wrapps the single action for the tool MitkMRSignal2Concentration."""
     CONVERSION_T1_ABSOLUTE = "t1-absolute"
     CONVERSION_T1_RELATIVE = "t1-relative"
     CONVERSION_T1_FLASH = "t1-flash"
@@ -69,7 +69,7 @@ class MitkMRSignal2ConcentrationMiniAppAction(GenericCLIAction):
             additionalActionProps = dict()
         additionalActionProps[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
 
-        GenericCLIAction.__init__(self, i=[signal], actionID="MitkMRSignal2ConcentrationMiniApp",
+        GenericCLIAction.__init__(self, i=[signal], actionID="MitkMRSignal2Concentration",
                                   outputFlags=['o'],
                                   additionalArgs=additionalArgs,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
@@ -78,17 +78,17 @@ class MitkMRSignal2ConcentrationMiniAppAction(GenericCLIAction):
                                   defaultoutputextension='nrrd')
 
 
-class MitkMRSignal2ConcentrationMiniAppBatchAction(BatchActionBase):
-    """Batch action for MitkMRSignal2ConcentrationMiniApp."""
+class MitkMRSignal2ConcentrationBatchAction(BatchActionBase):
+    """Batch action for MitkMRSignal2Concentration."""
 
-    CONVERSION_T1_ABSOLUTE = MitkMRSignal2ConcentrationMiniAppAction.CONVERSION_T1_ABSOLUTE
-    CONVERSION_T1_RELATIVE = MitkMRSignal2ConcentrationMiniAppAction.CONVERSION_T1_RELATIVE
-    CONVERSION_T1_FLASH = MitkMRSignal2ConcentrationMiniAppAction.CONVERSION_T1_FLASH
-    CONVERSION_T2 = MitkMRSignal2ConcentrationMiniAppAction.CONVERSION_T2
+    CONVERSION_T1_ABSOLUTE = MitkMRSignal2ConcentrationAction.CONVERSION_T1_ABSOLUTE
+    CONVERSION_T1_RELATIVE = MitkMRSignal2ConcentrationAction.CONVERSION_T1_RELATIVE
+    CONVERSION_T1_FLASH = MitkMRSignal2ConcentrationAction.CONVERSION_T1_FLASH
+    CONVERSION_T2 = MitkMRSignal2ConcentrationAction.CONVERSION_T2
 
     def __init__(self, signalSelector, actionTag='MitkMRSignal2Concentration', session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRSignal2ConcentrationMiniAppAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRSignal2ConcentrationAction,
                                  primaryInputSelector=signalSelector,
                                  primaryAlias="signal", session=session,
                                  relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),

@@ -20,18 +20,18 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkMRSignal2ConcentrationMiniApp import MitkMRSignal2ConcentrationMiniAppBatchAction as conversion
+from avid.actions.mitk.MitkMRSignal2Concentration import MitkMRSignal2ConcentrationBatchAction as conversion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getExecutableURL(None,'MitkMRSignal2ConcentrationMiniApp') is None, 'Tool MitkMRSignal2ConcentrationMiniApp is not installed on the system.')
+@unittest.skipIf(getExecutableURL(None,'MitkMRSignal2Concentration') is None, 'Tool MitkMRSignal2Concentration is not installed on the system.')
 class TestMRPerfusionMiniApp(unittest.TestCase):
 
 
     def setUp(self):
       self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MRSignal2ConcentrationMiniApp")
+      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MRSignal2Concentration")
       
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 

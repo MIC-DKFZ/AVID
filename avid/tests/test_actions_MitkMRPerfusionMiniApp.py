@@ -20,12 +20,12 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkMRPerfusionMiniApp import MitkMRPerfusionMiniAppBatchAction as perfusion
+from avid.actions.mitk.MitkMRPerfusion import MitkMRPerfusionBatchAction as perfusion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getExecutableURL(None,'MitkMRPerfusionMiniApp') is None, 'Tool MitkMRPerfusionMiniApp is not installed on the system.')
-class TestMitkMRPerfusionMiniApp(unittest.TestCase):
+@unittest.skipIf(getExecutableURL(None,'MitkMRPerfusion') is None, 'Tool MitkMRPerfusionMiniApp is not installed on the system.')
+class TestMitkMRPerfusion(unittest.TestCase):
 
 
     def setUp(self):
