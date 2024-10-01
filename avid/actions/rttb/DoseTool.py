@@ -26,10 +26,10 @@ import avid.externals.virtuos as virtuos
 from avid.linkers import CaseLinker
 from avid.linkers.caseInstanceLinker import CaseInstanceLinker
 from avid.selectors import TypeSelector
-from . import BatchActionBase
-from .doseMap import _getArtefactLoadStyle
-from .genericCLIAction import GenericCLIAction
-from .simpleScheduler import SimpleScheduler
+from avid.actions import BatchActionBase
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
+from avid.actions.genericCLIAction import GenericCLIAction
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
+from avid.actions.rttb.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath

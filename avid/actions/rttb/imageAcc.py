@@ -23,15 +23,15 @@ import logging
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 
-from avid.common import osChecker, AVIDUrlLocater
+from avid.common import osChecker
 from avid.splitter import BaseSplitter
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.actions import BatchActionBase
+from avid.actions.cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker
 from avid.selectors import TypeSelector
 from avid.sorter import TimePointSorter
-from .simpleScheduler import SimpleScheduler
-from .doseMap import _getArtefactLoadStyle
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
 from avid.externals.matchPoint import ensureMAPRegistrationArtefact
 
 logger = logging.getLogger(__name__)

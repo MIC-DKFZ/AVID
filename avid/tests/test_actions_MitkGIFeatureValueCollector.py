@@ -21,9 +21,7 @@ import os
 import shutil
 import avid.common.workflow as workflow
 import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
-from avid.actions.MitkGIFeatureValueCollector import MitkGIFeatureValueCollectorBatchAction as collector
-from avid.selectors import CaseSelector
+from avid.actions.mitk.MitkGIFeatureValueCollector import MitkGIFeatureValueCollectorBatchAction as collector
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.splitter import KeyValueSplitter
 

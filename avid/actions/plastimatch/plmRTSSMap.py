@@ -26,10 +26,10 @@ from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT, getDeformationFie
 from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction
-from ..common.cliConnector import default_artefact_url_extraction_delegate
-from .simpleScheduler import SimpleScheduler
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
+from avid.common.cliConnector import default_artefact_url_extraction_delegate
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

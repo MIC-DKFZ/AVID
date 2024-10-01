@@ -22,15 +22,14 @@ import logging
 
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import osChecker, AVIDUrlLocater
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.common import osChecker
+from avid.actions import BatchActionBase
+from avid.actions.cliActionBase import CLIActionBase
 from avid.linkers import FractionLinker, CaseLinker
 from avid.sorter import BaseSorter
-from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
-from .doseMap import _getArtefactLoadStyle
-from .doseAcc import _getFractionWeightByArtefact
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
+from avid.actions.rttb.doseAcc import _getFractionWeightByArtefact
 import avid.externals.virtuos as virtuos
 
 logger = logging.getLogger(__name__)

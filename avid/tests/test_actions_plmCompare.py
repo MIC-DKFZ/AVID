@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.plmCompare import PlmCompareBatchAction as plmCompare
+from avid.actions.plastimatch.plmCompare import PlmCompareBatchAction as plmCompare
 from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper

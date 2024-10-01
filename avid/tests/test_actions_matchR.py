@@ -21,7 +21,7 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.matchR import matchRBatchAction as matchR
+from avid.actions.matchpoint.matchR import matchRBatchAction as matchR
 from avid.common.AVIDUrlLocater import getToolsPath
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath

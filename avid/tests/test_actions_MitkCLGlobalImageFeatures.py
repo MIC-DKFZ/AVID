@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkCLGlobalImageFeatures import MitkCLGlobalImageFeaturesBatchAction as radiomics
+from avid.actions.mitk.MitkCLGlobalImageFeatures import MitkCLGlobalImageFeaturesBatchAction as radiomics
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getExecutableURL

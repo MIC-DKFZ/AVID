@@ -22,11 +22,11 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
 from avid.linkers import CaseLinker
 
-from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
-from ..externals.matchPoint import FORMAT_VALUE_MATCHPOINT
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 
 logger = logging.getLogger(__name__)
 

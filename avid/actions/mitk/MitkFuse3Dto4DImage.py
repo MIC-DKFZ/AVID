@@ -30,10 +30,10 @@ from avid.linkers import FractionLinker
 from avid.sorter import BaseSorter, KeyValueSorter
 from avid.splitter import BaseSplitter, KeyValueSplitter
 
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.actions import BatchActionBase
+from avid.actions.cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

@@ -16,36 +16,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
+import avid.common.artefact.defaultProps as artefactProps
 from avid.common import osChecker
-from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction
+from avid.externals.doseTool import saveSimpleDictAsResultXML
+from avid.externals.plastimatch import parseDiceResult
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
-from avid.externals.plastimatch import parseCompareResult
-from avid.externals.doseTool import saveSimpleDictAsResultXML
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
 
-class PlmCompareAction(GenericCLIAction):
-    """Class that wraps the single action for the tool plastimatch compare."""
+class PlmDiceAction(GenericCLIAction):
+    """Class that wraps the single action for the tool plastimatch dice."""
 
     def __init__(self, refImage, inputImage,
-                 actionTag="plmCompare", alwaysDo=False,
+                 actionTag="plmDice", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         refImage = self._ensureSingleArtefact(refImage, "refImage")
         inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
 
         GenericCLIAction.__init__(self, refImage=[refImage], inputImage=[inputImage], actionID="plastimatch",
                                   noOutputArgs=True,
-                                  additionalArgs={'command': 'compare'},
+                                  additionalArgs={'command': 'dice', 'all': None},
                                   argPositions=['command', 'refImage', 'inputImage'],
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
@@ -56,13 +55,13 @@ class PlmCompareAction(GenericCLIAction):
         resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-        with open(self.logFilePath) as logfile:
-            result = parseCompareResult(logfile.read())
+        with open(self._logFilePath) as logFile:
+            result = parseDiceResult(logFile.read())
             saveSimpleDictAsResultXML(result, resultPath)
 
 
-class PlmCompareBatchAction(BatchActionBase):
-    """Batch action for PlmCompareAction."""
+class PlmDiceBatchAction(BatchActionBase):
+    """Batch action for PlmDiceAction."""
 
     def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmCompare", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
@@ -72,7 +71,7 @@ class PlmCompareBatchAction(BatchActionBase):
         additionalInputSelectors = {"inputImage": inputSelector}
         linker = {"inputImage": inputLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PlmCompareAction,
+        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PlmDiceAction,
                                  primaryInputSelector=refSelector,
                                  primaryAlias="refImage", additionalInputSelectors=additionalInputSelectors,
                                  linker=linker, session=session,

@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.voxelizer import VoxelizerBatchAction as voxelizer
+from avid.actions.rttb.voxelizer import VoxelizerBatchAction as voxelizer
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath
 

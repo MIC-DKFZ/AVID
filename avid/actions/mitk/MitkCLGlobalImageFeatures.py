@@ -29,11 +29,11 @@ from avid.linkers import CaseLinker
 from avid.linkers import FractionLinker
 from avid.splitter import BaseSplitter, KeyValueSplitter
 
-from . import BatchActionBase
-from .cliActionBase import CLIActionBase
+from avid.actions import BatchActionBase
+from avid.actions.cliActionBase import CLIActionBase
 from avid.selectors import TypeSelector
-from .genericCLIAction import generate_cli_call
-from .simpleScheduler import SimpleScheduler
+from avid.actions.genericCLIAction import generate_cli_call
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

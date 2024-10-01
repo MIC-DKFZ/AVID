@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkMapImage import MitkMapImageBatchAction as map
+from avid.actions.mitk.MitkMapImage import MitkMapImageBatchAction as map
 from avid.common.artefact.defaultProps import TIMEPOINT
 from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector

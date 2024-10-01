@@ -22,7 +22,7 @@ import shutil
 import avid.common.workflow as workflow
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.actions.doseStatsCollector import DoseStatsCollectorBatchAction as collector
+from avid.actions.rttb.doseStatsCollector import DoseStatsCollectorBatchAction as collector
 from avid.selectors import CaseSelector
 from avid.selectors import CaseInstanceSelector
 from avid.selectors.keyValueSelector import ActionTagSelector

@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkFileConverter import MitkFileConverterBatchAction as convert
+from avid.actions.mitk.MitkFileConverter import MitkFileConverterBatchAction as convert
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getExecutableURL

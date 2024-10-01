@@ -24,11 +24,11 @@ from pathlib import Path
 
 import avid.common.artefact.defaultProps as artefactProps
 
-from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
-from ..common.artefact import getArtefactProperty
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common.artefact import getArtefactProperty
 
 logger = logging.getLogger(__name__)
 

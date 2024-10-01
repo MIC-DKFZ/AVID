@@ -21,7 +21,7 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
+from avid.actions.mitk.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
 from avid.common.AVIDUrlLocater import getToolsPath
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath

@@ -20,8 +20,8 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesBatchAction as split
-from avid.actions.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesAction as SplitAction
+from avid.actions.mitk.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesBatchAction as split
+from avid.actions.mitk.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesAction as SplitAction
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 import avid.common.artefact.defaultProps as artefacProps

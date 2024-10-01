@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.doseAcc import DoseAccBatchAction as doseAcc
+from avid.actions.rttb.doseAcc import DoseAccBatchAction as doseAcc
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.sorter import BaseSorter
 

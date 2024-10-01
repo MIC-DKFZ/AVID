@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.MitkMRSignal2ConcentrationMiniApp import MitkMRSignal2ConcentrationMiniAppBatchAction as conversion
+from avid.actions.mitk.MitkMRSignal2ConcentrationMiniApp import MitkMRSignal2ConcentrationMiniAppBatchAction as conversion
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getExecutableURL
 

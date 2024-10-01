@@ -23,12 +23,12 @@ import csv
 
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from ..common.demultiplexer import getSelectors
-from . import BatchActionBase
-from .pythonAction import PythonAction
+from avid.common.demultiplexer import getSelectors
+from avid.actions import BatchActionBase
+from avid.actions.pythonAction import PythonAction
 from avid.selectors import TypeSelector, KeyValueSelector
-from .simpleScheduler import SimpleScheduler
-from ..splitter import BaseSplitter
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.splitter import BaseSplitter
 import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)

@@ -20,8 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.combineR import combineRBatchAction as combineR
-from avid.common.artefact.defaultProps import TIMEPOINT
+from avid.actions.matchpoint.combineR import combineRBatchAction as combineR
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath

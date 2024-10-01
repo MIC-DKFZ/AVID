@@ -24,10 +24,10 @@ import avid.common.artefact as artefactHelper
 from avid.linkers import CaseLinker, LinkerBase
 from avid.linkers import FractionLinker
 
-from . import BatchActionBase
-from .genericCLIAction import GenericCLIAction
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
 from avid.selectors import TypeSelector
-from .simpleScheduler import SimpleScheduler
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

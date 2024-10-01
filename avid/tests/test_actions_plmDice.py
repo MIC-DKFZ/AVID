@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.plmDice import PlmDiceBatchAction as plmDice
+from avid.actions.plastimatch.plmDice import PlmDiceBatchAction as plmDice
 from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper

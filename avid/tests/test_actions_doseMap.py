@@ -20,7 +20,7 @@ import unittest
 import os
 import shutil
 import avid.common.workflow as workflow
-from avid.actions.doseMap import DoseMapBatchAction as doseMap
+from avid.actions.rttb.doseMap import DoseMapBatchAction as doseMap
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getToolConfigPath
