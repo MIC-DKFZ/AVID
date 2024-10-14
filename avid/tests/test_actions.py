@@ -69,9 +69,15 @@ class Test(unittest.TestCase):
       
       with self.assertRaises(NotImplementedError):
         action3.indicateOutputs()
-        
+
       with self.assertRaises(NotImplementedError):
-        action3._do()
+        action3._do_setup()
+
+      with self.assertRaises(NotImplementedError):
+        action3._do_processing()
+
+      with self.assertRaises(RuntimeError):
+        action3.do_processing()
 
       with self.assertRaises(NotImplementedError):
         action3.do()

@@ -45,6 +45,10 @@ class ActionBase(object):
     ACTION_SKIPPED = "SKIPPED"
     """Indicating that the action instance was not executed so far."""
     ACTION_PENDING = "PENDING"
+    """Indicating that the action instance is currently generating the outputs."""
+    ACTION_RUNNING = "RUNNING"
+    """Indicating that the action instance is in an uninitialized state."""
+    ACTION_UNINIT = "UNINIT"
 
     def __init__(self, actionTag, session=None, additionalActionProps=None):
         '''init the action and setting the workflow session, the action is working
@@ -63,8 +67,11 @@ class ActionBase(object):
         if self._additionalActionProps is None:
             self._additionalActionProps = {}
 
+        self._add_self_to_session_after_processing = True
         self._outputArtefacts = None
-        self._last_exec_state = self.ACTION_PENDING
+        self._last_exec_state = self.ACTION_UNINIT
+        self._last_start_time = None
+        self._last_stop_time = None
 
         #list of all warnings captured since the last execution of the action. Elements of this list are
         #pair tuples of detail strings and exception instances (if provided; if not provided the 2nd
@@ -85,7 +92,7 @@ class ActionBase(object):
 
     @property
     def outputArtefacts(self):
-        if self._outputArtefacts is None and self.isPending:
+        if self._outputArtefacts is None and (self.isPending or self.is_uninitialized):
             self.indicateOutputs()
         return self._outputArtefacts
 
@@ -117,6 +124,14 @@ class ActionBase(object):
     def isPending(self):
         return self._last_exec_state == self.ACTION_PENDING
 
+    @property
+    def isRunning(self):
+        return self._last_exec_state == self.ACTION_RUNNING
+
+    @property
+    def is_uninitialized(self):
+        return self._last_exec_state == self.ACTION_UNINIT
+
     def _init_session(self, session = None):
         if session is None:
             # check if we have a current generated global session we can use
@@ -138,7 +153,7 @@ class ActionBase(object):
           generated.). This the list might only indicate the assumed outputs. Also An action can return
           None to signal that it cannot indicate the outputs before generation.
           :return: Either a list of indicated outputs or None.'''
-        if self._outputArtefacts is None and self.isPending:
+        if self._outputArtefacts is None and (self.isPending or self.is_uninitialized):
             self._outputArtefacts = self._indicateOutputs()
 
         return self._outputArtefacts
@@ -163,27 +178,85 @@ class ActionBase(object):
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
         pass
 
-    def _do(self):
-        ''' Internal function that triggers the processing of an action.
-          This Method is used internally (e.g. when ever an action is used by an other
-          action; and no action tag should be added to the session. '''
-        raise NotImplementedError("Reimplement in a derived class to function correctly.")
-        # Implement: what the action should really do
-        pass
-
     def do(self):
         '''Triggers the processing of an action instance. This should be used as public
         trigger of an action. Returns the action instance itself.'''
+
+        if self.do_setup():
+            self.do_processing()
+
+        self.do_finalize()
+        return self
+
+    def do_setup(self):
         global logger
         logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 
         self._last_warnings = list()
+        self._last_exec_state = self.ACTION_PENDING
+        self._outputArtefacts = None
 
-        (self._last_exec_state, self._outputArtefacts) = self._do()
+        processing_needed = False
+        try:
+            processing_needed = self._do_setup()
+        except BaseException as e:
+            self._reportWarning(f'Error occurred while setup phase of action tag "{self.actionTag}".'
+                                ' The error occurred in the class specific implementation of the'
+                                f' _do_setup method of "{self.__class__}". Please check the'
+                                ' implementation of the method or the class documentation.'
+                                f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                , exception=e)
+            self._last_exec_state = self.ACTION_FAILURE
 
+        self._last_start_time = time.time()
+        self._last_stop_time = None
+        return processing_needed
+
+
+    def do_processing(self):
+        if not self.isPending:
+            raise RuntimeError("do_processing was called without propoer initialization of action instance."
+                               " Check if do_setup was called successfully. This error normally indicate wrong usage"
+                               " of actions or internal logic error of code.")
+        self._last_exec_state = self.ACTION_RUNNING
+        return self._do_processing()
+
+
+    def do_finalize(self):
+        self._last_stop_time = time.time()
         logger.info(f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
-        self._notifyActionFinished()
-        return self
+        if not self.isSkipped:
+            (self._last_exec_state, self._outputArtefacts) = self._do_finalize()
+
+        if self._add_self_to_session_after_processing:
+            #notify session about the finished action instance
+            self._session.addProcessedActionInstance(self)
+
+    def _do_setup(self):
+        """ Internal function that triggers the setup/preparation of the processing of an action.
+          It also checks of an action needs to run at all.
+          This Method is used internally. Method should return if processing is needed (True) or
+          if can be skipped (False).
+        """
+        raise NotImplementedError("Reimplement in a derived class to function correctly.")
+        # Implement: what the action should really do
+        return False
+
+
+    def _do_processing(self):
+        """ Internal function that triggers the processing of an action.
+          This Method is used internally. """
+        raise NotImplementedError("Reimplement in a derived class to function correctly.")
+        # Implement: what the action should really do
+        pass
+
+
+    def _do_finalize(self):
+        """ Internal function that triggers the finalization after the processing of an action.
+          This Method is used internally. """
+        raise NotImplementedError("Reimplement in a derived class to function correctly.")
+        # Implement: what the action should really do
+        pass
 
     def _reportWarning(self, details, exception=None):
         """Helper function that is used to report a warning happening in an action.
@@ -194,10 +267,6 @@ class ActionBase(object):
         self._last_warnings.append((details, exception))
         logger.warning(details)
 
-    def _notifyActionFinished(self):
-        """Method that is called by do() to signal the session that a certain action is finished.
-        Default implementation does nothing."""
-        pass
 
 class SingleActionBase(ActionBase):
     '''Base class for action that directly will work on artefact and generate them.'''
@@ -481,99 +550,101 @@ class SingleActionBase(ActionBase):
 
         return invalidInputs
 
-    def _do(self):
-        ''' Triggers the processing of an action. '''
-        global logger
 
-        outputs = self.indicateOutputs()
+    def _do_setup(self):
+        outputs = self.indicateOutputs() #outputs are also stored in self._outputArtefacts
         (isNeeded, alternatives) = self._checkNecessity(outputs)
 
-        state = ActionBase.ACTION_SUCCESS
+        if not (self._alwaysDo or isNeeded):
+            self._outputArtefacts = alternatives
+            self._last_exec_state = ActionBase.ACTION_SKIPPED
+            return False
 
-        if self._alwaysDo or isNeeded:
-            isValid = False
-      
-            starttime = time.time()
-            endtime = None
-            
-            invalidInputs = self._getInvalidInputs()
-            if len(invalidInputs) == 0:
-                failure_occurred = False
-                try:
-                    self._generateOutputs()
-                    endtime = time.time()
-                except BaseException as e:
-                    self._reportWarning(f'Error occurred while generating outputs for action tag "{self.actionTag}".'
-                                        ' The error occurred in the class specific implementation of the'
-                                        f' _generateOutputs method of "{self.__class__}". Please check the'
-                                        ' implementation of the method or the class documentation.'
-                                        f' All outputs will be marked as invalid. Error details: {str(e)}'
-                                        , exception=e)
-                    failure_occurred = True
-                except:
-                    self._reportWarning('Unknown error occurred while generating outputs for action tag'
-                                        f' "{self.actionTag}".'
-                                        ' The error occurred in the class specific implementation of the'
-                                        f' _generateOutputs method of "{self.__class__}". Please check the'
-                                        ' implementation of the method or the class documentation.'
-                                        ' All outputs will be marked as invalid.')
-                    failure_occurred = True
 
-                if not failure_occurred:
-                    try:
-                        outputs = self._collectOutputs(indicatedOutputs = outputs)
-                        (isValid, outputs) = self._checkOutputsExistance(outputs)
-                    except BaseException as e:
-                        self._reportWarning('Error occurred while collecting generated outputs for action tag'
-                                            f' "{self.actionTag}".'
-                                            f' If the action class "{self.__class__}" has a specific implementation of the'
-                                            f' _collectOutputs method, please check the'
-                                            ' implementation of the method or the class documentation.'
-                                            f' All outputs will be marked as invalid. Error details: {str(e)}'
-                                            , exception=e)
-                        failure_occurred = True
-                    except:
-                        self._reportWarning('Unknown error occurred while collecting generated outputs for action tag'
-                                            f' "{self.actionTag}".'
-                                            f' If the action class "{self.__class__}" has a specific implementation of the'
-                                            f' _collectOutputs method, please check the'
-                                            ' implementation of the method or the class documentation.'
-                                            ' All outputs will be marked as invalid.')
-                        failure_occurred = True
+        invalid_inputs = self._getInvalidInputs()
+        if len(invalid_inputs)>0:
+            self._reportWarning('Action failed due to at least one invalid input. All outputs are marked as invalid.'
+                                ' Typical reason for that error is that a preceding action (that generated inputs)'
+                                ' failed and generated the invalid inputs.'
+                                ' Invalid inputs: {}'.format(invalid_inputs))
 
-            else:
-                self._reportWarning('Action failed due to at least one invalid input. All outputs are marked as invalid.'
-                                    ' Typical reason for that error is that a preceding action (that generated inputs)'
-                                    ' failed and generated the invalid inputs.'
-                                    ' Invalid inputs: {}'.format(self._inputArtefacts))
-
-            if not isValid:
-                for artefact in outputs:
-                    artefact[artefactProps.INVALID] = True
-
-            generatedArtefacts = outputs
-      
+            # invalidate all indicated outputs that should have been processed
             for artefact in outputs:
-                try:
-                    artefact[artefactProps.EXECUTION_DURATION] = endtime - starttime
-                except:
-                    pass
-        
-                self._session.addArtefact(artefact, True)
+                artefact[artefactProps.INVALID] = True
 
-            if not isValid:
-                state = ActionBase.ACTION_FAILURE
+            self._last_exec_state = ActionBase.ACTION_FAILURE
+            return False
 
+        return True
+
+
+    def _do_processing(self):
+        ''' Internal function that triggers the processing of an action.
+          This Method is used internally. '''
+        try:
+            self._generateOutputs()
+        except BaseException as e:
+            self._reportWarning(f'Error occurred while generating outputs for action tag "{self.actionTag}".'
+                                ' The error occurred in the class specific implementation of the'
+                                f' _generateOutputs method of "{self.__class__}". Please check the'
+                                ' implementation of the method or the class documentation.'
+                                f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                , exception=e)
+            self._last_exec_state = self.ACTION_FAILURE
+        except:
+            self._reportWarning('Unknown error occurred while generating outputs for action tag'
+                                f' "{self.actionTag}".'
+                                ' The error occurred in the class specific implementation of the'
+                                f' _generateOutputs method of "{self.__class__}". Please check the'
+                                ' implementation of the method or the class documentation.'
+                                ' All outputs will be marked as invalid.')
+            failure_occurred = True
+            self._last_exec_state = self.ACTION_FAILURE
+
+
+    def _do_finalize(self):
+
+        is_valid = False
+        outputs = self._outputArtefacts
+
+        if not self.isFailure:
+            try:
+                outputs = self._collectOutputs(indicatedOutputs=outputs)
+                (is_valid, outputs) = self._checkOutputsExistance(outputs)
+            except BaseException as e:
+                self._reportWarning('Error occurred while collecting generated outputs for action tag'
+                                    f' "{self.actionTag}".'
+                                    f' If the action class "{self.__class__}" has a specific implementation of the'
+                                    f' _collectOutputs method, please check the'
+                                    ' implementation of the method or the class documentation.'
+                                    f' All outputs will be marked as invalid. Error details: {str(e)}'
+                                    , exception=e)
+            except:
+                self._reportWarning('Unknown error occurred while collecting generated outputs for action tag'
+                                    f' "{self.actionTag}".'
+                                    f' If the action class "{self.__class__}" has a specific implementation of the'
+                                    f' _collectOutputs method, please check the'
+                                    ' implementation of the method or the class documentation.'
+                                    ' All outputs will be marked as invalid.')
+
+
+        for artefact in outputs:
+            if not is_valid:
+                artefact[artefactProps.INVALID] = True
+            try:
+                artefact[artefactProps.EXECUTION_DURATION] = self._last_stop_time - self._last_start_time
+            except:
+                pass
+
+            self._session.addArtefact(artefact, True)
+
+        if not is_valid:
+            state = ActionBase.ACTION_FAILURE
         else:
-            generatedArtefacts = alternatives
-            state = ActionBase.ACTION_SKIPPED
+            state = ActionBase.ACTION_SUCCESS
 
-        return (state, generatedArtefacts)
+        return (state, outputs)
 
-    def _notifyActionFinished(self):
-        """Method that is called by do() to signal the session that a certain action is finished.
-        Default implementation does nothing."""
-        self._session.addProcessedActionInstance(self)
 
 class BatchActionBase(ActionBase):
     '''Base class for action objects that resemble the logic to generate and
@@ -637,6 +708,7 @@ class BatchActionBase(ActionBase):
         self._actions = None
         self._scheduler = scheduler  # scheduler that should be used to execute the jobs
         self._session.registerBatchAction(self)
+        self._add_self_to_session_after_processing = False
 
         self.lock = threading.RLock()
 
@@ -683,14 +755,18 @@ class BatchActionBase(ActionBase):
           read to be executed.'''
         return self._generator.generateActions()
 
-    def _do(self):
-        ''' Triggers the processing of an action. '''
 
+    def _do_setup(self):
         self.generateActions()
+        return True
 
+
+    def _do_processing(self):
         self._scheduler.execute(self._actions)
 
-        state = ActionBase.ACTION_SKIPPED
+
+    def _do_finalize(self):
+        state = ActionBase.ACTION_UNINIT
         generatedArtefacts = list()
 
         with self.lock:
@@ -699,6 +775,8 @@ class BatchActionBase(ActionBase):
                     state = ActionBase.ACTION_SUCCESS
                 elif action.isFailure:
                     state = ActionBase.ACTION_FAILURE
+                elif action.isSkipped:
+                    state = ActionBase.ACTION_SKIPPED
 
                 generatedArtefacts.extend(action.outputArtefacts)
 

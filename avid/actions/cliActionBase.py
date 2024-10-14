@@ -50,12 +50,15 @@ class CLIActionBase(SingleActionBase):
     if self._cwd is None and self._actionID is not None:
       self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, actionID, actionConfig))
 
-    self._logFilePath = None
-    self._logErrorFilePath = None
+    self._last_log_file_path = None
+    self._last_log_error_file_path = None
 
     self._cli_connector = cli_connector
     if self._cli_connector is None:
       self._cli_connector = DefaultCLIConnector()
+
+    self._last_call_content = None
+    self._last_cli_call = None
 
   @property
   def cwd(self):
@@ -66,18 +69,19 @@ class CLIActionBase(SingleActionBase):
   def logFilePath(self):
     '''Returns the path of the log file that contains the std::out stream of the execution, the action instance
     is associated with. If it is None the action was not executed so far.'''
-    return self._logFilePath
+    return self._last_log_file_path
 
   @property
   def logErrorFilePath(self):
     '''Returns the path of the error log file that contains the std::error stream of the execution, the action
     instance is associated with. If it is None the action was not executed so far.'''
-    return self._logErrorFilePath
+    return self._last_log_error_file_path
 
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed
     for the CLI call to run properly (e.g. the batch/bash file that should be
-    executed.
+    executed. It is called in the do_setup stage if the base implementation of
+    _do_setup indicates the need of processing.
      @return The returnvalue is a string/stream containing all the instructions that
       should be executed in the command line. The CLIActionBase will store it into a shell script and
       execute it.'''
@@ -87,27 +91,41 @@ class CLIActionBase(SingleActionBase):
   
   def _postProcessCLIExecution(self):
     ''' Internal function that should postprocess everything that is needed
-    after the CLI call to leaf the action and its result in a proper state. '''
+    after the CLI call to leave the action and its result in a proper state.
+    It is called at the beginning of the do_finalize stage.'''
     #Implement: if something should be done after the execution, do it here
     pass  
 
 
-  def _generateOutputs(self):
-    callcontent = self._prepareCLIExecution()
+  def _do_setup(self):
+    processing_needed = SingleActionBase._do_setup(self)
 
-    #by policy the first artefact always determines the location and such.
-    cliArtefact = self.generateArtefact(self.outputArtefacts[0], userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_MISC, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_BAT})
-    path = artefactHelper.generateArtefactPath(self._session, cliArtefact)
-    cliName = os.path.join(path, os.path.split(artefactHelper.getArtefactProperty(self.outputArtefacts[0],artefactProps.URL))[1])
+    if processing_needed:
+      self._last_call_content = self._prepareCLIExecution()
 
-    clicall = self._cli_connector.generate_cli_file(cliName, callcontent)
+      # by policy the first artefact always determines the location and such.
+      cliArtefact = self.generateArtefact(self.outputArtefacts[0],
+                                          userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_MISC,
+                                                            artefactProps.FORMAT: artefactProps.FORMAT_VALUE_BAT})
 
-    global logger
+      path = artefactHelper.generateArtefactPath(self._session, cliArtefact)
+      cliName = os.path.join(path, os.path.split(
+        artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL))[1])
 
-    self._logFilePath = clicall+os.extsep+"log"
-    self._logErrorFilePath = clicall+os.extsep+"error.log"
+      self._last_cli_call = self._cli_connector.generate_cli_file(cliName, self._last_call_content)
 
-    self._cli_connector.execute(clicall, log_file_path=self._logFilePath, error_log_file_path=self._logErrorFilePath,
-                                cwd=self._cwd)
+      self._last_log_file_path = self._last_cli_call + os.extsep + "log"
+      self._last_log_error_file_path = self._last_cli_call + os.extsep + "error.log"
+
+    return processing_needed
+
+  def _do_finalize(self):
 
     self._postProcessCLIExecution()
+
+    return SingleActionBase._do_finalize(self)
+
+
+  def _generateOutputs(self):
+    self._cli_connector.execute(self._last_cli_call, log_file_path=self._last_log_file_path, error_log_file_path=self._last_log_error_file_path,
+                                cwd=self._cwd)

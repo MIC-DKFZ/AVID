@@ -55,7 +55,7 @@ class PlmDiceAction(GenericCLIAction):
         resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-        with open(self._logFilePath) as logFile:
+        with open(self._last_log_file_path) as logFile:
             result = parseDiceResult(logFile.read())
             saveSimpleDictAsResultXML(result, resultPath)
 
