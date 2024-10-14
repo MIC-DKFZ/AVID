@@ -27,6 +27,17 @@ from avid.common import osChecker
 
 logger = logging.getLogger(__name__)
 
+def generateBatchPath(cli_action_path, action):
+    """Helper function that tries to determin the action tag level of the cli_action_path.
+    If that does not exist, the content path of the session will be returned."""
+    path = Path(cli_action_path)
+
+    try:
+        idx = path.parts.index(action.actionTag)
+        return Path(*path.parts[:idx + 1])
+    except ValueError:
+        return Path(action._session.contentPath)
+
 def process_batch(action_batch):
     global logger
 
@@ -38,6 +49,7 @@ def process_batch(action_batch):
     for action in actions:
         if action.do_setup():
             actions_to_process.append(action)
+
     if len(actions_to_process)>0:
         # get the CLIConnector of the actions (we assume that all actions have the same CLIEvecutor as BatchActions
         # use the same CLIConnector for all generated actions.
@@ -57,8 +69,8 @@ def process_batch(action_batch):
             batch_call_content = batch_call_content + modified_call
 
         # generate the file paths
-        path = Path(actions_to_process[0]._last_cli_call)
-        batch_cli_path_base = path.parent/f'batch_{action_tag}_{batch_uid}_{batch_nr}'
+        path = generateBatchPath(actions_to_process[0]._last_cli_call, actions_to_process[0])
+        batch_cli_path_base = path/f'batch_{action_tag}_{batch_uid}_{batch_nr}'
 
         batch_cli_call=cli_connector.generate_cli_file(str(batch_cli_path_base), batch_call_content)
         batch_log_file_path = batch_cli_call + os.extsep + "log"
