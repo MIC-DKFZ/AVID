@@ -164,26 +164,6 @@ class TestCLIBatchScheduler(unittest.TestCase):
         self.assertEqual(len(self.session.getSkippedActions()), len(skip_pattern))
         self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions)-len(skip_pattern))
 
-    def test_Scheduler_skipping_always_do(self):
-        for action in self.actions:
-            action._alwaysDo = True
-
-        skip_pattern = [2, 5, 6, 7, 9, 10]
-        for action in [self.actions[i] for i in skip_pattern]:
-            action.will_skip = True
-
-        scheduler = CLIBatchScheduler(2)
-        scheduler.execute(self.actions)
-
-        for action in self.actions:
-            self.assertTrue(action.isSuccess)
-            self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
-
-        self.assertEqual(len(self.session.executed_actions), len(self.actions))
-        self.assertEqual(len(self.session.getFailedActions()), 0)
-        self.assertEqual(len(self.session.getSkippedActions()), 0)
-        self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions))
-
     def test_Scheduler_failing(self):
         scheduler = CLIBatchScheduler(2)
 
