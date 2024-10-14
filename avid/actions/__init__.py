@@ -144,7 +144,7 @@ class ActionBase(object):
             self._session = session
 
     def indicateOutputs(self):
-        ''' Return a list of artefact entries the action will produce if do() is
+        ''' Return a list of artefact entries the action will produce if do_setup() is
           called. The method should return complete entries.
           Therefore, the entries should already contain the url where they
           *will* be stored if the action is executed.
@@ -161,7 +161,7 @@ class ActionBase(object):
     def _indicateOutputs(self):
         ''' Internal function that is called by indicate outputs if no output artefact
           list exists yet. Return a list of artefact entries the action will produce
-          if do() is called. The method should
+          if do_setup() is called. The method should
           return complete entries. Therefore the entries should already contain the
           url where they *will* be stored if the action is executed.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
@@ -180,7 +180,8 @@ class ActionBase(object):
 
     def do(self):
         '''Triggers the processing of an action instance. This should be used as public
-        trigger of an action. Returns the action instance itself.'''
+        trigger of an action. It is a convenient version that will trigger do_setup, do_process and do_finalize
+        in the right way. Returns the action instance itself.'''
 
         if self.do_setup():
             self.do_processing()
@@ -189,6 +190,13 @@ class ActionBase(object):
         return self
 
     def do_setup(self):
+        """Function that has to be called to prepare an action for the processing. After the call of the method the
+        action instance is able to process the data (if needed). The return value indicates of the instance can/needs to
+        process (true) or not (false). It is advised to use do(), which will use do_setup() appropriately.
+        After the call of this method, the instance will have one of the following states:
+         (1) pending: expected state. Indicating that action should/needs to process and no waiting for triggering do_process()
+         (2) skipped: indicated ouput data is already there and valid. No need for do_process, directly trigger do_finalize()
+         (3) failed: indicated that the setup failed (e.g. because inputs are invalid). No need for do_process, directly trigger do_finalize() """
         global logger
         logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 
@@ -214,15 +222,21 @@ class ActionBase(object):
 
 
     def do_processing(self):
+        """Function that has to be called to do the data processing of an action processing. After the call of the method the
+        outputs of action instance are computed. It is advised to use do(), which will use do_processing() appropriately."""
         if not self.isPending:
             raise RuntimeError("do_processing was called without propoer initialization of action instance."
                                " Check if do_setup was called successfully. This error normally indicate wrong usage"
                                " of actions or internal logic error of code.")
         self._last_exec_state = self.ACTION_RUNNING
-        return self._do_processing()
+        self._do_processing()
 
 
     def do_finalize(self):
+        """Function that has to be called after the data processing of an action processing to finalize the action state
+        and do the book keeping (e.g. notifying the session, checking the validity and existance of the outputs).
+        After the call of the method the outputs of action instance are collected and verified.
+        It is advised to use do(), which will use do_finalize() appropriately."""
         self._last_stop_time = time.time()
         logger.info(f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
         if not self.isSkipped:
@@ -471,7 +485,7 @@ class SingleActionBase(ActionBase):
           @postcondition: all artefacts indicated by indicateOutputs are correctly created
           and do exist.
           @remark It is *not* needed to add the artefacts to the session or something
-          else. This all will be handled by the calling do() method.'''
+          else. This all will be handled by the calling do_process() method.'''
         raise NotImplementedError("Reimplement in a derived class to function correctly.")
         # Implement: do the action job and generate all artefacts indicated by indicateOutputs,
         # so that they exist after returning from this function.
@@ -726,7 +740,7 @@ class BatchActionBase(ActionBase):
         return self.__class__.__name__ + "_" + str(self.actionTag)
 
     def _indicateOutputs(self):
-        ''' Return a list of artefact entries the action will produce if do() is
+        ''' Return a list of artefact entries the action will produce if do_setup() is
           called. Reimplement this method for derived actions. The method should
           return complete entries. Therefore the enties should already contain the
           url where they *will* be stored if the action is executed.'''
