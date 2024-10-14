@@ -64,46 +64,51 @@ class DummyBatchAction(BatchActionBase):
 class DummyCLIAction(CLIActionBase):
   '''Class that wraps the single action for the AVID dummy cli.'''
 
-  def __init__(self, input,
-               actionTag = "DummyCLI", alwaysDo = False,
+  def __init__(self, input, actionTag = "DummyCLI", will_fail=False, will_skip=False, alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None):
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, None, actionConfig = None)
 
     self._addInputArtefacts(input = input)
 
     self._input = input
+    self.will_fail = will_fail
+    self.will_skip = will_skip
 
   def _generateName(self):
-    name = "Dummy_of_"+str(artefactHelper.getArtefactProperty(self._input,artefactProps.ACTIONTAG))
+    name = f'Dummy_{artefactHelper.getArtefactProperty(self._input[0],artefactProps.ACTIONTAG)}' \
+           f'_#{artefactHelper.getArtefactProperty(self._input[0],artefactProps.TIMEPOINT)}'
 
     return name
 
   def _indicateOutputs(self):
-
-    self._resultArtefact = self.generateArtefact(self._input,
+    if self.will_skip:
+      self._resultArtefact = self._input[0] # by directly passing back the input as output indication it will allways force a skipping
+    else:
+      self._resultArtefact = self.generateArtefact(self._input[0],
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
                                                  urlHumanPrefix=self.instanceName,
                                                  urlExtension='txt')
-    return [self._result]
+    return [self._resultArtefact]
 
 
   def _prepareCLIExecution(self):
 
-    resultPath = artefactHelper.getArtefactProperty(self._result,artefactProps.URL)
-    inputPath = artefactHelper.getArtefactProperty(self._input,artefactProps.URL)
+    if self.will_fail:
+      return 'echo "Dummy action failed om purpose." >&2'
+
+    resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
+    inputPath = artefactHelper.getArtefactProperty(self._input[0],artefactProps.URL)
 
     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
-    execURL = self._cli_connector.get_executable_url(self._session, "CLIDummy", self._actionConfig)
-
-    content = '"' + execURL + '" "'+str(resultPath)+'" "'+str(inputPath)+'" "Dummytest"'
+    content = f'echo "{inputPath} into {resultPath}" > {resultPath}'
 
     return content
 
 
 class DummyCLIBatchAction(BatchActionBase):
-  def __init__(self, artefacts, actionTag = 'DummyCLI', alwaysDo = False, scheduler = SimpleScheduler(), session = None):
+  def __init__(self, artefacts, actionTag='DummyCLI', alwaysDo=False, scheduler=SimpleScheduler(), session=None):
 
     BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session = session)
     self._artefacts = artefacts
