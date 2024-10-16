@@ -75,7 +75,7 @@ class DummyCLIAction(CLIActionBase):
     self.will_skip = will_skip
 
   def _generateName(self):
-    name = f'Dummy_{artefactHelper.getArtefactProperty(self._input[0],artefactProps.ACTIONTAG)}' \
+    name = f'Dummy_{self.actionTag}_{artefactHelper.getArtefactProperty(self._input[0],artefactProps.ACTIONTAG)}' \
            f'_#{artefactHelper.getArtefactProperty(self._input[0],artefactProps.TIMEPOINT)}'
 
     return name
@@ -95,6 +95,7 @@ class DummyCLIAction(CLIActionBase):
   def _prepareCLIExecution(self):
 
     if self.will_fail:
+      self._reportWarning("This is a test warning")
       return 'echo "Dummy action failed om purpose." >&2'
 
     resultPath = artefactHelper.getArtefactProperty(self._resultArtefact,artefactProps.URL)
