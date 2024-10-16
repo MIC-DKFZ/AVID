@@ -136,13 +136,13 @@ class GenericCLIAction(CLIActionBase):
         that the callable returns a list of output artefacts or None (if no indication can be made; like
         self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
         and uses the first input artefact as reference. The signature of indicateCallable is:
-        indicateCallable(actionInstance = Instance of the calling action),
-        **allArgs = all arguments passed to the action))
-        :param postProcessCLIExecutionCallable: A callable that, if defined, will be called to execute post processing
-        code after the CLI Execution. If this callable is not set, no post processing will be done. The signature of
+        indicateCallable(actionInstance = Instance of the calling action, indicated_default_output = the artefact
+        produced by the default indication strategy, **allArgs = all arguments passed to the action)).
+        :param postProcessCLIExecutionCallable: A callable that, if defined, will be called to execute post-processing
+        code after the CLI Execution. If this callable is not set, no post-processing will be done. The signature of
         postProcessCLIExecutionCallable is:
         postProcessCLIExecutionCallable(actionInstance = Instance of the calling action, **allArgs = all arguments
-        passed to the action)
+        passed to the action).
         :param collectOutputsCallable: A callable that, if defined, will be called to collect/generate artefact
         instances for all generated outputs after the CLI execution is post processed. For more details, See the
         documentation of SingleActionBase._collectOutputs. If this callable is not set, nothing will be collected and
@@ -269,11 +269,30 @@ class GenericCLIAction(CLIActionBase):
         return name
 
     def _indicateOutputs(self):
-        resultArtefacts = None
+        # we generate the default output, as template the first artefact of the first input (sorted by input names)
+        # in the dictionary is used.
+        reference = self._inputs[sorted(self._inputs.keys())[0]][0]
+
+        if self._outputReferenceArtefactName is not None:
+            reference = self._inputs[self._outputReferenceArtefactName][0]
+
+        resultArtefacts = [
+            self.generateArtefact(reference=reference,
+                                  userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
+                                  urlHumanPrefix=self.instanceName,
+                                  urlExtension=self._outputextension)]
+
         if self._indicateCallable is not None:
+            # the action has a specific strategy to indicate outputs, call it.
             allargs = self._inputs.copy()
             allargs.update(self._additionalArgs)
-            resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
+            if 'indicated_default_output' in allargs:
+                raise RuntimeError('Cannot call custom indicateCallable for indicating the outputs. One of the defined'
+                                   'action inputs or additional arguments uses the reserved name'
+                                   ' "indicated_default_output". Please check the configuration of the'
+                                   ' genericCLIAction.')
+            resultArtefacts = self._indicateCallable(actionInstance=self,  indicated_default_output=resultArtefacts[0],
+                                                     **allargs)
             if resultArtefacts is not None:
                 # check if its really a list of artefacts
                 try:
@@ -286,19 +305,6 @@ class GenericCLIAction(CLIActionBase):
                     raise TypeError(
                         'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
                             resultArtefacts))
-
-        else:
-            # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
-            reference = self._inputs[sorted(self._inputs.keys())[0]][0]
-
-            if self._outputReferenceArtefactName is not None:
-                reference = self._inputs[self._outputReferenceArtefactName][0]
-
-            resultArtefacts = [
-                self.generateArtefact(reference=reference,
-                                      userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                      urlHumanPrefix=self.instanceName,
-                                      urlExtension=self._outputextension)]
         return resultArtefacts
 
     def _prepareCLIExecution(self):
