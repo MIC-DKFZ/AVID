@@ -68,6 +68,7 @@ class Artefact(object):
             self._defaultProps[defaultProps.URL] = None
             self._defaultProps[defaultProps.OBJECTIVE] = None
             self._defaultProps[defaultProps.RESULT_SUB_TAG] = None
+            self._defaultProps[defaultProps.RESULT_SUB_COUNT] = None
             self._defaultProps[defaultProps.INVALID] = None
             self._defaultProps[defaultProps.INPUT_IDS] = None
             self._defaultProps[defaultProps.ACTION_CLASS] = None

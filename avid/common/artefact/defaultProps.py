@@ -41,8 +41,12 @@ TYPE = "type"
 FORMAT = "format"
 '''URL to the artefact stored in a file/resource and indicated by the entry'''
 URL = "url"
-'''In case actions produce more then one result artefact, this property may be used to make the results distinguishable.'''
+'''In case actions produce more then one result artefact, this property may be used to make the results
+ distinguishable.'''
 RESULT_SUB_TAG = "result_sub_tag"
+'''In case actions produce more then one result artefact, distinguished by sub result tag, this property should be used
+to indicate how many sub results were produced.'''
+RESULT_SUB_COUNT = "result_sub_count"
 '''Indicates if a given artefact is valid (True) or not (False).'''
 INVALID = "invalid"
 '''Creation time of an artefact.'''
