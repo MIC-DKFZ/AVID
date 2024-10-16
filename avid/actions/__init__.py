@@ -776,7 +776,8 @@ class BatchActionBase(ActionBase):
 
 
     def _do_processing(self):
-        self._scheduler.execute(self._actions)
+        if lem(self._actions)>0:
+            self._scheduler.execute(self._actions)
 
 
     def _do_finalize(self):
