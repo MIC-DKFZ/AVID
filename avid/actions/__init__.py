@@ -776,7 +776,7 @@ class BatchActionBase(ActionBase):
 
 
     def _do_processing(self):
-        if lem(self._actions)>0:
+        if len(self._actions)>0:
             self._scheduler.execute(self._actions)
 
 
