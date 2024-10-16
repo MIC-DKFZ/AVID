@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import shutil
 import unittest
 import os
 import avid.common.artefact.generator as artefactGenerator
@@ -39,6 +39,12 @@ class TestCLIBatchScheduler(unittest.TestCase):
             a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
             self.session.addArtefact(a)
             self.actions.append(DummyAction([a],actionTag="Action1"))
+
+    def tearDown(self):
+      try:
+        shutil.rmtree(self.sessionDir)
+      except:
+        pass
 
     def test_Scheduler(self):
         scheduler = CLIBatchScheduler(5)

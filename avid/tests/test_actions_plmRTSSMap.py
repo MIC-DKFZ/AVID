@@ -26,7 +26,7 @@ from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath
 
-@unittest.skipIf(getToolConfigPath('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
+@unittest.skipIf(getToolConfigPath('plastimatch') is None, 'Tool Plastimatch not installed on the system.')
 class TestPlmRTSSMap(unittest.TestCase):
 
     def setUp(self):

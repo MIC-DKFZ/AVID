@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import shutil
 import unittest
 import os
 import avid.common.artefact.generator as artefactGenerator
@@ -45,6 +45,12 @@ class TestWorkflowReport(unittest.TestCase):
             self.actions_failed.append(DummyAction([a],actionTag="ActionFailed",will_fail=True))
 
         self.actions = self.actions_success+self.actions_skipped+self.actions_failed
+
+    def tearDown(self):
+      try:
+        shutil.rmtree(self.sessionDir)
+      except:
+        pass
 
     def test_create_actions_report(self):
         scheduler = SimpleScheduler()
