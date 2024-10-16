@@ -77,6 +77,10 @@ class CLIActionBase(SingleActionBase):
     instance is associated with. If it is None the action was not executed so far.'''
     return self._last_log_error_file_path
 
+  @property
+  def last_cli_call_file_path(self):
+    return self._last_cli_call
+
   def _prepareCLIExecution(self):
     ''' Internal function that should prepare/generate everything that is needed
     for the CLI call to run properly (e.g. the batch/bash file that should be

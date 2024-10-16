@@ -30,13 +30,10 @@ import avid.common.patientNumber as patientNumber
 from avid.common import artefact
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
-from rich.traceback import Traceback as RichTraceback
+from .report import print_action_diagnostics
 from rich.progress import Progress
 from rich.console import Console
-from rich import inspect as rich_inspect
-from rich.panel import  Panel as RichPanel
-from rich.columns import Columns as RichColumns
-from rich.padding import Padding as RichPadding
+
 
 '''set when at least one session was initialized to ensure this stream is only
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
@@ -497,42 +494,6 @@ class Session(object):
     self.print(f'Debug mode: {self.debug}')
 
 
-def print_action_diagnostics(action, console, debug=False):
-  console.print(f'Action tag: {action.actionTag}')
-  console.print(f'Action instance UID: {action.actionInstanceUID}')
-  color_modifier = ''
-  if action.isSuccess:
-    if action.has_warnings:
-      color_modifier = '[yellow]'
-    else:
-      color_modifier = '[green]'
-  elif action.isFailure:
-    color_modifier = '[red]'
 
-  console.print(f'Status: {color_modifier}{action.last_exec_state}')
-
-  if debug:
-    console.print('Instance inspection:')
-    rich_inspect(action, private=True, docs=False)
-
-  if action.has_warnings:
-    warning_panels = list()
-    for (pos, warning) in enumerate(action.last_warnings):
-      detail_panels = list()
-      (warn_detail, exception) = warning
-      detail_panels.append(f'[bold]Details:[/bold]\n{warn_detail}\n')
-      if not exception is None:
-        detail_panels.append('[bold]Exception:[/bold]')
-        detail_panels.append(RichTraceback.from_exception(exception.__class__, exception, exception.__traceback__))
-
-      panel_title = f'Warning #{pos}'
-      if action.isFailure:
-        panel_title = f'Error #{pos}'
-
-      warning_panels.append(RichPanel(RichColumns(detail_panels), title=panel_title))
-
-    console.print('Instance warnings/errors:')
-    warn_panel = RichPadding(RichColumns(warning_panels),pad=(0,0,0,4))
-    console.print(warn_panel)
 
 currentGeneratedSession = None

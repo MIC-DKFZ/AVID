@@ -23,7 +23,7 @@ import shutil
 from avid.common.workflow import initSession
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml as load_xml
 
-class TestStructDefinitionHelper(unittest.TestCase):
+class TestWorkflowHelper(unittest.TestCase):
 
     def setUp(self):
         self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_workflow")
