@@ -24,13 +24,14 @@ import sys
 import threading
 from builtins import object
 from builtins import str
+from pathlib import Path
 
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.patientNumber as patientNumber
 from avid.common import artefact
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
-from .report import print_action_diagnostics
+from .report import print_action_diagnostics, create_actions_report
 from rich.progress import Progress
 from rich.console import Console
 
@@ -66,8 +67,8 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
   
-  session = Session(name, rootPath, autoSave = autoSave or interimSessionSave,
-                    interimSessionSave = interimSessionSave, debug = debug)
+  session = Session(name, rootPath, auto_save=autoSave or interimSessionSave,
+                    interim_session_save= interimSessionSave, debug = debug)
       
   #logging setup
   logginglevel = logging.INFO
@@ -191,21 +192,22 @@ def initSession_byCLIargs( sessionPath = None, **args):
   if not "structDefinition" in args and cliargs.structDefinition is not None:
     args["structDefinition"] = cliargs.structDefinition
   if not "noInterimSave" in args and cliargs.noInterimSave is not None:
-    args["interimSessionSave"] = not cliargs.overwriteExistingSession
+    args["interim_session_save"] = not cliargs.overwriteExistingSession
 
   return initSession(sessionPath, **args)  
 
    
 class Session(object):
-  def __init__(self, name = None, rootPath = None, autoSave = False, interimSessionSave = False, debug = False):
-    if name is None or rootPath is None:
+  def __init__(self, name=None, root_path=None, auto_save=False, interim_session_save=False, debug=False,
+               auto_error_report=False, auto_warning_report=False):
+    if name is None or root_path is None:
       raise TypeError()
     
     self.lock = threading.RLock()
     #Workflow Name/ID
     self.name = name
     #Path of the workflow session root
-    self._rootPath = rootPath
+    self._rootPath = root_path
     
     self._lastStoredLocation = str()
     
@@ -232,8 +234,11 @@ class Session(object):
     
     self.numberOfPatients = self.getNumberOfPatientsDecorator(patientNumber.getNumberOfPatients)
 
-    self.autoSave = autoSave
-    self.interimSessionSave = interimSessionSave
+    self.autoSave = auto_save
+    self.interimSessionSave = interim_session_save
+
+    self.auto_error_report = auto_error_report
+    self.auto_warning_report = auto_warning_report
 
     #indicates that the session runs in debug mode
     self.debug = debug
@@ -265,12 +270,29 @@ class Session(object):
       logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
       fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
      
-    logging.info("Successful actions: %s.", len(self.getSuccessfulActions()))
+    logging.info(f'Successful actions (with warnings): {len(self.getSuccessfulActions())} '
+                 f'({len(self.getSuccessfulActions())}).')
     logging.info("Skipped actions: %s.", len(self.getSkippedActions()))
+    if self.auto_warning_report:
+        actions_with_warning = self.getSuccessfulActionsWithWarnings()
+        if len(actions_with_warning) > 0:
+            session_path = Path(self._lastStoredLocation)
+            report_file_path = session_path.with_name(session_path.stem+'_warning_report').with_suffix('.zip')
+            logging.debug("Auto saving report for all successful actions with warnings. File path: %s.", report_file_path)
+            create_actions_report(actions=actions_with_warning, report_file_path=report_file_path,
+                                  generate_report_zip=True)
+
     if len(self.getFailedActions()) == 0:
       logging.info("Failed actions: 0.")
     else:
-      logging.error("FAILED ACTIONS: %s.", len(self.getFailedActions()))
+      failed_actions = self.getFailedActions()
+      logging.error("FAILED ACTIONS: %s.", len(failed_actions))
+      if self.auto_error_report:
+        session_path = Path(self._lastStoredLocation)
+        report_file_path = session_path.with_name(session_path.stem+'_error_report').with_suffix('.zip')
+        logging.debug("Auto saving report for all failed actions. File path: %s.", report_file_path)
+        create_actions_report(actions=failed_actions, report_file_path=report_file_path,
+                              generate_report_zip=True)
     logging.info("Session finished. Feed me more...")
 
       
