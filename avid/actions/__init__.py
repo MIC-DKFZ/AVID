@@ -231,19 +231,24 @@ class ActionBase(object):
         self._last_exec_state = self.ACTION_RUNNING
         self._do_processing()
 
-
     def do_finalize(self):
         """Function that has to be called after the data processing of an action processing to finalize the action state
-        and do the book keeping (e.g. notifying the session, checking the validity and existance of the outputs).
+        and do the bookkeeping (e.g. notifying the session, checking the validity and existence of the outputs).
         After the call of the method the outputs of action instance are collected and verified.
         It is advised to use do(), which will use do_finalize() appropriately."""
-        self._last_stop_time = time.time()
-        logger.info(f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
-        if not self.isSkipped:
-            (self._last_exec_state, self._outputArtefacts) = self._do_finalize()
+        try:
+            self._last_stop_time = time.time()
+            logger.info(
+                f"Finished action: {self.instanceName} (UID: {self.actionInstanceUID}) -> {self._last_exec_state}")
+            if not self.isSkipped:
+                (self._last_exec_state, self._outputArtefacts) = self._do_finalize()
+
+        except BaseException as e:
+            self._reportWarning(f'Error occurred while CLIBatchScheduler finalized this action.', exception=e)
+            self._last_exec_state = self.ACTION_FAILURE
 
         if self._add_self_to_session_after_processing:
-            #notify session about the finished action instance
+            # notify session about the finished action instance
             self._session.addProcessedActionInstance(self)
 
     def _do_setup(self):
