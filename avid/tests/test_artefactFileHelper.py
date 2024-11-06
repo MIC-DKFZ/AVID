@@ -23,7 +23,7 @@ import os
 import shutil
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection
 import avid.common.artefact.defaultProps as artefactProps
 
 def remove_lock_file(filepath):
@@ -39,10 +39,10 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.a1 = artefactGenerator.generateArtefactEntry("case1", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), "obj_1", True)
       self.a2 = artefactGenerator.generateArtefactEntry("case2", None, 0, "action2", "result2", "dummy2", os.path.join(self.testDataDir, "artefact2.txt"), None, False, customProp1 = "nice", customProp2 = "42")
       self.a3 = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact1.txt"), input_ids = {'source':['id_1','id_1_1'], 'source3': [None], 'source4':['id_2']} )
-      self.data = list()
-      self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-      self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-      self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
+      self.data = ArtefactCollection()
+      self.data.add_artefact(self.a1)
+      self.data.add_artefact(self.a2)
+      self.data.add_artefact(self.a3)
 
       self.a3_update = artefactGenerator.generateArtefactEntry("case3", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact3.txt"), input_ids = {'source':['id_1','id_1_1'], 'source3': [None], 'source4':['id_2']} )
       self.a4 = artefactGenerator.generateArtefactEntry("case4", None, 0, "action1", "result1", "dummy1", os.path.join(self.testDataDir, "artefact2.txt"))

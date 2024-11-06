@@ -18,7 +18,7 @@
 
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection
 import avid.common.artefact.defaultProps as artefactProps
 
 class TestArtefactGeneration(unittest.TestCase):
@@ -30,10 +30,10 @@ class TestArtefactGeneration(unittest.TestCase):
     self.a5 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", "result", "dummy", "myCoolFileVersion2.any")
     self.a6 = artefactGenerator.generateArtefactEntry("Case1", 1, 0, "Action2", "result", "dummy", "myCoolFileVersion2.any")
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
+    self.data = ArtefactCollection()
+    self.data.add_artefact(self.a1)
+    self.data.add_artefact(self.a2)
+    self.data.add_artefact(self.a3)
 
   def test_generateArtefactEntry(self):
     self.assertEqual(self.a1[artefactProps.CASE], "Case1")
@@ -54,26 +54,22 @@ class TestArtefactGeneration(unittest.TestCase):
     
 
   def test_addArtefactToWorkflowData(self):
-    workflowData = list()
-    workflowData = artefact.addArtefactToWorkflowData(workflowData, self.a1)
-    workflowData = artefact.addArtefactToWorkflowData(workflowData, self.a3)
+    workflowData = ArtefactCollection()
+    workflowData.add_artefact(self.a1)
+    workflowData.add_artefact(self.a3)
     
     self.assertEqual(len(workflowData), 2)
     self.assertIn(self.a1, workflowData)
     self.assertIn(self.a3, workflowData)
     
     #Check remove simelar is active
-    workflowData = artefact.addArtefactToWorkflowData(workflowData, self.a5, True)
+    workflowData.add_artefact(self.a5, True)
     self.assertEqual(len(workflowData), 2)
     self.assertEqual(workflowData[0], self.a3)
     self.assertEqual(workflowData[1], self.a5)
 
     #Check remove simelar is inactive
-    workflowData = artefact.addArtefactToWorkflowData(workflowData, self.a1)
-    self.assertEqual(len(workflowData), 3)
-    self.assertEqual(workflowData[0], self.a3)
-    self.assertEqual(workflowData[1], self.a5)
-    self.assertEqual(workflowData[2], self.a1)
+    self.assertRaises(ValueError, workflowData.add_artefact(self.a1, False))
 
   def test_findSimelarArtefact(self):
     self.assertEqual(artefact.findSimilarArtefact(self.data, self.a1), self.a1)

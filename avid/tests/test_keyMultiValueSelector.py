@@ -17,7 +17,7 @@
 # limitations under the License.
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection
 import avid.common.artefact.defaultProps as artefactProps
 from avid.selectors.keyMulitValueSelector import KeyMultiValueSelector
 
@@ -33,15 +33,15 @@ class TestSelectors(unittest.TestCase):
     self.a7 = artefactGenerator.generateArtefactEntry("Case3", "a", 0, "Action2", "result", "dummy", None)
     self.a8 = artefactGenerator.generateArtefactEntry("Case4", "1", 0, "Action3", "result", "dummy", None)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a7)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a8)
+    self.data = ArtefactCollection()
+    self.data.add_artefact(self.a1)
+    self.data.add_artefact(self.a2)
+    self.data.add_artefact(self.a3)
+    self.data.add_artefact(self.a4)
+    self.data.add_artefact(self.a5)
+    self.data.add_artefact(self.a6)
+    self.data.add_artefact(self.a7)
+    self.data.add_artefact(self.a8)
 
   def test_KeyMultiValueSelector(self):
     selector = KeyMultiValueSelector(artefactProps.CASE, ['Case3', 'Case4', 'CaseNo'])
