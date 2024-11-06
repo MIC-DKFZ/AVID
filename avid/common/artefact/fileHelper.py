@@ -204,7 +204,7 @@ def update_artefactlist(destination_file, source_artefacts, update_existing=Fals
 
     try:
         destination_artefacts = loadArtefactList_xml(destination_file,rootPath=rootPath)
-        update_artefacts(destination_list=destination_artefacts, source_list=source_artefacts,
+        update_artefacts(destination_collection=destination_artefacts, source_collection=source_artefacts,
                          update_existing=update_existing)
         saveArtefactList_xml(filePath=destination_file,artefacts=destination_artefacts, rootPath=rootPath,
                              savePathsRelative=savePathsRelative )

@@ -28,7 +28,7 @@ from pathlib import Path
 
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.patientNumber as patientNumber
-from avid.common import artefact
+from avid.common.artefact import ArtefactCollection
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
 from .report import print_action_diagnostics, create_actions_report
@@ -227,7 +227,7 @@ class Session(object):
 
     #List of all executed (SingleActionBase based) actions that where executed for that session
     self.executed_actions = list()
-    self.artefacts = list()
+    self.artefacts = ArtefactCollection()
 
     #That is a list of all batch actions assigned to this session.
     self._batch_actions = list()
@@ -346,14 +346,12 @@ class Session(object):
     with self.lock:    
       self.actionTools[actionID] = entry
 
-  def addArtefact(self, artefactEntry, removeSimelar = False):
+  def add_artefact(self, artefact_entry):
     ''' 
-        This method adds an arbitrary artefact entry to the artefact list.
-        @param removeSimelar If True the method checks if the session data contains
-        a simelar entry. If yes the simelar entry will be removed.      
-    ''' 
+        This method adds an arbitrary artefact entry to the artefact collection.
+    '''
     with self.lock:
-      self.artefacts = artefact.addArtefactToWorkflowData(self.artefacts, artefactEntry, removeSimelar)
+      self.artefacts.add_artefact(artefact_entry)
       try:
         if self.interimSessionSave:
           logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)

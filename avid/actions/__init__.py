@@ -503,7 +503,7 @@ class SingleActionBase(ActionBase):
 
         for output in outputs:
             if artefactHelper.getArtefactProperty(output, artefactProps.TYPE) == artefactProps.TYPE_VALUE_RESULT:
-                alternative = artefactHelper.findSimilarArtefact(self._session.artefacts, output)
+                alternative = self._session.artefacts.find_similar(output)
                 if alternative is None \
                         or alternative[artefactProps.INVALID] \
                         or alternative[artefactProps.URL] is None \
@@ -650,7 +650,7 @@ class SingleActionBase(ActionBase):
             except:
                 pass
 
-            self._session.addArtefact(artefact, True)
+            self._session.add_artefact(artefact)
 
         if not is_valid:
             state = ActionBase.ACTION_FAILURE
