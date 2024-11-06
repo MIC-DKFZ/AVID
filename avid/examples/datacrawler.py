@@ -15,7 +15,7 @@ def fileFunction(pathParts, fileName, fullPath):
     This is an example datacrawler for the follwoing folder structure:
     data
       - img
-            pat1_TP1_MR (in the example, the file name consists of <case case_id>_<date>_<image_id>.nrrd)
+            pat1_TP1_MR (in the example, the file name consists of <case_id>_<date>_<image_id>.nrrd)
             ...
       - mask
             pat1_TP1_Seg1.nrrd (in the example, the file name consists of <case case_id>_<date>_<seg_id>.nrrd)
