@@ -57,9 +57,24 @@ class MitkMapImageAction(GenericCLIAction):
                                                urlExtension=actionInstance._outputExt)
         return [resultArtefact]
 
+    @staticmethod
+    def _defaultNameCallable(actionInstance, **allActionArgs):
+        name = "map_" + artefactHelper.getArtefactShortName(actionInstance._inputImage[0])
+
+        if actionInstance._registration is not None:
+            name += "_reg_" + artefactHelper.getArtefactShortName(actionInstance._registration)
+        else:
+            name += "_identity"
+
+        if actionInstance._templateImage is not None:
+            name += "_to_" + artefactHelper.getArtefactShortName(actionInstance._templateImage)
+
+        return name
+
     def __init__(self, inputImage, registration = None, templateImage=None, actionTag="MitkMapImage",
                  paddingValue = None, interpolator=None, supersamplingFactor=None, outputExt="nrrd", inputIsArtefactReference=True,
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
+                 generateNameCallable=None, cli_connector=None):
 
         self._inputImage = [self._ensureSingleArtefact(inputImage, "inputImage")]
         self._registration = self._ensureSingleArtefact(registration, "regstration")
@@ -84,24 +99,15 @@ class MitkMapImageAction(GenericCLIAction):
         if self._templateImage is not None:
             inputs['t'] = [self._templateImage]
 
+        if generateNameCallable is None:
+            generateNameCallable = self._defaultNameCallable
+
         GenericCLIAction.__init__(self, **inputs, actionID="MitkMapImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input', 'template', 'registration'],
                                   actionTag= actionTag, alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
-                                  additionalActionProps=additionalActionProps,
+                                  generateNameCallable=generateNameCallable, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
-    def _generateName(self):
-        name = "map_" + artefactHelper.getArtefactShortName(self._inputImage[0])
-
-        if self._registration is not None:
-            name += "_reg_" + artefactHelper.getArtefactShortName(self._registration)
-        else:
-            name += "_identity"
-
-        if self._templateImage is not None:
-            name += "_to_" + artefactHelper.getArtefactShortName(self._templateImage)
-
-        return name
 
 class MitkMapImageBatchAction(BatchActionBase):
     '''Batch action for MitkMapImage that maps images by a given registration into a given reference geometry.

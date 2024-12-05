@@ -40,7 +40,8 @@ from rich.console import Console
 stdoutlogstream = None
 
 def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
-                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False, initLogging = True):
+                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False,
+                 initLogging = True, updateBootstrap = False):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
    @param sessionPath Path of the stored artefact list the session should use
@@ -113,13 +114,13 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
       rootlogger.debug("Number of artefacts loaded from session: %s. Session path: %s", len(artefacts), sessionPath)
     else:
       rootlogger.info("Old session was overwritten. Session path: %s", sessionPath)
-         
-  if bootstrapArtefacts is not None and len(artefacts) == 0:
-    rootlogger.debug("Load artefacts from bootstrap file: %s", bootstrapArtefacts)
-    artefacts = fileHelper.loadArtefactList_xml(bootstrapArtefacts, expandPaths)
-    rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(artefacts))
 
-    
+  if bootstrapArtefacts is not None and (len(artefacts) == 0 or updateBootstrap):
+    rootlogger.debug("Load artefacts from bootstrap file: %s", bootstrapArtefacts)
+    bootstrapArtefacts = fileHelper.loadArtefactList_xml(bootstrapArtefacts, expandPaths)
+    rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(bootstrapArtefacts))
+    artefact.update_artefacts(artefacts, bootstrapArtefacts)
+
   session.artefacts.extend(artefacts)
   
   #other setup stuff
