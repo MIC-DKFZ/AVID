@@ -124,6 +124,7 @@ class GenericCLIAction(CLIActionBase):
                  postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
                  inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
                  additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None,
+                 url_include_id=True,
                  **inputArgs):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
@@ -191,6 +192,7 @@ class GenericCLIAction(CLIActionBase):
         self._inputArgsURLExtractionDelegate = inputArgsURLExtractionDelegate
         self._collectOutputsCallable = collectOutputsCallable
         self._outputextension = defaultoutputextension
+        self._url_include_id = url_include_id
         self._noOutputArgs = noOutputArgs
 
         self._inputs = dict()
@@ -294,7 +296,8 @@ class GenericCLIAction(CLIActionBase):
             self.generateArtefact(reference=reference,
                                   userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
                                   urlHumanPrefix=self.instanceName,
-                                  urlExtension=self._outputextension)]
+                                  urlExtension=self._outputextension,
+                                  url_include_id=self._url_include_id)]
 
         if self._indicateCallable is not None:
             # the action has a specific strategy to indicate outputs, call it.

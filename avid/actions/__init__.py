@@ -373,7 +373,7 @@ class SingleActionBase(ActionBase):
 
     # noinspection PyProtectedMember
     def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None,
-                         urlHumanPrefix = None, urlExtension = None):
+                         urlHumanPrefix = None, urlExtension = None, url_include_id = True):
         '''Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
@@ -454,11 +454,14 @@ class SingleActionBase(ActionBase):
 
         if urlHumanPrefix is not None or urlExtension is not None:
             path = artefactHelper.generateArtefactPath(self._session, result)
-            name = ""
+            name_parts = []
             if urlHumanPrefix is not None:
-                name = urlHumanPrefix + "."
-            name = name + str(artefactHelper.getArtefactProperty(result, artefactProps.ID))
-
+                name_parts.append(urlHumanPrefix)
+            if url_include_id:
+                name_parts.append(str(artefactHelper.getArtefactProperty(result, artefactProps.ID)))
+            name = ".".join(name_parts)
+            if len(name) == 0:
+                logger.warning("Generated artefact has an empty name. Make sure to provide a unique name when cutting the id from the output names.")
             if urlExtension is not None:
                 name = name + os.extsep + urlExtension
 
