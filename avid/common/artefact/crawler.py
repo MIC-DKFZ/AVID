@@ -20,6 +20,7 @@ import argparse
 import os
 import logging
 import sys
+import concurrent.futures
 
 from avid.common.artefact import artefactExists
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
@@ -46,6 +47,7 @@ def splitall(path):
             path = parts[0]
             allparts.insert(0, parts[1])
     return allparts
+
 
 class DirectoryCrawler(object):
   '''Helper class that crawls to directory tree starting from the given rootPath.
@@ -82,7 +84,61 @@ class DirectoryCrawler(object):
             crawl_logger.info(f'Check "{fullpath}": Added')
 
     return artefacts
-      
+
+
+def getArtefactsFromFolder(folder, files, functor, rootPath):
+    """
+    Helper function that crawls all the given files, which lie within folder, by calling a functor on each one.
+    The functor gets an additional argument 'known_ids', a set by which duplicates (e.g. DICOM files belonging to the
+    same series) can be filtered out. This logic has to be done in the functor.
+    """
+    relativePath = os.path.relpath(folder, rootPath)
+    pathParts = splitall(relativePath)
+    artefacts = {}
+    known_ids = set()
+    for aFile in files:
+        fullpath = os.path.join(folder, aFile)
+        artefact = functor(pathParts, aFile, fullpath, known_ids)
+        artefacts[fullpath] = artefact
+    return artefacts
+
+
+class ParallelDirectoryCrawler(object):
+    """Helper class that crawls a directory tree starting from the given rootPath.
+    The crawler assumes that every file that he founds is a potential artefact.
+    The crawler will call the file functor to interpret the file. If the file
+    functor returns the artefact the crawler enlists it to the result in the
+    artefact list.
+    Crawling is distributed to n_threads parallel processes, which each go through a folder.
+    @param ignoreExistingArtefacts If set to true artefacts returned by fileFunctor
+    will only be added if they do not already exist in the artefact list."""
+
+    def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts=False, n_threads=10):
+        self._rootPath = rootPath
+        self._fileFunctor = fileFunctor
+        self._ignoreExistingArtefacts = ignoreExistingArtefacts
+        self._n_threads = n_threads
+
+    def getArtefacts(self):
+        artefacts = list()
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_threads) as executor:
+            futures = []
+            for root, dirs, files in os.walk(self._rootPath):
+                futures.append(executor.submit(getArtefactsFromFolder, root, files, self._fileFunctor, self._rootPath))
+
+            for future in concurrent.futures.as_completed(futures):
+                folder_artefacts = future.result()
+                for fullpath, artefact in folder_artefacts.items():
+                    if artefact is None:
+                        crawl_logger.debug(f'Check "{fullpath}": Skipped')
+                    elif artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts:
+                        crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
+                    else:
+                        artefacts.append(artefact)
+                        crawl_logger.info(f'Check "{fullpath}": Added')
+
+        return artefacts
+
   
 def runSimpleCrawlerScriptMain(fileFunction):
     '''This is a helper function that can be used if you want to write a crawler script that crawles a root directory
@@ -98,6 +154,27 @@ def runSimpleCrawlerScriptMain(fileFunction):
     cliargs, unknown = parser.parse_known_args()
 
     crawler = DirectoryCrawler(cliargs.root, fileFunction, True)
+    artefacts = crawler.getArtefacts()
+
+    crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')
+    saveArtefactList(cliargs.output, artefacts)
+
+
+def runParallelCrawlerScriptMain(fileFunction, n_threads=10):
+    """This is a helper function that can be used if you want to write a crawler script that crawles a root directory
+     and stores the results as file. This function will parse for command line arguments "root" (the root directory)
+     and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly."""
+    parser = argparse.ArgumentParser(description='Simple AVID artefact crawler script that can be used to index'
+                                                 ' artefacts.')
+    parser.add_argument('root', help='Path to the root directory where the crawler should start to crawl.')
+    parser.add_argument('output', help='File path where the results of the crawl should be stored'
+                                       ' (the found/indexed artefacts). If output already exists it will be'
+                                       ' overwritten.')
+    parser.add_argument('n_threads', help='Number of processes that will crawl folders in parallel', default=1)
+
+    cliargs, unknown = parser.parse_known_args()
+
+    crawler = ParallelDirectoryCrawler(cliargs.root, fileFunction, True, n_threads=n_threads)
     artefacts = crawler.getArtefacts()
 
     crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')
