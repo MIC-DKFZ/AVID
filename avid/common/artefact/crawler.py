@@ -21,6 +21,7 @@ import os
 import logging
 import sys
 import concurrent.futures
+from tqdm import tqdm
 
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
 from avid.common.artefact import ArtefactCollection
@@ -126,16 +127,18 @@ class ParallelDirectoryCrawler(object):
             for root, dirs, files in os.walk(self._rootPath):
                 futures.append(executor.submit(getArtefactsFromFolder, root, files, self._fileFunctor, self._rootPath))
 
-            for future in concurrent.futures.as_completed(futures):
+            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
                 folder_artefacts = future.result()
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
-                        crawl_logger.debug(f'Check "{fullpath}": Skipped')
+                        pass
+                        #crawl_logger.debug(f'Check "{fullpath}": Skipped')
                     elif artefact in artefacts and self._ignoreExistingArtefacts:
-                        crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
+                        pass
+                        #crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
                     else:
                         artefacts.add_artefact(artefact)
-                        crawl_logger.info(f'Check "{fullpath}": Added')
+                        #crawl_logger.info(f'Check "{fullpath}": Added')
 
         return artefacts
 
