@@ -23,6 +23,7 @@ import sys
 import concurrent.futures
 
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
+from avid.common.artefact import ArtefactCollection
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class DirectoryCrawler(object):
     self._ignoreExistingArtefacts = ignoreExistingArtefacts
     
   def getArtefacts(self):
-    artefacts = list()
+    artefacts = ArtefactCollection()
     
     for root, dirs, files in os.walk(self._rootPath):
       
@@ -79,7 +80,7 @@ class DirectoryCrawler(object):
         elif artefact in artefacts and self._ignoreExistingArtefacts:
             crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
         else:
-            artefacts.append(artefact)
+            artefacts.add_artefact(artefact)
             crawl_logger.info(f'Check "{fullpath}": Added')
 
     return artefacts
@@ -119,7 +120,7 @@ class ParallelDirectoryCrawler(object):
         self._n_threads = n_threads
 
     def getArtefacts(self):
-        artefacts = list()
+        artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_threads) as executor:
             futures = []
             for root, dirs, files in os.walk(self._rootPath):
@@ -133,7 +134,7 @@ class ParallelDirectoryCrawler(object):
                     elif artefact in artefacts and self._ignoreExistingArtefacts:
                         crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
                     else:
-                        artefacts.append(artefact)
+                        artefacts.add_artefact(artefact)
                         crawl_logger.info(f'Check "{fullpath}": Added')
 
         return artefacts
