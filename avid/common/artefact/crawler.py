@@ -22,7 +22,6 @@ import logging
 import sys
 import concurrent.futures
 
-from avid.common.artefact import artefactExists
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
 
 log_stdout = logging.StreamHandler(sys.stdout)
@@ -77,7 +76,7 @@ class DirectoryCrawler(object):
 
         if artefact is None:
             crawl_logger.debug(f'Check "{fullpath}": Skipped')
-        elif artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts:
+        elif artefact in artefacts and self._ignoreExistingArtefacts:
             crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
         else:
             artefacts.append(artefact)
@@ -131,7 +130,7 @@ class ParallelDirectoryCrawler(object):
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
                         crawl_logger.debug(f'Check "{fullpath}": Skipped')
-                    elif artefactExists(artefacts, artefact) and self._ignoreExistingArtefacts:
+                    elif artefact in artefacts and self._ignoreExistingArtefacts:
                         crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
                     else:
                         artefacts.append(artefact)
