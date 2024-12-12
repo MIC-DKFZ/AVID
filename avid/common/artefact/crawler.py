@@ -124,21 +124,27 @@ class ParallelDirectoryCrawler(object):
         artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_threads) as executor:
             futures = []
-            for root, dirs, files in os.walk(self._rootPath):
+            for root, dirs, files in tqdm(os.walk(self._rootPath), desc='Found folders to scan'):
                 futures.append(executor.submit(getArtefactsFromFolder, root, files, self._fileFunctor, self._rootPath))
 
-            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+            skipped, duplicates, added = 0, 0, 0
+            pbar = tqdm(
+                concurrent.futures.as_completed(futures),
+                total=len(futures),
+                desc="Finished folders",
+                postfix={"Added": added, "Skipped": skipped, "Duplicates": duplicates}
+            )
+            for future in pbar:
                 folder_artefacts = future.result()
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
-                        pass
-                        #crawl_logger.debug(f'Check "{fullpath}": Skipped')
+                        skipped += 1
                     elif artefact in artefacts and self._ignoreExistingArtefacts:
-                        pass
-                        #crawl_logger.info(f'Check "{fullpath}": Skipped as duplicate artefact')
+                        duplicates += 1
                     else:
                         artefacts.add_artefact(artefact)
-                        #crawl_logger.info(f'Check "{fullpath}": Added')
+                        added += 1
+                pbar.set_postfix({"Added": added, "Skipped": skipped, "Duplicates": duplicates})
 
         return artefacts
 
