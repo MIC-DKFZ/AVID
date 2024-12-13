@@ -107,6 +107,8 @@ def getArtefactsFromFolder(folder, functor, rootPath):
 
 def scan_directories(dir_path):
     for sub_dir in os.scandir(dir_path):
+        if sub_dir.is_file() and sub_dir.name.endswith('.dcm'):
+            break
         if sub_dir.is_dir():
             yield sub_dir
             for sub_sub_dir in scan_directories(sub_dir):
