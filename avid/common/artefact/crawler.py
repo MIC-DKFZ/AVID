@@ -87,12 +87,13 @@ class DirectoryCrawler(object):
     return artefacts
 
 
-def getArtefactsFromFolder(folder, files, functor, rootPath):
+def getArtefactsFromFolder(folder, functor, rootPath):
     """
     Helper function that crawls all the given files, which lie within folder, by calling a functor on each one.
     The functor gets an additional argument 'known_ids', a set by which duplicates (e.g. DICOM files belonging to the
     same series) can be filtered out. This logic has to be done in the functor.
     """
+    files = [filepath.path for filepath in os.scandir(folder) if filepath.is_file()]
     relativePath = os.path.relpath(folder, rootPath)
     pathParts = splitall(relativePath)
     artefacts = {}
@@ -102,6 +103,14 @@ def getArtefactsFromFolder(folder, files, functor, rootPath):
         artefact = functor(pathParts, aFile, fullpath, known_ids)
         artefacts[fullpath] = artefact
     return artefacts
+
+
+def scan_directories(dir_path):
+    for sub_dir in os.scandir(dir_path):
+        if sub_dir.is_dir():
+            yield sub_dir
+            for sub_sub_dir in scan_directories(sub_dir):
+                yield sub_sub_dir
 
 
 class ParallelDirectoryCrawler(object):
@@ -124,8 +133,8 @@ class ParallelDirectoryCrawler(object):
         artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_threads) as executor:
             futures = []
-            for root, dirs, files in tqdm(os.walk(self._rootPath), desc='Found folders to scan'):
-                futures.append(executor.submit(getArtefactsFromFolder, root, files, self._fileFunctor, self._rootPath))
+            for root in tqdm(scan_directories(self._rootPath), desc='Found folders to scan'):
+                futures.append(executor.submit(getArtefactsFromFolder, root.path, self._fileFunctor, self._rootPath))
 
             skipped, duplicates, added = 0, 0, 0
             pbar = tqdm(
