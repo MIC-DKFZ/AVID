@@ -125,15 +125,15 @@ class ParallelDirectoryCrawler(object):
     @param ignoreExistingArtefacts If set to true artefacts returned by fileFunctor
     will only be added if they do not already exist in the artefact list."""
 
-    def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts=False, n_threads=10):
+    def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts=False, n_processes=10):
         self._rootPath = rootPath
         self._fileFunctor = fileFunctor
         self._ignoreExistingArtefacts = ignoreExistingArtefacts
-        self._n_threads = n_threads
+        self._n_processes = n_processes
 
     def getArtefacts(self):
         artefacts = ArtefactCollection()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_threads) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor:
             futures = []
             for root in tqdm(scan_directories(self._rootPath), desc='Found folders to scan'):
                 futures.append(executor.submit(getArtefactsFromFolder, root.path, self._fileFunctor, self._rootPath))
@@ -180,7 +180,7 @@ def runSimpleCrawlerScriptMain(fileFunction):
     saveArtefactList(cliargs.output, artefacts)
 
 
-def runParallelCrawlerScriptMain(fileFunction, n_threads=10):
+def runParallelCrawlerScriptMain(fileFunction):
     """This is a helper function that can be used if you want to write a crawler script that crawles a root directory
      and stores the results as file. This function will parse for command line arguments "root" (the root directory)
      and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly."""
@@ -190,11 +190,11 @@ def runParallelCrawlerScriptMain(fileFunction, n_threads=10):
     parser.add_argument('output', help='File path where the results of the crawl should be stored'
                                        ' (the found/indexed artefacts). If output already exists it will be'
                                        ' overwritten.')
-    parser.add_argument('n_threads', help='Number of processes that will crawl folders in parallel', default=1)
+    parser.add_argument('n_processes', help='Number of processes that will crawl folders in parallel', default=1, type=int)
 
     cliargs, unknown = parser.parse_known_args()
 
-    crawler = ParallelDirectoryCrawler(cliargs.root, fileFunction, True, n_threads=n_threads)
+    crawler = ParallelDirectoryCrawler(cliargs.root, fileFunction, True, n_processes=cliargs.n_processes)
     artefacts = crawler.getArtefacts()
 
     crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')
