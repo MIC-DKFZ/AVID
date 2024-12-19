@@ -88,7 +88,8 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
     PROPERTY_ORIGINAL_TIME_STEP = "MitkSplit4Dto3DImagesAction_original_time_step"
 
     def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkSplit4Dto3DImages",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
+                 cli_connector=None, **additionalActionArgs):
         addArgs = None
         if readerName is not None:
             addArgs = {'r':readerName}
@@ -99,7 +100,8 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
                                   propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=defaultoutputextension,
-                                  collectOutputsCallable=self.collectSplitOutputs)
+                                  collectOutputsCallable=self.collectSplitOutputs,
+                                  **additionalActionArgs)
 
 
 class MitkSplit4Dto3DImagesBatchAction(BatchActionBase):
