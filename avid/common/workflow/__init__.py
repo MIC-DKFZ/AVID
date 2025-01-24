@@ -41,8 +41,9 @@ from rich.console import Console
 stdoutlogstream = None
 
 def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
-                 interim_session_save = False, debug = False, structDefinition = None, overwriteExistingSession = False,
-                 initLogging = True, updateBootstrap = False):
+                interim_session_save = False, interim_save_interval=1, debug = False, structDefinition = None,
+                overwriteExistingSession = False, initLogging = True, updateBootstrap = False):
+
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
    @param sessionPath Path of the stored artefact list the session should use
@@ -67,10 +68,10 @@ def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefact
   
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
-  
   session = Session(name, rootPath, auto_save=autoSave or interim_session_save,
-                    interim_session_save= interim_session_save, debug = debug)
-      
+                    interim_session_save= interim_session_save, interim_save_interval=interim_save_interval,
+                    debug = debug)
+
   #logging setup
   logginglevel = logging.INFO
   if debug:
@@ -164,6 +165,7 @@ def getSessionParser(sessionPath = None):
     parser.add_argument('--structDefinition', help = 'Path to the file that defines all structures/structure pattern, that should/might be evaluated in the session.')
     parser.add_argument('--noInterimSave', action='store_true', help = 'Indicates that a session, should one store its new state after everything is processed. If not set, '
                                                                              'the session file will be actualized with every new artefact stored in the session.')
+    parser.add_argument('--interimSaveInterval', type=int, help='The number of new artefacts that need to be added until another interim save is performed. Only relevant when interim saves are active.')
     return parser
 
 def initSession_byCLIargs( sessionPath = None, **args):
@@ -194,13 +196,15 @@ def initSession_byCLIargs( sessionPath = None, **args):
     args["structDefinition"] = cliargs.structDefinition
   if not "noInterimSave" in args and cliargs.noInterimSave is not None:
     args["interim_session_save"] = not cliargs.overwriteExistingSession
+  if not "interimSaveInterval" in args and cliargs.interimSaveInterval is not None:
+    args["interim_save_interval"] = cliargs.interimSaveInterval
 
   return initSession(sessionPath, **args)  
 
    
 class Session(object):
-  def __init__(self, name=None, root_path=None, auto_save=False, interim_session_save=False, debug=False,
-               auto_error_report=False, auto_warning_report=False):
+  def __init__(self, name=None, root_path=None, auto_save=False, interim_session_save=False, interim_save_interval=1,
+               debug=False, auto_error_report=False, auto_warning_report=False):
     if name is None or root_path is None:
       raise TypeError()
     
@@ -237,6 +241,8 @@ class Session(object):
 
     self.autoSave = auto_save
     self.interimSessionSave = interim_session_save
+    self.interim_save_interval = interim_save_interval
+    self.unsaved_artefacts_counter = 0
 
     self.auto_error_report = auto_error_report
     self.auto_warning_report = auto_warning_report
@@ -255,6 +261,7 @@ class Session(object):
     # Lookup that is used to map an action tag to a task id for the progress indicator.
     # This lookup is only valid and set if a progress indicator is defined.
     self.__progress_task_lookup = dict()
+
 
   def __del__(self):
     global currentGeneratedSession
@@ -353,10 +360,12 @@ class Session(object):
     '''
     with self.lock:
       self.artefacts.add_artefact(artefact_entry)
+      self.unsaved_artefacts_counter += 1
       try:
-        if self.interimSessionSave:
+        if self.interimSessionSave and (self.unsaved_artefacts_counter % self.interim_save_interval) == 0:
           logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
           fileHelper.save_artefacts_to_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+          self.unsaved_artefacts_counter = 0
       except:
         pass
 
