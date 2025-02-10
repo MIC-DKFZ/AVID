@@ -54,12 +54,9 @@ class AndSelector(SelectorBase):
     selection1 = self._selector1.getSelection(workflowData)
     selection2 = self._selector2.getSelection(workflowData)
     resultSelection = list(dict(),)
-    for item1 in selection1:
-      for item2 in selection2:
-        if item1 == item2:
-          resultSelection.append(item1)
-          selection2.remove(item2)
-          break
+    for item in selection1:
+      if item in selection2:
+        resultSelection.append(item)
           
     return resultSelection
 
