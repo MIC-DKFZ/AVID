@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from avid.selectors import SelectorBase
+from avid.common.artefact import ArtefactCollection
+
 
 class MultiKeyValueSelector(SelectorBase):
   '''
@@ -50,15 +52,15 @@ class MultiKeyValueSelector(SelectorBase):
     return selection
     
   def __getFilteredContainer(self,container,dictEntry):
-    outList = list(dict(),)
+    outCollection = ArtefactCollection()
     try:
       for entry in container:
         if dictEntry in entry:
           if entry[dictEntry] == self.__selectionDict[dictEntry]:
-            outList.append(entry)
+            outCollection.add_artefact(entry)
         else:
           if self.__selectionDict[dictEntry] is None:
-            outList.append(entry)
-      return outList
+            outCollection.add_artefact(entry)
+      return outCollection
     except KeyError:
       self.__workflow.getLogger().info("A key (%s) was specified, which is not stored in the input data!",dictEntry)
