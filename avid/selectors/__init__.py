@@ -38,7 +38,16 @@ class SelectorBase(object):
     '''Creates an AndSelector with self and other and returns it'''
     andSelector = AndSelector(self,other)
     return andSelector
-  
+
+  def __neg__(self):
+    """ Creates a NotSelector with self and returns it """
+    notSelector = NotSelector(self)
+    return notSelector
+
+  def __sub__(self, other):
+    """ Creates a NotSelector to 'subtract' the other selection from this one """
+    return self + NotSelector(other)
+
   
 class AndSelector(SelectorBase):
   '''
@@ -88,6 +97,26 @@ class OrSelector(SelectorBase):
         resultSelection.add_artefact(item2)
 
     return resultSelection
+
+
+class NotSelector(SelectorBase):
+  """ Special selector that negates a provided selector.
+      The selection result of the NotSelector is everything that NOT matches the child selector.
+  """
+
+  def __init__(self, selector):
+    ''' init '''
+    super().__init__()
+    self._selector = selector
+
+  def getSelection(self, workflowData):
+    selection = self._selector.getSelection(workflowData)
+    non_selection = ArtefactCollection()
+    for item in workflowData:
+      if item not in selection:
+        non_selection.add_artefact(item)
+
+    return non_selection
 
 
 class LambdaSelector(SelectorBase):
