@@ -36,7 +36,7 @@ def get_input_artefact_ids(workflow_data, input_keys=None):
                     for ID in inputs_dict[input_key]:
                         inputs.add(ID)
 
-    return list(inputs)
+    return inputs
 
 class IsInputSelector(SelectorBase):
     """ Convenience selector to select only artefacts that are inputs of other artefacts (derived artefacts) in
