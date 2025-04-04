@@ -54,6 +54,10 @@ class PlmRTSSMapAction(GenericCLIAction):
                     else:
                         regPath = fieldPath
                 result.append(regPath)
+        elif arg_name == 'output-dicom':
+            for arg_artefact in arg_value:
+                output_path = artefactHelper.getArtefactProperty(arg_artefact, artefactProps.URL)
+                result.append(os.path.splitext(output_path)[0])
         else:
             result = default_artefact_url_extraction_delegate(arg_name=arg_name, arg_value=arg_value)
 
@@ -71,8 +75,17 @@ class PlmRTSSMapAction(GenericCLIAction):
         if registration is not None:
             inputArgs['xf'] = [registration]
 
+        outputFlags = None
+        if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
+            outputFlags = ['output-dicom']
+        elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
+            outputFlags = ['output-cxt']
+        else:
+            raise ValueError(
+                'Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
+
         GenericCLIAction.__init__(self, **inputArgs, actionID="plastimatch",
-                                  noOutputArgs=True,
+                                  outputFlags=outputFlags,
                                   argPositions=['command'],
                                   additionalArgsAsURL=['output-dicom', 'output-cxt'],
                                   inputArgsURLExtractionDelegate=self._plmRTSS_url_extraction_delegate,
@@ -82,14 +95,6 @@ class PlmRTSSMapAction(GenericCLIAction):
                                   defaultoutputextension=self._getOutputExtension())
 
         additionalArgs = {'command': 'convert'}
-        resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
-        if self._outputFormat == artefactProps.FORMAT_VALUE_DCM:
-            additionalArgs['output-dicom'] = os.path.splitext(resultPath)[0]
-        elif self._outputFormat == FORMAT_VALUE_PLM_CXT:
-            additionalArgs['output-cxt'] = resultPath
-        else:
-            raise ValueError(
-                'Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
 
         self.setAdditionalArguments(additionalArgs=additionalArgs)
 
