@@ -385,14 +385,20 @@ class ArtefactCollection:
         Adds an artefact to the collection. If an artefact with the same hash exists:
         - Replaces it if replace_if_exists is True.
         - Raises a ValueError otherwise.
+        Returns the replaced artefact. If no artefact was replaced it returns None.
         """
         artefact_hash = hash(artefact)
 
-        if not replace_if_exists and artefact_hash in self.artefact_dict:
-            raise ValueError(f'An identical artefact already exists in the collection. Existing artefact: "'
+        already_existing = artefact_hash in self.artefact_dict
+        replace_artefact = None
+        if already_existing:
+            if not replace_if_exists:
+                raise ValueError(f'An identical artefact already exists in the collection. Existing artefact: "'
                              f'{self.artefact_dict[artefact_hash]}". New artefact: "{artefact}"')
+            replace_artefact = self.artefact_dict[artefact_hash]
 
         self.artefact_dict[artefact_hash] = artefact
+        return replace_artefact
 
     def remove_artefact(self, artefact):
         """Removes the artefact from the collection if it exists."""
@@ -431,8 +437,26 @@ class ArtefactCollection:
         return len(self.artefact_dict)
 
     def __contains__(self, artefact):
-        """Check if an artefact exists in the manager."""
-        return self.similar_artefact_exists(artefact=artefact)
+        """Check if an identical artefact exists in the collection."""
+        return self.identical_artefact_exists(artefact=artefact)
 
     def __repr__(self):
-        return f"ArtefactManager({len(self.artefacts)} artefacts)"
+        return f"ArtefactCollection({len(self.artefact_dict)} artefacts)"
+
+    def __eq__(self, other):
+        """Checks if the passed container containes the identical artefacts then self.
+        Order of artefects is not relevant for equality."""
+        otherCollection = ArtefactCollection()
+
+        try:
+            otherCollection.extend(other, replace_if_exists=False)
+        except ValueError:
+            return False
+
+        if len(self) != len(otherCollection):
+            return False
+
+        for artefact in self:
+            if not otherCollection.identical_artefact_exists(artefact=artefact):
+                return False
+        return True

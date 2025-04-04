@@ -57,9 +57,9 @@ class TestArtefactFileHelper(unittest.TestCase):
 
     def test_load_xml(self):
       with self.assertRaises(ValueError):
-        fileHelper.loadArtefactList_xml("invalidFilePath")
+        fileHelper.load_artefact_collection_from_xml("invalidFilePath")
       
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.testDataDir,"testlist.avid"),True)
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.testDataDir, "testlist.avid"), True)
       self.assertEqual(len(artefacts), 3)
       self.assertEqual(artefacts[0][artefactProps.ID], "ID_1")
       self.assertEqual(artefacts[0][artefactProps.CASE], "case_1")
@@ -99,50 +99,50 @@ class TestArtefactFileHelper(unittest.TestCase):
       self.assertDictEqual(artefacts[2][artefactProps.INPUT_IDS], {"input1":["ID_1","ID_1_2"], "input2":['ID_2']})
 
     def test_save_xml(self):
-      fileHelper.saveArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"),self.data, rootPath = self.testDataDir)
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
-      self.assertListEqual(self.data, artefacts)
+      fileHelper.save_artefacts_to_xml(os.path.join(self.sessionDir, "test1.avid"), self.data, rootPath = self.testDataDir)
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.sessionDir, "test1.avid"), rootPath = self.testDataDir)
+      self.assertEqual(self.data, artefacts)
 
     def test_update_artefactlist_simple(self):
       testFilePath = os.path.join(self.sessionDir,"test1.avid")
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, rootPath = self.testDataDir)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, rootPath = self.testDataDir)
 
       fileHelper.update_artefactlist(testFilePath, self.data_simelar, rootPath = self.testDataDir)
 
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.sessionDir, "test1.avid"), rootPath = self.testDataDir)
       referenceArtefacts = [self.a1, self.a2, self.a3, self.a4]
-      self.assertListEqual(referenceArtefacts, artefacts)
+      self.assertEqual(artefacts, referenceArtefacts)
 
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, savePathsRelative=False)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, savePathsRelative=False)
 
       fileHelper.update_artefactlist(testFilePath, self.data_simelar, savePathsRelative=False)
 
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"))
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.sessionDir, "test1.avid"))
       referenceArtefacts = [self.a1, self.a2, self.a3, self.a4]
-      self.assertListEqual(referenceArtefacts, artefacts)
+      self.assertEqual(artefacts, referenceArtefacts)
 
 
     def test_update_artefactlist_update_existing(self):
       testFilePath = os.path.join(self.sessionDir,"test1.avid")
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, rootPath = self.testDataDir)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, rootPath = self.testDataDir)
 
       fileHelper.update_artefactlist(testFilePath, self.data_simelar, update_existing=True, rootPath = self.testDataDir)
 
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"), rootPath = self.testDataDir)
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.sessionDir, "test1.avid"), rootPath = self.testDataDir)
       referenceArtefacts = [self.a1, self.a2, self.a3_update, self.a4]
-      self.assertListEqual(referenceArtefacts, artefacts)
+      self.assertEqual(artefacts, referenceArtefacts)
 
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, savePathsRelative=False)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, savePathsRelative=False)
 
       fileHelper.update_artefactlist(testFilePath, self.data_simelar, update_existing=True, savePathsRelative=False)
 
-      artefacts = fileHelper.loadArtefactList_xml(os.path.join(self.sessionDir,"test1.avid"))
+      artefacts = fileHelper.load_artefact_collection_from_xml(os.path.join(self.sessionDir, "test1.avid"))
       referenceArtefacts = [self.a1, self.a2, self.a3_update, self.a4]
-      self.assertListEqual(referenceArtefacts, artefacts)
+      self.assertEqual(artefacts, referenceArtefacts)
 
     def test_update_artefactlist_waitfail(self):
       testFilePath = os.path.join(self.sessionDir,"test1.avid")
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, rootPath = self.testDataDir)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, rootPath = self.testDataDir)
 
       lf_path = testFilePath+ os.extsep + 'update_lock'
       with open(lf_path, 'x') as lf:
@@ -160,7 +160,7 @@ class TestArtefactFileHelper(unittest.TestCase):
     def test_update_artefactlist_waitsuccess(self):
 
       testFilePath = os.path.join(self.sessionDir,"test1.avid")
-      fileHelper.saveArtefactList_xml(testFilePath,self.data, rootPath = self.testDataDir)
+      fileHelper.save_artefacts_to_xml(testFilePath, self.data, rootPath = self.testDataDir)
 
       lf_path = testFilePath+ os.extsep + 'update_lock'
       with open(lf_path, 'x') as lf:

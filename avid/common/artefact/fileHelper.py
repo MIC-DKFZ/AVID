@@ -23,7 +23,7 @@ import time
 import xml.etree.ElementTree as ElementTree
 from builtins import str
 
-from avid.common.artefact import generateArtefactEntry, update_artefacts
+from avid.common.artefact import ArtefactCollection, generateArtefactEntry, update_artefacts
 from . import defaultProps
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ XML_NAMESPACE_DICT = {"avid": XML_NAMESPACE}
 CURRENT_XML_VERSION = "1.0"
 
 
-def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
+def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None, replace_if_exists=True):
     """Loads a artefact list from a XML file.
     @param filePath Path where the artefact list is located or file like object that grants access to the list.
     @param expandPaths If true all relative url will be expanded by the rootPath
@@ -66,7 +66,7 @@ def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
     @param rootPath If defined any relative url in the list will expanded by the
     root path. If rootPath is set, expandPaths is implicitly true.
     """
-    artefacts = list()
+    artefacts = ArtefactCollection()
 
     if rootPath is None and expandPaths is True:
         rootPath = os.path.split(filePath)[0]
@@ -114,12 +114,25 @@ def loadArtefactList_xml(filePath, expandPaths=False, rootPath=None):
             artefact[defaultProps.INVALID] = True
             logger.info("Artefact had no valid URL. Set invalid property to true. Artefact: %s", artefact)
 
-        artefacts.append(artefact)
+        replaced_artifact = artefacts.add_artefact(artefact=artefact, replace_if_exists=replace_if_exists)
+
+        if replaced_artifact is not None:
+            logger.warning(
+                "Artefacts file contained similar artefact which will be overwritten."
+                 "\nOld artifact: %s"
+                 "\nNew artifact: %s", replaced_artifact, artefact)
 
     return artefacts
 
 
-def saveArtefactList_xml(filePath, artefacts, rootPath=None, savePathsRelative=True):
+def save_artefacts_to_xml(filePath, artefacts, rootPath=None, savePathsRelative=True):
+    """Saves any container with artefacts as a XML file.
+    @param filePath Path where the artefacts file should be stored.
+    @param savePathsRelative If true all pathes will be stored as relative path to the
+    passed root path. If rootPath is not set, it will be the directory of filePath
+    @param rootPath If defined any relative url in the list will expanded by the
+    root path.
+    """
     if rootPath is None:
         rootPath = os.path.split(filePath)[0]
 
@@ -203,11 +216,11 @@ def update_artefactlist(destination_file, source_artefacts, update_existing=Fals
                                    ' File: {}'.format(destination_file))
 
     try:
-        destination_artefacts = loadArtefactList_xml(destination_file,rootPath=rootPath)
+        destination_artefacts = load_artefact_collection_from_xml(destination_file, rootPath=rootPath)
         update_artefacts(destination_collection=destination_artefacts, source_collection=source_artefacts,
                          update_existing=update_existing)
-        saveArtefactList_xml(filePath=destination_file,artefacts=destination_artefacts, rootPath=rootPath,
-                             savePathsRelative=savePathsRelative )
+        save_artefacts_to_xml(filePath=destination_file, artefacts=destination_artefacts, rootPath=rootPath,
+                              savePathsRelative=savePathsRelative)
     finally:
         if lf is not None:
             lf.close()

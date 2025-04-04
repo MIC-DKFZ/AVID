@@ -110,14 +110,14 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   
   if sessionExists:
     if not overwriteExistingSession:
-      artefacts = fileHelper.loadArtefactList_xml(sessionPath, expandPaths)
+      artefacts = fileHelper.load_artefact_collection_from_xml(sessionPath, expandPaths)
       rootlogger.debug("Number of artefacts loaded from session: %s. Session path: %s", len(artefacts), sessionPath)
     else:
       rootlogger.info("Old session was overwritten. Session path: %s", sessionPath)
          
   if bootstrapArtefacts is not None and len(artefacts) == 0:
     rootlogger.debug("Load artefacts from bootstrap file: %s", bootstrapArtefacts)
-    artefacts = fileHelper.loadArtefactList_xml(bootstrapArtefacts, expandPaths)
+    artefacts = fileHelper.load_artefact_collection_from_xml(bootstrapArtefacts, expandPaths)
     rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(artefacts))
 
     
@@ -268,7 +268,7 @@ class Session(object):
   def __exit__(self, exc_type, exc_value, traceback):
     if self.autoSave:
       logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
-      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+      fileHelper.save_artefacts_to_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
      
     logging.info(f'Successful actions (with warnings): {len(self.getSuccessfulActions())} '
                  f'({len(self.getSuccessfulActions())}).')
@@ -355,7 +355,7 @@ class Session(object):
       try:
         if self.interimSessionSave:
           logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
-          fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+          fileHelper.save_artefacts_to_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
       except:
         pass
 
