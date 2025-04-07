@@ -18,7 +18,7 @@
 
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-from avid.common.artefact import ArtefactCollection
+from avid.common.artefact import ArtefactCollection, ensureCaseInstanceValidity
 import avid.common.artefact.defaultProps as artefactProps
 
 class TestArtefactGeneration(unittest.TestCase):
@@ -65,45 +65,55 @@ class TestArtefactGeneration(unittest.TestCase):
     #Check remove simelar is active
     workflowData.add_artefact(self.a5, True)
     self.assertEqual(len(workflowData), 2)
-    self.assertEqual(workflowData[0], self.a3)
-    self.assertEqual(workflowData[1], self.a5)
+    self.assertIn(self.a3, workflowData)
+    self.assertIn(self.a5, workflowData)
 
     #Check remove simelar is inactive
-    self.assertRaises(ValueError, workflowData.add_artefact(self.a1, False))
+    self.assertRaises(ValueError, workflowData.add_artefact, self.a1, False)
 
   def test_findSimelarArtefact(self):
-    self.assertEqual(artefact.findSimilarArtefact(self.data, self.a1), self.a1)
-    self.assertEqual(artefact.findSimilarArtefact(self.data, self.a2), self.a2)
-    self.assertEqual(artefact.findSimilarArtefact(self.data, self.a4), None)
-    self.assertEqual(artefact.findSimilarArtefact(self.data, self.a5), self.a1, "Check if it finds artefact that are only different by URL and returns them")
+    self.assertEqual(self.data.find_similar(self.a1), self.a1)
+    self.assertEqual(self.data.find_similar(self.a2), self.a2)
+    self.assertEqual(self.data.find_similar(self.a4), None)
+    self.assertEqual(self.data.find_similar(self.a5), self.a1, "Check if it finds artefact that are only different by URL and returns them")
     
   def test_artefactExists(self):
-    self.assertEqual(artefact.artefactExists(self.data, self.a1), True)
-    self.assertEqual(artefact.artefactExists(self.data, self.a2), True)
-    self.assertEqual(artefact.artefactExists(self.data, self.a4), False)
-    self.assertEqual(artefact.artefactExists(self.data, self.a5), True, "Check if it finds artefact that are only different by URL and returns them")
-    
+    self.assertEqual(self.data.similar_artefact_exists(self.a1), True)
+    self.assertEqual(self.data.similar_artefact_exists(self.a2), True)
+    self.assertEqual(self.data.similar_artefact_exists(self.a4), False)
+    self.assertEqual(self.data.similar_artefact_exists(self.a5), True, "Check if it finds artefact that are only different by URL and returns them")
+
+    self.assertEqual(self.data.identical_artefact_exists(self.a1), True)
+    self.assertEqual(self.data.identical_artefact_exists(self.a2), True)
+    self.assertEqual(self.data.identical_artefact_exists(self.a4), False)
+    self.assertEqual(self.data.identical_artefact_exists(self.a5), False, "Check if it finds artefact that are only different by URL and returns them")
+
+    self.assertTrue(self.a1 in self.data)
+    self.assertTrue(self.a2 in self.data)
+    self.assertTrue(self.a4 not in self.data)
+    self.assertTrue(self.a5 not in self.data)
+
   def test_ensureCaseInstanceValidity(self):
     testA = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", "result", "dummy", "myCoolFile.any")
-    result = artefact.ensureCaseInstanceValidity(testA, self.a1, self.a5)
+    result = ensureCaseInstanceValidity(testA, self.a1, self.a5)
     
     self.assertEqual(result, True)
     self.assertEqual(testA[artefactProps.CASEINSTANCE], None)
     
-    result = artefact.ensureCaseInstanceValidity(testA, self.a1, self.a2, self.a5, None)
+    result = ensureCaseInstanceValidity(testA, self.a1, self.a2, self.a5, None)
     
     self.assertEqual(result, True)
     self.assertEqual(testA[artefactProps.CASEINSTANCE], self.a2[artefactProps.CASEINSTANCE])
 
     #conflict due to different instance testA and self.a3
-    result = artefact.ensureCaseInstanceValidity(testA, self.a1, self.a3)
+    result = ensureCaseInstanceValidity(testA, self.a1, self.a3)
     
     self.assertEqual(result, False)
     self.assertEqual(testA[artefactProps.CASEINSTANCE], self.a2[artefactProps.CASEINSTANCE])
 
     #conflict due to different instance self.a2 and self.a3
     testA = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", "result", "dummy", "myCoolFile.any")
-    result = artefact.ensureCaseInstanceValidity(testA, self.a2, self.a3)
+    result = ensureCaseInstanceValidity(testA, self.a2, self.a3)
     
     self.assertEqual(result, False)
     self.assertEqual(testA[artefactProps.CASEINSTANCE], self.a2[artefactProps.CASEINSTANCE])
