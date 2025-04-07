@@ -446,17 +446,35 @@ class ArtefactCollection:
     def __eq__(self, other):
         """Checks if the passed container containes the identical artefacts then self.
         Order of artefects is not relevant for equality."""
-        otherCollection = ArtefactCollection()
+        other_collection = ArtefactCollection()
 
         try:
-            otherCollection.extend(other, replace_if_exists=False)
+            other_collection.extend(other, replace_if_exists=False)
         except ValueError:
             return False
 
-        if len(self) != len(otherCollection):
+        if len(self) != len(other_collection):
             return False
 
         for artefact in self:
-            if not otherCollection.identical_artefact_exists(artefact=artefact):
+            if not other_collection.identical_artefact_exists(artefact=artefact):
+                return False
+        return True
+
+    def collection_is_similar(self, other):
+        """Checks if the passed container containes simelar artefacts then self.
+        Order of artefects is not relevant for equality."""
+        other_collection = ArtefactCollection()
+
+        try:
+            other_collection.extend(other, replace_if_exists=False)
+        except ValueError:
+            return False
+
+        if len(self) != len(other_collection):
+            return False
+
+        for artefact in self:
+            if not other_collection.similar_artefact_exists(artefact=artefact):
                 return False
         return True
