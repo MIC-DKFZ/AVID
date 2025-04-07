@@ -40,8 +40,8 @@ from rich.console import Console
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
 stdoutlogstream = None
 
-def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
-                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False, initLogging = True):
+def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
+                interim_session_save = False, debug = False, structDefinition = None, overwriteExistingSession = False, initLogging = True):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
    @param sessionPath Path of the stored artefact list the session should use
@@ -67,8 +67,8 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
   
-  session = Session(name, rootPath, auto_save=autoSave or interimSessionSave,
-                    interim_session_save= interimSessionSave, debug = debug)
+  session = Session(name, rootPath, auto_save=autoSave or interim_session_save,
+                    interim_session_save= interim_session_save, debug = debug)
       
   #logging setup
   logginglevel = logging.INFO
