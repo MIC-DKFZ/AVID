@@ -18,7 +18,7 @@
 
 
 import argparse
-from avid.common.artefact.fileHelper import loadArtefactList_xml, saveArtefactList_xml
+from avid.common.artefact.fileHelper import load_artefact_collection_from_xml, save_artefacts_to_xml
 
 import avid.common.demultiplexer as demux
 from random import shuffle
@@ -46,7 +46,7 @@ def main():
   print('AVID diagnostics tool')
   print('')
 
-  artefacts = loadArtefactList_xml(args_dict['artefactfile'], expandPaths=True)
+  artefacts = load_artefact_collection_from_xml(args_dict['artefactfile'], expandPaths=True)
   print('Artefacts loaded from: {}'.format(args_dict['artefactfile']))
 
   fileNameBase, fileExt = os.path.splitext(args_dict['artefactfile'])
@@ -103,7 +103,7 @@ def main():
       subArtefacts.extend(splitInstances[0])
       splitInstances.pop(0)
     subFilePath = os.path.join(filePath, fileNameBase+os.path.extsep+'sub'+str(pos+1)+fileExt)
-    saveArtefactList_xml(subFilePath,subArtefacts)
+    save_artefacts_to_xml(subFilePath, subArtefacts)
 
   if len(splitInstances)>0:
     print('Generate subset {}. Instance size: {}'.format(len(subsetSizes)+1, len(splitInstances)))
@@ -112,7 +112,7 @@ def main():
     for si in splitInstances:
       subArtefacts.extend(si)
     subFilePath = os.path.join(filePath, fileNameBase+os.path.extsep+'resudial'+fileExt)
-    saveArtefactList_xml(subFilePath,subArtefacts)
+    save_artefacts_to_xml(subFilePath, subArtefacts)
 
 
 

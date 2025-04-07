@@ -24,13 +24,14 @@ import sys
 import threading
 from builtins import object
 from builtins import str
+from pathlib import Path
 
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.patientNumber as patientNumber
-from avid.common import artefact
+from avid.common.artefact import ArtefactCollection, update_artefacts
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
-from .report import print_action_diagnostics
+from .report import print_action_diagnostics, create_actions_report
 from rich.progress import Progress
 from rich.console import Console
 
@@ -39,8 +40,8 @@ from rich.console import Console
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
 stdoutlogstream = None
 
-def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
-                 interimSessionSave = False, debug = False, structDefinition = None, overwriteExistingSession = False,
+def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
+                 interim_session_save = False, debug = False, structDefinition = None, overwriteExistingSession = False,
                  initLogging = True, updateBootstrap = False):
   ''' Convenience method to init a session and load the artefact list of the
    if it is already present.
@@ -67,8 +68,8 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
   if name is None:
     name = os.path.split(sessionPath)[1]+"_session"
   
-  session = Session(name, rootPath, autoSave = autoSave or interimSessionSave,
-                    interimSessionSave = interimSessionSave, debug = debug)
+  session = Session(name, rootPath, auto_save=autoSave or interim_session_save,
+                    interim_session_save= interim_session_save, debug = debug)
       
   #logging setup
   logginglevel = logging.INFO
@@ -106,20 +107,20 @@ def initSession( sessionPath, name = None, expandPaths = False, bootstrapArtefac
       rootlogger.warning("Overwrite existing session activated, but could not remove existing old result data directory.")
       
   #artefact setup
-  artefacts = list()
+  artefacts = ArtefactCollection()
   
   if sessionExists:
     if not overwriteExistingSession:
-      artefacts = fileHelper.loadArtefactList_xml(sessionPath, expandPaths)
+      artefacts = fileHelper.load_artefact_collection_from_xml(sessionPath, expandPaths)
       rootlogger.debug("Number of artefacts loaded from session: %s. Session path: %s", len(artefacts), sessionPath)
     else:
       rootlogger.info("Old session was overwritten. Session path: %s", sessionPath)
 
   if bootstrapArtefacts is not None and (len(artefacts) == 0 or updateBootstrap):
     rootlogger.debug("Load artefacts from bootstrap file: %s", bootstrapArtefacts)
-    bootstrapArtefacts = fileHelper.loadArtefactList_xml(bootstrapArtefacts, expandPaths)
-    rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(bootstrapArtefacts))
-    artefact.update_artefacts(artefacts, bootstrapArtefacts)
+    bootstrapped_artefacts = fileHelper.load_artefact_collection_from_xml(bootstrapArtefacts, expandPaths)
+    rootlogger.debug("Number of artefacts loaded from bootstrap file: %s.", len(bootstrapped_artefacts))
+    update_artefacts(artefacts, bootstrapped_artefacts)
 
   session.artefacts.extend(artefacts)
   
@@ -192,21 +193,22 @@ def initSession_byCLIargs( sessionPath = None, **args):
   if not "structDefinition" in args and cliargs.structDefinition is not None:
     args["structDefinition"] = cliargs.structDefinition
   if not "noInterimSave" in args and cliargs.noInterimSave is not None:
-    args["interimSessionSave"] = not cliargs.overwriteExistingSession
+    args["interim_session_save"] = not cliargs.overwriteExistingSession
 
   return initSession(sessionPath, **args)  
 
    
 class Session(object):
-  def __init__(self, name = None, rootPath = None, autoSave = False, interimSessionSave = False, debug = False):
-    if name is None or rootPath is None:
+  def __init__(self, name=None, root_path=None, auto_save=False, interim_session_save=False, debug=False,
+               auto_error_report=False, auto_warning_report=False):
+    if name is None or root_path is None:
       raise TypeError()
     
     self.lock = threading.RLock()
     #Workflow Name/ID
     self.name = name
     #Path of the workflow session root
-    self._rootPath = rootPath
+    self._rootPath = root_path
     
     self._lastStoredLocation = str()
     
@@ -226,15 +228,18 @@ class Session(object):
 
     #List of all executed (SingleActionBase based) actions that where executed for that session
     self.executed_actions = list()
-    self.artefacts = list()
+    self.artefacts = ArtefactCollection()
 
     #That is a list of all batch actions assigned to this session.
     self._batch_actions = list()
     
     self.numberOfPatients = self.getNumberOfPatientsDecorator(patientNumber.getNumberOfPatients)
 
-    self.autoSave = autoSave
-    self.interimSessionSave = interimSessionSave
+    self.autoSave = auto_save
+    self.interimSessionSave = interim_session_save
+
+    self.auto_error_report = auto_error_report
+    self.auto_warning_report = auto_warning_report
 
     #indicates that the session runs in debug mode
     self.debug = debug
@@ -264,14 +269,31 @@ class Session(object):
   def __exit__(self, exc_type, exc_value, traceback):
     if self.autoSave:
       logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
-      fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+      fileHelper.save_artefacts_to_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
      
-    logging.info("Successful actions: %s.", len(self.getSuccessfulActions()))
+    logging.info(f'Successful actions (with warnings): {len(self.getSuccessfulActions())} '
+                 f'({len(self.getSuccessfulActions())}).')
     logging.info("Skipped actions: %s.", len(self.getSkippedActions()))
+    if self.auto_warning_report:
+        actions_with_warning = self.getSuccessfulActionsWithWarnings()
+        if len(actions_with_warning) > 0:
+            session_path = Path(self._lastStoredLocation)
+            report_file_path = session_path.with_name(session_path.stem+'_warning_report').with_suffix('.zip')
+            logging.debug("Auto saving report for all successful actions with warnings. File path: %s.", report_file_path)
+            create_actions_report(actions=actions_with_warning, report_file_path=report_file_path,
+                                  generate_report_zip=True)
+
     if len(self.getFailedActions()) == 0:
       logging.info("Failed actions: 0.")
     else:
-      logging.error("FAILED ACTIONS: %s.", len(self.getFailedActions()))
+      failed_actions = self.getFailedActions()
+      logging.error("FAILED ACTIONS: %s.", len(failed_actions))
+      if self.auto_error_report:
+        session_path = Path(self._lastStoredLocation)
+        report_file_path = session_path.with_name(session_path.stem+'_error_report').with_suffix('.zip')
+        logging.debug("Auto saving report for all failed actions. File path: %s.", report_file_path)
+        create_actions_report(actions=failed_actions, report_file_path=report_file_path,
+                              generate_report_zip=True)
     logging.info("Session finished. Feed me more...")
 
       
@@ -325,18 +347,16 @@ class Session(object):
     with self.lock:    
       self.actionTools[actionID] = entry
 
-  def addArtefact(self, artefactEntry, removeSimelar = False):
+  def add_artefact(self, artefact_entry):
     ''' 
-        This method adds an arbitrary artefact entry to the artefact list.
-        @param removeSimelar If True the method checks if the session data contains
-        a simelar entry. If yes the simelar entry will be removed.      
-    ''' 
+        This method adds an arbitrary artefact entry to the artefact collection.
+    '''
     with self.lock:
-      self.artefacts = artefact.addArtefactToWorkflowData(self.artefacts, artefactEntry, removeSimelar)
+      self.artefacts.add_artefact(artefact_entry)
       try:
         if self.interimSessionSave:
           logging.debug("Auto saving artefact of current session. File path: %s.", self._lastStoredLocation)
-          fileHelper.saveArtefactList_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
+          fileHelper.save_artefacts_to_xml(self._lastStoredLocation, self.artefacts, self.rootPath)
       except:
         pass
 

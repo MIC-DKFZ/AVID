@@ -64,11 +64,11 @@ class Test(unittest.TestCase):
         self.a_Invalid_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
  
         self.session = workflow.Session("session1", self.sessionDir)
-        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_valid)
-        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_valid2)
-        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_NoneURL)
-        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_NoFile)
-        artefact.addArtefactToWorkflowData(self.session.artefacts,self.a_Invalid)
+        self.session.artefacts.add_artefact(self.a_valid)
+        self.session.artefacts.add_artefact(self.a_valid2)
+        self.session.artefacts.add_artefact(self.a_NoneURL)
+        self.session.artefacts.add_artefact(self.a_NoFile)
+        self.session.artefacts.add_artefact(self.a_Invalid)
         
 
     def tearDown(self):
@@ -91,7 +91,8 @@ class Test(unittest.TestCase):
       self.assertIn(action._actions[1], self.session.executed_actions)
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertIn(self.a_valid2_new, self.session.artefacts)
-      
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid2))
 
     def test_simelar_exisiting_alwaysOff(self):
       workflow.currentGeneratedSession = self.session
@@ -107,8 +108,8 @@ class Test(unittest.TestCase):
       self.assertIn(action._actions[1], self.session.executed_actions)
       self.assertIn(self.a_valid, self.session.artefacts)
       self.assertIn(self.a_valid2, self.session.artefacts)
-      self.assertFalse(self.a_valid_new in self.session.artefacts)
-      self.assertFalse(self.a_valid2_new in self.session.artefacts)
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid2_new))
 
 
     def test_simelar_mixed_alwaysDo(self):
@@ -125,6 +126,8 @@ class Test(unittest.TestCase):
       self.assertIn(action._actions[1], self.session.executed_actions)
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertIn(self.a_Invalid_new, self.session.artefacts)
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_Invalid))
 
 
     def test_simelar_mixed_alwaysOff(self):
@@ -141,8 +144,8 @@ class Test(unittest.TestCase):
       self.assertIn(action._actions[1], self.session.executed_actions)
       self.assertIn(self.a_valid, self.session.artefacts)
       self.assertIn(self.a_Invalid_new, self.session.artefacts)
-      self.assertFalse(self.a_valid_new in self.session.artefacts)
-      self.assertFalse(self.a_Invalid in self.session.artefacts)
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_Invalid))
 
 
     def test_failure_mixed_alwaysOn(self):
@@ -160,6 +163,7 @@ class Test(unittest.TestCase):
       self.assertIn(self.a_valid_new, self.session.artefacts)
       self.assertIn(self.a_NoFile, self.session.artefacts)
       self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
 
     
     def test_failure_mixed_alwaysOff(self):
@@ -177,6 +181,7 @@ class Test(unittest.TestCase):
       self.assertIn(self.a_valid, self.session.artefacts)
       self.assertIn(self.a_NoFile, self.session.artefacts)
       self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
+      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
 
 
 if __name__ == "__main__":
