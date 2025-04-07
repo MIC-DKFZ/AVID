@@ -39,7 +39,7 @@ class TestWorkflowReport(unittest.TestCase):
 
         for i in range(0, 3):
             a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
-            self.session.addArtefact(a)
+            self.session.add_artefact(a)
             self.actions_success.append(DummyAction([a],actionTag="ActionSuccess"))
             self.actions_skipped.append(DummyAction([a],actionTag="ActionSkipped",will_skip=True))
             self.actions_failed.append(DummyAction([a],actionTag="ActionFailed",will_fail=True))

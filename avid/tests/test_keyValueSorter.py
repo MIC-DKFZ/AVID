@@ -17,7 +17,7 @@
 # limitations under the License.
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection, defaultProps
 from avid.sorter import KeyValueSorter
 
 class TestKeyValueSorter(unittest.TestCase):
@@ -28,15 +28,15 @@ class TestKeyValueSorter(unittest.TestCase):
     self.a4 = artefactGenerator.generateArtefactEntry("Case2", "7", 0, "Action1", "result", "dummy", None)
     self.a5 = artefactGenerator.generateArtefactEntry("Case4", "5", 1, "Action1", "result", "dummy", None)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
+    self.data = ArtefactCollection()
+    self.data.add_artefact(self.a1)
+    self.data.add_artefact(self.a2)
+    self.data.add_artefact(self.a3)
+    self.data.add_artefact(self.a4)
+    self.data.add_artefact(self.a5)
 
   def test_KeyValueSorter(self):
-    sorter = KeyValueSorter(key=artefact.defaultProps.CASE)
+    sorter = KeyValueSorter(key=defaultProps.CASE)
     selection = sorter.sortSelection(self.data)
     self.assertEqual(len(selection), 5)
     self.assertEqual(self.a3, selection[0])
@@ -45,7 +45,7 @@ class TestKeyValueSorter(unittest.TestCase):
     self.assertEqual(self.a5, selection[3])
     self.assertEqual(self.a2, selection[4])
 
-    sorter = KeyValueSorter(key=artefact.defaultProps.CASEINSTANCE)
+    sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE)
     selection = sorter.sortSelection(self.data)
     self.assertEqual(len(selection), 5)
     self.assertEqual(self.a2, selection[0])
@@ -55,7 +55,7 @@ class TestKeyValueSorter(unittest.TestCase):
     self.assertEqual(self.a4, selection[4])
 
   def test_KeyValueSorter_numeric(self):
-    sorter = KeyValueSorter(key=artefact.defaultProps.CASEINSTANCE, asNumbers=True)
+    sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE, asNumbers=True)
     selection = sorter.sortSelection(self.data)
     self.assertEqual(len(selection), 5)
     self.assertEqual(self.a2, selection[0])

@@ -22,7 +22,7 @@ import logging
 import sys
 
 from avid.common.artefact import artefactExists
-from avid.common.artefact.fileHelper import saveArtefactList_xml as saveArtefactList
+from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)

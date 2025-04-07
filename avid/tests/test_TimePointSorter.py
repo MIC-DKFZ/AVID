@@ -17,7 +17,7 @@
 # limitations under the License.
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection
 from avid.sorter import TimePointSorter
 
 class TestKeyValueSorter(unittest.TestCase):
@@ -28,12 +28,12 @@ class TestKeyValueSorter(unittest.TestCase):
     self.a4 = artefactGenerator.generateArtefactEntry("Case2", "7", 2, "Action1", "result", "dummy", None)
     self.a5 = artefactGenerator.generateArtefactEntry("Case4", "5", 5, "Action1", "result", "dummy", None)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
+    self.data = ArtefactCollection()
+    self.data.add_artefact(self.a1)
+    self.data.add_artefact(self.a2)
+    self.data.add_artefact(self.a3)
+    self.data.add_artefact(self.a4)
+    self.data.add_artefact(self.a5)
 
   def test_KeyValueSorter(self):
     sorter = TimePointSorter()

@@ -19,7 +19,7 @@
 
 import argparse
 from avid.common.artefact import defaultProps
-from avid.common.artefact.fileHelper import loadArtefactList_xml
+from avid.common.artefact.fileHelper import load_artefact_collection_from_xml
 
 from avid.selectors import SelectorBase, AndSelector
 from avid.selectors import ValiditySelector
@@ -42,7 +42,7 @@ def main():
   print('AVID diagnostics tool')
   print('')
 
-  artefacts = loadArtefactList_xml(args_dict['artefactfile'], expandPaths=True)
+  artefacts = load_artefact_collection_from_xml(args_dict['artefactfile'], expandPaths=True)
   print('Artefacts loaded from: {}'.format(args_dict['artefactfile']))
 
   selector = SelectorBase()
