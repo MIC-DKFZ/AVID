@@ -17,6 +17,9 @@
 # limitations under the License.
 
 from builtins import object
+from avid.common.artefact import ArtefactCollection
+
+
 class SelectorBase(object):
   '''
       Base class for selectors. Selectors are used to make a selection
@@ -28,7 +31,7 @@ class SelectorBase(object):
     pass
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
     return workflowData #default just returns everything.
 
   def __add__(self,other):
@@ -50,16 +53,13 @@ class AndSelector(SelectorBase):
     self._selector2 = selector2
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
     selection1 = self._selector1.getSelection(workflowData)
     selection2 = self._selector2.getSelection(workflowData)
-    resultSelection = list(dict(),)
-    for item1 in selection1:
-      for item2 in selection2:
-        if item1 == item2:
-          resultSelection.append(item1)
-          selection2.remove(item2)
-          break
+    resultSelection = ArtefactCollection()
+    for item in selection1:
+      if item in selection2:
+        resultSelection.add_artefact(item)
           
     return resultSelection
 
@@ -78,14 +78,14 @@ class OrSelector(SelectorBase):
     self._selector2 = selector2
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
     selection1 = self._selector1.getSelection(workflowData)
     selection2 = self._selector2.getSelection(workflowData)
     resultSelection = selection1
 
     for item2 in selection2:
-      if not item2 in resultSelection:
-        resultSelection.append(item2)
+      if item2 not in resultSelection:
+        resultSelection.add_artefact(item2)
 
     return resultSelection
 
@@ -102,7 +102,7 @@ class LambdaSelector(SelectorBase):
     self._selectionFunction = selectionFunction
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
     return self._selectionFunction(workflowData)
 
 
