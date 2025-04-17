@@ -88,7 +88,8 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
             run_arg = ['bsub']
 
             if self.additional_bsub_arguments:
-                run_arg.extend(self.additional_bsub_arguments)
+                for arg in self.additional_bsub_arguments:
+                    run_arg.append(str(arg))
 
             if log_file_path is not None:
                 run_arg.append('-o')
