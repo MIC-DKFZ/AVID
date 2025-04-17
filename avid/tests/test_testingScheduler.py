@@ -39,7 +39,7 @@ class TestTestingScheduler(unittest.TestCase):
             self.actions.append(DummyAction([a], actionTag="Action1", session=self.session, alwaysDo=True))
 
     def test_Scheduler(self):
-        scheduler = TestingScheduler(SimpleScheduler(), n_test=2)
+        scheduler = TestingScheduler(SimpleScheduler(), action_limit=2)
         scheduler.execute(self.actions)
 
         self.assertEqual(len(self.session.executed_actions), 2)
@@ -49,7 +49,7 @@ class TestTestingScheduler(unittest.TestCase):
 
         self.session.executed_actions.clear()
 
-        scheduler = TestingScheduler(n_test=4)
+        scheduler = TestingScheduler(action_limit=4)
         scheduler.execute(self.actions)
 
         self.assertEqual(len(self.session.executed_actions), 4)

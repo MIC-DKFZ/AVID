@@ -23,12 +23,12 @@ class TestingScheduler:
     A helper scheduler for testing purposes that wraps a different scheduler and only passes on a specified number of
     actions. All the other actions are filtered out and will neither be skipped nor failed.
     :param scheduler: The primary scheduler that is to be wrapped. Needs to provide the method .execute(actionList)
-    :param n_test: The number of actions that should be passed through to the scheduler. (default: 10)
+    :param action_limit: The number of actions that should be passed through to the scheduler. (default: 10)
     """
 
-    def __init__(self, scheduler=SimpleScheduler(), n_test=10):
+    def __init__(self, scheduler=SimpleScheduler(), action_limit=10):
         self.scheduler = scheduler
-        self.n_test = n_test
+        self.action_limit = action_limit
 
     def execute(self, actionList):
-        self.scheduler.execute(actionList[:self.n_test])
+        self.scheduler.execute(actionList[:self.action_limit])
