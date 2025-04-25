@@ -101,7 +101,7 @@ def getArtefactsFromFolder(folder, functor, rootPath):
     known_ids = set()
     for aFile in files:
         fullpath = os.path.join(folder, aFile)
-        artefact = functor(pathParts, Path(aFile).name, fullpath, known_ids)
+        artefact = functor(pathParts, Path(aFile).name, fullpath)
         artefacts[fullpath] = artefact
     return artefacts
 
@@ -117,14 +117,20 @@ def scan_directories(dir_path):
 
 
 class ParallelDirectoryCrawler(object):
-    """Helper class that crawls a directory tree starting from the given rootPath.
-    The crawler assumes that every file that he founds is a potential artefact.
+    """
+    Helper class that crawls a directory tree starting from the given rootPath.
+    The crawler assumes that every file that he finds is a potential artefact.
     The crawler will call the file functor to interpret the file. If the file
     functor returns the artefact the crawler enlists it to the result in the
     artefact list.
     Crawling is distributed to n_threads parallel processes, which each go through a folder.
-    @param ignoreExistingArtefacts If set to true artefacts returned by fileFunctor
-    will only be added if they do not already exist in the artefact list."""
+    :param rootPath: Path to the root directory. All subdirectories will recursively be crawled through.
+    :param fileFunctor: A callable or factory for callables, which will get called for each subdirectory.
+    If fileFunctor is a factory, a new callable will be generated and reused within each subdirectory.
+    :param ignoreExistingArtefacts: If set to true artefacts returned by fileFunctor
+    will only be added if they do not already exist in the artefact list.
+    :param n_processes: The number of parallel processes to run. (default: 10)
+    """
 
     def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts=False, n_processes=10):
         self._rootPath = rootPath
@@ -132,12 +138,24 @@ class ParallelDirectoryCrawler(object):
         self._ignoreExistingArtefacts = ignoreExistingArtefacts
         self._n_processes = n_processes
 
+        self._functor_is_factory = False
+        try:
+            functor_test = self._fileFunctor()
+            if callable(functor_test):
+                self._functor_is_factory = True
+        except:
+            pass
+
     def getArtefacts(self):
         artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor:
             futures = []
             for root in tqdm(scan_directories(self._rootPath), desc='Found folders to scan'):
-                futures.append(executor.submit(getArtefactsFromFolder, root.path, self._fileFunctor, self._rootPath))
+                if self._functor_is_factory:
+                    functor = self._fileFunctor()
+                else:
+                    functor = self._fileFunctor
+                futures.append(executor.submit(getArtefactsFromFolder, root.path, functor, self._rootPath))
 
             skipped, duplicates, added = 0, 0, 0
             pbar = tqdm(
@@ -160,7 +178,7 @@ class ParallelDirectoryCrawler(object):
 
         return artefacts
 
-  
+
 def runSimpleCrawlerScriptMain(fileFunction):
     '''This is a helper function that can be used if you want to write a crawler script that crawles a root directory
      and stores the results as file. This function will parse for command line arguments "root" (the root directory)
