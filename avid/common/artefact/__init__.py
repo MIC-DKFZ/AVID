@@ -209,6 +209,9 @@ class Artefact(object):
         new_artefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
         return new_artefact
 
+    def __getstate__(self):
+        return {key: value for key, value in self.__dict__.items() if key != 'lock'}
+
     def clone(self):
         """ Create a copy of the artefact with its own uid """
         new_artefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
