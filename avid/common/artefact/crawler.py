@@ -104,8 +104,7 @@ class DirectoryCrawler(object):
         self._functor_is_factory = False
         try:
             functor_test = self._fileFunctor()
-            if callable(functor_test):
-                self._functor_is_factory = True
+            self._functor_is_factory = callable(functor_test)
         except:
             pass
 
