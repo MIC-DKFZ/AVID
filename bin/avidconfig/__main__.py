@@ -74,10 +74,11 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
 
   # MacOS
   elif os_name == "Darwin":
+    # MITK has a license that needs to be confirmed when mounting, so we need to send a "yes"
     subprocess.run("yes | PAGER=cat hdiutil attach " + filepath, shell=True)
     try:
       for mount_point in dmglib.dmg_get_mountpoints(filepath):
-        os.rename(os.path.join(mount_point, "MitkWorkbench.app"), mitkDir)
+        shutil.copytree(os.path.join(mount_point, "MitkWorkbench.app"), mitkDir)
     finally:
       dmglib.dmg_detach_already_attached(filepath)
 
