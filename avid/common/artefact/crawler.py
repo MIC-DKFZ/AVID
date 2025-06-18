@@ -151,7 +151,7 @@ def runCrawlerScriptMain(fileFunction):
     parser.add_argument('output', help='File path where the results of the crawl should be stored'
                                        ' (the found/indexed artefacts). If output already exists it will be'
                                        ' overwritten.')
-    parser.add_argument('n_processes', help='Number of processes that will crawl folders in parallel', default=1, type=int)
+    parser.add_argument('--n_processes', help='Number of processes that will crawl folders in parallel', default=1, type=int)
 
     cliargs, unknown = parser.parse_known_args()
 
