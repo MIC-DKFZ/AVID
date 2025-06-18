@@ -58,13 +58,14 @@ XML_NAMESPACE_DICT = {"avid": XML_NAMESPACE}
 CURRENT_XML_VERSION = "1.0"
 
 
-def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None, replace_if_exists=True):
+def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None, replace_if_exists=True, check_validity=True):
     """Loads a artefact list from a XML file.
     @param filePath Path where the artefact list is located or file like object that grants access to the list.
     @param expandPaths If true all relative url will be expanded by the rootPath
     If rootPath is not set, it will be the directory of filePath
     @param rootPath If defined any relative url in the list will expanded by the
     root path. If rootPath is set, expandPaths is implicitly true.
+    @param check_validity If true, the outputs of existing artefacts will be checked to confirm validity
     """
     artefacts = ArtefactCollection()
 
@@ -110,7 +111,7 @@ def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None
             artefact[defaultProps.URL] = os.path.join(rootPath, artefact[defaultProps.URL])
         artefact[defaultProps.URL] = os.path.normpath(artefact[defaultProps.URL])
 
-        if artefact[defaultProps.URL] is None or not os.path.isfile(artefact[defaultProps.URL]):
+        if check_validity and (artefact[defaultProps.URL] is None or not os.path.isfile(artefact[defaultProps.URL])):
             artefact[defaultProps.INVALID] = True
             logger.info("Artefact had no valid URL. Set invalid property to true. Artefact: %s", artefact)
 
