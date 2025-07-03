@@ -68,7 +68,7 @@ class MitkMatchImageAction(GenericCLIAction):
         return name
 
     def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None,
-                 targetMask=None, movingMask=None,
+                 targetMask=None, target_mask_label=None, movingMask=None, moving_mask_label=None,
                  targetIsArtefactReference = True, actionTag="MitkMatchImage",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
                  generateNameCallable=None, cli_connector=None):
@@ -81,6 +81,11 @@ class MitkMatchImageAction(GenericCLIAction):
         self._targetIsArtefactReference = targetIsArtefactReference
 
         additionalArgs = {'a':self._algorithm}
+        if target_mask_label:
+            additionalArgs['target_mask_label'] = target_mask_label
+        if moving_mask_label:
+            additionalArgs['moving_mask_label'] = moving_mask_label
+
         self._algorithmParameters = algorithmParameters
         if not self._algorithmParameters is None:
             additionalArgs['parameters'] = jsonDumps(self._algorithmParameters).replace('"', '\\"')
