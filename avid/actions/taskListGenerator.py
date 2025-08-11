@@ -38,33 +38,39 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
         return [result]
 
     @staticmethod
-    def _generate_default_tasklist(inputs, outputs, **args):
+    def _generate_tasks(inputs, outputs, **args):
         output_file = outputs[0][artefactProps.URL]
-        logger.info(f"Writing tasklist to {output_file}")
         inspected_dir = os.path.dirname(output_file)
-
-        task_list = []
+        tasks = []
         for artefact in inputs:
             url = artefact[artefactProps.URL]
             os.path.dirname(url)
-            task = dict()
-            task['Name'] = artefact['name']
-            task['Image'] = url
-            task['Result'] = os.path.join(inspected_dir, 'inspected', os.path.basename(url))
-            task_list.append(task)
+            tasks.append({
+                "Name": artefact['name'],
+                "Image": url,
+                "Result": os.path.join(inspected_dir, 'inspected', os.path.basename(url))
+            })
+
+        return tasks
+
+    def _generate_default_tasklist(self, inputs, outputs, **args):
+        output_file = outputs[0][artefactProps.URL]
+        logger.info(f"Writing tasklist to {output_file}")
+
+        tasks = self.generate_tasks_callable(inputs, outputs, **args)
 
         data = {
             "FileFormat": "MITK Segmentation Task List",
-            "Version": 1,
-            "Name": "Segmentation Workflow",
-            "Tasks": task_list
+            "Version": 3,
+            "Name": outputs[0][artefactProps.ACTIONTAG],
+            "Tasks": tasks
         }
 
         with open(output_file, 'w') as f:
             json.dump(data, f, indent=4)
 
     def __init__(self, inputSelector, actionTag='TaskListGenerator', generateCallable=None, indicateCallable=None,
-                 passOnlyURLs=False, **kwargs):
+                 generate_tasks_callable=None, passOnlyURLs=False, **kwargs):
         """
         :param inputSelector: Specified artefacts will all be included in the resulting tasklist
         :param generateCallable: Custom callable that defines how the resulting tasklist should be built. By default,
@@ -73,12 +79,25 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
         (= all other arguments passed to the action)
         :param indicateCallable: Custom callable that defines which outputs should be produced (see generateCallable).
         By default, a single json file in the top directory of the current session content will be created.
+        :param generate_tasks_callable: Custom callable that creates a list of tasks to write into a tasklist. If a
+        custom generateCallable is defined, this method may not be used.
+        By default, each input artefact gets a task with it as Image. generate_tasks_callable() receives the same inputs
+        as generateCallable, but returns a list of dictionaries that define tasklist tasks.
         """
         if indicateCallable is None:
             indicateCallable = TaskListGeneratorAction._indicate_outputs
 
         if generateCallable is None:
-            generateCallable = TaskListGeneratorAction._generate_default_tasklist
-        PythonUnaryStackBatchAction.__init__(self, inputSelector=inputSelector, actionTag=actionTag,
-                                             generateCallable=generateCallable, indicateCallable=indicateCallable,
-                                             passOnlyURLs=passOnlyURLs, **kwargs)
+            generateCallable = self._generate_default_tasklist
+
+        if generate_tasks_callable is None:
+            generate_tasks_callable = TaskListGeneratorAction._generate_tasks
+        self.generate_tasks_callable = generate_tasks_callable
+
+        PythonUnaryStackBatchAction.__init__(self,
+                                             inputSelector=inputSelector,
+                                             actionTag=actionTag,
+                                             generateCallable=generateCallable,
+                                             indicateCallable=indicateCallable,
+                                             passOnlyURLs=passOnlyURLs,
+                                             **kwargs)
