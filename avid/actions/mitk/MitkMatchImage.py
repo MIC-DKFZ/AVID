@@ -145,9 +145,9 @@ class MitkMatchImageBatchAction(BatchActionBase):
         and called something like 'mdra-0-14_MITK_MultiModal_rigid_default.dll'
     """
 
-    def __init__(self, targetSelector, movingSelector, movingLinker=CaseLinker(),
-                 targetMaskSelector=None, targetMaskLinker=FractionLinker(),
-                 movingMaskSelector=None, movingMaskLinker=FractionLinker(),
+    def __init__(self, targetSelector, movingSelector, movingLinker=None,
+                 targetMaskSelector=None, targetMaskLinker=None,
+                 movingMaskSelector=None, movingMaskLinker=None,
                  actionTag="MitkMatchImage", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
 
@@ -157,12 +157,19 @@ class MitkMatchImageBatchAction(BatchActionBase):
             "movingMask": movingMaskSelector,
         }
 
+        if movingLinker is None:
+            movingLinker = CaseLinker()
         linker = {"movingImage": movingLinker}
+
         if targetMaskSelector:
+            if targetMaskLinker is None:
+                targetMaskLinker = FractionLinker()
             linker["targetMask"] = targetMaskLinker
 
         dependent_linker = {}
         if movingMaskSelector:
+            if movingMaskLinker is None:
+                movingMaskLinker = FractionLinker()
             dependent_linker["movingImage"] = ["movingMask", movingMaskLinker]
 
         BatchActionBase.__init__(self, actionTag= actionTag, actionClass=MitkMatchImageAction,
