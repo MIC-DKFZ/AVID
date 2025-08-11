@@ -35,7 +35,6 @@ from urllib.request import urlretrieve
 import shutil
 import platform
 import subprocess
-import dmglib
 
 
 def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
@@ -72,6 +71,7 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
 
   # MacOS
   elif os_name == "Darwin":
+    import dmglib
     # MITK has a license that needs to be confirmed when mounting, so we need to send a "yes"
     subprocess.run("yes | PAGER=cat hdiutil attach " + filepath, shell=True)
     try:
