@@ -62,11 +62,13 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
   if os_name == "Windows":
     with zipfile.ZipFile(filepath, "r") as zip_f:
       zip_f.extractall(packagesPath)
+    # cut off ".zip" to get the name of the unpacked directory for renaming
     os.rename(filepath[:-4], mitkDir)
 
   elif os_name == "Linux":
     with tarfile.open(filepath, 'r:gz') as tar_f:
       tar_f.extractall(packagesPath)
+    # cut off ".tar.gz" to get the name of the unpacked directory for renaming
     os.rename(filepath[:-7], mitkDir)
 
   # MacOS
