@@ -64,13 +64,11 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
     with zipfile.ZipFile(filepath, "r") as zip_f:
       zip_f.extractall(packagesPath)
     os.rename(filepath[:-4], mitkDir)
-    os.remove(filepath)   # delete .zip file
 
   elif os_name == "Linux":
     with tarfile.open(filepath, 'r:gz') as tar_f:
       tar_f.extractall(packagesPath)
     os.rename(filepath[:-7], mitkDir)
-    os.remove(filepath)   # delete .tar.gz file
 
   # MacOS
   elif os_name == "Darwin":
