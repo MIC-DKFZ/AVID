@@ -19,6 +19,8 @@
 from builtins import str
 from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
+from avid.common.artefact import ArtefactCollection
+
 
 class KeyValueSelector(SelectorBase):
   '''
@@ -37,8 +39,8 @@ class KeyValueSelector(SelectorBase):
     self.__negate = negate
     
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
-    outList = list(dict(),)
+    '''Filters the given collection of entries and returns all selected entries'''
+    outCollection = ArtefactCollection()
     
     for entry in workflowData:
       if self.__key in entry:
@@ -48,18 +50,18 @@ class KeyValueSelector(SelectorBase):
                        and str(entry[self.__key]) == str(self.__value)
 
           if (not self.__negate and validValue) or (self.__negate and not validValue):
-            outList.append(entry)
+            outCollection.add_artefact(entry)
         else:
           equalValue = entry[self.__key] == self.__value
           if not equalValue and self.__allowNoneEquality and self.__value is None:
             equalValue = entry[self.__key] is None
           if (not self.__negate and equalValue) or (self.__negate and not equalValue) :
-            outList.append(entry)
+            outCollection.add_artefact(entry)
       else:
         if self.__value is None:
           #key does not exist, but selection value is None, therefore it is a match
-          outList.append(entry)
-    return outList
+          outCollection.add_artefact(entry)
+    return outCollection
   
 class ActionTagSelector(KeyValueSelector):
   ''' Convenience selector to select by a special action tag value.'''

@@ -37,7 +37,7 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         for i in range(0, 15):
             a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
-            self.session.addArtefact(a)
+            self.session.add_artefact(a)
             self.actions.append(DummyAction([a],actionTag="Action1"))
 
     def tearDown(self):

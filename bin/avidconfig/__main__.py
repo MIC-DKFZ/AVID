@@ -34,6 +34,7 @@ import tarfile
 from urllib.request import urlretrieve
 import shutil
 import platform
+import subprocess
 
 
 def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
@@ -41,45 +42,47 @@ def getAndUnpackMITK(mitkSourceConfigPath, packagesPath, update=False):
   mitkSourceConfig.read(mitkSourceConfigPath)
 
   os_name = platform.system()
-  if os_name == "Windows":
-    url = mitkSourceConfig.get(os_name, "url")
-    filename = url.split("/")[-1]
-    filepath = os.path.join(packagesPath, filename)
-    print("Downloading MITK installer.")
-    urlretrieve(url, filepath)
+  url = mitkSourceConfig.get(os_name, "url", fallback=None)
+  if url is None:
+    raise Exception("No MITK download found for the current OS. Please check the sources.config for MITK.")
 
+  filename = url.split("/")[-1]
+  filepath = os.path.join(packagesPath, filename)
+  print("Downloading MITK installer.")
+  urlretrieve(url, filepath)
+
+  mitkDir = os.path.join(packagesPath, "MITK")
+  if os.path.isdir(mitkDir):
+    if update:
+      shutil.rmtree(mitkDir)
+    else:
+      raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
+                      "CmdApps, use 'avidconfig tools update' instead.")
+
+  if os_name == "Windows":
     with zipfile.ZipFile(filepath, "r") as zip_f:
       zip_f.extractall(packagesPath)
-
-    mitkDir = os.path.join(packagesPath, "MITK")
-    if os.path.isdir(mitkDir):
-      if update:
-        shutil.rmtree(mitkDir)
-      else:
-        raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
-                      "CmdApps, use 'avidconfig tools update' instead.")
+    # cut off ".zip" to get the name of the unpacked directory for renaming
     os.rename(filepath[:-4], mitkDir)
-    os.remove(filepath)   # delete .zip file
 
   elif os_name == "Linux":
-    url = mitkSourceConfig.get(os_name, "url")
-    filename = url.split("/")[-1]
-    filepath = os.path.join(packagesPath, filename)
-    print("Downloading MITK installer.")
-    urlretrieve(url, filepath)
-
     with tarfile.open(filepath, 'r:gz') as tar_f:
       tar_f.extractall(packagesPath)
-
-    mitkDir = os.path.join(packagesPath, "MITK")
-    if os.path.isdir(mitkDir):
-      if update:
-        shutil.rmtree(mitkDir)
-      else:
-        raise Exception("Error. MITK-CmdApps already present in tools directory. If you want to replace the existing "
-                      "CmdApps, use 'avidconfig tools update' instead.")
+    # cut off ".tar.gz" to get the name of the unpacked directory for renaming
     os.rename(filepath[:-7], mitkDir)
-    os.remove(filepath)   # delete .tar.gz file
+
+  # MacOS
+  elif os_name == "Darwin":
+    import dmglib
+    # MITK has a license that needs to be confirmed when mounting, so we need to send a "yes"
+    subprocess.run("yes | PAGER=cat hdiutil attach " + filepath, shell=True)
+    try:
+      for mount_point in dmglib.dmg_get_mountpoints(filepath):
+        shutil.copytree(os.path.join(mount_point, "MitkWorkbench.app"), mitkDir)
+    finally:
+      dmglib.dmg_detach_already_attached(filepath)
+
+  os.remove(filepath)
 
   return mitkDir
 
@@ -127,12 +130,13 @@ def installTool(toolName, toolsPath, packageName, packagePath):
   if packageName == 'MITK':
     mitkCmdAppName = sourceConfig.get(toolName, 'executableName')
     os_name = platform.system()
-    file_extension = ""
+    execPath = None
     if os_name == 'Windows':
-      file_extension = '.bat'
+      execPath = os.path.join(packagePath, 'apps', mitkCmdAppName + '.bat')
     elif os_name == 'Linux':
-      file_extension = '.sh'
-    execPath = os.path.join(packagePath, 'apps', mitkCmdAppName + file_extension)
+      execPath = os.path.join(packagePath, 'apps', mitkCmdAppName + '.sh')
+    elif os_name == 'Darwin':
+      execPath = os.path.join(packagePath, 'Contents', 'MacOS', mitkCmdAppName)
 
   if execPath is None:
     print(

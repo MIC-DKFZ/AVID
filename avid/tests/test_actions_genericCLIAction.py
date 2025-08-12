@@ -19,10 +19,16 @@ import shutil
 import unittest
 import avid.common.workflow as workflow
 import os
+from pathlib import Path
 
 import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact.defaultProps as artefactProps
 from avid.actions.genericCLIAction import generate_cli_call, GenericCLIAction
+
+
+def generateNameCallableAlternative(actionInstance, **allActionArgs):
+    return 'test_{}_{}'.format(actionInstance._actionTag, actionInstance._actionID)
+
 
 class Test(unittest.TestCase):
 
@@ -101,10 +107,18 @@ class Test(unittest.TestCase):
         outputs = action.outputArtefacts
         self.assertEqual('Case1',outputs[0][artefactProps.CASE])
         self.assertEqual('GenericCLI',outputs[0][artefactProps.ACTIONTAG])
+        filename = Path(outputs[0][artefactProps.URL]).stem
+        self.assertTrue(filename.startswith('TestCLI_GenericCLI'))
 
         call = action._prepareCLIExecution()
         ref = '"test.exe" "{}" --input "{}"'.format(self.getURL(outputs[0]),self.getURL(self.a1))
         self.assertEqual(ref,call)
+
+        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], session=self.session,
+                                  generateNameCallable=generateNameCallableAlternative)
+        outputs = action.outputArtefacts
+        filename = Path(outputs[0][artefactProps.URL]).stem
+        self.assertTrue(filename.startswith('test_GenericCLI_TestCLI'))
 
         action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   session=self.session)

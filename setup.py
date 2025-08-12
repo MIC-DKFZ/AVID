@@ -48,6 +48,7 @@ setup(
     # the requirements are only need for special configurations.
 	extras_require = {
         'rich': ["rich==13.7.1"],
+        'mac': ["dmglib==0.9.6"],
     },
     # after running setup.py, you will be able to call samplepackage_exe
     # from the console as if it was a normal binary. It will call the function

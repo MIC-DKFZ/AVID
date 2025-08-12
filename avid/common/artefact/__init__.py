@@ -90,7 +90,8 @@ class Artefact(object):
                 self._additionalProps[key] = additionalP[key]
 
     def is_similar(self, other):
-
+        """ Function that indicates if one artefact can be assumed as equal/similar to self as they share the
+            same similarity relevant properties. It is also used for __eq__()."""
         mykeys = list(self.keys())
         okeys = list(other.keys())
 
@@ -105,6 +106,13 @@ class Artefact(object):
 
         return True
 
+    def is_identical(self, other):
+        """ Function that indicates if one artefact can be assumed as truly identical to self as they
+            have the same properties."""
+        if isinstance(other, self.__class__):
+            return self._defaultProps == other._defaultProps and self._additionalProps == other._additionalProps
+        else:
+            return False
     def keys(self):
         return list(self._defaultProps.keys()) + list(self._additionalProps.keys())
 
@@ -168,9 +176,28 @@ class Artefact(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._defaultProps == other._defaultProps and self._additionalProps == other._additionalProps
+            #raise RuntimeError
+            return self.is_similar(other)
         else:
             return False
+
+    def __hash__(self):
+        """Define hash based on similarity-relevant properties."""
+
+        def __make_hashable(value):
+            # If the value is a dictionary, convert it to a sorted tuple of key-value pairs
+            if isinstance(value, dict):
+                return tuple(sorted((k, __make_hashable(v)) for k, v in value.items()))
+            # If the value is a list or other iterable, convert to tuple recursively
+            elif isinstance(value, (list, set, tuple)):
+                return tuple(__make_hashable(item) for item in value)
+            # Otherwise, return the value as-is (should be hashable)
+            return value
+
+        # Generate a hashable representation of the similarity-relevant properties
+        hashable_properties = tuple(
+            __make_hashable(self[key]) for key in similarityRelevantProperties if key in self.keys())
+        return hash(hashable_properties)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -179,14 +206,17 @@ class Artefact(object):
         return 'Artefact(%s, %s)' % (self._defaultProps, self._additionalProps)
 
     def __copy__(self):
-        newArtefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
-        return newArtefact
+        new_artefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
+        return new_artefact
+
+    def __getstate__(self):
+        return {key: value for key, value in self.__dict__.items() if key != 'lock'}
 
     def clone(self):
         """ Create a copy of the artefact with its own uid """
-        newArtefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
-        newArtefact[defaultProps.ID] = str(uuid.uuid1())
-        return newArtefact
+        new_artefact = Artefact(defaultP=deepcopy(self._defaultProps), additionalP=deepcopy(self._additionalProps))
+        new_artefact[defaultProps.ID] = str(uuid.uuid1())
+        return new_artefact
 
 
 def getArtefactProperty(artefact, key):
@@ -229,50 +259,11 @@ def ensureCaseInstanceValidity(checkedArtefact, *otherArtefacts):
 
     return result
 
-
-def addArtefactToWorkflowData(workflowData, artefactEntry, removeSimelar=False):
-    '''
-        This method adds an arbitrary artefact entry to the workflow_data list.
-        @param removeSimelar If True the method checks if the session data contains
-        a simelar entry. If yes the simelar entry will be removed.
-    '''
-    if removeSimelar:
-        simelar = findSimilarArtefact(workflowData, artefactEntry)
-        if simelar is not None:
-            workflowData.remove(simelar)
-
-    workflowData.append(artefactEntry)
-    return workflowData
-
-
-def findSimilarArtefact(workflowData, artefactEntry):
-    '''
-        Checks if a passed artefact has already an entry in the workflow data and
-        returns this entry. Returns None if no entry was found. Remark: URL is
-        not check because it is not relevant for an artefact to be simelar.
-    '''
-    for entry in (workflowData):
-        if artefactEntry.is_similar(entry):
-            return entry
-
-    return None
-
-
-def artefactExists(workflowData, artefactEntry):
-    '''
-        Checks if a passed artefact has already an entry in the workflow data.
-        Remark: It only ensures that the standard key (CASE, CASEINSTANCE,
-        TIMEPOINT, ACTIONTAG, TYPE and FORMAT) are equal. Differences in URL are
-        ignored. As well as custom properties of the artefact.
-    '''
-    return findSimilarArtefact(workflowData, artefactEntry) is not None
-
-
-def update_artefacts(destination_list, source_list, update_existing=False):
+def update_artefacts(destination_collection, source_collection, update_existing=False):
     """Helper function that updates the content of the destination list with the content of the source list."""
-    for artefact in source_list:
-        if findSimilarArtefact(destination_list,artefact) is None or update_existing:
-            addArtefactToWorkflowData(destination_list,artefact, removeSimelar=True)
+    for artefact in source_collection:
+        if not artefact in destination_collection or update_existing:
+            destination_collection.add_artefact(artefact, replace_if_exists=True)
 
 
 def get_all_values_of_a_property(workflow_data, property_key):
@@ -379,3 +370,114 @@ def getArtefactShortName(workflowArtefact):
 
 
 from .generator import generateArtefactEntry
+
+
+class ArtefactCollection:
+    def __init__(self, initial_artefacts=None):
+        # Dictionary for storing artefacts with a hash-based key for efficient lookup
+        self.artefact_dict = {}
+        if not initial_artefacts is None:
+            self.extend(initial_artefacts, replace_if_exists=True)
+
+    def extend(self, artefacts, replace_if_exists=True):
+        for artefact in artefacts:
+            self.add_artefact(artefact=artefact)
+
+    def add_artefact(self, artefact, replace_if_exists=True):
+        """
+        Adds an artefact to the collection. If an artefact with the same hash exists:
+        - Replaces it if replace_if_exists is True.
+        - Raises a ValueError otherwise.
+        Returns the replaced artefact. If no artefact was replaced it returns None.
+        """
+        artefact_hash = hash(artefact)
+
+        already_existing = artefact_hash in self.artefact_dict
+        replace_artefact = None
+        if already_existing:
+            if not replace_if_exists:
+                raise ValueError(f'An identical artefact already exists in the collection. Existing artefact: "'
+                             f'{self.artefact_dict[artefact_hash]}". New artefact: "{artefact}"')
+            replace_artefact = self.artefact_dict[artefact_hash]
+
+        self.artefact_dict[artefact_hash] = artefact
+        return replace_artefact
+
+    def remove_artefact(self, artefact):
+        """Removes the artefact from the collection if it exists."""
+        artefact_hash = hash(artefact)
+        if artefact_hash in self.artefact_dict:
+            del self.artefact_dict[artefact_hash]
+            return True
+        return False
+
+    def find_similar(self, artefact):
+        """
+        Finds an artefact in the collection that is similar to the given artefact.
+        Returns the artefact if found, or None if no match exists.
+        """
+        artefact_hash = hash(artefact)
+        return self.artefact_dict.get(artefact_hash, None)
+
+    def similar_artefact_exists(self, artefact):
+        """Checks if an artefact similar to the given artefact exists in the collection."""
+        return self.find_similar(artefact=artefact) is not None
+
+    def identical_artefact_exists(self, artefact):
+        """Checks if the identical (so all, not only the identity relevant properties, are the same) artefact to the
+         given artefact exists in the collection."""
+        artefact_in_dict = self.find_similar(artefact)
+        if artefact_in_dict is None:
+            return False
+        return artefact_in_dict.is_identical(artefact)
+
+    def __iter__(self):
+        """Allows iteration over artefacts in the collection."""
+        return iter(self.artefact_dict.values())
+
+    def __len__(self):
+        """Returns the number of artefacts in the collection."""
+        return len(self.artefact_dict)
+
+    def __contains__(self, artefact):
+        """Check if an identical artefact exists in the collection."""
+        return self.identical_artefact_exists(artefact=artefact)
+
+    def __repr__(self):
+        return f"ArtefactCollection({len(self.artefact_dict)} artefacts)"
+
+    def __eq__(self, other):
+        """Checks if the passed container containes the identical artefacts then self.
+        Order of artefects is not relevant for equality."""
+        other_collection = ArtefactCollection()
+
+        try:
+            other_collection.extend(other, replace_if_exists=False)
+        except ValueError:
+            return False
+
+        if len(self) != len(other_collection):
+            return False
+
+        for artefact in self:
+            if not other_collection.identical_artefact_exists(artefact=artefact):
+                return False
+        return True
+
+    def collection_is_similar(self, other):
+        """Checks if the passed container containes simelar artefacts then self.
+        Order of artefects is not relevant for equality."""
+        other_collection = ArtefactCollection()
+
+        try:
+            other_collection.extend(other, replace_if_exists=False)
+        except ValueError:
+            return False
+
+        if len(self) != len(other_collection):
+            return False
+
+        for artefact in self:
+            if not other_collection.similar_artefact_exists(artefact=artefact):
+                return False
+        return True

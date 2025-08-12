@@ -18,8 +18,9 @@
 
 from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common.artefact import getArtefactProperty, Artefact
+from avid.common.artefact import getArtefactProperty, Artefact, ArtefactCollection
 from avid.selectors import ValiditySelector
+
 
 def get_input_artefact_ids(workflow_data, input_keys=None):
     """Helper that gets all input artefact ids of the passed workflow_data.
@@ -35,31 +36,37 @@ def get_input_artefact_ids(workflow_data, input_keys=None):
                     for ID in inputs_dict[input_key]:
                         inputs.add(ID)
 
-    return list(inputs)
+    return inputs
 
 class IsInputSelector(SelectorBase):
     """ Convenience selector to select only artefacts that are inputs of other artefacts (derived artefacts) in
      the given workflow data. You can narrow down the relevant derived artefacts by providing a derivative selector
-     or specifying the input keys that are relevant."""
-    def __init__(self, input_keys=None, derivative_selector=None):
+     or specifying the input keys that are relevant. Inheritance will be checked until the specified depth, with
+     depth = -1 being unrestricted."""
+    def __init__(self, input_keys=None, derivative_selector=None, depth=1):
         ''' init '''
         super().__init__()
         self.input_keys = input_keys
         self.derivative_selector = derivative_selector
+        self.depth = depth
 
     def getSelection(self, workflowData):
-        '''Filters the given list of entries and returns all selected entries'''
-        outList = list(dict(),)
+        '''Filters the given collection of entries and returns all selected entries'''
+        outCollection = ArtefactCollection()
 
         relevant_data = workflowData
         if self.derivative_selector is not None:
           relevant_data = self.derivative_selector.getSelection(workflowData=workflowData)
 
-        inputs = get_input_artefact_ids(relevant_data, self.input_keys)
+        depth_counter = 0
+        while relevant_data and depth_counter != self.depth:
+            depth_counter += 1
 
-        [outList.append(x) for x in workflowData if x[artefactProps.ID] in inputs]
+            input_ids = get_input_artefact_ids(relevant_data, self.input_keys)
+            relevant_data = [x for x in workflowData if x[artefactProps.ID] in input_ids]
+            outCollection.extend(relevant_data)
 
-        return outList
+        return outCollection
 
 
 class IsPrimeInvalidSelector(SelectorBase):
@@ -70,13 +77,13 @@ class IsPrimeInvalidSelector(SelectorBase):
     super().__init__()
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
 
     valid_artefacts = ValiditySelector().getSelection(workflowData)
 
     valid_ids = [x[artefactProps.ID] for x in valid_artefacts if not x[artefactProps.INVALID]]
 
-    outList = list(dict(),)
+    outCollection = ArtefactCollection()
     for entry in workflowData:
       input_ids = getArtefactProperty(entry, artefactProps.INPUT_IDS)
 
@@ -88,9 +95,9 @@ class IsPrimeInvalidSelector(SelectorBase):
               if not ID in valid_ids:
                 found = False
       if found:
-        outList.append(entry)
+        outCollection.add_artefact(entry)
 
-    return outList
+    return outCollection
 
 class RootSelector(SelectorBase):
   ''' Convenience selector to select all artefacts that have no inputs.'''
@@ -99,12 +106,12 @@ class RootSelector(SelectorBase):
     super().__init__()
 
   def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
+    '''Filters the given collection of entries and returns all selected entries'''
 
-    outList = list(dict(),)
+    outCollection = ArtefactCollection()
     for entry in workflowData:
       input_ids = getArtefactProperty(entry, artefactProps.INPUT_IDS)
       if input_ids is None or len(input_ids)==0:
-        outList.append(entry)
+        outCollection.add_artefact(entry)
 
-    return outList
+    return outCollection

@@ -18,7 +18,7 @@
 
 import unittest
 import avid.common.artefact.generator as artefactGenerator
-import avid.common.artefact as artefact
+from avid.common.artefact import ArtefactCollection
 from avid.selectors import ValiditySelector
 
 class TestValiditySelector(unittest.TestCase):
@@ -30,13 +30,13 @@ class TestValiditySelector(unittest.TestCase):
     self.a5 = artefactGenerator.generateArtefactEntry("Case2", None, 0, "Action1", "result", "dummy", None)
     self.a6 = artefactGenerator.generateArtefactEntry("Case2", None, 1, "Action1", "result", "dummy", None, invalid=True)
 
-    self.data = list()
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a1)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a2)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a3)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a4)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a5)
-    self.data = artefact.addArtefactToWorkflowData(self.data, self.a6)
+    self.data = ArtefactCollection()
+    self.data.add_artefact(self.a1)
+    self.data.add_artefact(self.a2)
+    self.data.add_artefact(self.a3)
+    self.data.add_artefact(self.a4)
+    self.data.add_artefact(self.a5)
+    self.data.add_artefact(self.a6)
 
   def test_ValiditySelector(self):
     sel = ValiditySelector()
