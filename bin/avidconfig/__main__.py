@@ -28,6 +28,7 @@ from avid.common.AVIDUrlLocater import getPackageSourcePath, getPackageToolsConf
 from avid.common.osChecker import checkAndCreateDir
 
 import os
+from pathlib import Path
 import configparser
 import zipfile
 import tarfile
@@ -165,6 +166,28 @@ def installTool(toolName, toolsPath, packageName, packagePath):
     config.write(configFile)
 
 
+def removePackage(packageName, toolsPath):
+  """
+  Removes a tool package by deleting its source directory (if present) and all associated tool configs
+  """
+  # remove all tool configs
+  sourceConfig = configparser.ConfigParser()
+  sourceConfig.read(getPackageToolsConfigPath(packageName))
+  for toolName in sourceConfig.sections():
+    toolConfigDirPath = Path(getToolConfigPath(toolName, toolsPath=toolsPath, checkExistance=False)).parent
+    if not toolConfigDirPath.is_dir():
+      print(f"No tool config found for {toolName}")
+      continue
+    print(f"Removing tool config: {toolName}")
+    shutil.rmtree(toolConfigDirPath)
+
+  # remove package directory
+  packagePath = Path(toolsPath) / "packages" / packageName
+  if packagePath.is_dir():
+    print(f"Removing package directory: {packageName}")
+    shutil.rmtree(packagePath)
+
+
 def main():
   mainDesc = "A simple tool to configure the avid pipeline and it tool stack."
   parser = argparse.ArgumentParser(description = mainDesc)
@@ -180,13 +203,13 @@ def main():
   #if 'command' in args_dict:
   if args_dict['command'] == "tools":
     if len(args_dict['subcommands']) == 0:
-      print("Error. Command 'tools' has to specify a subcommand ('update', 'install', 'add').")
+      print("Error. Command 'tools' has to specify a subcommand ('install', 'add', 'remove').")
       return
+    toolsPath = getToolsPath(False)
+    if args_dict['toolspath']:
+      toolsPath = args_dict['toolspath']
     if args_dict['subcommands'][0] == "install":
       packages = args_dict['subcommands'][1:]
-      toolsPath = getToolsPath(False)
-      if args_dict['toolspath']:
-        toolsPath = args_dict['toolspath']
       checkAndCreateDir(toolsPath)
       toolsSourceConfigPath = getDefaultToolsSourceConfigPath()
       localPackagePath = args_dict.get('localPackagePath')
@@ -196,8 +219,25 @@ def main():
       if len(packages) == 0:
         packages = getAllKnownPackages()
         print("No tool package specified to be installed. Install all tool packages with defined sources: " + str(packages))
+        confirmation = input("Are you sure you want to install all tool packages? Y/n\n")
+        if confirmation and confirmation.lower() != "y":
+          print("Operation cancelled")
+          return
       for package in packages:
         installPackage(package, toolsPath, localPackagePath)
+
+    elif args_dict['subcommands'][0] == "remove":
+      packages = args_dict['subcommands'][1:]
+      if len(packages) == 0:
+        packages = getAllKnownPackages()
+        print("No tool package specified to be removed. Remove all tool packages: " + str(packages))
+        confirmation = input("Are you sure you want to remove all tool packages? Y/n\n")
+        if confirmation and confirmation.lower() != "y":
+          print("Operation cancelled")
+          return
+      for package in packages:
+        removePackage(package, toolsPath)
+
     elif args_dict['subcommands'][0] == "add":
       if len(args_dict['subcommands']) < 3:
         print(
@@ -208,9 +248,6 @@ def main():
       execPath = args_dict['subcommands'][2]
 
       configFilePath = getToolConfigPath(actionID)
-
-
-
       if configFilePath is not None:
         print('Error. Cannot add a new tool "{}". Tool\'s config does already exist. Use command "tool-settings <action id> exe" to change existing configurations.'.format(actionID))
         return
