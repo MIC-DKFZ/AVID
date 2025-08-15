@@ -22,8 +22,8 @@ import json
 
 from avid.common.artefact import defaultProps as artefactProps
 
-from .pythonAction import PythonUnaryStackBatchAction
-from .simpleScheduler import SimpleScheduler
+from avid.actions.pythonAction import PythonUnaryStackBatchAction
+from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
