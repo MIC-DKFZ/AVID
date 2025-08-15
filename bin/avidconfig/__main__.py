@@ -219,8 +219,8 @@ def main():
       if len(packages) == 0:
         packages = getAllKnownPackages()
         print("No tool package specified to be installed. Install all tool packages with defined sources: " + str(packages))
-        confirmation = input("Are you sure you want to install all tool packages? y/n\n")
-        if confirmation.lower() != "y":
+        confirmation = input("Are you sure you want to install all tool packages? Y/n\n")
+        if confirmation and confirmation.lower() != "y":
           print("Operation cancelled")
           return
       for package in packages:
@@ -231,8 +231,8 @@ def main():
       if len(packages) == 0:
         packages = getAllKnownPackages()
         print("No tool package specified to be removed. Remove all tool packages: " + str(packages))
-        confirmation = input("Are you sure you want to remove all tool packages? y/n\n")
-        if confirmation.lower() != "y":
+        confirmation = input("Are you sure you want to remove all tool packages? Y/n\n")
+        if confirmation and confirmation.lower() != "y":
           print("Operation cancelled")
           return
       for package in packages:
