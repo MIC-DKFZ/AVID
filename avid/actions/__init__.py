@@ -373,8 +373,9 @@ class SingleActionBase(ActionBase):
 
     # noinspection PyProtectedMember
     def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None,
-                         urlHumanPrefix = None, urlExtension = None, url_include_id = True):
-        '''Helper method that can be used in derived action classes in their
+                         urlHumanPrefix = None, urlExtension = None, use_no_url_id = False):
+        """
+        Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
         1) It generates an artefact that has the actionTag of the current action.
@@ -402,7 +403,12 @@ class SingleActionBase(ActionBase):
         Parameter is a dictionary. The keys are the property ids and the dict values their value. Passing None indicates
         that there are no props
         @urlHumanPrefix: specifies the humand readable prefix of the artefact url. If set a URL will be generated.
-        @urlExtension: specifies the file extension of the artefact url. If set a URL will be generated.'''
+        @urlExtension: specifies the file extension of the artefact url. If set a URL will be generated.
+        @use_no_url_id Bool. If set to true, the unique id at the end of generated filenames will be removed,
+        giving the user full control of the resulting filenames.
+        WARNING: When using this option, the user has to take care themselves to avoid collisions between generated
+        files.
+        """
         result = artefactGenerator.generateArtefactEntry(
             artefactHelper.getArtefactProperty(reference, artefactProps.CASE),
             self._caseInstance,
@@ -457,7 +463,7 @@ class SingleActionBase(ActionBase):
             name_parts = []
             if urlHumanPrefix is not None:
                 name_parts.append(urlHumanPrefix)
-            if url_include_id:
+            if not use_no_url_id:
                 name_parts.append(str(artefactHelper.getArtefactProperty(result, artefactProps.ID)))
             name = ".".join(name_parts)
             if len(name) == 0:
