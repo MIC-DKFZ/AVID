@@ -17,6 +17,7 @@
 # limitations under the License.
 
 from avid.sorter import BaseSorter
+from avid.common.artefact import ArtefactCollection
 
 class KeyValueSorter(BaseSorter):
   '''Sorts the selection by the values of a passed property key.'''
@@ -30,7 +31,7 @@ class KeyValueSorter(BaseSorter):
   def sortSelection(self, selection):
     sortedSel = None
     if self._asNumbers:
-      sortedSel= sorted(selection, key=lambda k: float(k[self._key]), reverse = self._reverse)
+      sortedSel= ArtefactCollection(sorted(selection, key=lambda k: float(k[self._key]), reverse = self._reverse))
     else:
-      sortedSel = sorted(selection, key=lambda k: k[self._key], reverse=self._reverse)
+      sortedSel = ArtefactCollection(sorted(selection, key=lambda k: k[self._key], reverse=self._reverse))
     return sortedSel
