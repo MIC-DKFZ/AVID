@@ -110,18 +110,18 @@ class ImageAccAction(CLIActionBase):
                                                      artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                      artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
                                                      artefactProps.ACC_ELEMENT: str(len(self._images)-2)},
-                                                   urlHumanPrefix=self.instanceName,
-                                                   urlExtension=self._outputExt)
+                                                   url_user_defined_part=self.instanceName,
+                                                   url_extension=self._outputExt)
 
       self._interimArtefacts = list()
       for index, image in enumerate(self._images[1:-1]):
         self._interimArtefacts.append(self.generateArtefact(image,
-                                       userDefinedProps={
+                                                            userDefinedProps={
                                          artefactProps.TYPE: artefactProps.TYPE_VALUE_INTERIM,
                                          artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
                                          artefactProps.ACC_ELEMENT: str(index)},
-                                       urlHumanPrefix=self.instanceName+"_interim_{}".format(index),
-                                       urlExtension=self._outputExt))
+                                                            url_user_defined_part=self.instanceName + "_interim_{}".format(index),
+                                                            url_extension=self._outputExt))
 
     return [self._resultArtefact]
 

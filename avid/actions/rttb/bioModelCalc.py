@@ -100,9 +100,9 @@ class BioModelCalcAction(CLIActionBase):
   def _indicateOutputs(self):
 
     resultArtefact = self.generateArtefact(self._inputDose,
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension=self._outputExt)
+                                           userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT, artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
+                                           url_user_defined_part=self.instanceName,
+                                           url_extension=self._outputExt)
     return [resultArtefact]
  
                 

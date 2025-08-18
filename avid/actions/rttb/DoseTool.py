@@ -71,8 +71,8 @@ class DoseToolAction(GenericCLIAction):
                                                          artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                          artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_STATS_XML,
                                                          artefactProps.OBJECTIVE: self._structName},
-                                                     urlHumanPrefix=self.instanceName,
-                                                     urlExtension='xml')
+                                                     url_user_defined_part=self.instanceName,
+                                                     url_extension='xml')
         result = [self._resultArtefact]
 
         if self._computeDVH is True:
@@ -83,8 +83,8 @@ class DoseToolAction(GenericCLIAction):
                                                                 artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                 artefactProps.FORMAT: artefactProps.FORMAT_VALUE_RTTB_CUM_DVH_XML,
                                                                 artefactProps.OBJECTIVE: self._structName},
-                                                            urlHumanPrefix=name,
-                                                            urlExtension='xml')
+                                                            url_user_defined_part=name,
+                                                            url_extension='xml')
             result.append(self._resultDVHArtefact)
         return result
 

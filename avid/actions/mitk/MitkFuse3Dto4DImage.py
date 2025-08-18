@@ -78,9 +78,9 @@ class MitkFuse3Dto4DImageAction(CLIActionBase):
     def _indicateOutputs(self):
         # Specify result artefact
         self._resultArtefact = self.generateArtefact(self._images[self._getFirstImageKey()],
-                                                        userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                     userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                         artefactProps.FORMAT:artefactProps.FORMAT_VALUE_ITK},
-                                                        urlHumanPrefix=self.instanceName,urlExtension='nrrd')
+                                                     url_user_defined_part=self.instanceName, url_extension='nrrd')
 
         return [self._resultArtefact]
 

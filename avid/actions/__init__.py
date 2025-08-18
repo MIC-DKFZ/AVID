@@ -378,8 +378,9 @@ class SingleActionBase(ActionBase):
 
     # noinspection PyProtectedMember
     def generateArtefact(self, reference=None, copyAdditionalPropsFromReference=True, userDefinedProps = None,
-                         urlHumanPrefix = None, urlExtension = None):
-        '''Helper method that can be used in derived action classes in their
+                         url_user_defined_part = None, url_extension = None, use_no_url_id = False):
+        """
+        Helper method that can be used in derived action classes in their
         indicateOutputs() implementation. The generation will be done in following
         steps:
         1) It generates an artefact that has the actionTag of the current action.
@@ -388,14 +389,14 @@ class SingleActionBase(ActionBase):
         4) self._additionalActionProps will be transferd.
         5) the property values defined in userDefinedProps will be transfered.
         Remark: ActionTag will always be of this action.
-        Remark: As default the URL will be None. If parameter urlHumanPrefix or urlExtension are not None, an artefact
+        Remark: As default the URL will be None. If parameter url_user_defined_part or url_extension are not None, an artefact
         URL will be created. In this case the following pattern will be used:
-        <artefact_path>[<urlHumanPrefix>.]<artefact_id>[<><urlExtension>]
+        <artefact_path>[<url_user_defined_part>.]<artefact_id>[<><url_extension>]
         artefact_path: Return of artefactHelper.generateArtefactPath using the configured new artefact.
-        urlHumanPrefix: Parameter of the call
+        url_user_defined_part: Parameter of the call
         artefact_id: ID of the new artefact
         extension_seperator: OS specific file extension seperator
-        urlExtension: Parameter of the call
+        url_extension: Parameter of the call
         REMARK: Currently if self has a _propInheritanceDict specified, only the first artefact of the indicated
         input selection will be used to inherit the property.
         @param reference An other artefact as reference. If given, the following
@@ -406,8 +407,13 @@ class SingleActionBase(ActionBase):
         @param userDefinedProps Properties specified by the user that should be set for the new artefact.
         Parameter is a dictionary. The keys are the property ids and the dict values their value. Passing None indicates
         that there are no props
-        @urlHumanPrefix: specifies the humand readable prefix of the artefact url. If set a URL will be generated.
-        @urlExtension: specifies the file extension of the artefact url. If set a URL will be generated.'''
+        @url_user_defined_part: specifies the humand readable prefix of the artefact url. If set a URL will be generated.
+        @url_extension: specifies the file extension of the artefact url. If set a URL will be generated.
+        @use_no_url_id Bool. If set to true, the unique id at the end of generated filenames will be removed,
+        giving the user full control of the resulting filenames.
+        WARNING: When using this option, the user has to take care themselves to avoid collisions between generated
+        files.
+        """
         result = artefactGenerator.generateArtefactEntry(
             artefactHelper.getArtefactProperty(reference, artefactProps.CASE),
             self._caseInstance,
@@ -457,15 +463,18 @@ class SingleActionBase(ActionBase):
                 except:
                     pass
 
-        if urlHumanPrefix is not None or urlExtension is not None:
+        if url_user_defined_part is not None or url_extension is not None:
             path = artefactHelper.generateArtefactPath(self._session, result)
-            name = ""
-            if urlHumanPrefix is not None:
-                name = urlHumanPrefix + "."
-            name = name + str(artefactHelper.getArtefactProperty(result, artefactProps.ID))
-
-            if urlExtension is not None:
-                name = name + os.extsep + urlExtension
+            name_parts = []
+            if url_user_defined_part is not None:
+                name_parts.append(url_user_defined_part)
+            if not use_no_url_id:
+                name_parts.append(str(artefactHelper.getArtefactProperty(result, artefactProps.ID)))
+            name = ".".join(name_parts)
+            if len(name) == 0:
+                logger.warning("Generated artefact has an empty name. Make sure to provide a unique name when cutting the id from the output names.")
+            if url_extension is not None:
+                name = name + os.extsep + url_extension
 
             name = os.path.join(path, name)
 

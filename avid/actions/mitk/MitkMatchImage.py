@@ -50,8 +50,8 @@ class MitkMatchImageAction(GenericCLIAction):
         resultArtefact = actionInstance.generateArtefact(artefactRef,
                                                          userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                            artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT},
-                                                         urlHumanPrefix=actionInstance._generateName(),
-                                                         urlExtension='mapr')
+                                                         url_user_defined_part=actionInstance._generateName(),
+                                                         url_extension='mapr')
         return [resultArtefact]
 
     @staticmethod
