@@ -80,7 +80,8 @@ class MitkFileConverterAction(GenericCLIAction):
         return outputs
 
     def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkFileConverter",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None,
+                 **additionalActionArgs):
         addArgs = None
         if readerName is not None:
             addArgs = {'r':readerName}
@@ -91,7 +92,8 @@ class MitkFileConverterAction(GenericCLIAction):
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
                                   propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
                                   defaultoutputextension=defaultoutputextension,
-                                  collectOutputsCallable=self.collectFileConverterOutputs)
+                                  collectOutputsCallable=self.collectFileConverterOutputs,
+                                  **additionalActionArgs)
 
 
 class MitkFileConverterBatchAction(BatchActionBase):

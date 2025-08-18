@@ -86,8 +86,8 @@ class matchRAction(CLIActionBase):
     self._resultArtefact = self.generateArtefact(artefactRef,
                                                  userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT},
-                                                 urlHumanPrefix=self._generateName(),
-                                                 urlExtension='mapr')
+                                                 url_user_defined_part=self._generateName(),
+                                                 url_extension='mapr')
     return [self._resultArtefact]
 
         

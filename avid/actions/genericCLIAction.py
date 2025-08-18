@@ -124,6 +124,7 @@ class GenericCLIAction(CLIActionBase):
                  postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
                  inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
                  additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None,
+                 use_no_url_id=False,
                  **inputArgs):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
@@ -178,7 +179,11 @@ class GenericCLIAction(CLIActionBase):
         artefact. The signature of the delegate is delegate(arg_name, arg_value). Arg_value is expected to be a list
         of artefacts. The return is expected to be a list of URL strings (or None for artefacts that should not
         return a URL).
-        :param inputArgs: It is assumed that all unkown named arguments are inputs with artefact lists.
+        :param use_no_url_id: Bool. If set to true, the unique id at the end of generated filenames will be removed,
+        giving the user full control of the resulting filenames.
+        WARNING: When using this option, the user has to take care themselves to avoid collisions between generated
+        files.
+        :param inputArgs: It is assumed that all unknown named arguments are inputs with artefact lists.
         """
         CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                additionalActionProps=additionalActionProps,
@@ -191,6 +196,7 @@ class GenericCLIAction(CLIActionBase):
         self._inputArgsURLExtractionDelegate = inputArgsURLExtractionDelegate
         self._collectOutputsCallable = collectOutputsCallable
         self._outputextension = defaultoutputextension
+        self._use_no_url_id = use_no_url_id
         self._noOutputArgs = noOutputArgs
 
         self._inputs = dict()
@@ -293,8 +299,9 @@ class GenericCLIAction(CLIActionBase):
         resultArtefacts = [
             self.generateArtefact(reference=reference,
                                   userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                  urlHumanPrefix=self.instanceName,
-                                  urlExtension=self._outputextension)]
+                                  url_user_defined_part=self.instanceName,
+                                  url_extension=self._outputextension,
+                                  use_no_url_id=self._use_no_url_id)]
 
         if self._indicateCallable is not None:
             # the action has a specific strategy to indicate outputs, call it.

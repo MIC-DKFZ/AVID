@@ -154,8 +154,8 @@ class PythonAction(SingleActionBase):
             self._resultArtefacts = [
                 self.generateArtefact(reference=reference,
                                       userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                      urlHumanPrefix=self.instanceName,
-                                      urlExtension=self._outputextension)]
+                                      url_user_defined_part=self.instanceName,
+                                      url_extension=self._outputextension)]
         return self._resultArtefacts
 
     def _generateOutputs(self):
