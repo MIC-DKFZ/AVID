@@ -64,7 +64,7 @@ def getArtefactsFromFolder(folder, functor, rootPath):
     known_ids = set()
     for aFile in files:
         fullpath = os.path.join(folder, aFile)
-        artefact = functor(pathParts, Path(aFile).name, fullpath)
+        artefact = functor(pathParts, Path(aFile).name, fullpath, known_ids)
         artefacts[fullpath] = artefact
     return artefacts
 
