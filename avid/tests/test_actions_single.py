@@ -317,19 +317,19 @@ class Test(unittest.TestCase):
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test auto url generation only prefix
-        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName")
+        a = action.generateArtefact(self.a_3, url_user_defined_part="HumanReadableFileName")
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID]
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation only extension
-        a = action.generateArtefact(self.a_3, urlExtension='txt')
+        a = action.generateArtefact(self.a_3, url_extension='txt')
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', a[artefactProps.ID])
         refURL = refURL + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation all
-        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName", urlExtension='txt')
+        a = action.generateArtefact(self.a_3, url_user_defined_part="HumanReadableFileName", url_extension='txt')
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID] + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)

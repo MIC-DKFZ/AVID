@@ -89,18 +89,18 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
             self._resultCSVArtefact = self.generateArtefact(self._images[0],
                                                             userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                             artefactProps.FORMAT:artefactProps.FORMAT_VALUE_CSV},
-                                                            urlHumanPrefix=self.instanceName,urlExtension='csv')
+                                                            url_user_defined_part=self.instanceName, url_extension='csv')
             result = [self._resultCSVArtefact]
 
         else:
             self._resultCSVArtefact = self.generateArtefact(self._images,
                                                             userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                             artefactProps.FORMAT:artefactProps.FORMAT_VALUE_CSV},
-                                                            urlHumanPrefix=self.instanceName,urlExtension='csv')
+                                                            url_user_defined_part=self.instanceName, url_extension='csv')
             self._resultXMLArtefact = self.generateArtefact(self._images,
                                                             userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                             artefactProps.FORMAT:FORMAT_VALUE_MITK_GIF_XML},
-                                                            urlHumanPrefix=self.instanceName,urlExtension='xml')
+                                                            url_user_defined_part=self.instanceName, url_extension='xml')
             result = [self._resultCSVArtefact, self._resultXMLArtefact]
 
         return result

@@ -299,8 +299,8 @@ class GenericCLIAction(CLIActionBase):
         resultArtefacts = [
             self.generateArtefact(reference=reference,
                                   userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                  urlHumanPrefix=self.instanceName,
-                                  urlExtension=self._outputextension,
+                                  url_user_defined_part=self.instanceName,
+                                  url_extension=self._outputextension,
                                   use_no_url_id=self._use_no_url_id)]
 
         if self._indicateCallable is not None:

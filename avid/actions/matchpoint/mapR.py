@@ -83,8 +83,8 @@ class mapRAction(CLIActionBase):
 
         resultArtefact = self.generateArtefact(artefactRef,
                                                userDefinedProps=userDefinedProps,
-                                               urlHumanPrefix=self.instanceName,
-                                               urlExtension=self._outputExt)
+                                               url_user_defined_part=self.instanceName,
+                                               url_extension=self._outputExt)
         return [resultArtefact]
 
     def _prepareCLIExecution(self):

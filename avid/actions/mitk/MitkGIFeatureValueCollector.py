@@ -52,7 +52,7 @@ def _indicate_outputs(actionInstance, selected_features, value_table, row_keys, 
                                                                                 artefactProps.OBJECTIVE: objective_value,
                                                                                 artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                                 artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
-                                                    urlHumanPrefix=actionInstance.instanceName,urlExtension='csv')
+                                                    url_user_defined_part=actionInstance.instanceName, url_extension='csv')
         outputs.append(resultCSV)
     else:
         for feature in selected_features:
@@ -63,7 +63,7 @@ def _indicate_outputs(actionInstance, selected_features, value_table, row_keys, 
                                                                                     artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                                     artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
                                                                                     artefactProps.RESULT_SUB_TAG: feature},
-                                                        urlHumanPrefix=prefix,urlExtension='csv')
+                                                        url_user_defined_part=prefix, url_extension='csv')
             outputs.append(resultCSV)
 
     return outputs
