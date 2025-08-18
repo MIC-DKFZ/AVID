@@ -244,7 +244,7 @@ class ActionBase(object):
                 (self._last_exec_state, self._outputArtefacts) = self._do_finalize()
 
         except BaseException as e:
-            self._reportWarning(f'Error occurred while CLIBatchScheduler finalized this action.', exception=e)
+            self._reportWarning(f'Error occurred while action was finalized.', exception=e)
             self._last_exec_state = self.ACTION_FAILURE
 
         if self._add_self_to_session_after_processing:
@@ -793,12 +793,14 @@ class BatchActionBase(ActionBase):
             for action in self._actions:
                 if action.isSuccess and not state == ActionBase.ACTION_FAILURE:
                     state = ActionBase.ACTION_SUCCESS
+                elif action.isSkipped and not state == ActionBase.ACTION_FAILURE:
+                    state = ActionBase.ACTION_SKIPPED
                 elif action.isFailure:
                     state = ActionBase.ACTION_FAILURE
-                elif action.isSkipped:
-                    state = ActionBase.ACTION_SKIPPED
 
-                generatedArtefacts.extend(action.outputArtefacts)
+                action_output = action.outputArtefacts
+                if action_output is not None:
+                    generatedArtefacts.extend(action_output)
 
         return (state, generatedArtefacts)
 
