@@ -464,6 +464,17 @@ class ArtefactCollection:
                 return False
         return True
 
+    def copy(self):
+        return ArtefactCollection(self.artefact_dict.copy().values())
+
+    def first(self):
+        """Return the first artefact in the collection or None if empty."""
+        return next(iter(self.artefact_dict.values()), None)
+
+    def last(self):
+        """Return the last artefact in the collection or None if empty."""
+        return next(reversed(self.artefact_dict.values()), None)
+
     def collection_is_similar(self, other):
         """Checks if the passed container containes simelar artefacts then self.
         Order of artefects is not relevant for equality."""
