@@ -36,11 +36,11 @@ class Test(unittest.TestCase):
         self.a_NoFile = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", "notexistingFile", None, True)
         self.a_Invalid = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), None, True)
         
-        self.a_valid_new = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
-        self.a_NoneURL_new = artefactGenerator.generateArtefactEntry("Case2", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
-        self.a_NoFile_new = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
-        self.a_Invalid_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
-        self.a_valid2_new = artefactGenerator.generateArtefactEntry("Case4", 2, 0, "Action2", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
+        self.a_valid_new = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"), new=True)
+        self.a_NoneURL_new = artefactGenerator.generateArtefactEntry("Case2", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), new=True)
+        self.a_NoFile_new = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), new=True)
+        self.a_Invalid_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), new=True)
+        self.a_valid2_new = artefactGenerator.generateArtefactEntry("Case4", 2, 0, "Action2", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), new=True)
  
         self.a_NoFile2 = artefactGenerator.generateArtefactEntry("Case6", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "notExstingFile.txt"))
         self.a_NoResult = artefactGenerator.generateArtefactEntry("Case4", 2, 0, "Action2", artefactProps.TYPE_VALUE_MISC, "dummy", os.path.join(self.testDataDir, "notExisitngFile.txt"))
@@ -325,19 +325,19 @@ class Test(unittest.TestCase):
         self.assertDictEqual(input_ids, a[artefactProps.INPUT_IDS])
 
         #test auto url generation only prefix
-        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName")
+        a = action.generateArtefact(self.a_3, url_user_defined_part="HumanReadableFileName")
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID]
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation only extension
-        a = action.generateArtefact(self.a_3, urlExtension='txt')
+        a = action.generateArtefact(self.a_3, url_extension='txt')
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', a[artefactProps.ID])
         refURL = refURL + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)
 
         #test auto url generation all
-        a = action.generateArtefact(self.a_3, urlHumanPrefix="HumanReadableFileName", urlExtension='txt')
+        a = action.generateArtefact(self.a_3, url_user_defined_part="HumanReadableFileName", url_extension='txt')
         refURL = os.path.join(self.sessionDir, 'test_artefact_generation', 'Test3', 'Type3', 'Case3', '0', 'HumanReadableFileName.')
         refURL = refURL + a[artefactProps.ID] + os.extsep + 'txt'
         self.assertEqual(a[artefactProps.URL], refURL)

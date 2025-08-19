@@ -93,8 +93,8 @@ class ImageAccAction(CLIActionBase):
       logger.error("operator %s not known.", self._operator)
       raise
 
-    name += artefactHelper.getArtefactShortName(self._images[0])
-    name += "to_"+artefactHelper.getArtefactShortName(self._images[-1])
+    name += artefactHelper.getArtefactShortName(self._images.first())
+    name += "to_"+artefactHelper.getArtefactShortName(self._images.last())
 
     if self._registrations is not None:
       name += "_by_registration"
@@ -105,23 +105,26 @@ class ImageAccAction(CLIActionBase):
    
   def _indicateOutputs(self):
     if self._resultArtefact is None:
-      self._resultArtefact = self.generateArtefact(self._images[-1],
+      # convert ArtefactCollection into a list to be able to use subscription for easier handling in the rest of this
+      # function.
+      images = list(self._images)
+      self._resultArtefact = self.generateArtefact(images[-1],
                                                    userDefinedProps={
                                                      artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                      artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
-                                                     artefactProps.ACC_ELEMENT: str(len(self._images)-2)},
-                                                   urlHumanPrefix=self.instanceName,
-                                                   urlExtension=self._outputExt)
+                                                     artefactProps.ACC_ELEMENT: str(len(images)-2)},
+                                                   url_user_defined_part=self.instanceName,
+                                                   url_extension=self._outputExt)
 
       self._interimArtefacts = list()
-      for index, image in enumerate(self._images[1:-1]):
+      for index, image in enumerate(images[1:-1]):
         self._interimArtefacts.append(self.generateArtefact(image,
-                                       userDefinedProps={
+                                                            userDefinedProps={
                                          artefactProps.TYPE: artefactProps.TYPE_VALUE_INTERIM,
                                          artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
                                          artefactProps.ACC_ELEMENT: str(index)},
-                                       urlHumanPrefix=self.instanceName+"_interim_{}".format(index),
-                                       urlExtension=self._outputExt))
+                                                            url_user_defined_part=self.instanceName + "_interim_{}".format(index),
+                                                            url_extension=self._outputExt))
 
     return [self._resultArtefact]
 
@@ -165,8 +168,13 @@ class ImageAccAction(CLIActionBase):
 
   def _prepareCLIExecution(self):
     resultArtefacts = self._interimArtefacts + [self._resultArtefact]
-    image1Artefacts = [self._images[0]] + self._interimArtefacts
-    weight2s = len(self._images)*[self._weight]
+
+    # convert ArtefactCollection into a list to be able to use subscription for easier handling in the rest of this
+    # function.
+    images = list(self._images)
+
+    image1Artefacts = [images[0]] + self._interimArtefacts
+    weight2s = len(images)*[self._weight]
     weight1s = [self._weight] + len(self._interimArtefacts)*[1]
 
     content = ""
@@ -174,7 +182,7 @@ class ImageAccAction(CLIActionBase):
     for index,resultArtefact in enumerate(resultArtefacts):
       if not len(content) == 0:
         content += os.linesep
-      line = self._generateCall(result=resultArtefact, image1=image1Artefacts[index], image2=self._images[index+1],
+      line = self._generateCall(result=resultArtefact, image1=image1Artefacts[index], image2=images[index+1],
                                 registration=self._registrations[index], weight1=weight1s[index], weight2=weight2s[index+1])
       content += line
 

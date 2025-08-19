@@ -75,8 +75,8 @@ def indicate_nary_output_script(actionInstance, **allargs):
     caseInstanceCount += 1
     result = actionInstance.generateArtefact(actionInstance._inputArtefacts[sorted(actionInstance._inputArtefacts.keys())[0]][0],
                                              userDefinedProps={artefactProps.CASEINSTANCE: str(caseInstanceCount)},
-                                             urlHumanPrefix=actionInstance.instanceName,
-                                             urlExtension='txt')
+                                             url_user_defined_part=actionInstance.instanceName,
+                                             url_extension='txt')
     return [result]
 
 def get_content(input):

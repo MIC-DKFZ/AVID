@@ -145,16 +145,17 @@ class PythonAction(SingleActionBase):
                             self._resultArtefacts))
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
-            reference = self._inputArtefacts[sorted(self._inputArtefacts.keys())[0]][0]
+            first_input_key = sorted(self._inputArtefacts.keys())[0]
+            reference = next(iter(self._inputArtefacts[first_input_key]), None)
 
             if self._outputReferenceArtefactName is not None:
-                reference = self._inputArtefacts[self._outputReferenceArtefactName][0]
+                reference = next(iter(self._inputArtefacts[self._outputReferenceArtefactName]), None)
 
             self._resultArtefacts = [
                 self.generateArtefact(reference=reference,
                                       userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                      urlHumanPrefix=self.instanceName,
-                                      urlExtension=self._outputextension)]
+                                      url_user_defined_part=self.instanceName,
+                                      url_extension=self._outputextension)]
         return self._resultArtefacts
 
     def _generateOutputs(self):

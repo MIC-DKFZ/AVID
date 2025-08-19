@@ -52,9 +52,9 @@ class MitkMapImageAction(GenericCLIAction):
                 artefactRef = actionInstance._templateImage
 
         resultArtefact = actionInstance.generateArtefact(artefactRef,
-                                               userDefinedProps=userDefinedProps,
-                                               urlHumanPrefix=actionInstance.instanceName,
-                                               urlExtension=actionInstance._outputExt)
+                                                         userDefinedProps=userDefinedProps,
+                                                         url_user_defined_part=actionInstance.instanceName,
+                                                         url_extension=actionInstance._outputExt)
         return [resultArtefact]
 
     @staticmethod

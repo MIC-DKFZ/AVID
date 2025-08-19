@@ -57,8 +57,8 @@ class PointSetConversionAction(SingleActionBase):
         resultArtefact = self.generateArtefact(self._pointset,
                                                userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                  artefactProps.FORMAT: self._targetformat},
-                                               urlHumanPrefix=self.instanceName,
-                                               urlExtension=self._getExtension(self._targetformat))
+                                               url_user_defined_part=self.instanceName,
+                                               url_extension=self._getExtension(self._targetformat))
         return [resultArtefact]
 
     def _generateOutputs(self):

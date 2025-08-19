@@ -75,16 +75,18 @@ class TestArtefactRefineAction(unittest.TestCase):
                       artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
                       artefactProps.EXECUTION_DURATION]
       self.assertEqual(action.isSuccess, True)
+
+      ref_artefact_iterator = iter(refArtefacts)
       result = action.outputArtefacts[0]
-      self.assertTrue(is_similar(refArtefacts[0], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
       result = action.outputArtefacts[1]
-      self.assertTrue(is_similar(refArtefacts[1], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
       result = action.outputArtefacts[2]
-      self.assertTrue(is_similar(refArtefacts[2], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
 
@@ -99,18 +101,22 @@ class TestArtefactRefineAction(unittest.TestCase):
                       artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
                       artefactProps.EXECUTION_DURATION, 'baseline']
       self.assertEqual(action.isSuccess, True)
+
+      ref_artefact_iterator = iter(refArtefacts)
       result = action.outputArtefacts[0]
-      self.assertTrue(is_similar(refArtefacts[0], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
       self.assertEqual(result['baseline'], 'true')
+
       result = action.outputArtefacts[1]
-      self.assertTrue(is_similar(refArtefacts[1], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
       self.assertEqual(result['baseline'], 'true')
+
       result = action.outputArtefacts[2]
-      self.assertTrue(is_similar(refArtefacts[2], result, changedProps))
+      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
       self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
       self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
       self.assertEqual(result['baseline'], 'false')

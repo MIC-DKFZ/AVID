@@ -85,10 +85,10 @@ class DummyCLIAction(CLIActionBase):
       self._resultArtefact = self._input[0] # by directly passing back the input as output indication it will allways force a skipping
     else:
       self._resultArtefact = self.generateArtefact(self._input[0],
-                                                 userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
+                                                   userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
                                                                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
-                                                 urlHumanPrefix=self.instanceName,
-                                                 urlExtension='txt')
+                                                   url_user_defined_part=self.instanceName,
+                                                   url_extension='txt')
     return [self._resultArtefact]
 
 

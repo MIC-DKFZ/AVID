@@ -67,8 +67,8 @@ class MitkMRPerfusionAction(CLIActionBase):
                                                      userDefinedProps={
                                                          artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                          artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK},
-                                                     urlHumanPrefix=self.instanceName,
-                                                     urlExtension='nrrd')
+                                                     url_user_defined_part=self.instanceName,
+                                                     url_extension='nrrd')
 
     def _generateName(self):
         style = ''

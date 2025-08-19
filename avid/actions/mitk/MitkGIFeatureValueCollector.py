@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 def _indicate_outputs(actionInstance, selected_features, value_table, row_keys, column_key, **allargs):
 
     feature_files = actionInstance._inputArtefacts['feature_files']
-    refInput = feature_files[0]
+    refInput = feature_files.first()
     outputs = []
     case_values = artefactHelper.get_all_values_of_a_property(feature_files, artefactProps.CASE)
     case_value = 'COLLECTION'
@@ -52,7 +52,7 @@ def _indicate_outputs(actionInstance, selected_features, value_table, row_keys, 
                                                                                 artefactProps.OBJECTIVE: objective_value,
                                                                                 artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                                 artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
-                                                    urlHumanPrefix=actionInstance.instanceName,urlExtension='csv')
+                                                    url_user_defined_part=actionInstance.instanceName, url_extension='csv')
         outputs.append(resultCSV)
     else:
         for feature in selected_features:
@@ -63,7 +63,7 @@ def _indicate_outputs(actionInstance, selected_features, value_table, row_keys, 
                                                                                     artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                                                     artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
                                                                                     artefactProps.RESULT_SUB_TAG: feature},
-                                                        urlHumanPrefix=prefix,urlExtension='csv')
+                                                        url_user_defined_part=prefix, url_extension='csv')
             outputs.append(resultCSV)
 
     return outputs
@@ -122,7 +122,7 @@ def _get_output_artefact_by_subresult(artefacts, feature):
         raise RuntimeError(f'Cannot collect features. Internal state of action seems wrong. More then one output for'
                            f' feature "{feature}" defined. Outputs: {findings}')
 
-    return findings[0]
+    return findings.first()
 
 def _generate_statistics(outputs, feature_files, selected_features, value_table, row_keys,
                          column_key, with_headers, fail_on_value_collision, collision_signature, **allargs):
@@ -153,7 +153,7 @@ def _generate_statistics(outputs, feature_files, selected_features, value_table,
                 else:
                     new_row.append(str(collision_signature))
             else:
-                file_path = artefactHelper.getArtefactProperty(files_of_row[0], artefactProps.URL)
+                file_path = artefactHelper.getArtefactProperty(files_of_row.first(), artefactProps.URL)
                 values = _get_feature_values(file_path, selected_features)
                 new_row.append(values)
                 column_names.update(values.keys())
@@ -213,7 +213,7 @@ def _generate_statistics(outputs, feature_files, selected_features, value_table,
                         else:
                             new_row.append(str(collision_signature))
                     else:
-                        file_path = artefactHelper.getArtefactProperty(cell_artefacts[0], artefactProps.URL)
+                        file_path = artefactHelper.getArtefactProperty(cell_artefacts.first(), artefactProps.URL)
                         feature_values = _get_feature_values(file_path,[selected_feature])
                         new_row.append(feature_values[selected_feature])
                 value_table.append(new_row)
