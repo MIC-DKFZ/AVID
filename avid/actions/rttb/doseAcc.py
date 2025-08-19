@@ -135,8 +135,8 @@ class DoseAccAction(CLIActionBase):
       logger.error("operator %s not known.", self._operator)
       raise
 
-    name += artefactHelper.getArtefactShortName(self._doses[0])
-    name += "to_"+artefactHelper.getArtefactShortName(self._doses[-1])
+    name += artefactHelper.getArtefactShortName(self._doses.first())
+    name += "to_"+artefactHelper.getArtefactShortName(self._doses.last())
 
     if self._registrations is not None:
       name += "_by_registration"
@@ -147,16 +147,20 @@ class DoseAccAction(CLIActionBase):
 
   def _indicateOutputs(self):
     if self._resultArtefact is None:
-      self._resultArtefact = self.generateArtefact(self._doses[-1],
+      # convert ArtefactCollection into a list to be able to use subscription for easier handling in the rest of this
+      # function.
+      doses = list(self._doses)
+
+      self._resultArtefact = self.generateArtefact(doses[-1],
                                                    userDefinedProps={
                                                      artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                      artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
-                                                     artefactProps.ACC_ELEMENT: str(len(self._doses)-2)},
+                                                     artefactProps.ACC_ELEMENT: str(len(doses)-2)},
                                                    url_user_defined_part=self.instanceName,
                                                    url_extension=self._outputExt)
 
       self._interimArtefacts = list()
-      for index, dose in enumerate(self._doses[1:-1]):
+      for index, dose in enumerate(doses[1:-1]):
         self._interimArtefacts.append(self.generateArtefact(dose,
                                                             userDefinedProps={
                                          artefactProps.TYPE: artefactProps.TYPE_VALUE_INTERIM,
@@ -241,7 +245,11 @@ class DoseAccAction(CLIActionBase):
 
   def _prepareCLIExecution(self):
     resultArtefacts = self._interimArtefacts + [self._resultArtefact]
-    dose1Artefacts = [self._doses[0]] + self._interimArtefacts
+
+    # convert ArtefactCollection into a list to be able to use subscription for easier handling in the rest of this
+    # function.
+    doses = list(self._doses)
+    dose1Artefacts = [doses[0]] + self._interimArtefacts
     weight2s = self._getFractionWeights()
     weight1s = [weight2s[0]] + len(self._interimArtefacts)*[1]
 
@@ -250,7 +258,7 @@ class DoseAccAction(CLIActionBase):
     for index,resultArtefact in enumerate(resultArtefacts):
       if not len(content) == 0:
         content += os.linesep
-      line = self._generateCall(result=resultArtefact, dose1=dose1Artefacts[index], dose2=self._doses[index+1],
+      line = self._generateCall(result=resultArtefact, dose1=dose1Artefacts[index], dose2=doses[index+1],
                                 registration=self._registrations[index], weight1=weight1s[index], weight2=weight2s[index+1])
       content += line
 

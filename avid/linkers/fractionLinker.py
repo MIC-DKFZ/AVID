@@ -89,24 +89,21 @@ class FractionLinker(InnerLinkerBase):
 
     #now we have to find the secondary selection that is closest to the primary selection as FractionLinker always
     #returns the closest option.
-    try:
-      masterTimePoint = float(artefactHelper.getArtefactProperty(primarySelection[0], artefactProps.TIMEPOINT))
-      bestTimePoint = float('-inf')
-      for selection in preFilterdResult:
-        try:
-          if selection[0] is None:
-            timePoint = float('-inf')
-          else:
-            timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
+    masterTimePoint = float(artefactHelper.getArtefactProperty(next(iter(primarySelection)), artefactProps.TIMEPOINT))
+    bestTimePoint = float('-inf')
+    for selection in preFilterdResult:
+      try:
+        if selection[0] is None:
+          timePoint = float('-inf')
+        else:
+          timePoint = float(artefactHelper.getArtefactProperty(selection[0], artefactProps.TIMEPOINT))
 
-          if bestTimePoint <= timePoint <= masterTimePoint:
-            if timePoint > bestTimePoint:
-              result.clear()
-            bestTimePoint = timePoint
-            result.append(selection)
-        except:
-          pass
-    except:
-      pass
+        if bestTimePoint <= timePoint <= masterTimePoint:
+          if timePoint > bestTimePoint:
+            result.clear()
+          bestTimePoint = timePoint
+          result.append(selection)
+      except:
+        pass
 
     return result

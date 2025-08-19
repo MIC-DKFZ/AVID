@@ -656,15 +656,16 @@ class SingleActionBase(ActionBase):
                                     ' All outputs will be marked as invalid.')
 
 
-        for artefact in outputs:
-            if not is_valid:
-                artefact[artefactProps.INVALID] = True
-            try:
-                artefact[artefactProps.EXECUTION_DURATION] = self._last_stop_time - self._last_start_time
-            except:
-                pass
+        if outputs:
+            for artefact in outputs:
+                if not is_valid:
+                    artefact[artefactProps.INVALID] = True
+                try:
+                    artefact[artefactProps.EXECUTION_DURATION] = self._last_stop_time - self._last_start_time
+                except:
+                    pass
 
-            self._session.add_artefact(artefact)
+                self._session.add_artefact(artefact)
 
         if not is_valid:
             state = ActionBase.ACTION_FAILURE
@@ -792,6 +793,9 @@ class BatchActionBase(ActionBase):
     def _do_processing(self):
         if len(self._actions)>0:
             self._scheduler.execute(self._actions)
+        else:
+            logger.info(
+                f"Batch action contains no actions. Empty batch action: {self.instanceName} (UID: {self.actionInstanceUID})")
 
 
     def _do_finalize(self):

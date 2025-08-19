@@ -79,7 +79,7 @@ class DoseStatsCollectorAction(SingleActionBase):
 
         for key in self._keys:
             if len(self._doseSelections) > 0:
-                artefact = self.generateArtefact(self._doseSelections[0],
+                artefact = self.generateArtefact(self._doseSelections.first(),
                                                  userDefinedProps={
                                                      artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
                                                      artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
