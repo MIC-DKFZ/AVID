@@ -32,13 +32,12 @@ from avid.common.artefact import ArtefactCollection, update_artefacts
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
 from .report import print_action_diagnostics, create_actions_report
-from rich.progress import Progress
-from rich.console import Console
+from .console_abstraction import Console, Progress, get_logging_handler
 
 
 '''set when at least one session was initialized to ensure this stream is only
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
-stdoutlogstream = None
+stdout_log_stream = None
 
 def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefacts = None, autoSave = False,
                 interim_session_save = False, interim_save_interval=1, debug = False, structDefinition = None,
@@ -87,17 +86,14 @@ def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefact
   rootlogger = logging.getLogger()
 
   if initLogging:
-    global stdoutlogstream
+    global stdout_log_stream
 
-    if stdoutlogstream is None:
-      from rich.logging import RichHandler
-      #stdoutlogstream = RichHandler()
-      stdoutlogstream = logging.StreamHandler(sys.stdout)
-      stdoutlogstream.setLevel(logging.ERROR)
-      streamFormater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
-      stdoutlogstream.setFormatter(streamFormater)
-      rootlogger.addHandler(stdoutlogstream)
-  
+    if stdout_log_stream is None:
+      stdout_log_stream = get_logging_handler(level=logging.ERROR)
+      stream_formater = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
+      stdout_log_stream.setFormatter(stream_formater)
+      rootlogger.addHandler(stdout_log_stream)
+
   #result path setup
   
   rootResultPath = os.path.join(rootPath, name)
@@ -251,13 +247,13 @@ class Session(object):
     self.debug = debug
 
     #indicates if the session has a defined console where information should be printed to.
-    #This variabel can be explitly set but is also said by some methods if needed.
-    #Remark: Information will be always printed into the log (if said) indipendent from the console.
-    self._console = None
+    #Remark: Information will be always printed into the log (if set) indipendent from the console.
+    self._console = Console()
 
     # indicates if the session has a progress indicator active that should be used (e.g. if processed actions are
     # reported).
-    self._progress_indicator = None
+    self._progress_indicator = Progress(console=self._console, transient=True)
+
     # Lookup that is used to map an action tag to a task id for the progress indicator.
     # This lookup is only valid and set if a progress indicator is defined.
     self.__progress_task_lookup = dict()
@@ -425,27 +421,30 @@ class Session(object):
       with self.lock:
           self.executed_actions.append(action)
           logging.debug("stored action token: %s", action)
-          if not self._console is None and not self._console.is_terminal:
-              #If console is not a terminal, the progressbars and live status want be
-              #shown, thus we indicate the progress with explizit print outs
+
+          if not self._progress_indicator is None:
+              action_state_indicator = '.'
               if action.isSuccess:
                   if action.has_warnings:
-                      self.print('W', end='')
-                  else:
-                    self.print('.', end='')
+                      action_state_indicator = 'W'
               elif action.isSkipped:
-                  self.print('S', end='')
+                  action_state_indicator = 'S'
               else:
-                  self.print('E', end='')
+                  action_state_indicator = 'W'
+
+              if not action.actionTag in self.__progress_task_lookup:
+                  #action is not registered so for, do that on the fly
+                  self.__progress_task_lookup[action.actionTag] = self._progress_indicator.add_task(
+                      f'{action.actionTag}', total=None)
+
+              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
+                                              advance=1, action_state_indicator=action_state_indicator)
 
           if not self._console is None and action.isFailure:
             self._console.print(f'\n[red]Failed action diagnostics[/red]')
             print_action_diagnostics(action, console=self._console, debug=self.debug)
             self._console.print('\n')
 
-          if not self._progress_indicator is None:
-              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
-                                              advance=1)
 
   def registerBatchAction(self, batch_action):
       self._batch_actions.append(batch_action)
@@ -499,19 +498,20 @@ class Session(object):
           self.print('Prepare actions ')
           batch_action.generateActions()
           self.print('Generated action instances: {}'.format(len(batch_action._actions)))
+          self.print('Process actions ', end='')
           self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag], total=len(batch_action._actions))
 
-          self.print('Process actions ', end='')
           batch_action.do()
-          self.print('\n')
 
+          self._progress_indicator.update(task_batches, advance=1)
+
+          self.print('\n')
           self.print(f'Batch summary:\n'
                      f'Success: [green]{len(batch_action.getSuccessfulActions(no_warnings=True))}[/green]'
                      f'   Skipped: {len(batch_action.getSkippedActions())}'
                      f'   Warning: [yellow]{len(batch_action.getSuccessfulActionsWithWarnings())}[/yellow]'
                      f'   Error: [red]{len(batch_action.getFailedActions())}[/red]\n')
 
-          self._progress_indicator.update(task_batches, advance=1)
 
 
   def print(self, *args,**nargs):
