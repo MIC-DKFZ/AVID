@@ -20,6 +20,7 @@ import sys
 import traceback
 import re
 from typing import Any, Optional, TextIO, Union
+import time
 
 # Try to import rich components, set flags for availability
 try:
@@ -278,25 +279,54 @@ class Progress:
         self._rich_progress = None
         self._tasks = {}
         self._task_counter = 0
+        self._last_display_lines = 0
 
         if RICH_AVAILABLE and self.console._rich_console:
             self._rich_progress = RichProgress(console=self.console._rich_console, transient=transient)
 
-    def add_task(self, description: str, total: Optional[int] = None) -> int:
-        """Add a progress task"""
+    def add_task(self, description: str, total: Optional[int] = None, indicator_cadence: Optional[float] = None) -> int:
+        """Add a progress task
+        :return: ID of the task that should be updated.
+        :param description: the task label.
+        :param total: the value that indicates 100% of progress. If None the end of the task is not known.
+        :param indicator_cadence: Used for action state indication in none terminal modes. It is the amount of
+         advancement needed before a new state update will be printed in a new line. That is used to control
+         the amount of output in file like outputs (like stdout)."""
         task_id = self._task_counter
         self._task_counter += 1
 
         if self._rich_progress:
             real_task_id = self._rich_progress.add_task(description, total=total)
-            self._tasks[task_id] = {"rich_id": real_task_id, "description": description, "total": total, "completed": 0}
+            self._tasks[task_id] = {
+                'rich_id': real_task_id,
+                'description': description,
+                'total': total,
+                'completed': 0,
+                'start_time':time.time(),
+                'indicator_cadence': indicator_cadence
+            }
         else:
-            self._tasks[task_id] = {"description": description, "total": total, "completed": 0}
+            self._tasks[task_id] = {
+                'description': description,
+                'total': total,
+                'completed': 0,
+                'start_time':time.time(),
+                'last_update_time': 0,
+                'indicator_cadence': indicator_cadence
+            }
 
         return task_id
 
-    def update(self, task_id: int, advance: Optional[float] = None, total: Optional[float] = None, **kwargs):
-        """Update progress for a task"""
+    def update(self, task_id: int, advance: Optional[float] = None, total: Optional[float] = None,
+               indicator_cadence: Optional[float] = None, **kwargs):
+        """Update progress for a task
+        :param task_id: ID of the task that should be updated.
+        :param advance: Increment of the progress. If None is passed the progress will not be changed but other
+        values will be updated.
+        :param total: the value that indicates 100% of progress. If None the end of the task is not known.
+        :param indicator_cadence: Used for action state indication in none terminal modes. It is the amount of
+         advancement needed before a new state update will be printed in a new line. That is used to control
+         the amount of output in file like outputs (like stdout)."""
         if task_id not in self._tasks:
             return
 
@@ -305,23 +335,131 @@ class Progress:
         if total:
             task["total"] = total
 
-        if self.console.is_terminal and self._rich_progress and "rich_id" in task:
+        if indicator_cadence:
+            task["indicator_cadence"] = indicator_cadence
+
+        if advance:
+            task["completed"] += advance
+
+        if self._rich_progress and "rich_id" in task and self.console.is_terminal:
             self._rich_progress.update(task["rich_id"], advance=advance, total=total, **kwargs)
         else:
-            # Simple progress indication
-            if advance:
-                task["completed"] += advance
-                if 'action_state_indicator' in kwargs:
-                    # it is an action based progress, thus we indicate the progress with explicit print-outs
-                    # in non rich mode
-                    self.console.print(kwargs['action_state_indicator'], end='')
-                else:
-                    if "total" in task and task["total"]:
-                        percentage = (task["completed"] / task["total"]) * 100
-                        self.console.print(f"{task['description']}: {task['completed']}/{task['total']} ({percentage:.1f}%)")
-                    else:
-                        self.console.print(f"{task['description']}: {task['completed']} items processed")
+            # Simple progress with visual bar and time estimates
+            current_time = time.time()
 
+            # Only update display every 0.1 seconds to avoid flickering
+            if current_time - task.get("last_update_time", 0) < 0.1:
+                return
+
+            task["last_update_time"] = current_time
+
+            if self.console.is_terminal:
+                self._display_all_tasks()
+            elif 'action_state_indicator' in kwargs:
+                # it is an action based progress in a non terminal, thus we indicate the progress with explicit
+                # print-outs in non rich mode
+                current_interval = None
+                if task['indicator_cadence']:
+                    current_interval = round(task["completed"]/task['indicator_cadence'])
+
+                if current_interval is None or (not  'current_interval' in task or task['current_interval'] != current_interval):
+                    task['current_interval'] = current_interval
+                    progress_line = self._format_progress_line(task)
+                    self.console.print(f"\n{progress_line} - {kwargs['action_state_indicator']}", end='')
+                else:
+                    self.console.print(f"{kwargs['action_state_indicator']}", end='')
+
+    def _display_all_tasks(self):
+        """Display all active tasks in a block, updating the entire display"""
+        # Move cursor up to overwrite previous display
+        if self._last_display_lines > 0:
+            # Move cursor up and clear lines
+            for _ in range(self._last_display_lines):
+                self.console.print(f"\033[A\033[K", end='')  # Move up one line and clear it
+        else:
+            #first time tasks are displayed in current setup. Move to new  line
+            #to avoid overriding last other line
+            self.console.print('\n')
+
+        # Display each task
+        lines_displayed = 0
+        for task_id in self._tasks:
+            task = self._tasks[task_id]
+            progress_line = self._format_progress_line(task)
+            self.console.print(progress_line)
+            lines_displayed += 1
+
+        self._last_display_lines = lines_displayed
+
+        # Ensure we flush to see the update immediately
+        if hasattr(self.console.file, 'flush'):
+            self.console.file.flush()
+
+    def _format_progress_line(self, task: dict) -> str:
+        """Format a single progress line for a task"""
+        description = task["description"]
+        completed = task["completed"]
+        total = task.get("total")
+        start_time = task["start_time"]
+        current_time = time.time()
+
+        elapsed = current_time - start_time
+        if total and total<=completed:
+            if 'elapsed_time' in task:
+                elapsed = task['elapsed_time']
+            else:
+                task['elapsed_time'] = elapsed
+
+        if total and total > 0:
+            # Calculate percentage and create visual bar
+            percentage = min((completed / total) * 100, 100)
+            bar_width = 30
+            filled_width = int((percentage / 100) * bar_width)
+            bar = "█" * filled_width + "░" * (bar_width - filled_width)
+
+            # Calculate time estimates
+            time_info = self._format_time_estimates(completed, total, elapsed)
+
+            # Format: Description [████████░░░░] 45.2% (123/456) - 2m 15s elapsed, ~3m 45s remaining
+            return f"{description} [{bar}] {percentage:5.1f}% ({int(completed)}/{int(total)}) - {time_info}"
+        else:
+            # Indeterminate progress - show spinner and count
+            spinner_chars = "/-\|"
+            spinner_idx = int(current_time * 10) % len(spinner_chars)
+            spinner = spinner_chars[spinner_idx]
+
+            elapsed_str = self._format_duration(elapsed)
+            return f"{description} {spinner} {int(completed)} items - {elapsed_str} elapsed"
+
+    def _format_time_estimates(self, completed: float, total: float, elapsed: float) -> str:
+        """Format time estimates for progress display"""
+        elapsed_str = self._format_duration(elapsed)
+        if completed <= 0 or elapsed <= 0:
+            return f"{elapsed_str} elapsed"
+
+        # Calculate rate and remaining time
+        rate = completed / elapsed
+        remaining_items = total - completed
+
+        if rate > 0:
+            eta_seconds = remaining_items / rate
+            eta_str = self._format_duration(eta_seconds)
+            return f"{elapsed_str} elapsed, ~{eta_str} remaining"
+        else:
+            return f"{elapsed_str} elapsed"
+
+    def _format_duration(self, seconds: float) -> str:
+        """Format duration in a human-readable format"""
+        if seconds < 60:
+            return f"{int(seconds)}s"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            secs = int(seconds % 60)
+            return f"{minutes}m {secs}s"
+        else:
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            return f"{hours}h {minutes}m"
 
     def __enter__(self):
         if self._rich_progress:

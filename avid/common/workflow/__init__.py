@@ -495,11 +495,13 @@ class Session(object):
         for batch_pos, batch_action in enumerate(relevant_batches):
           self._console.rule(title='Batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(relevant_batches)) )
           self.print('Start batch action "{}" (batch {}/{})'.format(batch_action.actionTag, batch_pos+1, len(relevant_batches)))
-          self.print('Prepare actions ')
+          self.print('Prepare actions')
           batch_action.generateActions()
           self.print('Generated action instances: {}'.format(len(batch_action._actions)))
-          self.print('Process actions ', end='')
-          self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag], total=len(batch_action._actions))
+          self.print('Process actions')
+          self._progress_indicator.update(task_id=self.__progress_task_lookup[batch_action.actionTag],
+                                          total=len(batch_action._actions),
+                                          indicator_cadence=min(len(batch_action._actions)/20, 50))
 
           batch_action.do()
 
@@ -517,6 +519,8 @@ class Session(object):
   def print(self, *args,**nargs):
     if not self._console is None:
       self._console.print(*args, **nargs)
+      if not self._progress_indicator is None:
+          self._progress_indicator._last_display_lines = 0
 
   def print_session_info(self):
     self.print(f'Session name: {self.name}')
