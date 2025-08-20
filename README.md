@@ -17,6 +17,7 @@ Unlike traditional workflow engines that require explicit DAG definitions, AVID 
 - **⚡ Batch processing**: Efficiently handles large cohorts
 - **🔧 Extensible**: Easy to add new processing steps
 - **📊 Reproducible**: Full tracking of processing steps and metadata
+- **🚀 Runtime flexible**: Allows running locally, in containers, or on HPC clusters (eg. LSF, SLURM) with just configuration changes 
 
 ### 🤝 Use Cases
 
@@ -26,8 +27,9 @@ AVID excels in scenarios involving:
 - **Large cohort studies** (hundreds to thousands of patients)
 - **Complex processing pipelines** with many interdependent steps
 - **Reproducible research** requiring full processing provenance
+- **Flexible deployment**: Need to run the same workflow in different runtime environments (e.g. locally during development and on HPC clusters for production)
 
-For more thoughts on when to use AVID and when other options might be better suited please see the section below: [When to Choose AVID vs Other Workflow Tools](#when-to-choose-avid-vs-other-workflow-tools)
+For more thoughts on when to use AVID and when other options might be better suited please see the section below: [When to Choose AVID vs Other Workflow Tools](#-when-to-choose-avid-vs-other-workflow-tools)
 
 
 ## 🚀 Quick Start
@@ -59,6 +61,8 @@ session = workflow.initSession(
 # Define a simple processing function
 def process_image(outputs, inputs, **kwargs):
     # Your image processing logic here
+    # The inputs that should be used is indicated by "inputs"
+    # The location where the results should be stored are indicated by "outputs"
     pass
 
 # Apply to all valid data
@@ -92,10 +96,9 @@ The artefacts of a session can be written out in an xml-file. An exemplary artef
     <avid:property key="timestamp">1638869608.3330662</avid:property>
 </avid:artefact>
 ```
+
 ### Session
 The session is a set of artefact that should be processed by a workflow. It can be seen as a "blackboard" which contains all the relevant metadata about the *data* in the form of *artefacts*. It can be read from and written to by the *actions*. The user can directly feed information about the initial input data to the session in the form of an xml file. It is also possible to gain insights into the current session by writing out the artefacts as items of an xml-file.
-
-AVID workflows are built using two types of scripts that users create:
 
 
 ### Datacrawler Script
@@ -142,8 +145,7 @@ Therefore we ignore them for now. If you are interested to learn more please go 
 
 ### Workflow Script
 **Workflow scripts** declare what processing you want to happen with your data. They define the sequence of actions, selectors, and linkers etc. that transform your data.
-The script shown in [Basic Example](#basic-example). is a very simple workflow script example.
-
+The script shown in [Basic Example](#basic-example) is a very simple workflow script example.
 
 ## 📊 Real-world Example
 
