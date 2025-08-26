@@ -112,6 +112,20 @@ class ConsoleTraceback:
         return cls(exc_type, exc_value, exc_traceback)
 
 
+if RICH_AVAILABLE:
+    TableType = RichTable
+    PanelType = RichPanel
+    ColumnsType = RichColumns
+    PaddingType = RichPadding
+    TracebackType = RichTraceback
+else:
+    TableType = ConsoleTable
+    PanelType = ConsolePanel
+    ColumnsType = ConsoleColumns
+    PaddingType = ConsolePadding
+    TracebackType = ConsoleTraceback
+
+
 class Console:
     """
     Console abstraction that uses rich if available, falls back to simple stdout otherwise.
@@ -509,35 +523,35 @@ def get_logging_handler(level=None):
 
 
 # Factory functions to create objects with the right backend
-def create_table(title: Optional[str] = None) -> Union[RichTable, ConsoleTable]:
+def create_table(title: Optional[str] = None) -> TableType:
     """Create a table object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichTable(title=title)
     return ConsoleTable(title=title)
 
 
-def create_panel(content: Any, title: Optional[str] = None) -> Union[RichPanel, ConsolePanel]:
+def create_panel(content: Any, title: Optional[str] = None) -> PanelType:
     """Create a panel object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichPanel(content, title=title)
     return ConsolePanel(content, title=title)
 
 
-def create_columns(renderables) -> Union[RichColumns, ConsoleColumns]:
+def create_columns(renderables) -> ColumnsType:
     """Create a columns object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichColumns(renderables)
     return ConsoleColumns(renderables)
 
 
-def create_padding(renderable, pad: tuple = (0, 0, 0, 0)) -> Union[RichPadding, ConsolePadding]:
+def create_padding(renderable, pad: tuple = (0, 0, 0, 0)) -> PaddingType:
     """Create a padding object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichPadding(renderable, pad=pad)
     return ConsolePadding(renderable, pad=pad)
 
 
-def create_traceback_from_exception(exc_type, exc_value, exc_traceback) -> Union[RichTraceback, ConsoleTraceback]:
+def create_traceback_from_exception(exc_type, exc_value, exc_traceback) -> TracebackType:
     """Create a traceback object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichTraceback.from_exception(exc_type, exc_value, exc_traceback)
