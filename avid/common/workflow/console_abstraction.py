@@ -424,7 +424,7 @@ class Progress:
             return f"{description} [{bar}] {percentage:5.1f}% ({int(completed)}/{int(total)}) - {time_info}"
         else:
             # Indeterminate progress - show spinner and count
-            spinner_chars = "/-\|"
+            spinner_chars = r"/-\|"
             spinner_idx = int(current_time * 10) % len(spinner_chars)
             spinner = spinner_chars[spinner_idx]
 
