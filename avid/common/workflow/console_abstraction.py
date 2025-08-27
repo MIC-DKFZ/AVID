@@ -369,18 +369,18 @@ class Progress:
 
             if self.console.is_terminal:
                 self._display_all_tasks()
-            elif 'action_state_indicator' in kwargs:
+            else:
                 # it is an action based progress in a non terminal, thus we indicate the progress with explicit
                 # print-outs in non rich mode
                 current_interval = None
                 if task['indicator_cadence']:
                     current_interval = round(task["completed"]/task['indicator_cadence'])
 
-                if current_interval is None or (not  'current_interval' in task or task['current_interval'] != current_interval):
+                if current_interval is None or ('current_interval' not in task or task['current_interval'] != current_interval):
                     task['current_interval'] = current_interval
                     progress_line = self._format_progress_line(task)
-                    self.console.print(f"\n{progress_line} - {kwargs['action_state_indicator']}", end='')
-                else:
+                    self.console.print(f"\n{progress_line}  ", end='')
+                if 'action_state_indicator' in kwargs:
                     self.console.print(f"{kwargs['action_state_indicator']}", end='')
 
     def _display_all_tasks(self):
