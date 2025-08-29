@@ -18,7 +18,7 @@ CONTENTS
 --------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
+   api
    usage
-   avid/avid

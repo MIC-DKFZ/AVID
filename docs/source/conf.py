@@ -13,7 +13,10 @@ author = 'German Cancer Research Center (DKFZ), Division of Medical Image Comput
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+]
 # sphinx-apidoc ./avid/ -o ./docs/source/avid/ -f -E
 
 templates_path = ['_templates']
