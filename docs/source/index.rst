@@ -7,18 +7,23 @@ Welcome to AVID's documentation!
    This project is under active development.
 
 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Introduction
+
+   readme_link
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+
+   api
+   usage
+
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-CONTENTS
---------
-
-.. toctree::
-   :maxdepth: 3
-
-   api
-   usage
