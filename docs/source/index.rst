@@ -19,7 +19,6 @@ Welcome to AVID's documentation!
    :caption: Contents:
 
    api
-   usage
 
 Indices and tables
 ==================
