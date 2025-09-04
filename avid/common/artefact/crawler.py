@@ -21,11 +21,11 @@ import os
 import logging
 import sys
 import concurrent.futures
-from tqdm import tqdm
 from pathlib import Path
 
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
 from avid.common.artefact import ArtefactCollection
+from avid.common.workflow import Progress
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)
@@ -110,23 +110,22 @@ class DirectoryCrawler(object):
 
     def getArtefacts(self):
         artefacts = ArtefactCollection()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor, Progress(transient=True) as progress:
+            directory_scanning = progress.add_task("Found folders to scan")
             futures = []
-            for root in tqdm(scan_directories(self._rootPath), desc='Found folders to scan'):
+            for root in scan_directories(self._rootPath):
                 if self._functor_is_factory:
                     functor = self._fileFunctor()
                 else:
                     functor = self._fileFunctor
                 futures.append(executor.submit(getArtefactsFromFolder, root.path, functor, self._rootPath))
+                progress.update(directory_scanning, advance=1)
+            progress.console.print(f"\nFound a total of {len(futures)} folders to scan. Starting to analyse folders ...")
 
+            directory_analysis = progress.add_task("Finished folders", total=len(futures))
+            # currently unused. Keeping these for https://git.dkfz.de/mic/internal/avid/-/issues/35
             skipped, duplicates, added = 0, 0, 0
-            pbar = tqdm(
-                concurrent.futures.as_completed(futures),
-                total=len(futures),
-                desc="Finished folders",
-                postfix={"Added": added, "Skipped": skipped, "Duplicates": duplicates}
-            )
-            for future in pbar:
+            for future in concurrent.futures.as_completed(futures):
                 folder_artefacts = future.result()
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
@@ -136,7 +135,7 @@ class DirectoryCrawler(object):
                     else:
                         artefacts.add_artefact(artefact)
                         added += 1
-                pbar.set_postfix({"Added": added, "Skipped": skipped, "Duplicates": duplicates})
+                progress.update(directory_analysis, advance=1)
 
         return artefacts
 
