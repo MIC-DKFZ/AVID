@@ -6,6 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+
 project = 'AVID'
 copyright = '2024, German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC)'
 author = 'German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC)'
@@ -21,7 +22,9 @@ extensions = [
 # sphinx-apidoc ./avid/ -o ./docs/source/avid/ -f -E
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = [
+    'actions/unrefactored/*',
+]
 
 
 
