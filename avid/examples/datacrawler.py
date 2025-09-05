@@ -3,8 +3,7 @@ __author__ = 'kleina'
 import os
 
 from avid.common.artefact.crawler import runSimpleCrawlerScriptMain
-import avid.common.artefact.defaultProps as artefactProps
-from avid.common.artefact.generator import generateArtefactEntry
+from avid.common.artefact.generator import generate_artefact_entry
 
 
 def fileFunction(pathParts, fileName, fullPath):
@@ -39,8 +38,7 @@ def fileFunction(pathParts, fileName, fullPath):
             actionTag = 'CT'
         objective = image_id
 
-        result = generateArtefactEntry(case=case, caseInstance=None, timePoint=time, actionTag=actionTag, artefactType=artefactProps.TYPE_VALUE_RESULT,
-                                       artefactFormat=artefactProps.FORMAT_VALUE_ITK, url=fullPath, objective=objective)
+        result = generate_artefact_entry(case=case, timePoint=time, actionTag=actionTag, url=fullPath, objective=objective)
 
     elif pathParts[0] == 'mask':
 
@@ -48,7 +46,7 @@ def fileFunction(pathParts, fileName, fullPath):
 
         actionTag = 'Seg'
 
-        result = generateArtefactEntry(case=case, caseInstance=None, timePoint=time, actionTag=actionTag, artefactType=artefactProps.TYPE_VALUE_RESULT, artefactFormat=artefactProps.FORMAT_VALUE_ITK, url=fullPath, objective=objective)
+        result = generate_artefact_entry(case=case, timePoint=time, actionTag=actionTag, url=fullPath, objective=objective)
 
     return result
 
