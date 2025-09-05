@@ -39,7 +39,7 @@ For more thoughts on when to use AVID and when other options might be better sui
 ```bash
 pip install avid
 ```
-or, if you console/terminal supports nice rich output,
+or, if you are working with a console/terminal that supports nice rich output, we advice to install AVID with the packgage rich.
 ```bash
 pip install avid[rich]
 ```
@@ -122,8 +122,8 @@ Data is not explicitly handed to actions. Instead, *selectors* are used to speci
 A selector selects artefacts based on properties. All available built-in selectors are located in the folder `.\avid\selectors`.
 
 ```python
-# Process only MR images from patient 'pat001'
-selector = ActionTagSelector('MR') + CaseSelector('pat001')
+# Process only MR images (which are indicated by the action tag 'MR'.
+selector = ActionTagSelector('MR')
 ```
 
 
@@ -134,7 +134,7 @@ All available linkers are located in the folder `. \avid\linkers`.
 
 ```python
 # Link MR and CT images from the same patient and timepoint
-linker = CaseLinker() + TimePointLinker()
+patient_linker = CaseLinker() + TimePointLinker()
 ```
 
 
@@ -149,31 +149,42 @@ The script shown in [Basic Example](#basic-example) is a very simple workflow sc
 
 ## 📊 Real-world Example
 
-Let's say you have a dataset with CT and MR images from multiple patients across different timepoints, and you want to:
-1. Register all images to a common space
-2. Calculate radiomics features
+Let's say you have a dataset with CT images, masks segmented on the CT images and  MR images from multiple patients across different timepoints, and you want to:
+1. Register all MR images to the CT of the same patient/timestep
+2. Calculate radiomics features for the MR images mapped to CT space using the respective masks
 3. Only process complete patient datasets
 
 ```python
 # Select CT images as targets, MR as moving images
 ct_selector = ActionTagSelector('CT')
+mask_selector = ActionTagSelector('CT_mask')
 mr_selector = ActionTagSelector('MR')
 
 # Link images from same patient/timepoint
 patient_linker = CaseLinker() + TimePointLinker()
 
 with session:
-    # Register MR to CT for each patient/timepoint
-    registration = RegistrationAction(
-        fixedSelector=ct_selector,
+    # Register all MRs onto CTs for each patient/timepoint
+    matcher = MitkMatchImageBatchAction(
+        targetSelector=ct_selector,
         movingSelector=mr_selector,
-        linker=patient_linker,
-        actionTag="registered"
+        movingLinker=patient_linker,
+        algorithm=path_to_the_used_reg_algorithm,
+        actionTag="MR-CT-Reg"
     )
 
-    # Calculate features on registered images
-    RadiomicsAction(
-        inputSelector=registration.actionTagSelector,
+    # Map all MRs by the determined respective registration for each patient/timepoint
+    mapper = MitkMapImageBatchAction(
+        inputSelector=mr_selector,
+        registrationSelector=registration.actionTagSelector,
+        templateSelector=ct_selector,
+        actionTag="Mapped_MR"
+    )
+
+    # Calculate features on mapped MR images
+    MitkCLGlobalImageFeaturesBatchAction(
+        imageSelector=mapper.actionTagSelector,
+        maskSelector=mask_selector,
         actionTag="features"
     )
     session.run_batches()
@@ -214,8 +225,6 @@ your_project/
 ### Complete Tutorial
 Check out our comprehensive Jupyter notebook tutorial: `examples/AVID_introduction.ipynb`
 
-### Example Workflows
-Explore real-world workflows in our [workflow repository](https://git.dkfz.de/mic/internal/avid-workflows)
 
 ### Configuration
 Configure AVID for your environment:
