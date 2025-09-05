@@ -88,7 +88,7 @@ TYPE_VALUE_CONFIG = "config"
 ''' Standard type value. Indicating any result artefacts produced by an action.'''
 TYPE_VALUE_RESULT = "result"
 ''' Standard type value. Indicating any result artefacts that is produced by an action as an interim result
-when the extion is processed. It is not the final result of the action and should not be used in normal workflows.'''
+when the action is processed. It is not the final result of the action and should not be used in normal workflows.'''
 TYPE_VALUE_INTERIM = "interim_result"
 
 '''Standard type value. Indicating the format of the artefact is not specified.'''
@@ -99,12 +99,6 @@ FORMAT_VALUE_DCM = "dcm"
 FORMAT_VALUE_ITK = "itk"
 '''Standard type value. Indicating the artefact is stored as an itk supported image format (e.g. NRRD, MetaImage,...).'''
 FORMAT_VALUE_ITK_TRANSFORM = "itk_transform"
-'''Standard type value. Indicating the artefact is stored in an virtuos format.'''
-FORMAT_VALUE_VIRTUOS = "virtuos"
-'''Standard type value. Indicating the artefact is stored in an virtuos plan format.'''
-FORMAT_VALUE_VIRTUOS_PLAN = "virtuos_plan"
-'''Standard type value. Indicating the artefact is stored in an virtuos hed format.'''
-FORMAT_VALUE_VIRTUOS_HEAD = "virtuos_head"
 '''Standard type value. Indicating the artefact is stored as a comma seperated value file.'''
 FORMAT_VALUE_CSV = "csv"
 '''Standard type value. Indicating the artefact is stored as a JSON file.'''
@@ -113,8 +107,6 @@ FORMAT_VALUE_JSON = "json"
 FORMAT_VALUE_XML = "xml"
 '''Standard type value. Indicating the artefact is stored as a bat file/batch script.'''
 FORMAT_VALUE_BAT = "bat"
-'''Standard type value. Indicating the artefact is stored as a avid tools xml format (legacy).'''
-FORMAT_VALUE_AVIDXML = "AVIDXMLConfig"
 '''Standard type value. Indicating the artefact is stored as helax DICOM iod.'''
 FORMAT_VALUE_HELAX_DCM = "helax"
 '''Standard type value. Indicating the artefact is stored as a RTTB result xml.'''
