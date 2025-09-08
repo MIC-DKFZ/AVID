@@ -39,7 +39,7 @@ For more thoughts on when to use AVID and when other options might be better sui
 ```bash
 pip install avid
 ```
-or, if you are working with a console/terminal that supports nice rich output, we advice to install AVID with the packgage rich.
+or, if you are working with a console/terminal that supports nice rich output, we advise to install AVID with the packgage rich.
 ```bash
 pip install avid[rich]
 ```
@@ -98,7 +98,7 @@ The artefacts of a session can be written out in an xml-file. An exemplary artef
 ```
 
 ### Session
-The session is a set of artefact that should be processed by a workflow. It can be seen as a "blackboard" which contains all the relevant metadata about the *data* in the form of *artefacts*. It can be read from and written to by the *actions*. The user can directly feed information about the initial input data to the session in the form of an xml file. It is also possible to gain insights into the current session by writing out the artefacts as items of an xml-file.
+The session is a set of artefacts that should be processed by a workflow. It can be seen as a "blackboard" which contains all the relevant metadata about the *data* in the form of *artefacts*. It can be read from and written to by the *actions*. The user can directly feed information about the initial input data to the session in the form of an xml file. It is also possible to gain insights into the current session by writing out the artefacts as items of an xml-file.
 
 
 ### Datacrawler Script
@@ -122,13 +122,13 @@ Data is not explicitly handed to actions. Instead, *selectors* are used to speci
 A selector selects artefacts based on properties. All available built-in selectors are located in the folder `.\avid\selectors`.
 
 ```python
-# Process only MR images (which are indicated by the action tag 'MR'.
+# Process only MR images (which are indicated by the action tag 'MR')
 selector = ActionTagSelector('MR')
 ```
 
 
 ### Linker
-**Linkers** intelligently pair related data. This is needed as a actions can also be given more than a single input, meaning they don't have to work on individual artefacts, but can also work on pairs of artefacts (or even more).
+**Linkers** intelligently pair related data. This is needed as actions can also be given more than a single input, meaning they don't have to work on individual artefacts, but can also work on pairs of artefacts (or even more).
 For example we could wish to perform a registration of MR and CT images, which takes both images as input. We can use a selector to select the desired images, but there is a problem. How do we clarify which artefacts belong together in a pair? Theoretically, each MR image could be paired with each CT image, across patients and time points. To get exactly what we want, we use *linkers*.
 All available linkers are located in the folder `. \avid\linkers`.
 
@@ -176,7 +176,7 @@ with session:
     # Map all MRs by the determined respective registration for each patient/timepoint
     mapper = MitkMapImageBatchAction(
         inputSelector=mr_selector,
-        registrationSelector=registration.actionTagSelector,
+        registrationSelector=matcher.actionTagSelector,
         templateSelector=ct_selector,
         actionTag="Mapped_MR"
     )
