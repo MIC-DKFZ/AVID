@@ -132,13 +132,28 @@ class Console:
     Provides a subset of rich.Console functionality with graceful degradation.
     """
 
+    @staticmethod
+    def force_jupyter():
+        """Helper function that checks if we are running in a IPython or jupyter environment."""
+        try:
+            from IPython import get_ipython
+            shell = get_ipython().__class__.__name__
+            if shell == "ZMQInteractiveShell":
+                return True  # Jupyter notebook or qtconsole
+            elif shell == "TerminalInteractiveShell":
+                return None  # IPython in terminal
+            else:
+                return None  # Other (maybe colab, etc.)
+        except Exception:
+            return None
+
     def __init__(self, file: Optional[TextIO] = None, width: Optional[int] = None):
         self.file = file or sys.stdout
         self.width = width
         self._rich_console = None
 
         if RICH_AVAILABLE:
-            self._rich_console = RichConsole(file=self.file, width=width)
+            self._rich_console = RichConsole(file=self.file, width=width, force_jupyter=Console.force_jupyter())
 
     @property
     def is_terminal(self) -> bool:
