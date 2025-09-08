@@ -89,7 +89,6 @@ The artefacts of a session can be written out in an xml-file. An exemplary artef
     <avid:property key="timePoint">TP1</avid:property>
     <avid:property key="actionTag">CT</avid:property>
     <avid:property key="type">result</avid:property>
-    <avid:property key="format">itk</avid:property>
     <avid:property key="url">../data/img/pat1_TP1_CT.txt</avid:property>
     <avid:property key="invalid">False</avid:property>
     <avid:property key="id">bbe232b8-5740-11ec-85a6-e9d058c65a83</avid:property>
@@ -102,18 +101,50 @@ The session is a set of artefacts that should be processed by a workflow. It can
 
 
 ### Datacrawler Script
-**Datacrawler scripts** are one of two types of scripts that AVID users create. Datacrawler scripts define how to discover and index your raw data. They crawl through your data folders, extract metadata from file (content, names or locations), transform it into artefacts, and create the initial session file with bootstrap artefacts:
-
+**Datacrawler scripts** are one of two types of scripts that AVID users create. Datacrawler scripts define how to discover and index your raw data. They crawl through your data folders, extract metadata from file (content, names or locations), transform it into artefacts, and create the initial session file with bootstrap artefacts.
+An examplary simple crawling script could look like this:
 ```python
-# datacrawler.py - discovers your data and creates bootstrap session
-# Crawls data folder, extracts patient ID, timepoint, modality from filenames
-# Creates bootstrap.avid with all discovered data items and their properties
-%run datacrawler.py /path/to/data/ output/bootstrap.avid
+from avid.common.artefact.crawler import runCrawlerScriptMain, crawl_property_by_path
+import avid.common.artefact.defaultProps as ArtefactProps
+from pathlib import Path
+
+@crawl_property_by_path(property_map={0: ArtefactProps.CASE,
+                                      1: ArtefactProps.TIMEPOINT
+                                      })
+def fileFunction(full_path, filename, artefact_candidate, **kwargs):
+    artefact_candidate[ArtefactProps.ACTIONTAG] = Path(filename).stem
+    artefact_candidate[ArtefactProps.URL] = full_path
+    return artefact_candidate
+
+if __name__ == "__main__":
+    runCrawlerScriptMain(fileFunction) #pre defined main function for most of the crawling needs.
+```
+This crawling scrip assumes that the names of the first sub dir level encodes the case ID and the second level names of
+the files encodes the time point. The action tag is the stem of the filename.
+
+This crawler script can tha be executed in a shell like:
+```bash
+# datacrawler.py - discovers your data and creates bootstrap session (bootstrap.avid)
+# with all discovered data items and their properties
+my_datacrawler.py --root /path/to/data/ --output output/bootstrap.avid
 ```
 
 
 ### Action
 **Actions** are processing steps that transform your data. AVID provides many built-in actions for common image processing tasks, and you can easily create custom ones.
+Each action will earmark artefacts produced by it with a artefact property called "actionTag". The value of action tag is specified in the workflow script.
+E.g. in the [Basic Example](#basic-example) the action tag for the action is "processed". Therefore all outputs produced by the action can be selected via the action tag
+```python
+[...]
+with session:
+    PythonUnaryBatchAction(
+        inputSelector=ValiditySelector(),
+        generateCallable=process_image,
+        actionTag="processed",
+        defaultoutputextension="nii.gz"
+    ).do()
+[...]
+```
 
 
 ### Selector
@@ -155,6 +186,13 @@ Let's say you have a dataset with CT images, masks segmented on the CT images an
 3. Only process complete patient datasets
 
 ```python
+import avid.common.workflow as workflow
+from avid.selectors import ActionTagSelector
+from avid.linkers import CaseLinker, TimePointLinker
+from avid.actions.mitk.MitkMatchImage import MitkMatchImageBatchAction
+from avid.actions.mitk.MitkMapImage import MitkMapImageBatchAction
+from avid.actions.mitk.MitkCLGlobalImageFeatures import MitkCLGlobalImageFeaturesBatchAction
+
 # Select CT images as targets, MR as moving images
 ct_selector = ActionTagSelector('CT')
 mask_selector = ActionTagSelector('CT_mask')
@@ -163,7 +201,11 @@ mr_selector = ActionTagSelector('MR')
 # Link images from same patient/timepoint
 patient_linker = CaseLinker() + TimePointLinker()
 
-with session:
+with workflow.initSession(
+    bootstrapArtefacts="path/to/your/data.avid",
+    sessionPath="output/session.avid",
+    name="my_analysis"
+    ) as session:
     # Register all MRs onto CTs for each patient/timepoint
     matcher = MitkMatchImageBatchAction(
         targetSelector=ct_selector,
@@ -200,13 +242,32 @@ AVID automatically:
 
 AVID provides numerous built-in actions for common image processing tasks:
 
-- **Registration**: Rigid, affine, and deformable registration
-- **Resampling**: Image resampling and spacing adjustment
-- **Segmentation**: Integration with various segmentation tools
-- **Radiomics**: Feature extraction from images and masks
-- **Format conversion**: Between different medical image formats
+### Generic
 - **Python actions**: Custom processing with full Python flexibility
 - **CLI integration**: Easy integration of command-line tools
+
+### MITK (https://www.mitk.org)
+Remark: To use this actions the MITK cli apps have to be installed and configured.
+- **Registration**: Rigid, affine, and deformable registration
+- **Resampling/Stitching**: Image resampling (optionally based on determined registrations) and image stitching
+- **Radiomics**: Feature extraction from images and masks
+- **Format conversion**: Between different medical image formats
+- **3D+t fusing/splitting**: Fuse multiple 3D image into a 3D+t/4D image or split a 3D+t image into multiple 3D frame images
+- **Perfusion fitting**: Fitting of MRI perfusion data to generate model specific parameter maps
+
+### Plastimatch (https://plastimatch.org/index.html)
+Remark: To use this actions the plastimatch tools have to be installed and AVID has to be configured accordingly.
+- **DICE computation**: compute the dice statistics for two masks
+- **Image compare**: Voxel wise comparison of two images
+
+### RTTB (https://github.com/MIC-DKFZ/RTTB)
+Remark: To use this actions the RTTB tools have to be installed and AVID has to be configured accordingly.
+- **Biological model**: Calculation of biological models based on dose distributions
+- **Dose accumulation**: Accumulate multiple doses
+- **Dose mapping**: Map a dose distribution based on a given registration
+- **Dose statistics**: Computation of dose and DVH statistics
+- **Struct voxelization**: Voxelization of RT structure sets
+
 
 ## 📁 Project Structure
 
