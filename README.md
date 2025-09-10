@@ -44,6 +44,13 @@ or, if you are working with a console/terminal that supports nice rich output, w
 pip install avid[rich]
 ```
 
+### Configuration
+
+To automatically download and configure the [MITK actions](#mitk-httpswwwmitkorg), run
+```bash
+avidconfig tools install MITK
+```
+
 ### Basic Example
 
 ```python
