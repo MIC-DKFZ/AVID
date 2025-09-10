@@ -19,10 +19,11 @@
 import os
 import shutil
 import unittest
+from pathlib import Path
 
 import avid.common.workflow as workflow
 from avid.actions.mitk.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
-from avid.common.AVIDUrlLocater import getToolsPath
+from avid.common.AVIDUrlLocater import getExecutableURL
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import getToolConfigPath
 
@@ -35,10 +36,8 @@ class TestMatchR(unittest.TestCase):
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "matchRTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_matchR")
 
-      self.dllPath = os.path.join(getToolsPath(), "MitkMatchImage")
-      self.itkAlgorithm = "mdra-0-14_MITK_MultiModal_rigid_default.dll"
-
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+      self.itkAlgorithm = Path(getExecutableURL(self.session, "MitkMatchImage")).parents[1] / "bin" / "mdra-0-14_MITK_MultiModal_rigid_default.dll"
 
               
     def tearDown(self):
