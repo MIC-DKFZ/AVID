@@ -45,8 +45,21 @@ pip install avid[rich]
 ```
 
 ### Configuration
+After you have installed AVID you can use it, but out of the box only with actions that utilize python functions
+you provide (see e.g. [Basic Example](#basic-example)). In most cases the full power of AVID comes with executing other
+functionality provided e.g. as command line applications or containers.
+To use that, you have to configure AVID, so that it knows where to find the available tools and how to call them. You
+can find more information about that in the [Learning More](#-learning-more) section.
 
-To automatically download and configure the [MITK actions](#mitk-httpswwwmitkorg), run
+AVID will store all relevant tool information (including tools installed by AVID) in its "tool path".
+If you haven't configured it, it will be `<package install path>/utilities`. You can set the tool path by changing
+the AVID settings:
+```bash
+avidconfig settings avid.toolspath <your_desired_tools_path>
+```
+
+A fast track to get some tools to your disposal is to let avid directly automatically download and configure the latest
+version of [MITK actions](#mitk-httpswwwmitkorg). For that, run
 ```bash
 avidconfig tools install MITK
 ```
@@ -209,10 +222,10 @@ mr_selector = ActionTagSelector('MR')
 patient_linker = CaseLinker() + TimePointLinker()
 
 with workflow.initSession(
-    bootstrapArtefacts="path/to/your/data.avid",
-    sessionPath="output/session.avid",
-    name="my_analysis"
-    ) as session:
+        bootstrapArtefacts="path/to/your/data.avid",
+        sessionPath="output/session.avid",
+        name="my_analysis"
+) as session:
     # Register all MRs onto CTs for each patient/timepoint
     matcher = MitkMatchImageBatchAction(
         targetSelector=ct_selector,
@@ -225,14 +238,14 @@ with workflow.initSession(
     # Map all MRs by the determined respective registration for each patient/timepoint
     mapper = MitkMapImageBatchAction(
         inputSelector=mr_selector,
-        registrationSelector=matcher.actionTagSelector,
+        registrationSelector=matcher.action_tag_selector,
         templateSelector=ct_selector,
         actionTag="Mapped_MR"
     )
 
     # Calculate features on mapped MR images
     MitkCLGlobalImageFeaturesBatchAction(
-        imageSelector=mapper.actionTagSelector,
+        imageSelector=mapper.action_tag_selector,
         maskSelector=mask_selector,
         actionTag="features"
     )
