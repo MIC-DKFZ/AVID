@@ -1,55 +1,40 @@
-__author__ = 'kleina'
+# SPDX-FileCopyrightText: 2024, German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC)
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# or find it in LICENSE.txt.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-import os
+from avid.common.artefact.crawler import runCrawlerScriptMain, crawl_filter_by_filename, crawl_property_by_path,\
+    crawl_property_by_filename
+import avid.common.artefact.defaultProps as ArtefactProps
 
-from avid.common.artefact.crawler import runSimpleCrawlerScriptMain
-from avid.common.artefact.generator import generate_artefact_entry
 
-
-def fileFunction(pathParts, fileName, fullPath):
+@crawl_filter_by_filename(filename_exclude="README.md")
+@crawl_property_by_path(property_map={0: ArtefactProps.CASE})
+@crawl_property_by_filename(extraction_rules={ArtefactProps.ACTIONTAG: (r"^([^_]+)", 'UNKNOWN'),
+                                              ArtefactProps.TIMEPOINT: (r"_TP(\d+)", 0)})
+def fileFunction(full_path, artefact_candidate, **kwargs):
     """
-    Functor to generate an artefact for a file stored with the BAT project
-    storage conventions.
-
-    This is an example datacrawler for the follwoing folder structure:
-    data
-      - img
-            pat1_TP1_MR (in the example, the file name consists of <case_id>_<date>_<image_id>.nrrd)
-            ...
-      - mask
-            pat1_TP1_Seg1.nrrd (in the example, the file name consists of <case case_id>_<date>_<seg_id>.nrrd)
-
+    Functor to generate an artefact for a file found by the crawler.
+    Most of the work is already done be the decorators that ensure that the artefact_candidate is already populated
+    based on information encoded in the file and name.
     """
-    result = None
-    name, ext = os.path.splitext(fileName)
-    try:
-        case_id, time, image_id = name.split('_') # first dir is <case case_id>_<date>
-        case = case_id # + '_' + time
-    except:
-        print('Something went wrong extracting case_id, time and image_id. Please check your data naming or datacrawler script.')
-
-
-    if pathParts[0] == 'img':
-        # we are in the base dir of a case. Get the images
-        actionTag = image_id
-        if 'MR' in image_id:
-            actionTag = 'MR'
-        elif 'CT' in image_id:
-            actionTag = 'CT'
-        objective = image_id
-
-        result = generate_artefact_entry(case=case, timePoint=time, actionTag=actionTag, url=fullPath, objective=objective)
-
-    elif pathParts[0] == 'mask':
-
-        objective = image_id
-
-        actionTag = 'Seg'
-
-        result = generate_artefact_entry(case=case, timePoint=time, actionTag=actionTag, url=fullPath, objective=objective)
-
-    return result
+    artefact_candidate[ArtefactProps.URL] = full_path
+    artefact_candidate[ArtefactProps.TYPE] = ArtefactProps.TYPE_VALUE_RESULT
+    return artefact_candidate
 
 
 if __name__ == "__main__":
-    runSimpleCrawlerScriptMain(fileFunction)
+    runCrawlerScriptMain(fileFunction)
