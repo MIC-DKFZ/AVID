@@ -52,7 +52,7 @@ To use that, you have to configure AVID, so that it knows where to find the avai
 can find more information about that in the [Learning More](#-learning-more) section.
 
 AVID will store all relevant tool information (including tools installed by AVID) in its "tool path".
-If you haven't configured it, it will be `<package install path>/utilities`. You can set the tool path by changing
+If you haven't configured it, it will be `<package install path>/Utilities`. You can set the tool path by changing
 the AVID settings:
 ```bash
 avidconfig settings avid.toolspath <your_desired_tools_path>
@@ -142,17 +142,17 @@ if __name__ == "__main__":
 This crawling scrip assumes that the names of the first sub dir level encodes the case ID and the second level names of
 the files encodes the time point. The action tag is the stem of the filename.
 
-This crawler script can tha be executed in a shell like:
+This crawler script can then be executed in a shell like:
 ```bash
 # datacrawler.py - discovers your data and creates bootstrap session (bootstrap.avid)
 # with all discovered data items and their properties
-my_datacrawler.py --root /path/to/data/ --output output/bootstrap.avid
+python my_datacrawler.py --root /path/to/data/ --output output/bootstrap.avid
 ```
 
 
 ### Action
 **Actions** are processing steps that transform your data. AVID provides many built-in actions for common image processing tasks, and you can easily create custom ones.
-Each action will earmark artefacts produced by it with a artefact property called "actionTag". The value of action tag is specified in the workflow script.
+Each action will earmark artefacts produced by it with an artefact property called "actionTag". The value of action tag is specified in the workflow script.
 E.g. in the [Basic Example](#basic-example) the action tag for the action is "processed". Therefore all outputs produced by the action can be selected via the action tag
 ```python
 [...]
@@ -267,7 +267,7 @@ AVID provides numerous built-in actions for common image processing tasks:
 - **CLI integration**: Easy integration of command-line tools
 
 ### MITK (https://www.mitk.org)
-Remark: To use this actions the MITK cli apps have to be installed and configured.
+Remark: To use these actions the MITK cli apps have to be installed and configured.
 - **Registration**: Rigid, affine, and deformable registration
 - **Resampling/Stitching**: Image resampling (optionally based on determined registrations) and image stitching
 - **Radiomics**: Feature extraction from images and masks
@@ -276,12 +276,12 @@ Remark: To use this actions the MITK cli apps have to be installed and configure
 - **Perfusion fitting**: Fitting of MRI perfusion data to generate model specific parameter maps
 
 ### Plastimatch (https://plastimatch.org/index.html)
-Remark: To use this actions the plastimatch tools have to be installed and AVID has to be configured accordingly.
+Remark: To use these actions the plastimatch tools have to be installed and AVID has to be configured accordingly.
 - **DICE computation**: compute the dice statistics for two masks
 - **Image compare**: Voxel wise comparison of two images
 
 ### RTTB (https://github.com/MIC-DKFZ/RTTB)
-Remark: To use this actions the RTTB tools have to be installed and AVID has to be configured accordingly.
+Remark: To use these actions the RTTB tools have to be installed and AVID has to be configured accordingly.
 - **Biological model**: Calculation of biological models based on dose distributions
 - **Dose accumulation**: Accumulate multiple doses
 - **Dose mapping**: Map a dose distribution based on a given registration

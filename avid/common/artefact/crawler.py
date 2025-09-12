@@ -241,12 +241,12 @@ class DirectoryCrawler(object):
 
     @property
     def number_of_last_skipped_duplicates(self):
-        """ Returns the number of artefacts that where skipped due to being duplicates in the last crawl."""
+        """ Returns the number of artefacts that were skipped due to being duplicates in the last crawl."""
         return self._last_skipped_duplicates
 
     @property
     def number_of_last_added(self):
-        """ Returns the number of artefacts that where added in the last crawl."""
+        """ Returns the number of artefacts that were added in the last crawl."""
         return self._last_added
 
     def getArtefacts(self):
