@@ -67,7 +67,6 @@ class ActionBase(object):
         if self._additionalActionProps is None:
             self._additionalActionProps = {}
 
-        self._add_self_to_session_after_processing = True
         self._outputArtefacts = None
         self._last_exec_state = self.ACTION_UNINIT
         self._last_start_time = None
@@ -83,7 +82,7 @@ class ActionBase(object):
         return self._actionTag
 
     @property
-    def actionTagSelector(self):
+    def action_tag_selector(self):
         return ActionTagSelector(self._actionTag)
 
     @property
@@ -247,7 +246,7 @@ class ActionBase(object):
             self._reportWarning(f'Error occurred while action was finalized.', exception=e)
             self._last_exec_state = self.ACTION_FAILURE
 
-        if self._add_self_to_session_after_processing:
+        if self._session:
             # notify session about the finished action instance
             self._session.addProcessedActionInstance(self)
 
@@ -737,7 +736,6 @@ class BatchActionBase(ActionBase):
         self._actions = None
         self._scheduler = scheduler  # scheduler that should be used to execute the jobs
         self._session.registerBatchAction(self)
-        self._add_self_to_session_after_processing = False
 
         self.lock = threading.RLock()
 
@@ -767,6 +765,14 @@ class BatchActionBase(ActionBase):
             outputs += action.indicateOutputs()
 
         return outputs
+
+    @property
+    def number_of_actions(self):
+        """ Returns the number of actions in the batch."""
+        if self._actions:
+            return len(self._actions)
+        else:
+            return 0
 
     def generateActions(self):
         """ Function that (pre)generates the actions of the batch action.
