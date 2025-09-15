@@ -45,7 +45,8 @@ def crawl_filter_by_filename(filename_exclude : Optional[Union[str, list[str]]] 
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(filename, *args, **kwargs):
+        def wrapper(*args, **kwargs):
+            filename = kwargs['filename']
             if filename_exclude:
                 if isinstance(filename_exclude, str):
                     invalid_names = [filename_exclude]
@@ -68,14 +69,15 @@ def crawl_filter_by_filename(filename_exclude : Optional[Union[str, list[str]]] 
             if not 'artefact_candidate' in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
 
-            return func(filename=filename, *args, **kwargs)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
 def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False) -> Callable :
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(path_parts, *args, **kwargs):
+        def wrapper(*args, **kwargs):
+            path_parts = kwargs['path_parts']
             if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
 
@@ -85,7 +87,7 @@ def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False)
                 elif add_none:
                     kwargs['artefact_candidate'][key] = None
 
-            return func(path_parts=path_parts, *args, **kwargs)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -123,7 +125,8 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(filename, *args, **kwargs):
+        def wrapper(*args, **kwargs):
+            filename = kwargs['filename']
             if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
 
@@ -137,7 +140,7 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
                     if value or add_none:
                         kwargs['artefact_candidate'][key] = value
 
-            return func(filename=filename, *args, **kwargs)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -153,10 +156,9 @@ def _get_artefacts_from_folder(folder, functor, rootPath):
     relativePath = folder.relative_to(rootPath)
     pathParts = relativePath.parts
     artefacts = {}
-    known_ids = set()
     for aFile in files:
         full_path = str(aFile.resolve())
-        artefact = functor(path_parts=pathParts, filename=aFile.name, full_path=full_path, known_ids=known_ids)
+        artefact = functor(path_parts=pathParts, filename=aFile.name, full_path=full_path)
         if artefact and not artefact[ArtefactProps.INVALID]:
             # if invalidity is not set already assume it is false in context of crawling,
             # therefore the file does exist otherwise the artefact wouldn't have been created
@@ -165,15 +167,15 @@ def _get_artefacts_from_folder(folder, functor, rootPath):
     return artefacts
 
 
-def _scan_directories(dir_path: str | Path):
+def _scan_directories(dir_path: str | Path, break_checker_delegate: Optional[Callable[[Path], bool]] = None):
     dir_path = Path(dir_path)
     yield dir_path  # include top-level directory in the scanning
 
     for sub_entry in dir_path.iterdir():
-        if sub_entry.is_file() and sub_entry.name.endswith('.dcm'):
+        if break_checker_delegate and break_checker_delegate(sub_entry):
             break
         if sub_entry.is_dir():
-            yield from _scan_directories(sub_entry)
+            yield from _scan_directories(dir_path=sub_entry, break_checker_delegate=break_checker_delegate)
 
 class DirectoryCrawler(object):
     """
@@ -183,28 +185,42 @@ class DirectoryCrawler(object):
     functor returns the artefact the crawler enlists it to the result in the
     artefact list.
     Crawling is distributed to n_threads parallel processes, which each go through a folder.
-    :param rootPath: Path to the root directory. All subdirectories will recursively be crawled through.
-    :param fileFunctor: A callable or factory for callables, which will get called for each subdirectory.
-    If fileFunctor is a factory, a new callable will be generated and reused within each subdirectory.
-    :param ignoreExistingArtefacts: If set to true artefacts returned by fileFunctor
-    will only be added if they do not already exist in the artefact list.
+    :param root_path: Path to the root directory. All subdirectories will recursively be crawled through.
+    :param file_functor: A callable or factory for callables, which will get called for each subdirectory.
+    If file_functor is a factory, a new callable will be generated and reused within each subdirectory.
+    :param replace_existing_artefacts: If set to true, artefacts returned by file_functor
+    will always be added and my overwrite simelar artefact already found in the crawl. If set to false, newly found
+    simelar artefacts will be dropped.
     :param n_processes: The number of parallel processes to run. (default: 1)
+    :param scan_directory_break_delegate: You can control the directory scanning of the crawler by providing a delegate.
+    If provided for each element in a directory the delegate is called and the current Path instance of the element is
+    passed. If the delegate returns true, the crawler breaks for that directory; neither checking further files nor
+    subdirectories. If the delegate returns false, the crawler goes on as normal. E.g. If you assume that folders
+    containing DCM files have only one series (=Artefact) per folder and no sub dirs, you could use the following break
+    delegate to drastically increase crawling speed by avoiding unnecessary checks:
+    def break_delegate(path):
+        return sub_entry.is_file() and sub_entry.name.endswith('.dcm')
     """
-
-    def __init__(self, rootPath, fileFunctor, ignoreExistingArtefacts=False, n_processes=1):
-        self._rootPath = rootPath
-        self._fileFunctor = fileFunctor
-        self._ignoreExistingArtefacts = ignoreExistingArtefacts
+    def __init__(self, root_path, file_functor, replace_existing_artefacts=False, n_processes=1,
+                 scan_directory_break_delegate: Optional[Callable[[Path], bool]] = None):
+        self._rootPath = root_path
+        self._fileFunctor = file_functor
+        self._replace_existing_artefacts = replace_existing_artefacts
         self._n_processes = n_processes
         self._last_irrelevant = 0
-        self._last_skipped_duplicates = 0
+        self._last_dropped = 0
+        self._last_overwrites = 0
         self._last_added = 0
+        self._scan_directory_break_delegate = scan_directory_break_delegate
 
         self._functor_is_factory = False
         try:
             functor_test = self._fileFunctor()
             self._functor_is_factory = callable(functor_test)
-        except:
+        except Exception as err:
+            crawl_logger.debug(
+                f"Error when probing file_functor for being a functor. Assume it is a normal function that should be"
+                f"called. Error details: {err}")
             pass
 
     @property
@@ -213,21 +229,28 @@ class DirectoryCrawler(object):
         return self._last_irrelevant
 
     @property
-    def number_of_last_skipped_duplicates(self):
-        """ Returns the number of artefacts that were skipped due to being duplicates in the last crawl."""
-        return self._last_skipped_duplicates
+    def number_of_last_dropped(self):
+        """ Returns the number of artefacts that were dropped due to being duplicates to already found artefacts
+        in the last crawl."""
+        return self._last_dropped
 
     @property
     def number_of_last_added(self):
-        """ Returns the number of artefacts that were added in the last crawl."""
+        """ Returns the number of artefacts that were finally added in the last crawl (and not overwritten or dropped)
+        So that is the number of artefacts finally in the list."""
         return self._last_added
+
+    @property
+    def number_of_last_overwites(self):
+        """ Returns the number of artefacts that were overwritten by simelar artefact in the cause of crawling."""
+        return self._last_overwrites
 
     def getArtefacts(self):
         artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor, Progress(transient=True) as progress:
             directory_scanning = progress.add_task("Found folders to scan")
             futures = []
-            for target_dir in _scan_directories(self._rootPath):
+            for target_dir in _scan_directories(dir_path=self._rootPath, break_checker_delegate=self._scan_directory_break_delegate):
                 if self._functor_is_factory:
                     functor = self._fileFunctor()
                 else:
@@ -237,22 +260,25 @@ class DirectoryCrawler(object):
             progress.console.print(f"\nFound a total of {len(futures)} folders to scan. Starting to analyse folders ...")
 
             directory_analysis = progress.add_task("Finished folders", total=len(futures))
-            self._last_irrelevant, self._last_skipped_duplicates, self._last_added = 0, 0, 0
+            self._last_irrelevant, self._last_dropped, self._last_added, self._last_overwrites = 0, 0, 0, 0
             for future in concurrent.futures.as_completed(futures):
                 folder_artefacts = future.result()
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
                         self._last_irrelevant += 1
-                    elif artefact in artefacts and self._ignoreExistingArtefacts:
-                        self._last_skipped_duplicates += 1
+                    elif artefacts.similar_artefact_exists(artefact) and not self._replace_existing_artefacts:
+                        self._last_dropped += 1
                     else:
-                        artefacts.add_artefact(artefact)
-                        self._last_added += 1
+                        replaced_artefact = artefacts.add_artefact(artefact)
+                        if replaced_artefact:
+                            self._last_overwrites += 1
+                        else:
+                            self._last_added += 1
                 progress.update(directory_analysis, advance=1)
 
         return artefacts
 
-def runCrawlerScriptMain(fileFunction):
+def runCrawlerScriptMain(file_function):
     """This is a helper function that can be used if you want to write a crawler script that crawles a root directory
      and stores the results as file. This function will parse for command line arguments "root" (the root directory)
      and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly."""
@@ -265,9 +291,12 @@ def runCrawlerScriptMain(fileFunction):
     parser.add_argument('--n_processes', help='Number of processes that will crawl folders in parallel', default=1, type=int)
     parser.add_argument('--relative_paths', action='store_true', help = 'Indicates if the artefact url paths should be '
                                                                         'stored relative to the output path.')
+    parser.add_argument('--replace', action='store_true', help = 'Indicates if existing artefacts should be replaced if'
+                                                                 'a simelar artefact was found in the same crawl.')
     cliargs, unknown = parser.parse_known_args()
 
-    crawler = DirectoryCrawler(cliargs.root, fileFunction, True, n_processes=cliargs.n_processes)
+    crawler = DirectoryCrawler(cliargs.root, file_function, True, n_processes=cliargs.n_processes,
+                               replace_existing_artefacts=cliargs.replace)
     artefacts = crawler.getArtefacts()
 
     crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')

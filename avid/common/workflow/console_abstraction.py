@@ -392,8 +392,8 @@ class Progress:
             # Simple progress with visual bar and time estimates
             current_time = time.time()
 
-            # Only update display every 0.1 seconds to avoid flickering
-            if not completed and current_time - task.get("last_update_time", 0) < 0.1:
+            # Only update display every 0.1 seconds to avoid flickering, except it was just completed
+            if not has_completed_now and current_time - task.get("last_update_time", 0) < 0.1:
                 return
 
             task["last_update_time"] = current_time
@@ -428,8 +428,11 @@ class Progress:
         else:
             self._display_all_tasks()
             task_completed = 0
-            for task in self._tasks:
-                if task.get('completed',0)>task.get('total',0):
+            for taskid, task in self._tasks.items():
+                total = task.get('total')
+                if not total:
+                    total = 0
+                if task.get('completed', 0) >= total:
                     task_completed += 1
             self.console.print(f"Progress stopped. {task_completed} tasks completed.")
 
@@ -480,11 +483,10 @@ class Progress:
             bar_width = 30
             filled_width = int((percentage / 100) * bar_width)
 
-
-            if not ONLY_LIMITED_ENCODING_IS_SUPPORTED:
-                bar = "█" * filled_width + "░" * (bar_width - filled_width)
-            else:
+            if ONLY_LIMITED_ENCODING_IS_SUPPORTED:
                 bar = "#" * filled_width + " " * (bar_width - filled_width)
+            else:
+                bar = "█" * filled_width + "░" * (bar_width - filled_width)
 
             # Calculate time estimates
             time_info = self._format_time_estimates(completed, total, elapsed)
@@ -493,7 +495,11 @@ class Progress:
             return f"{description} [{bar}] {percentage:5.1f}% ({int(completed)}/{int(total)}) - {time_info}"
         else:
             # Indeterminate progress - show spinner and count
-            spinner_chars = r"/-\|"
+            if ONLY_LIMITED_ENCODING_IS_SUPPORTED:
+                spinner_chars = r"/-\|"
+            else:
+                spinner_chars = r"◐◓◑◒"
+
             spinner_idx = int(current_time * 10) % len(spinner_chars)
             spinner = spinner_chars[spinner_idx]
 
