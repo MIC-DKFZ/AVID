@@ -61,7 +61,7 @@ class TestArtefactCrawler(unittest.TestCase):
         self.artefact_candidate[ArtefactProps.TIMEPOINT] = 1
         self.artefact_candidate[ArtefactProps.ACTIONTAG] = "test"
         self.artefact_candidate["custom2"] = 'my value'
-        self.crawl_root_dir = Path(__file__).parent.parent / "avid" / "examples" / "data"
+        self.crawl_root_dir = Path(__file__).parent.parent / "examples" / "data"
 
     def test_filter_by_filename_exclude(self):
         @crawl_filter_by_filename(filename_exclude="badfile.txt")
