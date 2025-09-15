@@ -23,7 +23,7 @@ import sys
 import re
 import concurrent.futures
 from pathlib import Path
-from typing import Callable, Optional, Pattern, Any
+from typing import Callable, Optional, Pattern, Any, Union
 from functools import wraps
 
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
@@ -39,7 +39,7 @@ crawl_logger.addHandler(log_stdout)
 crawl_logger.setLevel(logging.INFO)
 
 
-def crawl_filter_by_filename(filename_exclude : str | list[str] | None = None,
+def crawl_filter_by_filename(filename_exclude : Optional[Union[str, list[str]]] = None,
                  ext_include : Optional[tuple[str]] = None,
                  ext_exclude : Optional[tuple[str]] = None) -> Callable :
 
@@ -76,19 +76,14 @@ def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False)
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(path_parts, *args, **kwargs):
-            prop_values = dict()
-            for pos, key in property_map.items():
-                if -len(path_parts) <= pos < len(path_parts):
-                    prop_values[key] = path_parts[pos]
-                elif add_none:
-                    prop_values[key] = None
-
-            #now set all the found property mappings to the artefact candidate
-            if not 'artefact_candidate' in kwargs:
+            if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
 
-            for property_name in prop_values:
-                kwargs['artefact_candidate'][property_name] = prop_values[property_name]
+            for pos, key in property_map.items():
+                if -len(path_parts) <= pos < len(path_parts):
+                    kwargs['artefact_candidate'][key] = path_parts[pos]
+                elif add_none:
+                    kwargs['artefact_candidate'][key] = None
 
             return func(path_parts=path_parts, *args, **kwargs)
         return wrapper
@@ -109,10 +104,10 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
             "case":(r"Case_(\w+)", "unknown"),
             "timePoint":(r"TS(\d+)", 0)
         })
-        def fileFunction(path_parts, filename, full_path, *args, **kwargs):
+        def file_function(path_parts, filename, full_path, *args, **kwargs):
             #do stuff
 
-        fileFunction(filename="Case_Pat1_TS3.txt")
+        file_function(filename="Case_Pat1_TS3.txt")
         # -> {'case': 'Pat1', 'timePoint': '3'}
     """
     # Precompile regexes up-front for performance
@@ -129,44 +124,22 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(filename, *args, **kwargs):
-            prop_values = dict()
+            if 'artefact_candidate' not in kwargs:
+                kwargs['artefact_candidate'] = Artefact()
 
             for key, (regex, default) in compiled_rules.items():
                 match = regex.search(filename)
                 if match:
                     value = match.group(1)
-                    prop_values[key] = value
+                    kwargs['artefact_candidate'][key] = value
                 else:
                     value = default
                     if value or add_none:
-                        prop_values[key] = value
-
-            #now set all the found property mappings to the artefact candidate
-            if not 'artefact_candidate' in kwargs:
-                kwargs['artefact_candidate'] = Artefact()
-
-            for property_name in prop_values:
-                kwargs['artefact_candidate'][property_name] = prop_values[property_name]
+                        kwargs['artefact_candidate'][key] = value
 
             return func(filename=filename, *args, **kwargs)
         return wrapper
     return decorator
-
-
-def _split_all(path):
-    allparts = []
-    while 1:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            allparts.insert(0, parts[0])
-            break
-        elif parts[1] == path: # sentinel for relative paths
-            allparts.insert(0, parts[1])
-            break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
-    return allparts
 
 
 def _get_artefacts_from_folder(folder, functor, rootPath):

@@ -435,7 +435,7 @@ class Session(object):
                   elif action.isSkipped:
                       action_state_indicator = 'S'
                   else:
-                      action_state_indicator = 'W'
+                      action_state_indicator = 'E'
 
                   if not action.actionTag in self.__progress_task_lookup:
                       #action is not registered so for, do that on the fly
