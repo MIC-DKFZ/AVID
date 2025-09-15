@@ -167,7 +167,7 @@ def _get_artefacts_from_folder(folder, functor, rootPath):
     return artefacts
 
 
-def _scan_directories(dir_path: str | Path, break_checker_delegate: Optional[Callable[[Path], bool]] = None):
+def _scan_directories(dir_path: Union[str, Path], break_checker_delegate: Optional[Callable[[Path], bool]] = None):
     dir_path = Path(dir_path)
     yield dir_path  # include top-level directory in the scanning
 
@@ -189,8 +189,8 @@ class DirectoryCrawler(object):
     :param file_functor: A callable or factory for callables, which will get called for each subdirectory.
     If file_functor is a factory, a new callable will be generated and reused within each subdirectory.
     :param replace_existing_artefacts: If set to true, artefacts returned by file_functor
-    will always be added and my overwrite simelar artefact already found in the crawl. If set to false, newly found
-    simelar artefacts will be dropped.
+    will always be added and may overwrite similar artefacts already found in the crawl. If set to false, newly found
+    similar artefacts will be dropped.
     :param n_processes: The number of parallel processes to run. (default: 1)
     :param scan_directory_break_delegate: You can control the directory scanning of the crawler by providing a delegate.
     If provided for each element in a directory the delegate is called and the current Path instance of the element is
@@ -266,7 +266,7 @@ class DirectoryCrawler(object):
                 for fullpath, artefact in folder_artefacts.items():
                     if artefact is None:
                         self._last_irrelevant += 1
-                    elif artefacts.similar_artefact_exists(artefact) and not self._replace_existing_artefacts:
+                    elif not self._replace_existing_artefacts and artefacts.similar_artefact_exists(artefact):
                         self._last_dropped += 1
                     else:
                         replaced_artefact = artefacts.add_artefact(artefact)
@@ -292,7 +292,7 @@ def runCrawlerScriptMain(file_function, scan_directory_break_delegate: Optional[
     parser.add_argument('--relative_paths', action='store_true', help = 'Indicates if the artefact url paths should be '
                                                                         'stored relative to the output path.')
     parser.add_argument('--replace', action='store_true', help = 'Indicates if existing artefacts should be replaced if'
-                                                                 'a simelar artefact was found in the same crawl.')
+                                                                 'a similar artefact was found in the same crawl.')
     cliargs, unknown = parser.parse_known_args()
 
     crawler = DirectoryCrawler(root_path=cliargs.root, file_functor=file_function, n_processes=cliargs.n_processes,
