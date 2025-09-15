@@ -29,7 +29,7 @@ from functools import wraps
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
 from avid.common.artefact import ArtefactCollection, Artefact
 import avid.common.artefact.defaultProps as ArtefactProps
-from avid.common.workflow import Progress
+from avid.common.workflow import Progress, Console
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)
@@ -278,7 +278,7 @@ class DirectoryCrawler(object):
 
         return artefacts
 
-def runCrawlerScriptMain(file_function):
+def runCrawlerScriptMain(file_function, scan_directory_break_delegate: Optional[Callable[[Path], bool]] = None):
     """This is a helper function that can be used if you want to write a crawler script that crawles a root directory
      and stores the results as file. This function will parse for command line arguments "root" (the root directory)
      and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly."""
@@ -295,9 +295,18 @@ def runCrawlerScriptMain(file_function):
                                                                  'a simelar artefact was found in the same crawl.')
     cliargs, unknown = parser.parse_known_args()
 
-    crawler = DirectoryCrawler(cliargs.root, file_function, True, n_processes=cliargs.n_processes,
-                               replace_existing_artefacts=cliargs.replace)
+    crawler = DirectoryCrawler(root_path=cliargs.root, file_functor=file_function, n_processes=cliargs.n_processes,
+                               replace_existing_artefacts=cliargs.replace,
+                               scan_directory_break_delegate=scan_directory_break_delegate)
     artefacts = crawler.getArtefacts()
 
-    crawl_logger.info(f'Finished crawling. Number of generated artefacts: {len(artefacts)}')
+    console = Console()
+    console.print(f'\nFinished crawling.\n'
+                  f'Number of generated final artefacts: [green]{len(artefacts)}[/green]\n'
+                  f'Dropped similar artefacts: [yellow]{crawler.number_of_last_dropped}[/yellow]\n'
+                  f'Overwritten artefacts: [red]{crawler.number_of_last_overwites}[/red]\n'
+                  f'Irrelevant files: [gray]{crawler.number_of_last_overwites}[/gray]\n')
+
     saveArtefactList(filePath=cliargs.output, artefacts=artefacts, savePathsRelative=cliargs.relative_paths)
+
+    console.print(f'Saved artefacts at: [green]{cliargs.output}[/green]\n')
