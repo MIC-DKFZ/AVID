@@ -65,7 +65,7 @@ class PythonAction(SingleActionBase):
 
     def __init__(self, generateCallable, indicateCallable=None, additionalArgs=None, passOnlyURLs=True,
                  defaultoutputextension='nrrd', outputReferenceArtefactName=None,
-                 actionTag="Python", alwaysDo=True, session=None, additionalActionProps=None,
+                 actionTag="Python", alwaysDo=False, session=None, additionalActionProps=None,
                  propInheritanceDict=None, **inputArgs):
         SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
                                   propInheritanceDict=propInheritanceDict)

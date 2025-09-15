@@ -1,0 +1,1 @@
+Folder that contains dummy data for the examples

@@ -3,13 +3,13 @@ import os
 import avid.common.workflow as workflow
 from avid.linkers import TimePointLinker, CaseLinker, CaseInstanceLinker
 
-from avid.selectors import ActionTagSelector as ATS
+from avid.selectors import ActionTagSelector
 from avid.actions.pythonAction import PythonNaryBatchActionV2
 from avid.splitter import CaseSplitter
 
-mr_image_selector = ATS('MR')
-ct_image_selector = ATS('CT')
-mask_selector = ATS('Seg')
+mr_image_selector = ActionTagSelector('MR')
+ct_image_selector = ActionTagSelector('CT')
+mask_selector = ActionTagSelector('Seg')
 
 ###############################################################################
 # Define callable
@@ -34,7 +34,7 @@ def my_function(outputs, **kwargs):
 ###############################################################################
 # Example 1: only select a specific modality (here MR) and make a call per image
 ###############################################################################
-with workflow.initSession(bootstrapArtefacts=os.path.join(os.getcwd(),'output', 'example.avid'),
+with workflow.initSession(bootstrapArtefacts=os.path.join(os.getcwd(),'output', 'bootstrap.avid'),
                           sessionPath=os.path.join(os.getcwd(),'output', 'example'),
                           expandPaths=True) as session:
     action1 = PythonNaryBatchActionV2(primaryInputSelector=mr_image_selector,
@@ -44,10 +44,10 @@ with workflow.initSession(bootstrapArtefacts=os.path.join(os.getcwd(),'output', 
                             generateCallable=my_function,
                             passOnlyURLs=True)
 
-    action2 = PythonNaryBatchActionV2(primaryInputSelector=action1.actionTagSelector,
-                            primaryAlias='action1_images',
-                            additionalInputSelectors = {'masks': mask_selector},
-                            actionTag="action_2",
-                            generateCallable=my_function,
-                            passOnlyURLs=True)
+    action2 = PythonNaryBatchActionV2(primaryInputSelector=action1.action_tag_selector,
+                                      primaryAlias='action1_images',
+                                      additionalInputSelectors = {'masks': mask_selector},
+                                      actionTag="action_2",
+                                      generateCallable=my_function,
+                                      passOnlyURLs=True)
     session.run_batches()

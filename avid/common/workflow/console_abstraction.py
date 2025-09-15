@@ -45,6 +45,14 @@ RICH_TAG_PATTERN = re.compile(
     )
 
 
+def _test_for_limited_encoding():
+    return sys.stdout.encoding == 'cp1252'
+
+ONLY_LIMITED_ENCODING_IS_SUPPORTED = _test_for_limited_encoding()
+
+#only use rich if it is there and the environment supports rich encoding (e.g utf8)
+RICH_AVAILABLE = RICH_AVAILABLE and not ONLY_LIMITED_ENCODING_IS_SUPPORTED
+
 class ConsoleTable:
     """Abstraction for table creation that works with or without rich"""
 
@@ -132,13 +140,28 @@ class Console:
     Provides a subset of rich.Console functionality with graceful degradation.
     """
 
+    @staticmethod
+    def __force_jupyter():
+        """Helper function that checks if we are running in a IPython or jupyter environment."""
+        try:
+            from IPython import get_ipython
+            shell = get_ipython().__class__.__name__
+            if shell == "ZMQInteractiveShell":
+                return True  # Jupyter notebook or qtconsole
+            elif shell == "TerminalInteractiveShell":
+                return None  # IPython in terminal
+            else:
+                return None  # Other (maybe colab, etc.)
+        except Exception:
+            return None
+
     def __init__(self, file: Optional[TextIO] = None, width: Optional[int] = None):
         self.file = file or sys.stdout
         self.width = width
         self._rich_console = None
 
         if RICH_AVAILABLE:
-            self._rich_console = RichConsole(file=self.file, width=width)
+            self._rich_console = RichConsole(file=self.file, width=width, force_jupyter=Console.__force_jupyter())
 
     @property
     def is_terminal(self) -> bool:
@@ -332,7 +355,7 @@ class Progress:
         return task_id
 
     def update(self, task_id: int, advance: Optional[float] = None, total: Optional[float] = None,
-               indicator_cadence: Optional[float] = None, **kwargs):
+               completed: Optional[float] = None, indicator_cadence: Optional[float] = None, **kwargs):
         """Update progress for a task
         :param task_id: ID of the task that should be updated.
         :param advance: Increment of the progress. If None is passed the progress will not be changed but other
@@ -352,17 +375,25 @@ class Progress:
         if indicator_cadence:
             task["indicator_cadence"] = indicator_cadence
 
+        old_complete = task.get("completed", 0)
         if advance:
             task["completed"] += advance
 
+        if completed:
+            task["completed"] = completed
+        new_complete = task.get("completed", 0)
+
+        has_completed_now = old_complete < new_complete and task.get('total', None)\
+                            and new_complete >= task.get('total', 0)
+
         if self._rich_progress and "rich_id" in task and self.console.is_terminal:
-            self._rich_progress.update(task["rich_id"], advance=advance, total=total, **kwargs)
+            self._rich_progress.update(task["rich_id"], advance=advance, total=total, completed=completed, **kwargs)
         else:
             # Simple progress with visual bar and time estimates
             current_time = time.time()
 
-            # Only update display every 0.1 seconds to avoid flickering
-            if current_time - task.get("last_update_time", 0) < 0.1:
+            # Only update display every 0.1 seconds to avoid flickering, except it was just completed
+            if not has_completed_now and current_time - task.get("last_update_time", 0) < 0.1:
                 return
 
             task["last_update_time"] = current_time
@@ -376,12 +407,34 @@ class Progress:
                 if task['indicator_cadence']:
                     current_interval = round(task["completed"]/task['indicator_cadence'])
 
-                if current_interval is None or ('current_interval' not in task or task['current_interval'] != current_interval):
+                if has_completed_now or current_interval is None or ('current_interval' not in task or task['current_interval'] != current_interval):
                     task['current_interval'] = current_interval
                     progress_line = self._format_progress_line(task)
                     self.console.print(f"\n{progress_line}  ", end='')
                 if 'action_state_indicator' in kwargs:
                     self.console.print(f"{kwargs['action_state_indicator']}", end='')
+
+    def refresh(self):
+        """Force a refresh of the progress display (like flush)."""
+        if self._rich_progress:
+            self._rich_progress.refresh()
+        else:
+            self._display_all_tasks()
+
+    def stop(self):
+        """Stop the progress display and render a final state."""
+        if self._rich_progress:
+            self._rich_progress.stop()
+        else:
+            self._display_all_tasks()
+            task_completed = 0
+            for taskid, task in self._tasks.items():
+                total = task.get('total')
+                if not total:
+                    total = 0
+                if task.get('completed', 0) >= total:
+                    task_completed += 1
+            self.console.print(f"Progress stopped. {task_completed} tasks completed.")
 
     def _display_all_tasks(self):
         """Display all active tasks in a block, updating the entire display"""
@@ -429,7 +482,11 @@ class Progress:
             percentage = min((completed / total) * 100, 100)
             bar_width = 30
             filled_width = int((percentage / 100) * bar_width)
-            bar = "█" * filled_width + "░" * (bar_width - filled_width)
+
+            if ONLY_LIMITED_ENCODING_IS_SUPPORTED:
+                bar = "#" * filled_width + " " * (bar_width - filled_width)
+            else:
+                bar = "█" * filled_width + "░" * (bar_width - filled_width)
 
             # Calculate time estimates
             time_info = self._format_time_estimates(completed, total, elapsed)
@@ -438,7 +495,11 @@ class Progress:
             return f"{description} [{bar}] {percentage:5.1f}% ({int(completed)}/{int(total)}) - {time_info}"
         else:
             # Indeterminate progress - show spinner and count
-            spinner_chars = r"/-\|"
+            if ONLY_LIMITED_ENCODING_IS_SUPPORTED:
+                spinner_chars = r"/-\|"
+            else:
+                spinner_chars = r"◐◓◑◒"
+
             spinner_idx = int(current_time * 10) % len(spinner_chars)
             spinner = spinner_chars[spinner_idx]
 
@@ -484,7 +545,7 @@ class Progress:
         if self._rich_progress:
             self._rich_progress.__exit__(exc_type, exc_val, exc_tb)
         else:
-            self.console.print("All tasks completed.")
+            self.stop()
 
 
 def inspect(obj, console: Optional[Console] = None, private: bool = False, docs: bool = True):

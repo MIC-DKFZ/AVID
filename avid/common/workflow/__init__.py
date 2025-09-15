@@ -43,15 +43,17 @@ def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefact
                 interim_session_save = False, interim_save_interval=1, debug = False, structDefinition = None,
                 overwriteExistingSession = False, initLogging = True, updateBootstrap = False):
 
-  ''' Convenience method to init a session and load the artefact list of the
-   if it is already present.
-   @param sessionPath Path of the stored artefact list the session should use
-   and the rootpath for the new session. If no artefact list is present it will
-   just be the rootpath of the new session.
-   @param name of the session.
-   @param structDefinition Path to the structure definition file.
-   @param autoSave
-   '''
+  """ Convenience method to init a session and load the artefact list of the
+    if it is already present.
+    :param sessionPath: Path of the stored artefact list the session should use
+        and the rootpath for the new session. If no artefact list is present it will
+        just be the rootpath of the new session.
+    :param name: name of the session. If not set it will be '<session file name>_content'
+    :param structDefinition: Path to the structure definition file.
+    :param autoSave: Indicates if the session should be saved when a session scope is left and Session.__exit__()
+        is called
+    :param overwriteExistingSession: Indicates
+  """
   sessionExists = False
    
   if sessionPath is None:
@@ -419,32 +421,43 @@ class Session(object):
   def addProcessedActionInstance(self, action):
       """Adds an action to the session instance as processed action"""
       with self.lock:
-          self.executed_actions.append(action)
-          logging.debug("stored action token: %s", action)
+          from avid.actions import SingleActionBase, BatchActionBase
 
-          if not self._progress_indicator is None:
-              action_state_indicator = '.'
-              if action.isSuccess:
-                  if action.has_warnings:
-                      action_state_indicator = 'W'
-              elif action.isSkipped:
-                  action_state_indicator = 'S'
-              else:
-                  action_state_indicator = 'W'
+          if isinstance(action, SingleActionBase):
+              self.executed_actions.append(action)
+              logging.debug("stored action token: %s", action)
 
-              if not action.actionTag in self.__progress_task_lookup:
-                  #action is not registered so for, do that on the fly
-                  self.__progress_task_lookup[action.actionTag] = self._progress_indicator.add_task(
-                      f'{action.actionTag}', total=None)
+              if self._progress_indicator:
+                  action_state_indicator = '.'
+                  if action.isSuccess:
+                      if action.has_warnings:
+                          action_state_indicator = 'W'
+                  elif action.isSkipped:
+                      action_state_indicator = 'S'
+                  else:
+                      action_state_indicator = 'E'
 
-              self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
-                                              advance=1, action_state_indicator=action_state_indicator)
+                  if not action.actionTag in self.__progress_task_lookup:
+                      #action is not registered so for, do that on the fly
+                      self.__progress_task_lookup[action.actionTag] = self._progress_indicator.add_task(
+                          action.actionTag, total=None)
 
-          if not self._console is None and action.isFailure:
-            self._console.print(f'\n[red]Failed action diagnostics[/red]')
-            print_action_diagnostics(action, console=self._console, debug=self.debug)
-            self._console.print('\n')
+                  self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
+                                                  advance=1, action_state_indicator=action_state_indicator)
 
+              if not self._console is None and action.isFailure:
+                  self._console.print(f'\n[red]Failed action diagnostics[/red]')
+                  print_action_diagnostics(action, console=self._console, debug=self.debug)
+                  self._console.print('\n')
+          elif isinstance(action, BatchActionBase):
+              if self._progress_indicator:
+                  if not action.actionTag in self.__progress_task_lookup:
+                      # action is not registered so for, do that on the fly
+                      self.__progress_task_lookup[action.actionTag] = self._progress_indicator.add_task(
+                          action.actionTag, total=None)
+
+                  self._progress_indicator.update(task_id=self.__progress_task_lookup[action.actionTag],
+                                                  completed=action.number_of_actions)
 
   def registerBatchAction(self, batch_action):
       self._batch_actions.append(batch_action)

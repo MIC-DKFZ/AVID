@@ -63,7 +63,7 @@ class PlmDiceAction(GenericCLIAction):
 class PlmDiceBatchAction(BatchActionBase):
     """Batch action for PlmDiceAction."""
 
-    def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmCompare", session=None,
+    def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmDice", session=None,
                  additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
         if inputLinker is None:
             inputLinker = CaseLinker()
