@@ -225,7 +225,7 @@ class DirectoryCrawler(object):
 
     @property
     def number_of_last_irrelevant(self):
-        """ Returns the number of irrelevant file (not ended up in artefats) of the last crawl."""
+        """ Returns the number of irrelevant files (not ended up in artefats) of the last crawl."""
         return self._last_irrelevant
 
     @property
