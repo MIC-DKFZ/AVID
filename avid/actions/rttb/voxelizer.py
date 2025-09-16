@@ -98,11 +98,13 @@ class VoxelizerBatchAction(BatchActionBase):
                  referenceLinker=None,
                  actionTag="Voxelizer",
                  session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        """ Batch action for the voxelizer tool.
-    @param structNames: List of the structures names that should be voxelized.
-     If none is passed all structures defined in current session's structure
-     definitions.
-    """
+        """
+        Batch action for the voxelizer tool.
+
+        :param structNames: List of the structures names that should be voxelized.
+            If none is passed all structures defined in current session's structure
+            definitions.
+        """
         if referenceLinker is None:
             referenceLinker = CaseLinker()
 

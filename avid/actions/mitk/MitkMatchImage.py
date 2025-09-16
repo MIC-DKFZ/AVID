@@ -128,6 +128,7 @@ class MitkMatchImageAction(GenericCLIAction):
 class MitkMatchImageBatchAction(BatchActionBase):
     """
     Batch action for MitkMatchImage that performs image registration.
+
     :param targetSelector: Selector for the target images
     :param movingSelector: Selector for the moving images
     :param movingLinker: Linker to match moving images with their respective target image (default: link by Case)

@@ -49,34 +49,37 @@ def _getFractionWeightByArtefact(artefact, planned_fraction_property_name = arte
   return result
 
 class DoseAccAction(CLIActionBase):
-  '''Class that wraps the single action for the tool doseAcc.
-     The action implements the following strategy to deduce the weights for the dose accumulation:
-     1. If weight are set explicitly in __init__ they will always be used.
-     2. If plans are set in __init__, the action will try to deducing the number of planned fractions and compute the
-      weights accordingly.
-     3. Action will try to deducing the number of planned fractions (stored in an artefact property)
-     from the dose artefact.
-     4. Action will assume (a) in case of + operation that the weight equals 1/number of doses or
-      (b) in case of * operation that the weight equals 1.
-  '''
+  """
+  Class that wraps the single action for the tool doseAcc.
+
+  The action implements the following strategy to deduce the weights for the dose accumulation:
+  1. If weight are set explicitly in __init__ they will always be used.
+  2. If plans are set in __init__, the action will try to deduce the number of planned fractions and compute the
+  weights accordingly.
+  3. Action will try to deduce the number of planned fractions (stored in an artefact property)
+  from the dose artefact.
+  4. Action will assume (a) in case of + operation that the weight equals 1/number of doses or
+  (b) in case of * operation that the weight equals 1.
+  """
 
   def __init__(self, doses, registrations=None, plans=None, weight=None,
                planned_fraction_property= artefactProps.PLANNED_FRACTIONS, interpolator="linear", operator="+",
                outputExt="nrrd", actionTag="doseAcc", alwaysDo=False, session=None,
                additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-    ''':param doses: List of dose artefacts that should be accumulated.
-       :param registrations: List of registration artefacts that should be used to map the doses befor accumulation.
-       It is expected that this list is either None, a list equal in size to doses or a list that has one item less
-       then doses (because the first dose will never be mapped.
-       :param plans: list of plans that will be used to deduced to number of fractions and there for the accumulation
-       weigth for each dose.
-       :param weight: Possibility to set the weight that should be used for accumulating the doses.
-       :type weights: float, int
-       :param planned_fraction_property: Name of the property in the dose artefact or the plan artefact that encodes
-       the number of fractions.
-       :param interpolator: String that defines the interpolator that should be used. Is defined by doseAcc.
-       :param operator: String that defines the type of accumulation. Is defined by doseAcc.
-    '''
+    """
+    :param doses: List of dose artefacts that should be accumulated.
+    :param registrations: List of registration artefacts that should be used to map the doses befor accumulation.
+      It is expected that this list is either None, a list equal in size to doses or a list that has one item less
+      than doses (because the first dose will never be mapped.
+    :param plans: list of plans that will be used to deduced to number of fractions and therefore the accumulation
+      weigth for each dose.
+    :param weight: Possibility to set the weight that should be used for accumulating the doses.
+    :type weight: float, int
+    :param planned_fraction_property: Name of the property in the dose artefact or the plan artefact that encodes
+      the number of fractions.
+    :param interpolator: String that defines the interpolator that should be used. Is defined by doseAcc.
+    :param operator: String that defines the type of accumulation. Is defined by doseAcc.
+    """
     CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID = "doseAcc",
                            actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
     self._addInputArtefacts(doses=doses, registrations=registrations, plans= plans)

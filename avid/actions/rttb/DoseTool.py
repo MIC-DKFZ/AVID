@@ -150,8 +150,8 @@ class DoseStatBatchAction(BatchActionBase):
                  scheduler=SimpleScheduler(), **singleActionParameters):
         """
         :param structNames: List of the structures names for which a statistic should
-        be generated. If none is passed all structures defined in current session's structure
-     definitions.
+            be generated. If none is passed all structures defined in current session's structure
+            definitions.
         """
 
         if structLinker is None:

@@ -34,32 +34,35 @@ logger = logging.getLogger(__name__)
 
 
 class PythonAction(SingleActionBase):
-    """Action that offers a generic wrapper around any python callable. The basic idea is to have a simple possibility
-     to define action that execute a python script. The python script that should be executed must be passed as callable.
-     The action will call the callable with the following arguments:
-     1. all unknown keyword arguments that are passed to the action (inputArgs).
-     2. **additionalArgs
-     3. an argument called "outputs", that contain the result of self.indicateOutputs.
-     For the input arguments the user of the action is free to use any keyword that is not reserved by the action and is
-     not "outputs". Additionally the action checks name collisions of inputArgs and additionalArgs and will raise an
-     exception if needed.
-     :param generateCallable: A callable that will be called to generate the outputs. The action assumes that all outputs
-     are generated and stored at their designated location.
-     :param indicateCallable: A callable that, if defined, will be called (like generateCallable) to query the outputs.
-     The action assumes that the callable returns a list of output artefacts or None (if no indication can be made; like
-     self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
-     and uses the first input artefact as reference. The signature of indicateCallable is:
-     indicateCallable(actionInstance ( = Instance of the calling action), **allArgs
-      (= all arguments passed to the action)
-     :param outputReferenceArtefactName: Name of the inputArgs that will be used as
+    """
+    Action that offers a generic wrapper around any python callable. The basic idea is to have a simple possibility
+    to define action that execute a python script. The python script that should be executed must be passed as callable.
+    The action will call the callable with the following arguments:
+    1. all unknown keyword arguments that are passed to the action (inputArgs).
+    2. \*\*additionalArgs
+    3. an argument called "outputs", that contain the result of self.indicateOutputs.
+    For the input arguments the user of the action is free to use any keyword that is not reserved by the action and is
+    not "outputs". Additionally the action checks name collisions of inputArgs and additionalArgs and will raise an
+    exception if needed.
+
+    :param generateCallable: A callable that will be called to generate the outputs. The action assumes that all outputs
+        are generated and stored at their designated location.
+    :param indicateCallable: A callable that, if defined, will be called (like generateCallable) to query the outputs.
+        The action assumes that the callable returns a list of output artefacts or None (if no indication can be made; like
+        self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
+        and uses the first input artefact as reference. The signature of indicateCallable is:
+        indicateCallable(actionInstance ( = Instance of the calling action), \*\*allArgs
+        (= all arguments passed to the action)
+    :param outputReferenceArtefactName: Name of the inputArgs that will be used as
         template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
         order) will be used. If indicateCallable is set, this argument has only impact if the callable makes use of it.
-     :param additionalArgs: Dictionary containing all arguments that should be passed to generateCallable and are no
-      artefact input arguments.
-     :param passOnlyURLs: If set to true only URLs of the artefacts, instead of the artefacts themself, will be passed to
-      generateCallable.
-     :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
-     :param inputArgs: It is assumed that all unkown named arguments are inputs with artefact lists."""
+    :param additionalArgs: Dictionary containing all arguments that should be passed to generateCallable and are no
+        artefact input arguments.
+    :param passOnlyURLs: If set to true only URLs of the artefacts, instead of the artefacts themselves, will be passed to
+        generateCallable.
+    :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
+    :param inputArgs: It is assumed that all unkown named arguments are inputs with artefact lists.
+    """
 
     OUTPUTS_ARGUMENT_NAME = 'outputs'
 
@@ -232,20 +235,23 @@ class PythonBinaryBatchAction(BatchActionBase):
 
 
 class PythonNaryBatchAction(BatchActionBase):
-    '''Batch class that assumes an arbitrary number (>= 1) of input artefacts will be passed to the script.
-     The class assumes the following:
-     - inputsMaster is the selector that defines the master artefacts (other artefacts will be linked against them).
-     - all named unkown arguments that are passed with init and start with the prefix "inputs" are additional input selectors.
-     - all named unkown arguments that have the same name like and additional input and have the suffix "Linker" are
-      linker for the input. The linker will be used to link its input against the master input.
-     - if an input has no linker specified, CaseLinker+CaseInstanceLinker will be assumed.
-     - The additional inputs are not linked against each other. So all combinations of additional inputs for a master
-      input is processed.
-     The batch class assumes that the python script takes
-     - the master input as "inputsMaster"
-     - all other inputs with the name they where passed to the batch action.
-     REMARK: If you want a batch action that allows more control over the callable's argument namings and is
-     close to the interface of the BatchActionBase, please see PythonNaryBatchActionV2.'''
+    """
+    Batch class that assumes an arbitrary number (>= 1) of input artefacts will be passed to the script.
+
+    The class assumes the following:
+    - inputsMaster is the selector that defines the master artefacts (other artefacts will be linked against them).
+    - all named unkown arguments that are passed with init and start with the prefix "inputs" are additional input selectors.
+    - all named unkown arguments that have the same name like and additional input and have the suffix "Linker" are
+    linker for the input. The linker will be used to link its input against the master input.
+    - if an input has no linker specified, CaseLinker+CaseInstanceLinker will be assumed.
+    - The additional inputs are not linked against each other. So all combinations of additional inputs for a master
+    input is processed.
+    The batch class assumes that the python script takes
+    - the master input as "inputsMaster"
+    - all other inputs with the name they where passed to the batch action.
+    REMARK: If you want a batch action that allows more control over the callable's argument namings and is
+    close to the interface of the BatchActionBase, please see PythonNaryBatchActionV2.
+    """
 
     def __init__(self, inputsMaster, actionTag="NaryScript",
                  session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):

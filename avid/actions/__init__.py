@@ -189,13 +189,15 @@ class ActionBase(object):
         return self
 
     def do_setup(self):
-        """Function that has to be called to prepare an action for the processing. After the call of the method the
+        """
+        Function that has to be called to prepare an action for the processing. After the call of the method the
         action instance is able to process the data (if needed). The return value indicates of the instance can/needs to
         process (true) or not (false). It is advised to use do(), which will use do_setup() appropriately.
         After the call of this method, the instance will have one of the following states:
-         (1) pending: expected state. Indicating that action should/needs to process and no waiting for triggering do_process()
-         (2) skipped: indicated ouput data is already there and valid. No need for do_process, directly trigger do_finalize()
-         (3) failed: indicated that the setup failed (e.g. because inputs are invalid). No need for do_process, directly trigger do_finalize() """
+        (1) pending: expected state. Indicating that action should/needs to process and no waiting for triggering do_process()
+        (2) skipped: indicated ouput data is already there and valid. No need for do_process, directly trigger do_finalize()
+        (3) failed: indicated that the setup failed (e.g. because inputs are invalid). No need for do_process, directly trigger do_finalize()
+        """
         global logger
         logger.info("Starting action: " + self.instanceName + " (UID: " + self.actionInstanceUID + ") ...")
 

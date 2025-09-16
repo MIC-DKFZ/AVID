@@ -33,18 +33,20 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
 
     def __init__(self, mount_map=None, additional_bsub_arguments=None, polling_wait_time_pending=10,
                  polling_wait_time_running=1):
-        """:param mount_map: Dictionary that contains the mapping between relevant paths
-         outside of the container (those stored in the session) and the pathes that will
-         be known in the container. Needed to properly convert artefact urls.
-         Key of the map is the mount path inside of the container, the value is the respective
-         path outside.
-         :param additional_bsub_arguments: List of additional arguments that will be added to the bsub
-         call directly after the cli_path.
-         "bsub <clipath> [<additional_bsub_arguments>] [-o <log_file>] [-e <error_log_file>].
-         :param polling_wait_time_pending: Time (in sec) the connector will wait between pollings of the status
-         of a submitted job, if the job is pending.
-         :param polling_wait_time_running: Time (in sec) the connector will wait between pollings of the status
-         of a submitted job, if the job is running."""
+        """
+        :param mount_map: Dictionary that contains the mapping between relevant paths
+            outside of the container (those stored in the session) and the pathes that will
+            be known in the container. Needed to properly convert artefact urls.
+            Key of the map is the mount path inside of the container, the value is the respective
+            path outside.
+        :param additional_bsub_arguments: List of additional arguments that will be added to the bsub
+            call directly after the cli_path.
+            "bsub <clipath> [<additional_bsub_arguments>] [-o <log_file>] [-e <error_log_file>]".
+        :param polling_wait_time_pending: Time (in sec) the connector will wait between pollings of the status
+            of a submitted job, if the job is pending.
+        :param polling_wait_time_running: Time (in sec) the connector will wait between pollings of the status
+            of a submitted job, if the job is running.
+        """
         super().__init__(mount_map)
         self.additional_bsub_arguments = additional_bsub_arguments
         self.polling_wait_time_pending = polling_wait_time_pending

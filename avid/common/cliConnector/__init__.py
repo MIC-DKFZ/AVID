@@ -171,11 +171,13 @@ class URLMappingCLIConnectorBase(DefaultCLIConnector):
     """Base Implementation for CLIConnectors that allow the mapping of URLs (e.g. for container connectors)."""
 
     def __init__(self, mount_map = None):
-        """:param mount_map: Dictionary that contains the mapping between relevant paths
-         outside of the container (those stored in the session) and the pathes that will
-         be known in the container. Needed to properly convert artefact urls.
-         Key of the map is the mount path inside of the container, the value is the respective
-         path outside."""
+        """
+        :param mount_map: Dictionary that contains the mapping between relevant paths
+            outside of the container (those stored in the session) and the pathes that will
+            be known in the container. Needed to properly convert artefact urls.
+            Key of the map is the mount path inside of the container, the value is the respective
+            path outside.
+         """
         super().__init__()
         self.mount_map=mount_map
         if self.mount_map is None:

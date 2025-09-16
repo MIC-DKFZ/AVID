@@ -322,13 +322,15 @@ class Progress:
             self._rich_progress = RichProgress(console=self.console._rich_console, transient=transient)
 
     def add_task(self, description: str, total: Optional[int] = None, indicator_cadence: Optional[float] = None) -> int:
-        """Add a progress task
+        """
+        Add a progress task
         :return: ID of the task that should be updated.
         :param description: the task label.
-        :param total: the value that indicates 100% of progress. If None the end of the task is not known.
+        :param total: the value that indicates 100\% of progress. If None the end of the task is not known.
         :param indicator_cadence: Used for action state indication in none terminal modes. It is the amount of
-         advancement needed before a new state update will be printed in a new line. That is used to control
-         the amount of output in file like outputs (like stdout)."""
+        advancement needed before a new state update will be printed in a new line. That is used to control
+        the amount of output in file like outputs (like stdout).
+        """
         task_id = self._task_counter
         self._task_counter += 1
 
@@ -360,10 +362,11 @@ class Progress:
         :param task_id: ID of the task that should be updated.
         :param advance: Increment of the progress. If None is passed the progress will not be changed but other
         values will be updated.
-        :param total: the value that indicates 100% of progress. If None the end of the task is not known.
+        :param total: the value that indicates 100\% of progress. If None the end of the task is not known.
         :param indicator_cadence: Used for action state indication in none terminal modes. It is the amount of
-         advancement needed before a new state update will be printed in a new line. That is used to control
-         the amount of output in file like outputs (like stdout)."""
+        advancement needed before a new state update will be printed in a new line. That is used to control
+        the amount of output in file like outputs (like stdout).
+        """
         if task_id not in self._tasks:
             return
 
