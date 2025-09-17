@@ -58,9 +58,9 @@ class ArtefactRefineAction(PythonAction):
                  alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict=None, **inputArgs):
         """
         :param generateCallable: Custome callable that can be defined if a specific refinement is needed. If nothing is
-        set. The output is kept as indicated by the indicateCallable. The signature of generateCallable is:
-        generateCallable(primaryInputs ( = Input artefacts), outputs (=the output that should be produced), **allArgs
-        (= all other arguments passed to the action)
+            set. The output is kept as indicated by the indicateCallable. The signature of generateCallable is:
+            generateCallable(primaryInputs ( = Input artefacts), outputs (=the output that should be produced),
+            \*\*allArgs (= all other arguments passed to the action))
         """
         if generateCallable is None:
             generateCallable = ArtefactRefineAction._refine_artefact_default

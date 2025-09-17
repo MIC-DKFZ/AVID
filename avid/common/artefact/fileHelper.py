@@ -192,7 +192,7 @@ def update_artefactlist(destination_file, source_artefacts, update_existing=Fals
     :param rootPath: root path that should be used for relative path operations
     :param savePathsRelative: indicates if paths should be stored as relative paths
     :param wait_time: if the destination file is locked, the update function will wait and retry. This is the time in
-     seconds the function should wait and try to update until it returns with an error, if not successful.
+    seconds the function should wait and try to update until it returns with an error, if not successful.
     """
 
     # Simple strategy to ensure an OS independent lock while updating the file.

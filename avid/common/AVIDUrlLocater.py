@@ -124,18 +124,20 @@ def getToolConfigsPath(checkExistance=True, toolsPath=None):
 
   
 def getToolConfigPath(actionID, workflowRootPath=None, checkExistance=True, toolsPath=None):
-  ''' Helper functions that gets the path to the config file for the passed actionID
-      If workflowRootPath is set it will be also checked 
-     @param actionID of the action that requests the URL
-     @param workflowRootPath Path of the workflow. If none it will be ignored.
-     @param checkExistance Indicates if only existing paths should be returned. If True and config path
-     does not exist or can be determined, None will be returned.
-     The following rules will be used to determine the tool config path.
-     1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
-     2. check the path:<AVID toolspath>/tool-configs/<actionID>/avidtool.config. If it is valid, return it else 2.
-     3. check path:avidRoot/Utilities/<actionID>/avidtool.config. If it is valid, return it else 4.
-     4. return None      
-  '''
+  """
+  Helper functions that gets the path to the config file for the passed actionID
+  If workflowRootPath is set it will be also checked
+  :param actionID: actionID of the action that requests the URL
+  :param workflowRootPath: Path of the workflow. If none it will be ignored.
+  :param checkExistance: Indicates if only existing paths should be returned. If True and config path
+  does not exist or can be determined, None will be returned.
+
+  The following rules will be used to determine the tool config path.
+  1. check the path:workflowRootPath/tools/<actionID>/avidtool.config. If it is valid, return it else 2.
+  2. check the path:<AVID toolspath>/tool-configs/<actionID>/avidtool.config. If it is valid, return it else 2.
+  3. check path:avidRoot/Utilities/<actionID>/avidtool.config. If it is valid, return it else 4.
+  4. return None
+  """
 
   if workflowRootPath is not None:
     configPath = os.path.join(workflowRootPath, "tools", actionID, "avidtool.config")

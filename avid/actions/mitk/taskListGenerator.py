@@ -74,15 +74,15 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
         """
         :param inputSelector: Specified artefacts will all be included in the resulting tasklist
         :param generateCallable: Custom callable that defines how the resulting tasklist should be built. By default,
-        each tasklist entry contains the artefact name and url. The signature of generateCallable is:
-        generateCallable(inputs ( = Input artefacts), outputs (=the output that should be produced), **allArgs
-        (= all other arguments passed to the action)
+            each tasklist entry contains the artefact name and url. The signature of generateCallable is:
+            generateCallable(inputs ( = Input artefacts), outputs (=the output that should be produced), \*\*allArgs
+            (= all other arguments passed to the action)
         :param indicateCallable: Custom callable that defines which outputs should be produced (see generateCallable).
-        By default, a single json file in the top directory of the current session content will be created.
+            By default, a single json file in the top directory of the current session content will be created.
         :param generate_tasks_callable: Custom callable that creates a list of tasks to write into a tasklist. If a
-        custom generateCallable is defined, this method may not be used.
-        By default, each input artefact gets a task with it as Image. generate_tasks_callable() receives the same inputs
-        as generateCallable, but returns a list of dictionaries that define tasklist tasks.
+            custom generateCallable is defined, this method may not be used.
+            By default, each input artefact gets a task with it as Image. generate_tasks_callable() receives the same inputs
+            as generateCallable, but returns a list of dictionaries that define tasklist tasks.
         """
         if indicateCallable is None:
             indicateCallable = TaskListGeneratorAction._indicate_outputs

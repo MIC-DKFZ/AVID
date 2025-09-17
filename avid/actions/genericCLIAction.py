@@ -129,60 +129,60 @@ class GenericCLIAction(CLIActionBase):
         """
         :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added automatically) of the output.
-        If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
-        as the last parameters without a flag. If you don't want to use a flag, but control the position of the output
-        parameter. Define a output flag (or keep the default 'o') and use the argPositions to control the position
-        of all arguments.
+            If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
+            as the last parameters without a flag. If you don't want to use a flag, but control the position of the output
+            parameter. Define a output flag (or keep the default 'o') and use the argPositions to control the position
+            of all arguments.
         :param argPositions: list that contains the keys of all arguments (from artefact_args and additional_args) that are
-        not flag based but positional arguments. Those arguments will be added in the order of the list before the
-        positional arguments.
+            not flag based but positional arguments. Those arguments will be added in the order of the list before the
+            positional arguments.
         :param indicateCallable: A callable that, if defined, will be called to query the outputs. The action assumes
-        that the callable returns a list of output artefacts or None (if no indication can be made; like
-        self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
-        and uses the first input artefact as reference. The signature of indicateCallable is:
-        indicateCallable(actionInstance = Instance of the calling action, indicated_default_output = the artefact
-        produced by the default indication strategy, **allArgs = all arguments passed to the action).
+            that the callable returns a list of output artefacts or None (if no indication can be made; like
+            self.indicateOutputs). If this callable is not set, the default is one output that will be defined by the action
+            and uses the first input artefact as reference. The signature of indicateCallable is:
+            indicateCallable(actionInstance = Instance of the calling action, indicated_default_output = the artefact
+            produced by the default indication strategy, \*\*allArgs = all arguments passed to the action).
         :param generateNameCallable: A callable that, if defined, will be called to specify the name(s) of output.
-        If this callable is not set, the default name will be constructed as <actionID>_<actionTag>_ followed by all
-        inputs. The signature of generateNameCallable is:
-        generateNameCallable(actionInstance = Instance of the calling action, **allArgs = all arguments passed to the action).
-        It is expected to return a string for the output name.
+            If this callable is not set, the default name will be constructed as <actionID>_<actionTag>_ followed by all
+            inputs. The signature of generateNameCallable is:
+            generateNameCallable(actionInstance = Instance of the calling action, \*\*allArgs = all arguments passed to the action).
+            It is expected to return a string for the output name.
         :param postProcessCLIExecutionCallable: A callable that, if defined, will be called to execute post-processing
-        code after the CLI Execution. If this callable is not set, no post-processing will be done. The signature of
-        postProcessCLIExecutionCallable is:
-        postProcessCLIExecutionCallable(actionInstance = Instance of the calling action, **allArgs = all arguments
-        passed to the action).
+            code after the CLI Execution. If this callable is not set, no post-processing will be done. The signature of
+            postProcessCLIExecutionCallable is:
+            postProcessCLIExecutionCallable(actionInstance = Instance of the calling action, \*\*allArgs = all arguments
+            passed to the action).
         :param collectOutputsCallable: A callable that, if defined, will be called to collect/generate artefact
-        instances for all generated outputs after the CLI execution is post processed. For more details, See the
-        documentation of SingleActionBase._collectOutputs. If this callable is not set, nothing will be collected and
-        the indicated outputs are assumed to be still correct. The signature of the callable is:
-        collectOutputsCallable(actionInstance = instance of the calling action,
-         indicatedOutputs = outputs indicated so far, **allArgs = all arguments passed to the action )
+            instances for all generated outputs after the CLI execution is post processed. For more details, See the
+            documentation of SingleActionBase._collectOutputs. If this callable is not set, nothing will be collected and
+            the indicated outputs are assumed to be still correct. The signature of the callable is:
+            collectOutputsCallable(actionInstance = instance of the calling action,
+            indicatedOutputs = outputs indicated so far, \*\*allArgs = all arguments passed to the action )
         :param noOutputArgs: If set to true the output artefacts of the action will not be added as output args. In this
-        case outputFlags will be ignored.
+            case outputFlags will be ignored.
         :param outputReferenceArtefactName: Name of the inputArgs that will be used as
-        template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
-        order) will be used. If indicateCallable is set, this argument has only impact if the callable makes use of it.
+            template when generating the output artefacts. If not set (None), the first input selection (in alphabetic
+            order) will be used. If indicateCallable is set, this argument has only impact if the callable makes use of it.
         :param defaultoutputextension: Output extension that should be used if no indicateCallable is defined.
         :param additionalArgs: Dictionary with all additional arguments (except the artefact inputs and outputs) that
-        should be passed to the cli. The key is the argument/flag name (without "-" or "--"; the will be added
-        automatically). If the value is not None it will be also added after the argument.
+            should be passed to the cli. The key is the argument/flag name (without "-" or "--"; the will be added
+            automatically). If the value is not None it will be also added after the argument.
         :param additionalArgsAsURL: List of names of additionalArgs whose values should be treated like
-        URLs extracted from the input arguments. Depending on the OS or runtime environement that might lead to
-        alterations of the values. E.g. due to mapping of the URLs. If a name in the list does not exist in
-        additionalArgs, it is just ignored.
+            URLs extracted from the input arguments. Depending on the OS or runtime environement that might lead to
+            alterations of the values. E.g. due to mapping of the URLs. If a name in the list does not exist in
+            additionalArgs, it is just ignored.
         :param illegalArgs: List that can be used to add additional forbidden argument names, that may not be contained
-        in additionalArgs or inputArgs.
+            in additionalArgs or inputArgs.
         :param inputArgsURLExtractionDelegate: Delegate that can be used to change the way how urls are extracted from
-        artefacts that are provided for the argument or to offer a way to manipulate them before generating the cli
-        call string. The default implementation (extract_artefact_arg_urls_default) does just return the URL of the
-        artefact. The signature of the delegate is delegate(arg_name, arg_value). Arg_value is expected to be a list
-        of artefacts. The return is expected to be a list of URL strings (or None for artefacts that should not
-        return a URL).
+            artefacts that are provided for the argument or to offer a way to manipulate them before generating the cli
+            call string. The default implementation (extract_artefact_arg_urls_default) does just return the URL of the
+            artefact. The signature of the delegate is delegate(arg_name, arg_value). Arg_value is expected to be a list
+            of artefacts. The return is expected to be a list of URL strings (or None for artefacts that should not
+            return a URL).
         :param use_no_url_id: Bool. If set to true, the unique id at the end of generated filenames will be removed,
-        giving the user full control of the resulting filenames.
-        WARNING: When using this option, the user has to take care themselves to avoid collisions between generated
-        files.
+            giving the user full control of the resulting filenames.
+            WARNING: When using this option, the user has to take care themselves to avoid collisions between generated
+            files.
         :param inputArgs: It is assumed that all unknown named arguments are inputs with artefact lists.
         """
         CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,

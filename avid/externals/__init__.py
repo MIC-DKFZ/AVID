@@ -21,12 +21,14 @@ from avid.common.osChecker import checkAndCreateDir
 
 
 def configureExternalFile(inFilePath, outFilePath, paramDict, paramEscape='@'):
-    '''reads a given inFilePath configures/modifies it by the given parameter dictionary
+    """
+    Reads a given inFilePath configures/modifies it by the given parameter dictionary
     and stores the result at outFilePath.
     Configuration is done be searching for any key in the paramDict and replacing its
     occurence with the value associated with the key.
-    @param paramEscape specifies how the keys are escaped in the input file. Default would be
-     '@key1@'.'''
+    :param paramEscape: Specifies how the keys are escaped in the input file. Default would be
+    '@key1@'.
+    """
     with open(inFilePath, 'r') as ifile_handle:
         content = ifile_handle.read()
 
