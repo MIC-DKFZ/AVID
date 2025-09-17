@@ -94,6 +94,7 @@ def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False)
 def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add_none: bool = False) -> Callable :
     """
     Decorator to extract property values from the filename of a potential artefact.
+
     :param extraction_rules: dictionary of extraction rules for certain properties. Key of the dictionary
         indicates the property key for which a value should be captured. The value of the dictionary is a
         (regex_pattern, default_value) tuple. regex_pattern: regex with one capture group that will be used
@@ -101,7 +102,8 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
     :param add_none: Indicates if a property should be extracted if no match was found and the default value is None.
         If True the property with value None will be added. Otherwise the property will be skipped.
 
-    Example:
+    Example::
+
         @crawl_property_by_filename({
             "case":(r"Case_(\w+)", "unknown"),
             "timePoint":(r"TS(\d+)", 0)
@@ -185,21 +187,24 @@ class DirectoryCrawler(object):
     functor returns the artefact the crawler enlists it to the result in the
     artefact list.
     Crawling is distributed to n_threads parallel processes, which each go through a folder.
+
     :param root_path: Path to the root directory. All subdirectories will recursively be crawled through.
     :param file_functor: A callable or factory for callables, which will get called for each subdirectory.
-    If file_functor is a factory, a new callable will be generated and reused within each subdirectory.
+        If file_functor is a factory, a new callable will be generated and reused within each subdirectory.
     :param replace_existing_artefacts: If set to true, artefacts returned by file_functor
-    will always be added and may overwrite similar artefacts already found in the crawl. If set to false, newly found
-    similar artefacts will be dropped.
+        will always be added and may overwrite similar artefacts already found in the crawl. If set to false, newly found
+        similar artefacts will be dropped.
     :param n_processes: The number of parallel processes to run. (default: 1)
     :param scan_directory_break_delegate: You can control the directory scanning of the crawler by providing a delegate.
-    If provided for each element in a directory the delegate is called and the current Path instance of the element is
-    passed. If the delegate returns true, the crawler breaks for that directory; neither checking further files nor
-    subdirectories. If the delegate returns false, the crawler goes on as normal. E.g. If you assume that folders
-    containing DCM files have only one series (=Artefact) per folder and no sub dirs, you could use the following break
-    delegate to drastically increase crawling speed by avoiding unnecessary checks:
-    def break_delegate(path):
-        return sub_entry.is_file() and sub_entry.name.endswith('.dcm')
+        If provided for each element in a directory the delegate is called and the current Path instance of the element is
+        passed. If the delegate returns true, the crawler breaks for that directory; neither checking further files nor
+        subdirectories. If the delegate returns false, the crawler goes on as normal. E.g. If you assume that folders
+        containing DCM files have only one series (=Artefact) per folder and no sub dirs, you could use the following break
+        delegate to drastically increase crawling speed by avoiding unnecessary checks::
+
+            def break_delegate(path):
+                return sub_entry.is_file() and sub_entry.name.endswith('.dcm')
+
     """
     def __init__(self, root_path, file_functor, replace_existing_artefacts=False, n_processes=1,
                  scan_directory_break_delegate: Optional[Callable[[Path], bool]] = None):

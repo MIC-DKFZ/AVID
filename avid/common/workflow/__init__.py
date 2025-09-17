@@ -45,6 +45,7 @@ def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefact
 
   """ Convenience method to init a session and load the artefact list of the
     if it is already present.
+
     :param sessionPath: Path of the stored artefact list the session should use
         and the rootpath for the new session. If no artefact list is present it will
         just be the rootpath of the new session.

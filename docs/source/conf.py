@@ -26,6 +26,8 @@ exclude_patterns = [
     'actions/unrefactored/*',
 ]
 
+myst_heading_anchors = 3
+
 
 
 # -- Options for HTML output -------------------------------------------------
