@@ -25,7 +25,7 @@ from avid.selectors.keyValueSelector import ActionTagSelector
 
 from avid.common.AVIDUrlLocater import getExecutableURL
 
-@unittest.skipIf(getExecutableURL(None, 'MitkStitchImagesMiniApp') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
+@unittest.skipIf(getExecutableURL(None, 'MitkStitchImages') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
 class TestMitkStitchImagesMiniApp(unittest.TestCase):
 
     def setUp(self):

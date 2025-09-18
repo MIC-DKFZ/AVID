@@ -24,7 +24,7 @@ import subprocess
 import time
 
 from avid.common import osChecker, AVIDUrlLocater
-import avid.common.settings as AVIDSettings
+import avid.common.config_mangager as AVIDConfigManager
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 
@@ -107,8 +107,9 @@ class DefaultCLIConnector(object):
             # "os.rename" approach was the simpliest way to check os independent
             # if the process can access the bat file or if there is still a racing
             # condition.
-            pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE)
-            max_pause_count = math.ceil(AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
+            pause_duration = AVIDConfigManager.get_setting(AVIDConfigManager.SETTING_NAMES.ACTION_SUBPROCESS_PAUSE)
+            max_pause_count = math.ceil(AVIDConfigManager.get_setting(AVIDConfigManager.SETTING_NAMES.ACTION_TIMEOUT)
+                                        / pause_duration)
             pause_count = 0
             time.sleep(0.1)
             while True:
