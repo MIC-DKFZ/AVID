@@ -40,12 +40,13 @@ except ImportError:
     RICH_AVAILABLE = False
 
 RICH_TAG_PATTERN = re.compile(
-        r'\[/?(?:'
-        r'[a-zA-Z_][\w-]*'  # tag name like bold, red, underline
-        r'(?:=[^\]]+)?'  # optional =something
-        r'(?:\s+[a-zA-Z_][\w-]*(?:=[^\]]+)?)*)'  # optional additional attributes
-        r'\]'
-    )
+    r'\[/?(?:'
+    r'[a-zA-Z_][\w-]*'  # tag name like bold, red, underline
+    r'(?:=[^\]]+)?'  # optional =something
+    r'(?:\s+[a-zA-Z_][\w-]*(?:=[^\]]+)?)*'  # optional additional attributes
+    r')?'  # make the entire tag name group optional
+    r'\]'
+)
 
 
 def _test_for_limited_encoding():
@@ -64,7 +65,7 @@ class ConsoleTable:
         self.columns = []
         self.rows = []
 
-    def add_column(self, header: str, justify: str = "left"):
+    def add_column(self, header: str, justify: str = "left", **kwargs):
         self.columns.append({"header": header, "justify": justify})
 
     def add_row(self, *values):
@@ -335,7 +336,7 @@ class Console:
             for row in table.rows:
                 for i, cell in enumerate(row):
                     if i < len(widths):
-                        widths[i] = max(widths[i], len(str(cell)))
+                        widths[i] = max(widths[i], len(self._strip_markup(str(cell))))
 
             # Print header
             header_row = " | ".join(h.ljust(w) for h, w in zip(headers, widths))
@@ -344,7 +345,7 @@ class Console:
 
             # Print rows
             for row in table.rows:
-                row_str = " | ".join(str(cell).ljust(widths[i]) if i < len(widths) else str(cell)
+                row_str = " | ".join(self._strip_markup(str(cell)).ljust(widths[i]) if i < len(widths) else self._strip_markup(str(cell))
                                      for i, cell in enumerate(row))
                 result.append(row_str)
 
