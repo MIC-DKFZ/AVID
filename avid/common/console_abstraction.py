@@ -21,6 +21,7 @@ import traceback
 import re
 from typing import Any, Optional, TextIO, Union
 import time
+import pprint
 
 # Try to import rich components, set flags for availability
 try:
@@ -32,6 +33,8 @@ try:
     from rich.padding import Padding as RichPadding
     from rich.progress import Progress as RichProgress
     from rich.logging import RichHandler
+    from rich.pretty import Pretty as RichPretty
+    from rich.prompt import Prompt as RichPrompt, Confirm as RichConfirm
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -120,18 +123,100 @@ class ConsoleTraceback:
         return cls(exc_type, exc_value, exc_traceback)
 
 
+class ConsolePretty:
+    """Abstraction for pretty printing that works with or without rich"""
+
+    def __init__(self, obj, indent_size: int = 4, max_width: Optional[int] = None):
+        self.obj = obj
+        self.indent_size = indent_size
+        self.max_width = max_width
+
+    def __str__(self):
+        return pprint.pformat(self.obj, indent=self.indent_size, width=self.max_width or 80)
+
+    def __repr__(self):
+        return f"ConsolePretty(obj={repr(self.obj)})"
+
+
+class ConsolePrompt:
+    """Abstraction for user prompts that works with or without rich"""
+
+    @staticmethod
+    def ask(question: str, default: Optional[str] = None, password: bool = False,
+            choices: Optional[list] = None, console: Optional['Console'] = None) -> str:
+        """Ask for user input with validation"""
+        prompt_text = question
+        if default is not None:
+            prompt_text += f" [{default}]"
+        if choices:
+            prompt_text += f" ({'/'.join(choices)})"
+        prompt_text += ": "
+
+        while True:
+            if password:
+                import getpass
+                try:
+                    response = getpass.getpass(prompt_text)
+                except KeyboardInterrupt:
+                    raise
+                except Exception:
+                    # Fallback for environments where getpass doesn't work
+                    response = input(prompt_text)
+            else:
+                response = input(prompt_text)
+
+            # Handle empty response
+            if not response.strip() and default is not None:
+                response = default
+
+            # Validate choices if provided
+            if choices and response not in choices:
+                print(f"Please choose from: {', '.join(choices)}")
+                continue
+
+            return response
+
+
+class ConsoleConfirm:
+    """Abstraction for yes/no confirmation that works with or without rich"""
+
+    @staticmethod
+    def ask(question: str, default: bool = True, console: Optional['Console'] = None) -> bool:
+        """Ask for yes/no confirmation"""
+        suffix = " [Y/n]" if default else " [y/N]"
+        prompt_text = question + suffix + ": "
+
+        while True:
+            response = input(prompt_text).strip().lower()
+
+            if not response:
+                return default
+            elif response in ('y', 'yes'):
+                return True
+            elif response in ('n', 'no'):
+                return False
+            else:
+                print("Please answer 'y' or 'n'")
+
+
 if RICH_AVAILABLE:
     TableType = RichTable
     PanelType = RichPanel
     ColumnsType = RichColumns
     PaddingType = RichPadding
     TracebackType = RichTraceback
+    PrettyType = RichPretty
+    PromptType = RichPrompt
+    ConfirmType = RichConfirm
 else:
     TableType = ConsoleTable
     PanelType = ConsolePanel
     ColumnsType = ConsoleColumns
     PaddingType = ConsolePadding
     TracebackType = ConsoleTraceback
+    PrettyType = ConsolePretty
+    PromptType = ConsolePrompt
+    ConfirmType = ConsoleConfirm
 
 
 class Console:
@@ -201,7 +286,7 @@ class Console:
 
     def _process_object_recursive(self, obj) -> str:
         """Recursively process objects, handling nested rich components"""
-        if isinstance(obj, (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback)):
+        if isinstance(obj, (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback, ConsolePretty)):
             return self._render_simple(obj)
         elif isinstance(obj, str):
             return self._strip_markup(obj)
@@ -231,6 +316,8 @@ class Console:
             return self._render_padding_simple(obj)
         elif isinstance(obj, ConsoleTraceback):
             return self._render_traceback_simple(obj)
+        elif isinstance(obj, ConsolePretty):
+            return self._render_pretty_simple(obj)
         else:
             return self._process_object_recursive(obj)
 
@@ -305,6 +392,10 @@ class Console:
     def _render_traceback_simple(self, tb: ConsoleTraceback) -> str:
         """Render traceback in simple text format"""
         return ''.join(traceback.format_exception(tb.exc_type, tb.exc_value, tb.exc_traceback))
+
+    def _render_pretty_simple(self, pretty: ConsolePretty) -> str:
+        """Render pretty object in simple text format"""
+        return str(pretty)
 
 
 class Progress:
@@ -489,12 +580,12 @@ class Progress:
             if ONLY_LIMITED_ENCODING_IS_SUPPORTED:
                 bar = "#" * filled_width + " " * (bar_width - filled_width)
             else:
-                bar = "█" * filled_width + "░" * (bar_width - filled_width)
+                bar = "█" * filled_width + "▒" * (bar_width - filled_width)
 
             # Calculate time estimates
             time_info = self._format_time_estimates(completed, total, elapsed)
 
-            # Format: Description [████████░░░░] 45.2% (123/456) - 2m 15s elapsed, ~3m 45s remaining
+            # Format: Description [██████████▒▒▒▒▒▒▒▒▒▒] 45.2% (123/456) - 2m 15s elapsed, ~3m 45s remaining
             return f"{description} [{bar}] {percentage:5.1f}% ({int(completed)}/{int(total)}) - {time_info}"
         else:
             # Indeterminate progress - show spinner and count
@@ -622,14 +713,37 @@ def create_traceback_from_exception(exc_type, exc_value, exc_traceback) -> Trace
     return ConsoleTraceback.from_exception(exc_type, exc_value, exc_traceback)
 
 
+def create_pretty(obj, indent_size: int = 4, max_width: Optional[int] = None) -> PrettyType:
+    """Create a pretty object using rich if available, fallback otherwise"""
+    if RICH_AVAILABLE:
+        return RichPretty(obj, indent_size=indent_size, max_width=max_width)
+    return ConsolePretty(obj, indent_size=indent_size, max_width=max_width)
+
+
+def prompt_ask(question: str, default: Optional[str] = None, password: bool = False,
+               choices: Optional[list] = None, console: Optional[Console] = None) -> str:
+    """Ask for user input using rich if available, fallback otherwise"""
+    if RICH_AVAILABLE:
+        return RichPrompt.ask(question, default=default, password=password, choices=choices,
+                             console=console._rich_console if console else None)
+    return ConsolePrompt.ask(question, default=default, password=password, choices=choices, console=console)
+
+
+def confirm_ask(question: str, default: bool = True, console: Optional[Console] = None) -> bool:
+    """Ask for yes/no confirmation using rich if available, fallback otherwise"""
+    if RICH_AVAILABLE:
+        return RichConfirm.ask(question, default=default, console=console._rich_console if console else None)
+    return ConsoleConfirm.ask(question, default=default, console=console)
+
+
 def is_rich_object(obj) -> bool:
     """Check if an object is a rich-compatible object"""
     if RICH_AVAILABLE:
         # Check for rich objects
-        rich_types = (RichTable, RichPanel, RichColumns, RichPadding, RichTraceback)
+        rich_types = (RichTable, RichPanel, RichColumns, RichPadding, RichTraceback, RichPretty)
         if isinstance(obj, rich_types):
             return True
 
     # Check for our abstraction objects
-    abstraction_types = (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback)
+    abstraction_types = (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback, ConsolePretty)
     return isinstance(obj, abstraction_types)

@@ -20,7 +20,6 @@ import argparse
 import logging
 import os
 import shutil
-import sys
 import threading
 from builtins import object
 from builtins import str
@@ -32,7 +31,7 @@ from avid.common.artefact import ArtefactCollection, update_artefacts
 from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
 
 from .report import print_action_diagnostics, create_actions_report
-from .console_abstraction import Console, Progress, get_logging_handler
+from avid.common.console_abstraction import Console, Progress, get_logging_handler
 
 
 '''set when at least one session was initialized to ensure this stream is only
@@ -51,7 +50,7 @@ def initSession(sessionPath, name = None, expandPaths = False, bootstrapArtefact
         just be the rootpath of the new session.
     :param name: name of the session. If not set it will be '<session file name>_content'
     :param structDefinition: Path to the structure definition file.
-    :param autoSave: Indicates if the session should be saved when a session scope is left and Session.__exit__()
+    :param autoSave: Indicates if the session should be saved when a session requested_scope is left and Session.__exit__()
         is called
     :param overwriteExistingSession: Indicates
   """

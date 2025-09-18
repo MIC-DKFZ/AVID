@@ -23,7 +23,7 @@ from pathlib import Path
 
 
 # Import from our console abstraction instead of rich directly
-from .console_abstraction import (
+from avid.common.console_abstraction import (
     Console, create_table, create_panel, create_columns,
     create_padding, create_traceback_from_exception, inspect
 )
