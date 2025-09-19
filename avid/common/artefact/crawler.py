@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from builtins import object
 import argparse
 import os
@@ -22,8 +23,7 @@ import logging
 import sys
 import re
 import concurrent.futures
-from pathlib import Path
-from typing import Callable, Optional, Pattern, Any, Union
+from typing import Callable, Optional, Pattern, Any, Union, Dict, List, Tuple, Generator
 from functools import wraps
 
 from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
@@ -39,14 +39,21 @@ crawl_logger.addHandler(log_stdout)
 crawl_logger.setLevel(logging.INFO)
 
 
-def crawl_filter_by_filename(filename_exclude : Optional[Union[str, list[str]]] = None,
-                 ext_include : Optional[tuple[str]] = None,
-                 ext_exclude : Optional[tuple[str]] = None) -> Callable :
+def crawl_filter_by_filename(filename_exclude: Optional[Union[str, List[str]]] = None,
+                            ext_include: Optional[Tuple[str, ...]] = None,
+                            ext_exclude: Optional[Tuple[str, ...]] = None) -> Callable:
+    """Decorator to filter files based on filename patterns and extensions.
 
+    :param filename_exclude: Single filename or list of filenames to exclude
+    :param ext_include: Tuple of extensions to include (files must end with one of these)
+    :param ext_exclude: Tuple of extensions to exclude
+    :return: Decorated function that applies the filtering logic
+    """
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Optional[Artefact]:
             filename = kwargs['filename']
+
             if filename_exclude:
                 if isinstance(filename_exclude, str):
                     invalid_names = [filename_exclude]
@@ -65,18 +72,25 @@ def crawl_filter_by_filename(filename_exclude : Optional[Union[str, list[str]]] 
                 if filename.endswith(ext_exclude):
                     return None
 
-            #it is a potential artefact candidate, so call the function
-            if not 'artefact_candidate' in kwargs:
+            # It is a potential artefact candidate, so call the function
+            if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
 
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
-def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False) -> Callable :
+
+def crawl_property_by_path(property_map: Dict[int, str], add_none: bool = False) -> Callable :
+    """Decorator to extract properties from path parts.
+
+    :param property_map: Dictionary mapping path position (int) to property key (str)
+    :param add_none: Whether to add properties with None values when path position doesn't exist
+    :return: Decorated function that applies path-part-based property extraction
+    """
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Optional[Artefact]:
             path_parts = kwargs['path_parts']
             if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
@@ -91,16 +105,17 @@ def crawl_property_by_path(property_map : dict[int, str], add_none:bool = False)
         return wrapper
     return decorator
 
-def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add_none: bool = False) -> Callable :
-    """
-    Decorator to extract property values from the filename of a potential artefact.
 
-    :param extraction_rules: dictionary of extraction rules for certain properties. Key of the dictionary
-        indicates the property key for which a value should be captured. The value of the dictionary is a
-        (regex_pattern, default_value) tuple. regex_pattern: regex with one capture group that will be used
-        to get the value. default: fallback value if no match is found.
-    :param add_none: Indicates if a property should be extracted if no match was found and the default value is None.
-        If True the property with value None will be added. Otherwise the property will be skipped.
+def crawl_property_by_filename(extraction_rules: Dict[str, Tuple[str, Any]],
+                              add_none: bool = False) -> Callable:
+    """Decorator to extract property values from the filename of a potential artefact.
+
+    :param extraction_rules: Dictionary of extraction rules for certain properties. Key indicates
+        the property key for which a value should be captured. Value is a
+        (regex_pattern, default_value) tuple. regex_pattern: regex with one capture group
+        that will be used to get the value. default: fallback value if no match is found.
+    :param add_none: Whether to add a property with None value if no match found and default is None.
+    :return: Decorated function that applies filename-based property extraction
 
     Example::
 
@@ -109,25 +124,25 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
             "timePoint":(r"TS(\d+)", 0)
         })
         def file_function(path_parts, filename, full_path, *args, **kwargs):
-            #do stuff
+            # do stuff
 
         file_function(filename="Case_Pat1_TS3.txt")
         # -> {'case': 'Pat1', 'timePoint': '3'}
     """
     # Precompile regexes up-front for performance
     try:
-        compiled_rules: dict[str, tuple[Pattern[str], Any]] = {
+        compiled_rules: Dict[str, Tuple[Pattern[str], Any]] = {
             key: (re.compile(regex), default)
             for key, (regex, default) in extraction_rules.items()
         }
     except re.error as err:
-        crawl_logger.error(f"Error when precompiling the regex to capture property values from filename. Check regex"
-                           f" patterns. Error details: {err}")
+        crawl_logger.error(f"Error when precompiling the regex to capture property values from filename. "
+                          f"Check regex patterns. Error details: {err}")
         raise
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Optional[Artefact]:
             filename = kwargs['filename']
             if 'artefact_candidate' not in kwargs:
                 kwargs['artefact_candidate'] = Artefact()
@@ -146,87 +161,145 @@ def crawl_property_by_filename(extraction_rules: dict[str, tuple[str, Any]], add
         return wrapper
     return decorator
 
+def _splitall(path: str) -> List[str]:
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
 
-def _get_artefacts_from_folder(folder, functor, rootPath):
+
+
+def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: str) -> Dict[str, Optional[Artefact]]:
+    """Helper function that crawls all files in the given folder by calling a functor on each one.
+
+    :param folder_path: Path to the folder to scan
+    :type folder_path: str
+    :param functor: Function to call for each file found. Should accept path_parts, filename, and full_path
+    :type functor: Callable
+    :param root_path: Root path of the crawling operation for calculating relative paths
+    :type root_path: str
+    :return: Dictionary mapping full file paths to artefacts (or None if file was filtered out)
+    :rtype: Dict[str, Optional[Artefact]]
     """
-    Helper function that crawls all the given files, which lie within folder, by calling a functor on each one.
-    The functor gets an additional argument 'known_ids', a set by which duplicates (e.g. DICOM files belonging to the
-    same series) can be filtered out. This logic has to be done in the functor.
-    """
-    folder = Path(folder)
-    files = [Path(entry.path) for entry in os.scandir(folder) if entry.is_file()]
-    relativePath = folder.relative_to(rootPath)
-    pathParts = relativePath.parts
-    artefacts = {}
-    for aFile in files:
-        full_path = str(aFile.resolve())
-        artefact = functor(path_parts=pathParts, filename=aFile.name, full_path=full_path)
-        if artefact and not artefact[ArtefactProps.INVALID]:
-            # if invalidity is not set already assume it is false in context of crawling,
-            # therefore the file does exist otherwise the artefact wouldn't have been created
-            artefact[ArtefactProps.INVALID] = False
-        artefacts[full_path] = artefact
+    relative_path = os.path.relpath(folder_path, root_path)
+    path_parts = _splitall(relative_path) if relative_path != '.' else []
+    artefacts: Dict[str, Optional[Artefact]] = {}
+
+    try:
+        with os.scandir(folder_path) as entries:
+            for entry in entries:
+                if entry.is_file(follow_symlinks=False):
+                    full_path = entry.path
+
+                    artefact = functor(
+                        path_parts=path_parts,
+                        filename=entry.name,
+                        full_path=full_path
+                    )
+
+                    if artefact and not artefact[ArtefactProps.INVALID]:
+                        # If invalidity is not set already assume it is false in context of crawling,
+                        # since the file exists (otherwise we wouldn't have found it)
+                        artefact[ArtefactProps.INVALID] = False
+
+                    artefacts[full_path] = artefact
+    except OSError as e:
+        crawl_logger.warning(f"Error accessing folder {folder_path}: {e}")
+
     return artefacts
 
 
-def _scan_directories(dir_path: Union[str, Path], break_checker_delegate: Optional[Callable[[Path], bool]] = None):
-    dir_path = Path(dir_path)
-    yield dir_path  # include top-level directory in the scanning
+def _scan_directories(dir_path: str,
+                     break_checker_delegate: Optional[Callable[[os.DirEntry], bool]] = None) -> Generator[str, None, None]:
+    """Generator that recursively scans directories using DirEntry for optimal performance.
 
-    for sub_entry in dir_path.iterdir():
-        if break_checker_delegate and break_checker_delegate(sub_entry):
-            break
-        if sub_entry.is_dir():
-            yield from _scan_directories(dir_path=sub_entry, break_checker_delegate=break_checker_delegate)
+    This function yields directory paths in a depth-first manner, using os.scandir
+    for maximum performance when traversing large directory trees.
+
+    :param dir_path: Path to start scanning from
+    :param break_checker_delegate: Optional function to control directory scanning.
+        Called for each directory entry. If it returns True, scanning stops for that directory.
+    :yields: Directory paths as strings
+    """
+    # Yield the current directory first
+    yield dir_path
+
+    try:
+        # Use os.scandir for performance - much faster than os.listdir + stat calls
+        with os.scandir(dir_path) as entries:
+            for entry in entries:
+                # Check break condition if delegate provided
+                if break_checker_delegate and break_checker_delegate(entry):
+                    break
+
+                # Recursively scan subdirectories using cached is_dir() call
+                if entry.is_dir(follow_symlinks=False):
+                    yield from _scan_directories(entry.path, break_checker_delegate)
+    except (OSError, PermissionError) as e:
+        # Log permission or access errors but continue with other directories
+        crawl_logger.warning(f"Cannot access directory {dir_path}: {e}")
+
 
 class DirectoryCrawler(object):
+    """ Helper class that crawls a directory tree starting from the given rootPath.
+
+    The crawler assumes that every file found is a potential artefact and calls
+    the provided file functor to interpret each file. If the functor returns an
+    artefact, it is added to the result collection. Crawling is distributed to
+    multiple parallel processes for improved performance on large directory trees.
+
+    :param root_path: Path to the root directory. All subdirectories will be recursively crawled.
+    :param file_functor: A callable or factory for callables which processes each file.
+        If file_functor is a factory, a new callable will be generated for each subdirectory.
+    :param replace_existing_artefacts: If True, newly found artefacts will overwrite similar
+        existing ones. If False, duplicates will be dropped.
+    :param n_processes: Number of parallel processes to use for crawling
+    :param scan_directory_break_delegate: Optional delegate to control directory scanning.
+        Called for each directory entry - if it returns True, scanning stops for that directory.
+    :type scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]]
+
+    Example break delegate for DICOM optimization::
+
+        def dicom_break_delegate(path: os.DirEntry) -> bool:
+            # Stop scanning subdirs if we found a .dcm file (assumes one series per folder)
+            return os.path.isfile(path) and path.endswith('.dcm')
     """
-    Helper class that crawls a directory tree starting from the given rootPath.
-    The crawler assumes that every file that he finds is a potential artefact.
-    The crawler will call the file functor to interpret the file. If the file
-    functor returns the artefact the crawler enlists it to the result in the
-    artefact list.
-    Crawling is distributed to n_threads parallel processes, which each go through a folder.
+    def __init__(self,
+                 root_path: Union[str, os.PathLike],
+                 file_functor: Union[Callable, Callable[[], Callable]],
+                 replace_existing_artefacts: bool = False,
+                 n_processes: int = 1,
+                 scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None):
 
-    :param root_path: Path to the root directory. All subdirectories will recursively be crawled through.
-    :param file_functor: A callable or factory for callables, which will get called for each subdirectory.
-        If file_functor is a factory, a new callable will be generated and reused within each subdirectory.
-    :param replace_existing_artefacts: If set to true, artefacts returned by file_functor
-        will always be added and may overwrite similar artefacts already found in the crawl. If set to false, newly found
-        similar artefacts will be dropped.
-    :param n_processes: The number of parallel processes to run. (default: 1)
-    :param scan_directory_break_delegate: You can control the directory scanning of the crawler by providing a delegate.
-        If provided for each element in a directory the delegate is called and the current Path instance of the element is
-        passed. If the delegate returns true, the crawler breaks for that directory; neither checking further files nor
-        subdirectories. If the delegate returns false, the crawler goes on as normal. E.g. If you assume that folders
-        containing DCM files have only one series (=Artefact) per folder and no sub dirs, you could use the following break
-        delegate to drastically increase crawling speed by avoiding unnecessary checks::
-
-            def break_delegate(path):
-                return sub_entry.is_file() and sub_entry.name.endswith('.dcm')
-
-    """
-    def __init__(self, root_path, file_functor, replace_existing_artefacts=False, n_processes=1,
-                 scan_directory_break_delegate: Optional[Callable[[Path], bool]] = None):
-        self._rootPath = root_path
+        self._rootPath: str = os.fspath(root_path)
         self._fileFunctor = file_functor
         self._replace_existing_artefacts = replace_existing_artefacts
         self._n_processes = n_processes
+        self._scan_directory_break_delegate = scan_directory_break_delegate
+
         self._last_irrelevant = 0
         self._last_dropped = 0
         self._last_overwrites = 0
         self._last_added = 0
-        self._scan_directory_break_delegate = scan_directory_break_delegate
 
+        # Determine if functor is a factory (callable that returns callable)
         self._functor_is_factory = False
         try:
             functor_test = self._fileFunctor()
             self._functor_is_factory = callable(functor_test)
         except Exception as err:
             crawl_logger.debug(
-                f"Error when probing file_functor for being a functor. Assume it is a normal function that should be"
-                f"called. Error details: {err}")
-            pass
+                f"Error when probing file_functor for being a factory. "
+                f"Assuming it is a normal function. Error details: {err}")
 
     @property
     def number_of_last_irrelevant(self):
@@ -250,9 +323,21 @@ class DirectoryCrawler(object):
         """ Returns the number of artefacts that were overwritten by simelar artefact in the cause of crawling."""
         return self._last_overwrites
 
-    def getArtefacts(self):
+    def getArtefacts(self) -> ArtefactCollection:
+        """Execute the crawling operation and return collected artefacts.
+
+        This method orchestrates the entire crawling process:
+        1. Scans directories to find all folders to process
+        2. Distributes folder processing across multiple processes
+        3. Collects and merges results while handling duplicates
+        4. Updates internal statistics
+
+        :return: Collection of all discovered artefacts
+        :raises OSError: If root directory cannot be accessed
+        """
         artefacts = ArtefactCollection()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor, Progress(transient=True) as progress:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor,\
+                Progress(transient=True, refresh_per_second=0.5) as progress:
             directory_scanning = progress.add_task("Found folders to scan")
             futures = []
             for target_dir in _scan_directories(dir_path=self._rootPath, break_checker_delegate=self._scan_directory_break_delegate):
@@ -261,57 +346,127 @@ class DirectoryCrawler(object):
                 else:
                     functor = self._fileFunctor
                 progress.update(directory_scanning, advance=1)
-                futures.append(executor.submit(_get_artefacts_from_folder, str(target_dir), functor, self._rootPath))
-            progress.console.print(f"\nFound a total of {len(futures)} folders to scan. Starting to analyse folders ...")
+                future = executor.submit(_get_artefacts_from_folder, target_dir, functor, self._rootPath)
+                futures.append(future)
 
-            directory_analysis = progress.add_task("Finished folders", total=len(futures))
-            self._last_irrelevant, self._last_dropped, self._last_added, self._last_overwrites = 0, 0, 0, 0
+            progress.console.print(f"\nDiscovered {len(futures)} directories to analyze. Starting file analysis...")
+
+            directory_analysis = progress.add_task("Processing directories", total=len(futures))
+
+            self._last_irrelevant = 0
+            self._last_dropped = 0
+            self._last_added = 0
+            self._last_overwrites = 0
+
             for future in concurrent.futures.as_completed(futures):
-                folder_artefacts = future.result()
-                for fullpath, artefact in folder_artefacts.items():
-                    if artefact is None:
-                        self._last_irrelevant += 1
-                    elif not self._replace_existing_artefacts and artefacts.similar_artefact_exists(artefact):
-                        self._last_dropped += 1
-                    else:
-                        replaced_artefact = artefacts.add_artefact(artefact)
-                        if replaced_artefact:
-                            self._last_overwrites += 1
+                try:
+                    folder_artefacts = future.result()
+                    for fullpath, artefact in folder_artefacts.items():
+                        if artefact is None:
+                            self._last_irrelevant += 1
+                        elif not self._replace_existing_artefacts and artefacts.similar_artefact_exists(artefact):
+                            self._last_dropped += 1
                         else:
-                            self._last_added += 1
+                            replaced_artefact = artefacts.add_artefact(artefact)
+                            if replaced_artefact:
+                                self._last_overwrites += 1
+                            else:
+                                self._last_added += 1
+
+                except Exception as e:
+                    crawl_logger.error(f"Error processing directory results: {e}")
+
                 progress.update(directory_analysis, advance=1)
 
         return artefacts
 
-def runCrawlerScriptMain(file_function, scan_directory_break_delegate: Optional[Callable[[Path], bool]] = None):
-    """This is a helper function that can be used if you want to write a crawler script that crawles a root directory
-     and stores the results as file. This function will parse for command line arguments "root" (the root directory)
-     and "output" (file path where to store the artefact list) and use the DirectoryCrawler accordingly."""
-    parser = argparse.ArgumentParser(description='Simple AVID artefact crawler script that can be used to index'
-                                                 ' artefacts.')
-    parser.add_argument('root', help='Path to the root directory where the crawler should start to crawl.')
-    parser.add_argument('output', help='File path where the results of the crawl should be stored'
-                                       ' (the found/indexed artefacts). If output already exists it will be'
-                                       ' overwritten.')
-    parser.add_argument('--n_processes', help='Number of processes that will crawl folders in parallel', default=1, type=int)
-    parser.add_argument('--relative_paths', action='store_true', help = 'Indicates if the artefact url paths should be '
-                                                                        'stored relative to the output path.')
-    parser.add_argument('--replace', action='store_true', help = 'Indicates if existing artefacts should be replaced if'
-                                                                 'a similar artefact was found in the same crawl.')
-    cliargs, unknown = parser.parse_known_args()
 
-    crawler = DirectoryCrawler(root_path=cliargs.root, file_functor=file_function, n_processes=cliargs.n_processes,
-                               replace_existing_artefacts=cliargs.replace,
-                               scan_directory_break_delegate=scan_directory_break_delegate)
-    artefacts = crawler.getArtefacts()
+def runCrawlerScriptMain(file_function: Callable,
+                        scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None) -> None:
+    """Helper function for creating crawler scripts with command line interface.
 
-    console = Console()
-    console.print(f'\nFinished crawling.\n'
-                  f'Number of generated final artefacts: [green]{len(artefacts)}[/green]\n'
-                  f'Dropped similar artefacts: [yellow]{crawler.number_of_last_dropped}[/yellow]\n'
-                  f'Overwritten artefacts: [red]{crawler.number_of_last_overwites}[/red]\n'
-                  f'Irrelevant files: [gray]{crawler.number_of_last_overwites}[/gray]\n')
+    This function provides a standard CLI interface for crawler scripts that need to
+    crawl a root directory and store results to a file. It handles argument parsing
+    and provides common options for crawler configuration.
 
-    saveArtefactList(filePath=cliargs.output, artefacts=artefacts, savePathsRelative=cliargs.relative_paths)
+    :param file_function: Function to call for each file found during crawling.
+        Should at least accept path_parts, filename, and full_path as keyword arguments or swallow them as **kwargs.
+    :param scan_directory_break_delegate: Optional delegate to control directory scanning
+    :raises SystemExit: On argument parsing errors or crawling failures
 
-    console.print(f'Saved artefacts at: [green]{cliargs.output}[/green]\n')
+    Command line arguments::
+
+        script.py <root_dir> <output_file> [--n_processes N] [--relative_paths] [--replace]
+
+        root_dir: Directory to start crawling from
+        output_file: XML file to save discovered artefacts to
+        --n_processes: Number of parallel processes (default: 1)
+        --relative_paths: Store paths relative to output file location
+        --replace: Replace existing similar artefacts during crawling
+    """
+    parser = argparse.ArgumentParser(description='AVID artefact crawler script for indexing files as artefacts.',)
+
+    parser.add_argument('root', help='Path to the root directory where the crawler should start scanning.')
+    parser.add_argument('output', help='File path where discovered artefacts will be saved as XML. '
+                            'Existing files will be overwritten.')
+
+    parser.add_argument('--n_processes', help='Number of processes for parallel folder crawling', default=1, type=int)
+    parser.add_argument('--relative_paths', action='store_true',
+                       help='Store artefact file paths relative to the output file location')
+    parser.add_argument('--replace', action='store_true',
+                       help='Replace existing artefacts when similar ones are found in the same crawl')
+
+    try:
+        cliargs, unknown = parser.parse_known_args()
+    except SystemExit:
+        raise
+
+    if not os.path.exists(cliargs.root):
+        crawl_logger.error(f"Root directory does not exist: {cliargs.root}")
+        sys.exit(1)
+
+    if not os.path.isdir(cliargs.root):
+        crawl_logger.error(f"Root path is not a directory: {cliargs.root}")
+        sys.exit(1)
+
+    if cliargs.n_processes < 1:
+        crawl_logger.error("Number of processes must be at least 1")
+        sys.exit(1)
+
+    # Create output directory if it doesn't exist
+    output_dir = os.path.dirname(os.path.abspath(cliargs.output))
+    if output_dir and not os.path.exists(output_dir):
+        try:
+            os.makedirs(output_dir)
+            crawl_logger.info(f"Created output directory: {output_dir}")
+        except OSError as e:
+            crawl_logger.error(f"Cannot create output directory {output_dir}: {e}")
+            sys.exit(1)
+
+    # Execute crawling operation
+    try:
+        crawler = DirectoryCrawler(root_path=cliargs.root,
+                                   file_functor=file_function,
+                                   n_processes=cliargs.n_processes,
+                                   replace_existing_artefacts=cliargs.replace,
+                                   scan_directory_break_delegate=scan_directory_break_delegate)
+        artefacts = crawler.getArtefacts()
+
+        console = Console()
+        console.print(f'\n[bold]Crawling Results Summary[/bold]\n'
+                     f'Final artefacts collected: [green]{len(artefacts)}[/green]\n'
+                     f'Dropped duplicate artefacts: [yellow]{crawler.number_of_last_dropped}[/yellow]\n'
+                     f'Overwritten artefacts: [red]{crawler.number_of_last_overwites}[/red]\n'
+                     f'Irrelevant files skipped: [dim]{crawler.number_of_last_irrelevant}[/dim]\n')
+
+        crawl_logger.info(f"Saving {len(artefacts)} artefacts to {cliargs.output}...")
+        saveArtefactList(filePath=cliargs.output, artefacts=artefacts, savePathsRelative=cliargs.relative_paths)
+
+        console.print(f'Successfully saved artefacts to: [green]{cliargs.output}[/green]\n')
+
+    except KeyboardInterrupt:
+        crawl_logger.info("Crawling interrupted by user")
+        sys.exit(130)  # Standard exit code for SIGINT
+    except Exception as e:
+        crawl_logger.error(f"Crawling failed with error: {e}")
+        sys.exit(1)

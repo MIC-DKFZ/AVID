@@ -1,0 +1,277 @@
+import unittest
+import tempfile
+import time
+import os
+import shutil
+from pathlib import Path
+
+from avid.common.artefact.crawler import (
+    crawl_filter_by_filename,
+    crawl_property_by_path,
+    crawl_property_by_filename,
+    DirectoryCrawler,
+    _scan_directories
+)
+
+from avid.common.artefact import similarityRelevantProperties
+import avid.common.artefact.defaultProps as ArtefactProps
+from avid.common.workflow.console_abstraction import Progress
+
+similarityRelevantProperties.extend(["study_id", "series_id"])
+
+
+class TestCrawlerPerformance(unittest.TestCase):
+    """Performance tests for the DirectoryCrawler. Also used for report."""
+    
+    @classmethod
+    def setUpClass(cls):
+        """Create a large test directory structure for performance testing."""
+        cls.temp_dir = tempfile.mkdtemp(prefix='avid_crawler_perf_test_')
+        cls.test_root = Path(cls.temp_dir)
+        
+        # Create a realistic medical imaging directory structure
+        cls.num_patients = 30
+        cls.num_studies_per_patient = 5
+        cls.num_series_per_study = 10
+        cls.num_files_per_series = 50
+        
+        cls.total_dirs_expected = (
+            cls.num_patients *  # patient dirs
+            cls.num_studies_per_patient *  # study dirs
+            cls.num_series_per_study  # series dirs
+        ) + cls.num_patients + 1  # + patient dirs + root
+        
+        cls.total_files_expected = (
+            cls.num_patients *
+            cls.num_studies_per_patient *
+            cls.num_series_per_study *
+            cls.num_files_per_series
+        )
+        
+        print(f"Creating test structure with {cls.total_dirs_expected} directories "
+              f"and {cls.total_files_expected} files...")
+        
+        # Create directory structure: Patient -> Study -> Series -> Files
+        for patient_id in range(1, cls.num_patients + 1):
+            patient_dir = cls.test_root / f"Patient_{patient_id:03d}"
+            patient_dir.mkdir()
+            
+            for study_id in range(1, cls.num_studies_per_patient + 1):
+                study_dir = patient_dir / f"Study_{study_id:02d}"
+                study_dir.mkdir()
+                
+                for series_id in range(1, cls.num_series_per_study + 1):
+                    series_dir = study_dir / f"Series_{series_id:03d}"
+                    series_dir.mkdir()
+                    
+                    # Create files with realistic medical imaging naming patterns
+                    for file_id in range(1, cls.num_files_per_series + 1):
+                        # Mix of file types: DICOM, NIFTI, text reports
+                        if file_id <= 0.9*cls.num_files_per_series:  # Most files are DICOM
+                            filename = f"IMG_{file_id:04d}.dcm"
+                        else:  # Some text reports
+                            filename = f"Report_{file_id:04d}.txt"
+                        
+                        file_path = series_dir / filename
+                        # Create small files with minimal content to speed up creation
+                        file_path.write_text(f"Test file {file_id} for patient {patient_id}")
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up the test directory structure."""
+        if cls.temp_dir and os.path.exists(cls.temp_dir):
+            shutil.rmtree(cls.temp_dir)
+
+    @staticmethod
+    @crawl_property_by_path(property_map={0: ArtefactProps.CASE, 1: "study_id", 2: "series_id"})
+    @crawl_property_by_filename(extraction_rules={
+        ArtefactProps.TIMEPOINT: (r"_(\d+).", 0)
+    })
+    @crawl_filter_by_filename(ext_exclude=('.tmp', '.log'))
+    def performance_test_function(artefact_candidate, full_path, **kwargs):
+        """Test function that simulates realistic artefact processing."""
+        artefact_candidate[ArtefactProps.URL] = full_path
+        artefact_candidate[ArtefactProps.INVALID] = False
+
+        return artefact_candidate
+
+    @staticmethod
+    def dicom_break_delegate(entry_path: os.DirEntry) -> bool:
+        """Stop scanning subdirs once we find a DICOM file."""
+        return entry_path.is_file() and entry_path.name.endswith('.dcm')
+
+
+    def test_process_performance(self):
+        """Test crawling performance in different scenarios."""
+        print(f"\nTesting single-process crawling of {self.total_files_expected} files "
+              f"in {self.total_dirs_expected} directories...")
+        
+        start_time = time.time()
+        
+        crawler = DirectoryCrawler(
+            root_path=self.test_root,
+            file_functor=self.performance_test_function,
+            n_processes=1,
+            replace_existing_artefacts=False
+        )
+        
+        artefacts = crawler.getArtefacts()
+        
+        end_time = time.time()
+        elapsed_time_single = end_time - start_time
+        
+        # Verify results
+        self.assertEqual(len(artefacts), self.total_files_expected)
+        self.assertEqual(crawler.number_of_last_irrelevant, 0)
+        self.assertEqual(crawler.number_of_last_dropped, 0)
+
+        # Performance metrics
+        files_per_second_single = self.total_files_expected / elapsed_time_single
+        dirs_per_second_single = self.total_dirs_expected / elapsed_time_single
+
+        # Basic performance assertion (should process at least 5000 files/sec on modern hardware)
+        self.assertGreater(files_per_second_single, 5000,
+                          "Crawler performance is unexpectedly slow (< 5000 files/sec)")
+
+        ###################################################
+        #Test crawling performance with multiple processes.
+        num_processes = min(4, os.cpu_count() or 1)
+        print(f"\nTesting multi-process crawling with {num_processes} processes...")
+
+        start_time = time.time()
+
+        crawler = DirectoryCrawler(
+            root_path=self.test_root,
+            file_functor=self.performance_test_function,
+            n_processes=num_processes,
+            replace_existing_artefacts=False
+        )
+
+        artefacts = crawler.getArtefacts()
+
+        end_time = time.time()
+        elapsed_time_multi = end_time - start_time
+
+        # Verify results
+        self.assertEqual(len(artefacts), self.total_files_expected)
+        self.assertEqual(crawler.number_of_last_irrelevant, 0)
+        self.assertEqual(crawler.number_of_last_dropped, 0)
+
+        # Performance metrics
+        files_per_second_multi = self.total_files_expected / elapsed_time_multi
+        dirs_per_second_multi = self.total_dirs_expected / elapsed_time_multi
+
+        # Multi-process should generally be faster, but file I/O can be limiting factor
+        self.assertGreater(files_per_second_multi, 10000,
+                           "Multi-process crawler performance is unexpectedly slow")
+
+        print(f"Single-process results:")
+        print(f"  Total time: {elapsed_time_single:.2f} seconds")
+        print(f"  Files per second: {files_per_second_single:.1f}")
+        print(f"  Directories per second: {dirs_per_second_single:.1f}")
+
+        print(f"Multi-process results ({num_processes} processes):")
+        print(f"  Total time: {elapsed_time_multi:.2f} seconds")
+        print(f"  Files per second: {files_per_second_multi:.1f}")
+        print(f"  Directories per second: {dirs_per_second_multi:.1f}")
+        print(f"  Speedup achieved: {(elapsed_time_single/elapsed_time_multi):.1f}x")
+
+    def test_process_performance_scan_dir(self):
+        """Test dir scanning performance in different scenarios."""
+
+        print(f"\nTesting scan directory processes...")
+
+        start_time = time.time()
+
+        with Progress(transient=True) as progress:
+            directory_scanning = progress.add_task("Found folders to scan")
+            dirs = 0
+            for target_dir in _scan_directories(dir_path=self.test_root):
+                progress.update(directory_scanning, advance=1)
+                dirs += 1
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+
+        # Performance metrics
+        dirs_per_second = self.total_dirs_expected / elapsed_time
+
+        # Basic performance assertion (should process at least 100 files/sec on modern hardware)
+        self.assertGreater(dirs_per_second, 5000,
+                           "Scan performance is unexpectedly slow (< 5000 files/sec)")
+
+        print(f"\nTesting scan directory processes with break...")
+
+        start_time = time.time()
+
+        with Progress(transient=True) as progress:
+            directory_scanning = progress.add_task("Found folders to scan")
+            dirs = 0
+            for target_dir in _scan_directories(dir_path=self.test_root, break_checker_delegate=self.dicom_break_delegate):
+                progress.update(directory_scanning, advance=1)
+                dirs += 1
+
+        end_time = time.time()
+        elapsed_time_break = end_time - start_time
+
+        # Performance metrics
+        dirs_per_second_break = self.total_dirs_expected / elapsed_time_break
+
+        self.assertGreater(dirs_per_second_break, 20000,
+                           "Scan performance is unexpectedly slow (< 20000 files/sec)")
+
+        self.assertGreater(dirs_per_second_break, dirs_per_second,
+                           "Scan performance with break is unexpectedly slower")
+
+
+        print(f"Scan directory results:")
+        print(f"  Total time: {elapsed_time:.2f} seconds")
+        print(f"  Directories per second: {dirs_per_second:.1f}")
+        print(f"Scan directory results with break check:")
+        print(f"  Total time: {elapsed_time_break:.2f} seconds")
+        print(f"  Directories per second: {dirs_per_second_break:.1f}")
+
+
+    def test_memory_usage_stability(self):
+        """Test that memory usage remains stable during large crawls."""
+        import psutil
+        import gc
+        
+        print(f"\nTesting memory stability during crawling...")
+        
+        # Force garbage collection before starting
+        gc.collect()
+        process = psutil.Process()
+        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+        
+        crawler = DirectoryCrawler(
+            root_path=self.test_root,
+            file_functor=self.performance_test_function,
+            n_processes=1,  # Single process for clearer memory tracking
+            replace_existing_artefacts=False
+        )
+        
+        artefacts = crawler.getArtefacts()
+        
+        # Force garbage collection after crawling
+        gc.collect()
+        final_memory = process.memory_info().rss / 1024 / 1024  # MB
+        memory_increase = final_memory - initial_memory
+        
+        print(f"Memory usage:")
+        print(f"  Initial: {initial_memory:.1f} MB")
+        print(f"  Final: {final_memory:.1f} MB")
+        print(f"  Increase: {memory_increase:.1f} MB")
+        print(f"  Memory per file: {memory_increase * 1024 / len(artefacts):.1f} KB")
+        
+        # Memory increase should be reasonable (< 50MB for this test size)
+        self.assertLess(memory_increase, 100, 
+                       f"Memory usage increased too much: {memory_increase:.1f} MB")
+        
+
+# Add the performance test class to the existing test file
+if __name__ == "__main__":
+    # Run performance tests separately if desired
+    performance_suite = unittest.TestLoader().loadTestsFromTestCase(TestCrawlerPerformance)
+    performance_runner = unittest.TextTestRunner(verbosity=2)
+    performance_runner.run(performance_suite)

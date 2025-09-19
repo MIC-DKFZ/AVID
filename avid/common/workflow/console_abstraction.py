@@ -310,16 +310,19 @@ class Console:
 class Progress:
     """Progress abstraction that uses rich if available, provides simple fallback otherwise"""
 
-    def __init__(self, console: Optional[Console] = None, transient: bool = False):
+    def __init__(self, console: Optional[Console] = None, transient: bool = False, refresh_per_second: float = 10):
         self.console = console or Console()
         self.transient = transient
+        self._refresh_per_second = refresh_per_second
+        self._refresh_wait_in_seconds = 1/refresh_per_second
         self._rich_progress = None
         self._tasks = {}
         self._task_counter = 0
         self._last_display_lines = 0
 
         if RICH_AVAILABLE and self.console._rich_console:
-            self._rich_progress = RichProgress(console=self.console._rich_console, transient=transient)
+            self._rich_progress = RichProgress(console=self.console._rich_console, transient=transient,
+                                               refresh_per_second=refresh_per_second)
 
     def add_task(self, description: str, total: Optional[int] = None, indicator_cadence: Optional[float] = None) -> int:
         """
@@ -395,8 +398,10 @@ class Progress:
             # Simple progress with visual bar and time estimates
             current_time = time.time()
 
-            # Only update display every 0.1 seconds to avoid flickering, except it was just completed
-            if not has_completed_now and current_time - task.get("last_update_time", 0) < 0.1:
+            # Only update display every _refresh_wait_in_seconds seconds to avoid flickering,
+            # except it was just completed
+            if not has_completed_now\
+                    and current_time - task.get("last_update_time", 0) < 1/self._refresh_wait_in_seconds:
                 return
 
             task["last_update_time"] = current_time
