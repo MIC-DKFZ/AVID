@@ -86,7 +86,9 @@ def in_venv() -> bool:
 
 
 def get_valid_scope(requested_scope: Optional[str] = None) -> str:
-    return SCOPE_VENV if (requested_scope is None and in_venv()) else (requested_scope or SCOPE_USER)
+    if requested_scope is not None:
+        return requested_scope
+    return SCOPE_VENV if in_venv() else SCOPE_USER
 
 
 def get_user_config_dir() -> Path:

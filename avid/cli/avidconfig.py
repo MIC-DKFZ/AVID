@@ -286,7 +286,7 @@ def cmd_tool_install(args: argparse.Namespace, scope: str) -> None:
         # install all known packages after confirmation
         known = get_all_known_packages()
         console.print(f"No package specified. Known packages: {known}")
-        if not ConfirmType.ask("Install all known packages?"):
+        if not ConfirmType.ask("Install all known packages?", default=True):
             console.print("Aborted.")
             return
         packages = known
