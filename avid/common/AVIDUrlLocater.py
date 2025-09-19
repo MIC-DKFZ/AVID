@@ -33,15 +33,15 @@ import avid.common.config_mangager as cfg
 logger = logging.getLogger(__name__)
 
 
-def get_avid_project_root_path():
+def get_avid_package_root_dir():
     '''
-    identifies the root dir of the AVID project source dir
+    identifies the root dir of the AVID package
     '''
     # get the location of this file (to be precisely it's the .pyc)
     path = os.path.dirname(__file__)
 
     # navigate to the root dir - to do so we navigate the directory tree upwards
-    return Path(os.path.split(os.path.split(path)[0])[0])
+    return Path(os.path.split(path)[0])
 
 
 def ensure_existence(func):
@@ -57,7 +57,7 @@ def ensure_existence(func):
 
 @ensure_existence
 def get_tool_package_config_dir(package):
-    return get_avid_project_root_path() / "avid" / "cli" / "tool-packages" / package
+    return get_avid_package_root_dir() / "cli" / "tool-packages" / package
 
 
 @ensure_existence
