@@ -86,7 +86,7 @@ class MitkFileConverterAction(GenericCLIAction):
         if readerName is not None:
             addArgs = {'r':readerName}
 
-        GenericCLIAction.__init__(self, i=inputs, actionID="MitkFileConverter", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=inputs, tool_id="MitkFileConverter", outputFlags=['o'],
                                   additionalArgs=addArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,

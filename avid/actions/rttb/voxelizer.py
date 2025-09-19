@@ -55,7 +55,7 @@ class VoxelizerAction(GenericCLIAction):
         if additionalActionProps is not None:
             internalActionProps.update(additionalActionProps)
 
-        GenericCLIAction.__init__(self, s=[structSet], r=[referenceImage], actionID="VoxelizerTool",
+        GenericCLIAction.__init__(self, s=[structSet], r=[referenceImage], tool_id="VoxelizerTool",
                                   outputFlags=['o'],
                                   outputReferenceArtefactName='s',
                                   additionalArgs=additionalArgs,

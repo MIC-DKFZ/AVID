@@ -56,7 +56,7 @@ class DoseToolAction(GenericCLIAction):
                           'doseLoadStyle': _getArtefactLoadStyle(self._inputDose),
                           'structLoadStyle': _getStructLoadStyle(self._structSet)}
 
-        GenericCLIAction.__init__(self, structFile=[self._structSet], doseFile=[self._inputDose], actionID="DoseTool",
+        GenericCLIAction.__init__(self, structFile=[self._structSet], doseFile=[self._inputDose], tool_id="DoseTool",
                                   outputFlags=outputFlags,
                                   additionalArgs=additionalArgs,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,

@@ -115,11 +115,11 @@ class GenericCLIAction(CLIActionBase):
     """Action that offers a generic wrapper around a cli execution of an action. The basic idea is to have a simple
      possibility to define an action that execute a CLI executable. All passed artefact selections are directly
      converted into cli arguments. The user can define additional cli arguments and if the arguments are flag based
-     or positional arguments. If a user wants to use a tool not known to AVID, the users can specify own actionID and
+     or positional arguments. If a user wants to use a tool not known to AVID, the users can specify own tool_id and
      configure it with avidconig (system wide) or at runtime for a specific session (setWorkflowActionTool()) to point
      to a certain executable. For more details see the documentation of __init_."""
 
-    def __init__(self, actionID, outputFlags=None, indicateCallable=None, generateNameCallable=None, additionalArgs=None, illegalArgs=None,
+    def __init__(self, tool_id, outputFlags=None, indicateCallable=None, generateNameCallable=None, additionalArgs=None, illegalArgs=None,
                  argPositions=None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension='nrrd',
                  postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
                  inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
@@ -127,7 +127,7 @@ class GenericCLIAction(CLIActionBase):
                  use_no_url_id=False,
                  **inputArgs):
         """
-        :param actionID: actionID that will be used to deduce the tool/executable for this action instance.
+        :param tool_id: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added automatically) of the output.
             If set to none, the action assumes that the output parameter are indexed by and directly added in the beginning
             as the last parameters without a flag. If you don't want to use a flag, but control the position of the output
@@ -187,7 +187,7 @@ class GenericCLIAction(CLIActionBase):
         """
         CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                                additionalActionProps=additionalActionProps,
-                               actionID=actionID, actionConfig=actionConfig,
+                               tool_id=tool_id, actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         self._indicateCallable = indicateCallable

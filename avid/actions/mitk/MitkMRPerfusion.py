@@ -45,7 +45,7 @@ class MitkMRPerfusionAction(CLIActionBase):
                  hematocrit=0.45, roibased=False, constraints=False, actionTag="MRPerfusion", alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
         CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                               actionID="MitkMRPerfusion", actionConfig=actionConfig,
+                               tool_id="MitkMRPerfusion", actionConfig=actionConfig,
                                propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
 
         if aifimage is not None and aifmask is None:

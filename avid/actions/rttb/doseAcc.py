@@ -80,7 +80,7 @@ class DoseAccAction(CLIActionBase):
     :param interpolator: String that defines the interpolator that should be used. Is defined by doseAcc.
     :param operator: String that defines the type of accumulation. Is defined by doseAcc.
     """
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID = "doseAcc",
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, tool_id="doseAcc",
                            actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
     self._addInputArtefacts(doses=doses, registrations=registrations, plans= plans)
 

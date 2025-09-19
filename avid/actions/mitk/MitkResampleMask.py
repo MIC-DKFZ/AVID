@@ -32,7 +32,7 @@ class MitkResampleMaskAction(GenericCLIAction):
 
     def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkResampleMask",
                  alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-        GenericCLIAction.__init__(self, i=images, actionID="MitkResampleMask", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=images, tool_id="MitkResampleMask", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,

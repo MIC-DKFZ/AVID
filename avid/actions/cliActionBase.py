@@ -38,17 +38,17 @@ class CLIActionBase(SingleActionBase):
   the method.'''
 
   def __init__(self, actionTag, alwaysDo = False, session = None, additionalActionProps = None, cwd = None,
-               actionID = None, actionConfig = None, propInheritanceDict = None,
+               tool_id = None, actionConfig = None, propInheritanceDict = None,
                cli_connector = None):
     '''@param cwd Specifies the current working directory that should be used for the cli call.
     if not set explicitly, it will be deduced automatically by the specified tool/action '''
     SingleActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
                               additionalActionProps=additionalActionProps, propInheritanceDict = propInheritanceDict)
-    self._actionID = actionID
+    self._actionID = tool_id
     self._actionConfig = actionConfig
     self._cwd = cwd
     if self._cwd is None and self._actionID is not None:
-      self._cwd = os.path.dirname(AVIDUrlLocater.get_tool_executable_url(self._session, actionID, actionConfig))
+      self._cwd = os.path.dirname(AVIDUrlLocater.get_tool_executable_url(self._session, tool_id, actionConfig))
 
     self._last_log_file_path = None
     self._last_log_error_file_path = None

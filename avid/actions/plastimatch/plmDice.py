@@ -42,7 +42,7 @@ class PlmDiceAction(GenericCLIAction):
         refImage = self._ensureSingleArtefact(refImage, "refImage")
         inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
 
-        GenericCLIAction.__init__(self, refImage=[refImage], inputImage=[inputImage], actionID="plastimatch",
+        GenericCLIAction.__init__(self, refImage=[refImage], inputImage=[inputImage], tool_id="plastimatch",
                                   noOutputArgs=True,
                                   additionalArgs={'command': 'dice', 'all': None},
                                   argPositions=['command', 'refImage', 'inputImage'],

@@ -43,7 +43,7 @@ class ImageAccAction(CLIActionBase):
                interpolator = "linear", operator="+",  outputExt = "nrrd",
                actionTag = "imageAcc", alwaysDo = False, session = None,
                additionalActionProps = None, actionConfig = None, propInheritanceDict = None, cli_connector = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="doseAcc",
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, tool_id="doseAcc",
                            actionConfig = actionConfig, propInheritanceDict = propInheritanceDict, cli_connector = cli_connector)
     self._addInputArtefacts(images = images, registrations=registrations)
         

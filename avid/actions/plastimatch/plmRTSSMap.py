@@ -84,7 +84,7 @@ class PlmRTSSMapAction(GenericCLIAction):
             raise ValueError(
                 'Output format is not supported by plmRTSSMap action. Choosen format: {}'.format(self._outputFormat))
 
-        GenericCLIAction.__init__(self, **inputArgs, actionID="plastimatch",
+        GenericCLIAction.__init__(self, **inputArgs, tool_id="plastimatch",
                                   outputFlags=outputFlags,
                                   argPositions=['command'],
                                   additionalArgsAsURL=['output-dicom', 'output-cxt'],

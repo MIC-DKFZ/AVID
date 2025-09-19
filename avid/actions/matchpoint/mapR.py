@@ -40,7 +40,7 @@ class mapRAction(CLIActionBase):
                  interpolator="linear", outputExt="nrrd", paddingValue=None,
                  actionTag="mapR", inputIsReference=True, alwaysDo=False,
                  session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="mapR",
+        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, tool_id="mapR",
                                actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
         self._addInputArtefacts(inputImage=inputImage, registration=registration, templateImage=templateImage)
 
