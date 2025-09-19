@@ -57,7 +57,7 @@ def ensure_existence(func):
 
 @ensure_existence
 def get_tool_package_config_dir(package):
-    return get_avid_project_root_path() / "tool-packages" / package
+    return get_avid_project_root_path() / "avid" / "cli" / "tool-packages" / package
 
 
 @ensure_existence
