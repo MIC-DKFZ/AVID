@@ -23,9 +23,9 @@ import avid.common.workflow as workflow
 from avid.actions.rttb.doseMap import DoseMapBatchAction as doseMap
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('DoseMap') is None, 'Tool DoseMap not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('DoseMap') is None, 'Tool DoseMap not installed on the system.')
 class TestDoseMap(unittest.TestCase):
 
 

@@ -23,9 +23,9 @@ import avid.common.workflow as workflow
 from avid.actions.matchpoint.combineR import combineRBatchAction as combineR
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('combineR') is None, 'Tool combineR not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('combineR') is None, 'Tool combineR not installed on the system.')
 class TestMapR(unittest.TestCase):
 
 

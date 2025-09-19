@@ -50,7 +50,7 @@ class invertRAction(CLIActionBase):
     self._directMapping = directMapping
     self._inverseMapping = inverseMapping
 
-    cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "invertR", actionConfig))
+    cwd = os.path.dirname(AVIDUrlLocater.get_tool_executable_url(self._session, "invertR", actionConfig))
     self._cwd = cwd
 
   def _generateName(self):

@@ -24,9 +24,9 @@ from avid.actions.plastimatch.plmCompare import PlmCompareBatchAction as plmComp
 from avid.selectors.keyValueSelector import ActionTagSelector
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
 class TestPlmCompare(unittest.TestCase):
 
 

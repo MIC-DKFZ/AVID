@@ -57,7 +57,8 @@ class CurveDescriptorMiniAppAction(CLIActionBase):
                                                      url_extension='nrrd')
 
         if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "CurveDescriptorMiniApp", actionConfig))
+            self._cwd = os.path.dirname(
+                AVIDUrlLocater.get_tool_executable_url(self._session, "CurveDescriptorMiniApp", actionConfig))
 
     def _generateName(self):
         name = "curveDesc_{}".format(artefactHelper.getArtefactShortName(self._signal))
@@ -86,7 +87,7 @@ class CurveDescriptorMiniAppAction(CLIActionBase):
         signalPath = artefactHelper.getArtefactProperty(self._signal, artefactProps.URL)
         maskPath = artefactHelper.getArtefactProperty(self._mask, artefactProps.URL)
 
-        execURL = AVIDUrlLocater.getExecutableURL(self._session, "CurveDescriptorMiniApp", self._actionConfig)
+        execURL = AVIDUrlLocater.get_tool_executable_url(self._session, "CurveDescriptorMiniApp", self._actionConfig)
 
         result = list()
         result.append(execURL)

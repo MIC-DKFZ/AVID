@@ -67,7 +67,8 @@ class MitkCLGlobalImageFeaturesAction(CLIActionBase):
                     logger.warning('Ignored illegal argument "{}". It will be set by action'.format(arg))
 
         if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkCLGlobalImageFeatures", actionConfig))
+            self._cwd = os.path.dirname(
+                AVIDUrlLocater.get_tool_executable_url(self._session, "MitkCLGlobalImageFeatures", actionConfig))
 
     def _generateName(self):
         name = "gif"
