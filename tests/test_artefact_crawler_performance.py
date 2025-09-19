@@ -129,10 +129,6 @@ class TestCrawlerPerformance(unittest.TestCase):
         files_per_second_single = self.total_files_expected / elapsed_time_single
         dirs_per_second_single = self.total_dirs_expected / elapsed_time_single
 
-        # Basic performance assertion (should process at least 5000 files/sec on modern hardware)
-        self.assertGreater(files_per_second_single, 5000,
-                          "Crawler performance is unexpectedly slow (< 5000 files/sec)")
-
         ###################################################
         #Test crawling performance with multiple processes.
         num_processes = min(4, os.cpu_count() or 1)
@@ -161,10 +157,6 @@ class TestCrawlerPerformance(unittest.TestCase):
         files_per_second_multi = self.total_files_expected / elapsed_time_multi
         dirs_per_second_multi = self.total_dirs_expected / elapsed_time_multi
 
-        # Multi-process should generally be faster, but file I/O can be limiting factor
-        self.assertGreater(files_per_second_multi, 10000,
-                           "Multi-process crawler performance is unexpectedly slow")
-
         print(f"Single-process results:")
         print(f"  Total time: {elapsed_time_single:.2f} seconds")
         print(f"  Files per second: {files_per_second_single:.1f}")
@@ -175,6 +167,14 @@ class TestCrawlerPerformance(unittest.TestCase):
         print(f"  Files per second: {files_per_second_multi:.1f}")
         print(f"  Directories per second: {dirs_per_second_multi:.1f}")
         print(f"  Speedup achieved: {(elapsed_time_single/elapsed_time_multi):.1f}x")
+
+        # Basic performance assertion (should process at least 5000 files/sec on modern hardware)
+        self.assertGreater(files_per_second_single, 5000,
+                          "Crawler performance is unexpectedly slow (< 5000 files/sec)")
+        # Multi-process should generally be faster, but file I/O can be limiting factor
+        self.assertGreater(files_per_second_multi, 10000,
+                           "Multi-process crawler performance is unexpectedly slow")
+
 
     def test_process_performance_scan_dir(self):
         """Test dir scanning performance in different scenarios."""
@@ -196,10 +196,6 @@ class TestCrawlerPerformance(unittest.TestCase):
         # Performance metrics
         dirs_per_second = self.total_dirs_expected / elapsed_time
 
-        # Basic performance assertion (should process at least 100 files/sec on modern hardware)
-        self.assertGreater(dirs_per_second, 5000,
-                           "Scan performance is unexpectedly slow (< 5000 files/sec)")
-
         print(f"\nTesting scan directory processes with break...")
 
         start_time = time.time()
@@ -217,19 +213,20 @@ class TestCrawlerPerformance(unittest.TestCase):
         # Performance metrics
         dirs_per_second_break = self.total_dirs_expected / elapsed_time_break
 
-        self.assertGreater(dirs_per_second_break, 20000,
-                           "Scan performance is unexpectedly slow (< 20000 files/sec)")
-
-        self.assertGreater(dirs_per_second_break, dirs_per_second,
-                           "Scan performance with break is unexpectedly slower")
-
-
         print(f"Scan directory results:")
         print(f"  Total time: {elapsed_time:.2f} seconds")
         print(f"  Directories per second: {dirs_per_second:.1f}")
         print(f"Scan directory results with break check:")
         print(f"  Total time: {elapsed_time_break:.2f} seconds")
         print(f"  Directories per second: {dirs_per_second_break:.1f}")
+
+        # Basic performance assertion (should process at least 100 files/sec on modern hardware)
+        self.assertGreater(dirs_per_second, 5000,
+                           "Scan performance is unexpectedly slow (< 5000 files/sec)")
+        self.assertGreater(dirs_per_second_break, 20000,
+                           "Scan performance is unexpectedly slow (< 20000 files/sec)")
+        self.assertGreater(dirs_per_second_break, dirs_per_second,
+                           "Scan performance with break is unexpectedly slower")
 
 
     def test_memory_usage_stability(self):
