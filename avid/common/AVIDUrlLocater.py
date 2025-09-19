@@ -68,7 +68,7 @@ def ensureExistance(func):
 
 @ensureExistance
 def getPackagePath(package):
-  return os.path.join(getAVIDProjectRootPath(), "tool-packages", package)
+  return os.path.join(getAVIDProjectRootPath(), "avid", "cli", "tool-packages", package)
 
 
 @ensureExistance
