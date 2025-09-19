@@ -319,7 +319,7 @@ def cmd_tool_remove(args: argparse.Namespace, scope: str) -> None:
 
     console.print(f"Changed scope: {'[magenta]venv[/]' if scope==cfg.SCOPE_VENV else '[cyan]user[/]'}")
 
-    if tool_path.exists():
+    if tool_path and tool_path.exists():
         shutil.rmtree(tool_path)
         console.print(f"[green]Removed tool at [yellow] {tool_path}[/][/]")
     else:
@@ -341,7 +341,7 @@ def cmd_tool_list(args: argparse.Namespace, scope: str) -> None:
     venv_tools = dict()
     try:
         tool_configs_path = cfg.get_venv_tools_root_dir() / cfg.TOOL_CONFIGS_SUB_DIR
-        if tool_configs_path.exists():
+        if tool_configs_path and tool_configs_path.exists():
             for d in tool_configs_path.iterdir():
                 if d.is_dir():
                     venv_tools[d.name] = str(d)
@@ -369,7 +369,7 @@ def cmd_tool_list(args: argparse.Namespace, scope: str) -> None:
     console.print(table)
 
     file_path = cfg.get_venv_tools_root_dir()
-    console.print(f"Venv tools root path: [magenta]{file_path if file_path.exists() else 'N/A'}[/]")
+    console.print(f"Venv tools root path: [magenta]{file_path if file_path and file_path.exists() else 'N/A'}[/]")
     file_path = cfg.get_user_tools_root_dir()
     console.print(f"User tools root path: [cyan]{file_path if file_path.exists() else 'N/A'}[/]")
     console.print()
@@ -431,7 +431,7 @@ def cmd_settings_list(args: argparse.Namespace, scope: str) -> None:
 
     console.print(table)
     file_path = cfg.get_venv_config_file_path()
-    console.print(f"Venv scope location: [magenta]{file_path if file_path.exists() else 'N/A'}[/]")
+    console.print(f"Venv scope location: [magenta]{file_path if file_path and file_path.exists() else 'N/A'}[/]")
     file_path = cfg.get_user_config_file_path()
     console.print(f"User scope location: [cyan]{file_path if file_path.exists() else 'N/A'}[/]")
     console.print()
@@ -455,7 +455,7 @@ def cmd_settings_get(args: argparse.Namespace, scope: str) -> None:
     console.print(table)
 
     file_path = cfg.get_venv_config_file_path()
-    console.print(f"Venv scope location: [magenta]{file_path if file_path.exists() else 'N/A'}[/]")
+    console.print(f"Venv scope location: [magenta]{file_path if filepath and file_path.exists() else 'N/A'}[/]")
     file_path = cfg.get_user_config_file_path()
     console.print(f"User scope location: [cyan]{file_path if file_path.exists() else 'N/A'}[/]")
     console.print()
@@ -721,6 +721,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     parse_namespace = parser.parse_args(argv)
     scope = scope_or_default(parse_namespace.scope)
+
+    if scope == cfg.SCOPE_VENV and not cfg.in_venv():
+        console.print(f"[red]Try to run avidconfig in venv scope without being in a venv[/].\n"
+                      f"Activate a venv or don't use the --venv flag.")
+        return 2
 
     # catch missing subcommands and show proper help
     if parse_namespace.command == "settings" and parse_namespace.subcmd is None:

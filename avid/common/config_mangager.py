@@ -138,7 +138,7 @@ def get_user_tools_default_root_dir() -> Path:
     return get_user_data_dir() / "tools"
 
 
-def get_venv_tools_default_root_dir() -> Path:
+def get_venv_tools_default_root_dir() -> Optional[Path]:
     """Return the default root directory for installed tools for the current venv.
     Example (Linux):
         ``~/.local/share/avid/tools``
@@ -155,7 +155,7 @@ def get_user_tools_root_dir() -> Path:
     return Path(custom_path) if custom_path else get_user_tools_default_root_dir()
 
 
-def get_venv_tools_root_dir() -> Path:
+def get_venv_tools_root_dir() -> Optional[Path]:
     """Return the root directory for installed tools for the current venv. Either it is based on the default location or
     the setting stored in the venv config file.
     """
@@ -170,11 +170,12 @@ def get_user_tool_config_dir(tool_id: str) -> Path:
     return get_user_tools_root_dir() / TOOL_CONFIGS_SUB_DIR / tool_id
 
 
-def get_venv_tool_config_dir(tool_id: str) -> Path:
+def get_venv_tool_config_dir(tool_id: str) -> Optional[Path]:
     """Return path to a tool's TOML config dir for the current venv. Either it is based on the default location or
     the setting stored in the venv config file.
     """
-    return get_venv_tools_root_dir() / TOOL_CONFIGS_SUB_DIR / tool_id
+    root_dir = get_venv_tools_root_dir()
+    return (root_dir / TOOL_CONFIGS_SUB_DIR / tool_id) if root_dir else None
 
 
 def ensure_dir(p: Path) -> None:
@@ -252,11 +253,12 @@ def get_user_tool_config_file_path(tool_id: str) -> Path:
     return get_user_tool_config_dir(tool_id) / TOOL_CONFIG_FILENAME
 
 
-def get_venv_tool_config_file_path(tool_id: str) -> Path:
+def get_venv_tool_config_file_path(tool_id: str) -> Optional[Path]:
     """Return path to a tool's TOML config file for the current venv. Either it is based on the default location or
     the setting stored in the venv config file.
     """
-    return get_venv_tool_config_dir(tool_id) / TOOL_CONFIG_FILENAME
+    root_path = get_venv_config_dir()
+    return (root_path / TOOL_CONFIG_FILENAME) if root_path else None
 
 
 # ---------------------------------------------------------------------------
@@ -432,7 +434,7 @@ def load_venv_tool_config(tool_id: str) -> Optional[Dict[str, Any]]:
     """
     config_path = get_venv_tool_config_file_path(tool_id=tool_id)
 
-    return _load_toml(config_path) if config_path.exists() else None
+    return _load_toml(config_path) if config_path and config_path.exists() else None
 
 
 def save_user_tool_config(tool_id: str, cfg: Dict[str, Any]) -> None:

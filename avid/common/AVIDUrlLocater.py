@@ -89,7 +89,7 @@ def get_tool_config_dir(tool_id, workflow_root_path=None, check_existence=True):
     tool_dir = (Path(workflow_root_path) / "tools" / tool_id) if workflow_root_path else None
     if not tool_dir or not tool_dir.exists():
         tool_dir = cfg.get_venv_tool_config_dir(tool_id=tool_id)
-    if not tool_dir.exists():
+    if not tool_dir or not tool_dir.exists():
         tool_dir = cfg.get_user_tool_config_dir(tool_id=tool_id)
 
     if tool_dir.exists() or not check_existence:
@@ -117,7 +117,7 @@ def get_tool_config_file_path(tool_id, workflow_root_path=None, check_existence=
     config_path = (Path(workflow_root_path) / "tools" / tool_id / cfg.TOOL_CONFIG_FILENAME) if workflow_root_path else None
     if not config_path or not config_path.is_file():
         config_path = cfg.get_venv_tool_config_file_path(tool_id=tool_id)
-    if not config_path.is_file():
+    if not config_path or not config_path.is_file():
         config_path = cfg.get_user_tool_config_file_path(tool_id=tool_id)
 
     if config_path.is_file() or not check_existence:
