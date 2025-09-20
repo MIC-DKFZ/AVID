@@ -401,7 +401,7 @@ class Progress:
             # Only update display every _refresh_wait_in_seconds seconds to avoid flickering,
             # except it was just completed
             if not has_completed_now\
-                    and current_time - task.get("last_update_time", 0) < 1/self._refresh_wait_in_seconds:
+                    and current_time - task.get("last_update_time", 0) < self._refresh_wait_in_seconds:
                 return
 
             task["last_update_time"] = current_time
