@@ -252,13 +252,9 @@ def _scan_directories(dir_path: str,
                 if _break_checker_delegate and _break_checker_delegate(entry):
                     break
 
-                try:
-                    if entry.is_dir():
-                        # only build child path for directories (fewer string creations)
-                        stack.append(entry.path)
-                except OSError:
-                    # any stat/permission issue for this entry -> skip entry
-                    continue
+                if entry.is_dir():
+                    # only build child path for directories (fewer string creations)
+                    stack.append(entry.path)
         finally:
             # ensure scandir iterator is closed promptly
             try:
