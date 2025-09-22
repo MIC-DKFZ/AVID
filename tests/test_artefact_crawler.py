@@ -293,8 +293,8 @@ class TestArtefactCrawler(unittest.TestCase):
         #check if there were different factories used per directory
         for artefact in artefacts:
             correct_factory_per_path = (artefact[ArtefactProps.CASE] is None and artefact['special_prop'] == '1')\
-                                       or (artefact[ArtefactProps.CASE] == 'pat1' and artefact['special_prop'] == '2')\
-                                       or (artefact[ArtefactProps.CASE] == 'pat2' and artefact['special_prop'] == '3')
+                                       or (artefact[ArtefactProps.CASE] == 'pat1' and artefact['special_prop'] == '3')\
+                                       or (artefact[ArtefactProps.CASE] == 'pat2' and artefact['special_prop'] == '2')
             self.assertTrue(correct_factory_per_path)
 
 

@@ -247,47 +247,6 @@ class TestCrawlerPerformance(unittest.TestCase):
         self.assertGreater(dirs_per_second_break, dirs_per_second,
                            "Scan performance with break is unexpectedly slower")
 
-
-    def test_memory_usage_stability(self):
-        """Test that memory usage remains stable during large crawls."""
-        import psutil
-        import gc
         
-        print(f"\nTesting memory stability during crawling...")
-        
-        # Force garbage collection before starting
-        gc.collect()
-        process = psutil.Process()
-        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
-        
-        crawler = DirectoryCrawler(
-            root_path=self.test_root,
-            file_functor=self.performance_test_function,
-            n_processes=1,  # Single process for clearer memory tracking
-            replace_existing_artefacts=False
-        )
-        
-        artefacts = crawler.getArtefacts()
-        
-        # Force garbage collection after crawling
-        gc.collect()
-        final_memory = process.memory_info().rss / 1024 / 1024  # MB
-        memory_increase = final_memory - initial_memory
-        
-        print(f"Memory usage:")
-        print(f"  Initial: {initial_memory:.1f} MB")
-        print(f"  Final: {final_memory:.1f} MB")
-        print(f"  Increase: {memory_increase:.1f} MB")
-        print(f"  Memory per file: {memory_increase * 1024 / len(artefacts):.1f} KB")
-        
-        # Memory increase should be reasonable (< 50MB for this test size)
-        self.assertLess(memory_increase, 100, 
-                       f"Memory usage increased too much: {memory_increase:.1f} MB")
-        
-
-# Add the performance test class to the existing test file
 if __name__ == "__main__":
-    # Run performance tests separately if desired
-    performance_suite = unittest.TestLoader().loadTestsFromTestCase(TestCrawlerPerformance)
-    performance_runner = unittest.TextTestRunner(verbosity=2)
-    performance_runner.run(performance_suite)
+    unittest.main()

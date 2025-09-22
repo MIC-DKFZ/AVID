@@ -265,7 +265,6 @@ def _scan_directories(dir_path: str,
                 it.close()
             except Exception:
                 pass
-    yield dir_path
 
 
 class DirectoryCrawler(object):
