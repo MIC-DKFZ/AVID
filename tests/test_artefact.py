@@ -21,6 +21,7 @@ import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
 from avid.common import workflow
+from pathlib import Path
 
 
 class TestArtefact(unittest.TestCase):
@@ -41,12 +42,17 @@ class TestArtefact(unittest.TestCase):
     self.assertEqual(name, 'IllegalChars#0')
 
   def test_generateArtefactPath(self):
-    path = artefact.generateArtefactPath(self.session, self.a1)
-    self.assertEqual(path, 'test_session_dir\\TestSession\\Action1\\result\\Case1')
-    path = artefact.generateArtefactPath(self.session, self.a2)
-    self.assertEqual(path, 'test_session_dir\\TestSession\\Action2\\result\\Case1\\1')
-    path = artefact.generateArtefactPath(self.session, self.a3)
-    self.assertEqual(path, 'test_session_dir\\TestSession\\IllegalChars\\result\\Case1\\1')
+    path = Path(artefact.generateArtefactPath(self.session, self.a1))
+    expected = Path('test_session_dir') / 'TestSession' / 'Action1' / 'result' / 'Case1'
+    self.assertEqual(path, expected)
+
+    path = Path(artefact.generateArtefactPath(self.session, self.a2))
+    expected = Path('test_session_dir') / 'TestSession' / 'Action2' / 'result' / 'Case1' / '1'
+    self.assertEqual(path, expected)
+
+    path = Path(artefact.generateArtefactPath(self.session, self.a3))
+    expected = Path('test_session_dir') / 'TestSession' / 'IllegalChars' / 'result' / 'Case1' / '1'
+    self.assertEqual(path, expected)
 
   def test_ensureSimilarityRelevantProperty(self):
     self.assertNotIn("ensuredTestProp", artefact.similarityRelevantProperties)
