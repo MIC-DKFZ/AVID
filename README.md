@@ -59,7 +59,7 @@ AVID supports venv. So you can also do everything just explained in a venv to is
 A fast track to get some tools to your disposal is to let avid directly automatically download and configure the latest
 version of [MITK actions](#mitk-httpswwwmitkorg). The setup wizard will also propose that. Or you can later run
 ```bash
-avidconfig tool install MITK
+avidconfig package install MITK
 ```
 
 ### Basic Example

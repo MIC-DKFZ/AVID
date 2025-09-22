@@ -50,6 +50,7 @@ APP_AUTHOR = "DKFZ"
 GLOBAL_CONFIG_FILENAME = "config.toml"
 TOOL_CONFIG_FILENAME = "avid_tool_config.toml"
 TOOL_CONFIGS_SUB_DIR = "tool-configs"
+TOOL_PACKAGES_SUB_DIR = "packages"
 
 SCOPE_MERGED = "merged"
 SCOPE_USER = "user"
@@ -195,10 +196,8 @@ def _load_toml(path: Path) -> Dict[str, Any]:
     """Load TOML file, returning empty dict if missing or invalid."""
     if not path.exists():
         return {}
-    try:
-        return toml.load(path)
-    except Exception:
-        raise
+
+    return toml.load(path)
 
 
 def _save_toml(path: Path, data: Dict[str, Any]) -> None:
@@ -259,8 +258,8 @@ def get_venv_tool_config_file_path(tool_id: str) -> Optional[Path]:
     """Return path to a tool's TOML config file for the current venv. Either it is based on the default location or
     the setting stored in the venv config file.
     """
-    root_path = get_venv_config_dir()
-    return (root_path / TOOL_CONFIG_FILENAME) if root_path else None
+    v= get_venv_tool_config_dir(tool_id)
+    return v / TOOL_CONFIG_FILENAME if v else None
 
 
 # ---------------------------------------------------------------------------
@@ -343,8 +342,8 @@ def set_setting_in_dict(key: str, config_dict: Dict[str, Any], value:Any) -> Opt
     cur[parts[-1]] = value
 
 
-def unset_setting_in_dict(key: str, config_dict: Dict[str, Any]) -> None:
-    """Remove a setting.
+def unset_setting_in_dict(key: str, config_dict: Dict[str, Any]) -> bool:
+    """Remove a setting. Return indicate if key was unset.
     :param key: Dotted key, e.g. ``"core.timeout"``.
     :param config_dict: The dict in which the key should be removed.
     """
@@ -353,14 +352,19 @@ def unset_setting_in_dict(key: str, config_dict: Dict[str, Any]) -> None:
     stack = []
     for p in parts[:-1]:
         if p not in cur:
-            return
+            return False
         stack.append((cur, p))
         cur = cur[p]
-    cur.pop(parts[-1], None)
 
-    for parent, pname in reversed(stack):
-        if isinstance(parent[pname], dict) and not parent[pname]:
-            parent.pop(pname, None)
+    if parts[-1] in cur:
+        cur.pop(parts[-1], None)
+
+        for parent, pname in reversed(stack):
+            if isinstance(parent[pname], dict) and not parent[pname]:
+                parent.pop(pname, None)
+        return True
+
+    return False
 
 
 def get_setting(key: str, scope: str = "merged") -> Optional[Any]:
@@ -398,7 +402,7 @@ def set_setting(key: str, value: Any, scope: Optional[str] = None) -> None:
         save_user_config(cfg)
 
 
-def unset_setting(key: str, scope: Optional[str] = None) -> None:
+def unset_setting(key: str, scope: Optional[str] = None) -> bool:
     """Remove a setting.
     :param key: Dotted key, e.g. ``"core.timeout"``.
     :param scope: Indicating the scope in which the setting should be set.
@@ -407,12 +411,14 @@ def unset_setting(key: str, scope: Optional[str] = None) -> None:
     target = get_valid_scope(scope)
     cfg = load_venv_config() if target == SCOPE_VENV else load_user_config()
 
-    unset_setting_in_dict(key,cfg)
+    was_unset = unset_setting_in_dict(key,cfg)
 
     if target == SCOPE_VENV:
         save_venv_config(cfg)
     else:
         save_user_config(cfg)
+
+    return was_unset
 
 
 # ---------------------------------------------------------------------------

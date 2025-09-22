@@ -27,7 +27,7 @@ Locate AVID configuration, workflow, and tool paths.
 from pathlib import Path
 import os
 import logging
-import avid.common.config_mangager as cfg
+import avid.common.config_manager as cfg
 
 
 logger = logging.getLogger(__name__)
