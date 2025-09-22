@@ -74,9 +74,12 @@ class TestCrawlerPerformance(unittest.TestCase):
         cls.num_files_per_series = 50
         
         cls.total_dirs_expected = (
-            cls.num_patients *  # patient dirs
-            cls.num_studies_per_patient *  # study dirs
-            cls.num_series_per_study  # series dirs
+            cls.num_patients *
+            cls.num_studies_per_patient *
+            cls.num_series_per_study
+        ) + (
+            cls.num_patients *
+            cls.num_studies_per_patient
         ) + cls.num_patients + 1  # + patient dirs + root
         
         cls.total_files_expected = (
