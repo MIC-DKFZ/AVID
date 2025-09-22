@@ -3,8 +3,8 @@
 /AVID.egg-info
 /build
 *.log
-/avid/tests/temporary*
-/avid/examples/output/example_session*
+/tests/temporary*
+/examples/output/*
 avid.config
 
 ########## AVID related
