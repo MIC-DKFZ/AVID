@@ -1,3 +1,21 @@
+# SPDX-FileCopyrightText: 2024, German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC)
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# or find it in LICENSE.txt.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 import tempfile
 import time
@@ -16,8 +34,28 @@ from avid.common.artefact.crawler import (
 from avid.common.artefact import similarityRelevantProperties
 import avid.common.artefact.defaultProps as ArtefactProps
 from avid.common.workflow.console_abstraction import Progress
+import statistics
 
 similarityRelevantProperties.extend(["study_id", "series_id"])
+
+
+def probe_func_performance(func, times=5, *args, **kwargs):
+    """
+    Run func(*args, **kwargs) n times and returns  a tuple of last results and basic stats.
+    """
+    results = []
+    for _ in range(times):
+        start = time.perf_counter()
+        func_results = func(*args, **kwargs)
+        end = time.perf_counter()
+        results.append(end - start)
+
+    return (func_results, {
+        "runs": times,
+        "mean": statistics.mean(results),
+        "min": min(results),
+        "max": max(results),
+    })
 
 
 class TestCrawlerPerformance(unittest.TestCase):
@@ -106,35 +144,29 @@ class TestCrawlerPerformance(unittest.TestCase):
         print(f"\nTesting single-process crawling of {self.total_files_expected} files "
               f"in {self.total_dirs_expected} directories...")
         
-        start_time = time.time()
-        
+
         crawler = DirectoryCrawler(
             root_path=self.test_root,
             file_functor=self.performance_test_function,
             n_processes=1,
             replace_existing_artefacts=False
         )
-        
-        artefacts = crawler.getArtefacts()
-        
-        end_time = time.time()
-        elapsed_time_single = end_time - start_time
-        
+
+        artefacts, probe_single = probe_func_performance(crawler.getArtefacts)
+
         # Verify results
         self.assertEqual(len(artefacts), self.total_files_expected)
         self.assertEqual(crawler.number_of_last_irrelevant, 0)
         self.assertEqual(crawler.number_of_last_dropped, 0)
 
         # Performance metrics
-        files_per_second_single = self.total_files_expected / elapsed_time_single
-        dirs_per_second_single = self.total_dirs_expected / elapsed_time_single
+        files_per_second_single = self.total_files_expected / probe_single["mean"]
+        dirs_per_second_single = self.total_dirs_expected / probe_single["mean"]
 
         ###################################################
         #Test crawling performance with multiple processes.
         num_processes = min(4, os.cpu_count() or 1)
         print(f"\nTesting multi-process crawling with {num_processes} processes...")
-
-        start_time = time.time()
 
         crawler = DirectoryCrawler(
             root_path=self.test_root,
@@ -143,10 +175,7 @@ class TestCrawlerPerformance(unittest.TestCase):
             replace_existing_artefacts=False
         )
 
-        artefacts = crawler.getArtefacts()
-
-        end_time = time.time()
-        elapsed_time_multi = end_time - start_time
+        artefacts, probe_multi = probe_func_performance(crawler.getArtefacts)
 
         # Verify results
         self.assertEqual(len(artefacts), self.total_files_expected)
@@ -154,19 +183,21 @@ class TestCrawlerPerformance(unittest.TestCase):
         self.assertEqual(crawler.number_of_last_dropped, 0)
 
         # Performance metrics
-        files_per_second_multi = self.total_files_expected / elapsed_time_multi
-        dirs_per_second_multi = self.total_dirs_expected / elapsed_time_multi
+        files_per_second_multi = self.total_files_expected / probe_multi["mean"]
+        dirs_per_second_multi = self.total_dirs_expected / probe_multi["mean"]
 
         print(f"Single-process results:")
-        print(f"  Total time: {elapsed_time_single:.2f} seconds")
-        print(f"  Files per second: {files_per_second_single:.1f}")
-        print(f"  Directories per second: {dirs_per_second_single:.1f}")
+        print(f"  Total time (mean (min, max)): {probe_single['mean']:.2f} ({probe_single['min']:.2f},"
+              f"{probe_single['max']:.2f}) seconds")
+        print(f"  Files per second (mean): {files_per_second_single:.1f}")
+        print(f"  Directories per second (mean): {dirs_per_second_single:.1f}")
 
         print(f"Multi-process results ({num_processes} processes):")
-        print(f"  Total time: {elapsed_time_multi:.2f} seconds")
-        print(f"  Files per second: {files_per_second_multi:.1f}")
-        print(f"  Directories per second: {dirs_per_second_multi:.1f}")
-        print(f"  Speedup achieved: {(elapsed_time_single/elapsed_time_multi):.1f}x")
+        print(f"  Total time (mean (min, max)): {probe_multi['mean']:.2f} ({probe_multi['min']:.2f},"
+              f"{probe_multi['max']:.2f}) seconds")
+        print(f"  Files per second (mean): {files_per_second_multi:.1f}")
+        print(f"  Directories per second (mean): {dirs_per_second_multi:.1f}")
+        print(f"  Speedup achieved (mean): {(probe_single['mean']/probe_multi['mean']):.1f}x")
 
         # Basic performance assertion (should process at least 5000 files/sec on modern hardware)
         self.assertGreater(files_per_second_single, 5000,
@@ -181,43 +212,31 @@ class TestCrawlerPerformance(unittest.TestCase):
 
         print(f"\nTesting scan directory processes...")
 
-        start_time = time.time()
+        def scan_wo_break():
+            with Progress(transient=True) as progress:
+                directory_scanning = progress.add_task("Found folders to scan")
+                for target_dir in _scan_directories(dir_path=self.test_root):
+                    progress.update(directory_scanning, advance=1)
 
-        with Progress(transient=True) as progress:
-            directory_scanning = progress.add_task("Found folders to scan")
-            dirs = 0
-            for target_dir in _scan_directories(dir_path=self.test_root):
-                progress.update(directory_scanning, advance=1)
-                dirs += 1
-
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-
-        # Performance metrics
-        dirs_per_second = self.total_dirs_expected / elapsed_time
+        artefacts, probe_wo_break = probe_func_performance(scan_wo_break)
+        dirs_per_second = self.total_dirs_expected / probe_wo_break['mean']
 
         print(f"\nTesting scan directory processes with break...")
+        def scan_w_break():
+            with Progress(transient=True) as progress:
+                directory_scanning = progress.add_task("Found folders to scan")
+                for target_dir in _scan_directories(dir_path=self.test_root,
+                                                    break_checker_delegate=TestCrawlerPerformance.dicom_break_delegate):
+                    progress.update(directory_scanning, advance=1)
 
-        start_time = time.time()
-
-        with Progress(transient=True) as progress:
-            directory_scanning = progress.add_task("Found folders to scan")
-            dirs = 0
-            for target_dir in _scan_directories(dir_path=self.test_root, break_checker_delegate=self.dicom_break_delegate):
-                progress.update(directory_scanning, advance=1)
-                dirs += 1
-
-        end_time = time.time()
-        elapsed_time_break = end_time - start_time
-
-        # Performance metrics
-        dirs_per_second_break = self.total_dirs_expected / elapsed_time_break
+        artefacts, probe_w_break = probe_func_performance(scan_w_break)
+        dirs_per_second_break = self.total_dirs_expected / probe_w_break['mean']
 
         print(f"Scan directory results:")
-        print(f"  Total time: {elapsed_time:.2f} seconds")
+        print(f"  Total time (mean): {probe_wo_break['mean']:.2f} seconds")
         print(f"  Directories per second: {dirs_per_second:.1f}")
         print(f"Scan directory results with break check:")
-        print(f"  Total time: {elapsed_time_break:.2f} seconds")
+        print(f"  Total time (mean): {probe_w_break['mean']:.2f} seconds")
         print(f"  Directories per second: {dirs_per_second_break:.1f}")
 
         # Basic performance assertion (should process at least 100 files/sec on modern hardware)

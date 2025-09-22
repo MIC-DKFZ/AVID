@@ -197,7 +197,7 @@ def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: s
     try:
         with os.scandir(folder_path) as entries:
             for entry in entries:
-                if entry.is_file(follow_symlinks=False):
+                if entry.is_file():
                     full_path = entry.path
 
                     artefact = functor(
@@ -230,23 +230,42 @@ def _scan_directories(dir_path: str,
         Called for each directory entry. If it returns True, scanning stops for that directory.
     :yields: Directory paths as strings
     """
-    # Yield the current directory first
-    yield dir_path
+    # also put the starting directory on the stack
+    stack = [dir_path]
 
-    try:
-        # Use os.scandir for performance - much faster than os.listdir + stat calls
-        with os.scandir(dir_path) as entries:
-            for entry in entries:
-                # Check break condition if delegate provided
-                if break_checker_delegate and break_checker_delegate(entry):
+    # Localize frequently-used names to speed up inner loop
+    _os_scandir = os.scandir
+    _break_checker_delegate = break_checker_delegate
+
+    while stack:
+        current = stack.pop()
+        yield current
+
+        try:
+            it = _os_scandir(current)  # returns an iterator/ScandirIterator
+        except (OSError, PermissionError) as e:
+            crawl_logger.warning(f"Cannot access directory {current}: {e}")
+            continue
+
+        try:
+            for entry in it:
+                if _break_checker_delegate and _break_checker_delegate(entry):
                     break
 
-                # Recursively scan subdirectories using cached is_dir() call
-                if entry.is_dir(follow_symlinks=False):
-                    yield from _scan_directories(entry.path, break_checker_delegate)
-    except (OSError, PermissionError) as e:
-        # Log permission or access errors but continue with other directories
-        crawl_logger.warning(f"Cannot access directory {dir_path}: {e}")
+                try:
+                    if entry.is_dir():
+                        # only build child path for directories (fewer string creations)
+                        stack.append(entry.path)
+                except OSError:
+                    # any stat/permission issue for this entry -> skip entry
+                    continue
+        finally:
+            # ensure scandir iterator is closed promptly
+            try:
+                it.close()
+            except Exception:
+                pass
+    yield dir_path
 
 
 class DirectoryCrawler(object):
@@ -337,7 +356,7 @@ class DirectoryCrawler(object):
         """
         artefacts = ArtefactCollection()
         with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor,\
-                Progress(transient=True, refresh_per_second=0.5) as progress:
+                Progress(transient=True, refresh_per_second=2) as progress:
             directory_scanning = progress.add_task("Found folders to scan")
             futures = []
             for target_dir in _scan_directories(dir_path=self._rootPath, break_checker_delegate=self._scan_directory_break_delegate):
