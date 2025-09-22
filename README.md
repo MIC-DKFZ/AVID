@@ -34,6 +34,13 @@ For more thoughts on when to use AVID and when other options might be better sui
 
 ## 🚀 Quick Start
 
+### Requirements
+
+- Python 3.8+
+- Operating system independent (Windows, Linux, macOS)
+- Optional: External tools for specific processing steps
+
+
 ### Installation
 
 ```bash
@@ -43,6 +50,7 @@ or, if you are working with a console/terminal that supports nice rich output, w
 ```bash
 pip install avid[rich]
 ```
+
 
 ### Configuration
 After you have installed AVID you can use it, but out of the box only with actions that utilize python functions
@@ -198,6 +206,20 @@ Therefore we ignore them for now. If you are interested to learn more please go 
 **Workflow scripts** declare what processing you want to happen with your data. They define the sequence of actions, selectors, and linkers etc. that transform your data.
 The script shown in [Basic Example](#basic-example) is a very simple workflow script example.
 
+### 📁 Typical project structure
+A typical AVID project structure would be for example the following:
+```
+your_project/
+├── data/                   # The raw input data used for the project
+├── output/                 # Processing results
+│   ├── bootstrap.avid      # Initial bootstrap session generated data by datacrawler.py
+│   ├── session/            # Session sub dir containing all results produced by workflow.py
+│   └── session.avid        # Full processing session generated/used when running workflow.py
+├── datacrawler.py          # Datacrawler script that is used to generates bootstrap.avid
+└── workflow.py             # Main processing workflow that updates session.py and generates content of session/
+```
+
+
 ## 📊 Real-world Example
 
 Let's say you have a dataset with CT images, masks segmented on the CT images and  MR images from multiple patients across different timepoints, and you want to:
@@ -267,7 +289,8 @@ AVID provides numerous built-in actions for common image processing tasks:
 - **CLI integration**: Easy integration of command-line tools
 
 ### MITK (https://www.mitk.org)
-Remark: To use these actions the MITK cli apps have to be installed and configured.
+Remark: To use these actions the MITK cli apps have to be installed and configured. See also
+[Configuration](#configuration) for more details.
 - **Registration**: Rigid, affine, and deformable registration
 - **Resampling/Stitching**: Image resampling (optionally based on determined registrations) and image stitching
 - **Radiomics**: Feature extraction from images and masks
@@ -289,17 +312,6 @@ Remark: To use these actions the RTTB tools have to be installed and AVID has to
 - **Struct voxelization**: Voxelization of RT structure sets
 
 
-## 📁 Project Structure
-
-```
-your_project/
-├── data/                    # Raw input data
-├── output/                  # Processing results
-│   ├── bootstrap.avid      # Initial data catalog
-│   └── session.avid        # Full processing session
-├── datacrawler.py          # Data discovery script
-└── workflow.py             # Main processing workflow
-```
 
 ## 🎓 Learning More
 
@@ -308,61 +320,77 @@ Check out our comprehensive Jupyter notebook tutorial: `examples/AVID_introducti
 
 
 ### Configuration
-Configure AVID for your environment:
+For the basic configuration you can use the setup wizard by calling
 ```bash
-# Set tools path for external applications
-avidconfig settings avid.toolspath /path/to/your/tools
-
-# Install required tools (Windows)
-avidconfig tools install
+avidconfig config
 ```
 
-## 🤔 When to Choose AVID vs Other Workflow Tools
+But it is also possible to do everything explicit.
+To set a custom tools path (path where packages are installed and tool configurations are stored) for example, you can use the following command:
+```bash
+# Set tools path for external applications
+avidconfig settings set tools_path <tools-root-path>
+```
 
-### Choose AVID when:
+To install a package that is directly supported by AVID:
+```bash
+# Install required tools
+avidconfig package install <package ID>
+
+# E.g. install MITK tools
+avidconfig package install MITK
+```
+
+To add a custom tool by hand. You can als add it be explictly call:
+```bash
+avidconfig tool add <tool ID> <executable path>
+```
+After this call avid will have added and configured the tool "tool ID" with a executable located at the given executable path.
+
+## 🤔 When to Choose AVID vs Other Workflow Tools
+**REMARK: Please be aware that it only compiles the list of workflow tools we use and can comment on.**
+Therefor this list is neither extensive in terms of options nor most likely complete
+in the list of reasons for different tools. So please take it with a grain of salt.
+Understand it as a documentation who we in our projects would decide which tool to pick for the workflow use case.
+
+### We choose AVID when:
 - ✅ **Dynamic data relationships**: Your workflow needs to automatically handle varying numbers of inputs per case (e.g., different patients have different numbers of timepoints or imaging modalities)
 - ✅ **Complex data linking**: You need to pair/match data based on metadata (same patient, timepoint, modality combinations)
 - ✅ **Biomedical imaging focus**: Working with medical images where patient-centric organization is crucial
-- ✅ **Unpredictable data structure**: Your dataset structure varies and you want the workflow to adapt automatically
+- ✅ **Unpredictable dataset structure**: Your dataset structure varies and you want the workflow to adapt automatically
 - ✅ **Metadata-driven processing**: The processing logic depends heavily on data properties rather than fixed file paths
 
-### Choose Airflow when:
-- 🔄 **Fixed DAGs**: You have well-defined, stable workflow structures
-- 📅 **Scheduling focus**: You need complex scheduling, monitoring, and alerting capabilities
-- 🏢 **Enterprise environment**: Working in environments requiring robust orchestration, user management, and web UI
-- 🔗 **Service integration**: Heavy integration with databases, APIs, and external services
+### We choose Airflow when:
+- **Fixed DAGs**: You have well-defined, stable workflow structures
+- **Scheduling focus**: You need complex scheduling, monitoring, and alerting capabilities
+- **Enterprise environment**: Working in environments requiring robust orchestration, user management, and web UI
+- **Service integration**: Heavy integration with databases, APIs, and external services
+- **Container-first**: Workflows are primarily containerized tools
 
-### Choose Nextflow when:
-- 🧬 **Bioinformatics pipelines**: Primarily processing genomics/transcriptomics data
-- ☁️ **Cloud-native**: Heavy focus on containerization and cloud deployment
-- 📊 **High-throughput computing**: Need for automatic parallelization and resource management
-- 🐳 **Container-first**: Workflows are primarily containerized tools
+### We would choose Snakemake when:
+- **Fixed file-based workflows**: Processing follows clear input → output file patterns
+- **Make-like logic**: Comfortable with rule-based, target-driven execution
+- **Python ecosystem**: Want Python-based rules with minimal learning curve and a already strong community
+- **Reproducible science**: Focus on reproducibility with minimal overhead
 
-### Choose Snakemake when:
-- 📁 **File-based workflows**: Processing follows clear input → output file patterns
-- 🎯 **Make-like logic**: Comfortable with rule-based, target-driven execution
-- 🐍 **Python ecosystem**: Want Python-based rules with minimal learning curve
-- 🔄 **Reproducible science**: Focus on reproducibility with minimal overhead
+**In summary**: Choose AVID when your data structure is dynamic and metadata-driven, especially in biomedical imaging
+where patient-centric organization and flexible data relationships are key requirements.
 
-**In summary**: Choose AVID when your data structure is dynamic and metadata-driven, especially in biomedical imaging where patient-centric organization and flexible data relationships are key requirements.
 
-## 📋 Requirements
-
-- Python 3.x
-- Operating system independent (Windows, Linux, macOS)
-- Optional: External tools for specific processing steps
-
-## 📄 License
-
-Copyright © German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC).
-Please ensure your usage complies with the code license (see file LICENSE).
 
 ## 🆘 Support & Contributing
 
 - 📖 **Documentation**: Full API documentation available
 - 🐛 **Issues**: Report bugs and feature requests
 - 💬 **Discussion**: Join our community for questions and tips
-- 🔧 **Contributing**: We welcome contributions and custom actions
+- 🔧 **Contributing**: We welcome contributions, custom actions, support for other packages
+
+
+
+## Copyright & License
+
+Copyright © German Cancer Research Center (DKFZ), Division of Medical Image Computing (MIC).
+Please ensure your usage complies with the code license (see file LICENSE).
 
 ---
 
