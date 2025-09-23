@@ -16,4 +16,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Package with actions based on MITK CLI applications or data types.'''
+"""Package with actions based on MITK CLI applications or data types."""

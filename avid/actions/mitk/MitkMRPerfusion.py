@@ -23,35 +23,64 @@ import subprocess
 
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import FractionLinker
-from avid.selectors import TypeSelector
 from avid.actions import BatchActionBase
 from avid.actions.cliActionBase import CLIActionBase
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import AVIDUrlLocater, osChecker
+from avid.linkers import FractionLinker
+from avid.selectors import TypeSelector
 
 logger = logging.getLogger(__name__)
 
 
 class MitkMRPerfusionAction(CLIActionBase):
     """Class that wrapps the single action for the tool MRPerfusionMiniApp."""
+
     MODEL_DESCRIPTIVE = "descriptive"
     MODEL_TOFTS = "tofts"
     MODEL_2CX = "2CX"
     MODEL_3SL = "3SL"
     MODEL_2SL = "2SL"
 
-    def __init__(self, signal, model=MODEL_TOFTS, injectiontime=None, mask=None, aifmask=None, aifimage=None,
-                 hematocrit=0.45, roibased=False, constraints=False, actionTag="MRPerfusion", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                               tool_id="MitkMRPerfusion", actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
+    def __init__(
+        self,
+        signal,
+        model=MODEL_TOFTS,
+        injectiontime=None,
+        mask=None,
+        aifmask=None,
+        aifimage=None,
+        hematocrit=0.45,
+        roibased=False,
+        constraints=False,
+        actionTag="MRPerfusion",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+    ):
+        CLIActionBase.__init__(
+            self,
+            actionTag,
+            alwaysDo,
+            session,
+            additionalActionProps,
+            tool_id="MitkMRPerfusion",
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+        )
 
         if aifimage is not None and aifmask is None:
-            raise RuntimeError("Cannot use an AIF image without and AIF mask. Please specify mask.")
+            raise RuntimeError(
+                "Cannot use an AIF image without and AIF mask. Please specify mask."
+            )
 
-        self._addInputArtefacts(signal=signal, mask=mask, aifmask=aifmask, aifimage=aifimage)
+        self._addInputArtefacts(
+            signal=signal, mask=mask, aifmask=aifmask, aifimage=aifimage
+        )
 
         self._signal = self._ensureSingleArtefact(signal, "signal")
         self._model = model
@@ -63,24 +92,33 @@ class MitkMRPerfusionAction(CLIActionBase):
         self._mask = self._ensureSingleArtefact(mask, "mask")
         self._constraints = constraints
 
-        self._resultTemplate = self.generateArtefact(self._signal,
-                                                     userDefinedProps={
-                                                         artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                                                         artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK},
-                                                     url_user_defined_part=self.instanceName,
-                                                     url_extension='nrrd')
+        self._resultTemplate = self.generateArtefact(
+            self._signal,
+            userDefinedProps={
+                artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+            },
+            url_user_defined_part=self.instanceName,
+            url_extension="nrrd",
+        )
 
     def _generateName(self):
-        style = ''
+        style = ""
         if not self._roibased:
-            style = 'pixel'
-        name = "perfusion_{}_{}_{}".format(self._model, style, artefactHelper.getArtefactShortName(self._signal))
+            style = "pixel"
+        name = "perfusion_{}_{}_{}".format(
+            self._model, style, artefactHelper.getArtefactShortName(self._signal)
+        )
         if self._mask is not None:
             name += "_ROI_{}".format(artefactHelper.getArtefactShortName(self._mask))
         if self._aifimage is not None:
-            name += "_AIF_{}".format(artefactHelper.getArtefactShortName(self._aifimage))
+            name += "_AIF_{}".format(
+                artefactHelper.getArtefactShortName(self._aifimage)
+            )
         if self._aifmask is not None:
-            name += "_AIFROI_{}".format(artefactHelper.getArtefactShortName(self._aifmask))
+            name += "_AIFROI_{}".format(
+                artefactHelper.getArtefactShortName(self._aifmask)
+            )
 
         return name
 
@@ -89,60 +127,72 @@ class MitkMRPerfusionAction(CLIActionBase):
 
         self._resultArtefacts = dict()
         for info in resultsInfo:
-            result = self.generateArtefact(self._signal,
-                                           userDefinedProps={
-                                               artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                                               artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
-                                               artefactProps.RESULT_SUB_TAG: info[1]})
+            result = self.generateArtefact(
+                self._signal,
+                userDefinedProps={
+                    artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                    artefactProps.FORMAT: artefactProps.FORMAT_VALUE_ITK,
+                    artefactProps.RESULT_SUB_TAG: info[1],
+                },
+            )
             result[artefactProps.URL] = info[2]
             self._resultArtefacts[info[1]] = result
 
         return list(self._resultArtefacts.values())
 
     def _generateCLIArguments(self):
-        resultPath = artefactHelper.getArtefactProperty(self._resultTemplate, artefactProps.URL)
+        resultPath = artefactHelper.getArtefactProperty(
+            self._resultTemplate, artefactProps.URL
+        )
         signalPath = artefactHelper.getArtefactProperty(self._signal, artefactProps.URL)
         maskPath = artefactHelper.getArtefactProperty(self._mask, artefactProps.URL)
-        aifMaskPath = artefactHelper.getArtefactProperty(self._aifmask, artefactProps.URL)
+        aifMaskPath = artefactHelper.getArtefactProperty(
+            self._aifmask, artefactProps.URL
+        )
         aifPath = artefactHelper.getArtefactProperty(self._aifimage, artefactProps.URL)
 
-        execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
+        execURL = self._cli_connector.get_executable_url(
+            self._session, self._actionID, self._actionConfig
+        )
 
         result = list()
         result.append(execURL)
-        result.append('-i')
-        result.append('{}'.format(signalPath))
-        result.append('-o')
-        result.append('{}'.format(resultPath))
-        result.append('--model')
-        result.append('{}'.format(self._model))
+        result.append("-i")
+        result.append("{}".format(signalPath))
+        result.append("-o")
+        result.append("{}".format(resultPath))
+        result.append("--model")
+        result.append("{}".format(self._model))
 
         if maskPath is not None:
-            result.append('-m')
-            result.append('{}'.format(maskPath))
+            result.append("-m")
+            result.append("{}".format(maskPath))
 
         if aifMaskPath is not None:
-            result.append('--aifmask')
-            result.append('{}'.format(aifMaskPath))
+            result.append("--aifmask")
+            result.append("{}".format(aifMaskPath))
 
         if aifPath is not None:
-            result.append('--aifimage')
-            result.append('{}'.format(aifPath))
+            result.append("--aifimage")
+            result.append("{}".format(aifPath))
 
         if self._roibased:
-            result.append('-r')
+            result.append("-r")
 
         if self._constraints:
-            result.append('-c')
+            result.append("-c")
 
         if self._model == self.MODEL_DESCRIPTIVE and self._injectiontime is not None:
-            result.append('--injectiontime')
-            result.append('{}'.format(self._injectiontime))
+            result.append("--injectiontime")
+            result.append("{}".format(self._injectiontime))
 
-        if not self._model == self.MODEL_DESCRIPTIVE or not self._model == self.MODEL_2SL \
-                or not self._model == self.MODEL_3SL:
-            result.append('--hematocrit')
-            result.append('{}'.format(self._hematocrit))
+        if (
+            not self._model == self.MODEL_DESCRIPTIVE
+            or not self._model == self.MODEL_2SL
+            or not self._model == self.MODEL_3SL
+        ):
+            result.append("--hematocrit")
+            result.append("{}".format(self._hematocrit))
 
         return result
 
@@ -151,13 +201,15 @@ class MitkMRPerfusionAction(CLIActionBase):
         results = list()
         try:
             args = self._generateCLIArguments()
-            args.append('--preview')
+            args.append("--preview")
             output = subprocess.check_output(args, cwd=self._cwd)
 
             for line in output.splitlines():
                 stringLine = line.decode()
-                if stringLine.startswith('Store result '):
-                    regResults = re.findall('Store result (.*): (.*) -> (.*)', stringLine)
+                if stringLine.startswith("Store result "):
+                    regResults = re.findall(
+                        "Store result (.*): (.*) -> (.*)", stringLine
+                    )
 
                     try:
                         paramtype = regResults[0][0]
@@ -165,7 +217,9 @@ class MitkMRPerfusionAction(CLIActionBase):
                         url = regResults[0][2]
                         results.append((paramtype, name, url))
                     except:
-                        raise RuntimeError('Failed to parse storage info line: {}'.format(stringLine))
+                        raise RuntimeError(
+                            "Failed to parse storage info line: {}".format(stringLine)
+                        )
 
         except subprocess.CalledProcessError:
             pass
@@ -179,7 +233,9 @@ class MitkMRPerfusionAction(CLIActionBase):
         # should be handled soundly by reworking prepareCLIExecution not returning the content string, but all arguments
         # of the call. Then escaption etc can be handled in the base class.
         content = args[0] + ' "' + '" "'.join(args[1:]) + '"'
-        resultPath = artefactHelper.getArtefactProperty(self._resultTemplate, artefactProps.URL)
+        resultPath = artefactHelper.getArtefactProperty(
+            self._resultTemplate, artefactProps.URL
+        )
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
         return content
@@ -194,10 +250,21 @@ class MitkMRPerfusionBatchAction(BatchActionBase):
     MODEL_2SL = MitkMRPerfusionAction.MODEL_2SL
     MODEL_3SL = MitkMRPerfusionAction.MODEL_3SL
 
-    def __init__(self, signalSelector, maskSelector=None, aifmaskSelector=None, aifSelector=None,
-                 maskLinker=None, aifLinker=None, aifmaskLinker=None,
-                 actionTag="MRPerfusion", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        signalSelector,
+        maskSelector=None,
+        aifmaskSelector=None,
+        aifSelector=None,
+        maskLinker=None,
+        aifLinker=None,
+        aifmaskLinker=None,
+        actionTag="MRPerfusion",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
 
         if maskLinker is None:
             maskLinker = FractionLinker()
@@ -206,15 +273,24 @@ class MitkMRPerfusionBatchAction(BatchActionBase):
         if aifmaskLinker is None:
             aifmaskLinker = FractionLinker()
 
-        additionalInputSelectors = {"mask": maskSelector, "aifmask": aifmaskSelector,
-                                    "aifimage": aifSelector}
-        linker = {"mask": maskLinker, "aifmask": aifmaskLinker,
-                  "aifimage": aifLinker}
+        additionalInputSelectors = {
+            "mask": maskSelector,
+            "aifmask": aifmaskSelector,
+            "aifimage": aifSelector,
+        }
+        linker = {"mask": maskLinker, "aifmask": aifmaskLinker, "aifimage": aifLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkMRPerfusionAction,
-                                 primaryInputSelector=signalSelector,
-                                 primaryAlias="signal", additionalInputSelectors=additionalInputSelectors,
-                                 linker=linker, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=MitkMRPerfusionAction,
+            primaryInputSelector=signalSelector,
+            primaryAlias="signal",
+            additionalInputSelectors=additionalInputSelectors,
+            linker=linker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

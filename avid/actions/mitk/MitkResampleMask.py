@@ -19,36 +19,71 @@
 import logging
 
 import avid.common.artefact.defaultProps as artefactProps
-
 from avid.actions import BatchActionBase
 from avid.actions.genericCLIAction import GenericCLIAction
-from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.selectors import TypeSelector
 
 logger = logging.getLogger(__name__)
 
-class MitkResampleMaskAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MitkResampleMask.'''
 
-    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkResampleMask",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-        GenericCLIAction.__init__(self, i=images, tool_id="MitkResampleMask", outputFlags=['o'],
-                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
-                                  alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
-                                  defaultoutputextension=defaultoutputextension)
+class MitkResampleMaskAction(GenericCLIAction):
+    """Class that wraps the single action for the tool MitkResampleMask."""
+
+    def __init__(
+        self,
+        images,
+        additionalArgs=None,
+        defaultoutputextension="nrrd",
+        actionTag="MitkResampleMask",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+    ):
+        GenericCLIAction.__init__(
+            self,
+            i=images,
+            tool_id="MitkResampleMask",
+            outputFlags=["o"],
+            additionalArgs=additionalArgs,
+            illegalArgs=["output", "input"],
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+            defaultoutputextension=defaultoutputextension,
+        )
 
 
 class MitkResampleMaskBatchAction(BatchActionBase):
-    '''Batch action for MitkResampleMask.'''
+    """Batch action for MitkResampleMask."""
 
-    def __init__(self, imageSelector,
-                 actionTag="MitkResampleMask", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkResampleMaskAction,
-                                 primaryInputSelector=imageSelector,
-                                 primaryAlias="images", additionalInputSelectors=None,
-                                 linker=None, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+    def __init__(
+        self,
+        imageSelector,
+        actionTag="MitkResampleMask",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=MitkResampleMaskAction,
+            primaryInputSelector=imageSelector,
+            primaryAlias="images",
+            additionalInputSelectors=None,
+            linker=None,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

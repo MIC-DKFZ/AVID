@@ -18,6 +18,7 @@
 
 from avid.actions.simpleScheduler import SimpleScheduler
 
+
 class TestingScheduler:
     """
     A helper scheduler for testing purposes that wraps a different scheduler and only passes on a specified number of
@@ -31,4 +32,4 @@ class TestingScheduler:
         self.action_limit = action_limit
 
     def execute(self, actionList):
-        self.scheduler.execute(actionList[:self.action_limit])
+        self.scheduler.execute(actionList[: self.action_limit])

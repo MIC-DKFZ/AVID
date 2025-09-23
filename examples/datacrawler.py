@@ -16,15 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.common.artefact.crawler import runCrawlerScriptMain, crawl_filter_by_filename, crawl_property_by_path,\
-    crawl_property_by_filename
 import avid.common.artefact.defaultProps as ArtefactProps
+from avid.common.artefact.crawler import (
+    crawl_filter_by_filename,
+    crawl_property_by_filename,
+    crawl_property_by_path,
+    runCrawlerScriptMain,
+)
 
 
 @crawl_filter_by_filename(filename_exclude="README.md")
 @crawl_property_by_path(property_map={0: ArtefactProps.CASE})
-@crawl_property_by_filename(extraction_rules={ArtefactProps.ACTIONTAG: (r"^([^_]+)", 'UNKNOWN'),
-                                              ArtefactProps.TIMEPOINT: (r"_TP(\d+)", 0)})
+@crawl_property_by_filename(
+    extraction_rules={
+        ArtefactProps.ACTIONTAG: (r"^([^_]+)", "UNKNOWN"),
+        ArtefactProps.TIMEPOINT: (r"_TP(\d+)", 0),
+    }
+)
 def fileFunction(full_path, artefact_candidate, **kwargs):
     """
     Functor to generate an artefact for a file found by the crawler.

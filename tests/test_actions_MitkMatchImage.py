@@ -23,50 +23,77 @@ from pathlib import Path
 
 import avid.common.workflow as workflow
 from avid.actions.mitk.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
-from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.common.AVIDUrlLocater import (
+    get_tool_config_file_path,
+    get_tool_executable_url,
+)
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(get_tool_config_file_path('MitkMatchImage') is None, 'Tool MitkMatchImage not installed on the system.')
+
+@unittest.skipIf(
+    get_tool_config_file_path("MitkMatchImage") is None,
+    "Tool MitkMatchImage not installed on the system.",
+)
 class TestMatchR(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "matchRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "matchRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_matchR")
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "matchRTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "matchRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_matchR"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
-      self.itkAlgorithm = Path(get_tool_executable_url(self.session,
-                                                       "MitkMatchImage")).parents[1] / "bin" / "mdra-0-14_MITK_MultiModal_rigid_default.dll"
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+        self.itkAlgorithm = (
+            Path(get_tool_executable_url(self.session, "MitkMatchImage")).parents[1]
+            / "bin"
+            / "mdra-0-14_MITK_MultiModal_rigid_default.dll"
+        )
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_reg_action(self):
-      
-      action = mitkMatch(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = mitkMatch(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            algorithm=self.itkAlgorithm,
+            actionTag="TestReg",
+        )
+        action.do()
 
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_reg_action_always_do(self):
-      
-      action = mitkMatch(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg", alwaysDo = True)
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = mitkMatch(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            algorithm=self.itkAlgorithm,
+            actionTag="TestReg",
+            alwaysDo=True,
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

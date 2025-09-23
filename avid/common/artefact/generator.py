@@ -17,14 +17,27 @@
 # limitations under the License.
 
 """
-  This module offers methods for correct generation ore adding of artefact entries
-  tis responsible to add new dict entries in the flat file data container
+This module offers methods for correct generation ore adding of artefact entries
+tis responsible to add new dict entries in the flat file data container
 """
 
-from . import defaultProps
 from avid.common.artefact import Artefact
 
-def generateArtefactEntry(case, caseInstance, timePoint, actionTag, artefactType, artefactFormat, url = None, objective= None, invalid = False, **additionalProps):
+from . import defaultProps
+
+
+def generateArtefactEntry(
+    case,
+    caseInstance,
+    timePoint,
+    actionTag,
+    artefactType,
+    artefactFormat,
+    url=None,
+    objective=None,
+    invalid=False,
+    **additionalProps,
+):
     """
     REMARK: This is a deprecated version. With less default and different order of arguments in signature.
     Use the new version generate_artefact_entry if possible.
@@ -57,14 +70,23 @@ def generateArtefactEntry(case, caseInstance, timePoint, actionTag, artefactType
     artefact[defaultProps.OBJECTIVE] = objective
     artefact[defaultProps.INVALID] = invalid
 
-    for key in (additionalProps):
+    for key in additionalProps:
         artefact[key] = additionalProps[key]
 
     return artefact
 
 
-def generate_artefact_entry(case, time_point, action_tag, artefact_type=defaultProps.TYPE_VALUE_RESULT,
-                            case_instance=None, url=None, objective=None, invalid=False, **additional_props):
+def generate_artefact_entry(
+    case,
+    time_point,
+    action_tag,
+    artefact_type=defaultProps.TYPE_VALUE_RESULT,
+    case_instance=None,
+    url=None,
+    objective=None,
+    invalid=False,
+    **additional_props,
+):
     """
     This is a generic method to generate an arbitrary artefact entry.
     dict (\*\*kwargs)  can be used to pass additional infos for the dict entry
@@ -94,6 +116,6 @@ def generate_artefact_entry(case, time_point, action_tag, artefact_type=defaultP
     artefact[defaultProps.INVALID] = invalid
 
     for key in additional_props:
-      artefact[key] = additional_props[key]
+        artefact[key] = additional_props[key]
 
     return artefact

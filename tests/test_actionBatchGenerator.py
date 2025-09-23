@@ -15,61 +15,122 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import unittest
-import avid.common.workflow as workflow
-import os
-from avid.actions.dummy import DummyBatchAction
 
-import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact.generator as artefactGenerator
+import avid.common.workflow as workflow
+from avid.actions.dummy import DummyBatchAction
 from avid.selectors import SelectorBase
 
 
 class TestSelector(SelectorBase):
-  '''
-      Special selector that will only select the artefacts that are passed with init in order to directly control
-      what the action will get.
-  '''
+    """
+    Special selector that will only select the artefacts that are passed with init in order to directly control
+    what the action will get.
+    """
 
-  def __init__(self, legalArtefacts):
-    ''' init '''
-    super().__init__()
-    self._legalArtefacts = legalArtefacts
+    def __init__(self, legalArtefacts):
+        """init"""
+        super().__init__()
+        self._legalArtefacts = legalArtefacts
 
-  def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
-    result = []
-    for a in workflowData:
-        if a in self._legalArtefacts:
-            result.append(a)
-    return self._legalArtefacts
+    def getSelection(self, workflowData):
+        """Filters the given list of entries and returns all selected entries"""
+        result = []
+        for a in workflowData:
+            if a in self._legalArtefacts:
+                result.append(a)
+        return self._legalArtefacts
 
 
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_actions")
-        self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_actions"
+        )
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data")
 
-        self.a_valid = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
-        self.a_valid2 = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action3", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
-        self.a_NoneURL = artefactGenerator.generateArtefactEntry("Case2", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", None)
-        self.a_NoFile = artefactGenerator.generateArtefactEntry("Case3", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", "notexistingFile")
-        self.a_Invalid = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"), None, True)
-        
-        self.a_valid_new = artefactGenerator.generateArtefactEntry("Case1", 0, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
-        self.a_valid2_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action3", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
-        self.a_Invalid_new = artefactGenerator.generateArtefactEntry("Case2", 2, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", os.path.join(self.testDataDir, "artefact2.txt"))
- 
+        self.a_valid = artefactGenerator.generateArtefactEntry(
+            "Case1",
+            0,
+            0,
+            "Action1",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact1.txt"),
+        )
+        self.a_valid2 = artefactGenerator.generateArtefactEntry(
+            "Case2",
+            2,
+            0,
+            "Action3",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact2.txt"),
+        )
+        self.a_NoneURL = artefactGenerator.generateArtefactEntry(
+            "Case2", 1, 0, "Action1", artefactProps.TYPE_VALUE_RESULT, "dummy", None
+        )
+        self.a_NoFile = artefactGenerator.generateArtefactEntry(
+            "Case3",
+            1,
+            0,
+            "Action1",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            "notexistingFile",
+        )
+        self.a_Invalid = artefactGenerator.generateArtefactEntry(
+            "Case2",
+            2,
+            0,
+            "Action1",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact2.txt"),
+            None,
+            True,
+        )
+
+        self.a_valid_new = artefactGenerator.generateArtefactEntry(
+            "Case1",
+            0,
+            0,
+            "Action1",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact1.txt"),
+        )
+        self.a_valid2_new = artefactGenerator.generateArtefactEntry(
+            "Case2",
+            2,
+            0,
+            "Action3",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact2.txt"),
+        )
+        self.a_Invalid_new = artefactGenerator.generateArtefactEntry(
+            "Case2",
+            2,
+            0,
+            "Action1",
+            artefactProps.TYPE_VALUE_RESULT,
+            "dummy",
+            os.path.join(self.testDataDir, "artefact2.txt"),
+        )
+
         self.session = workflow.Session("session1", self.sessionDir)
         self.session.artefacts.add_artefact(self.a_valid)
         self.session.artefacts.add_artefact(self.a_valid2)
         self.session.artefacts.add_artefact(self.a_NoneURL)
         self.session.artefacts.add_artefact(self.a_NoFile)
         self.session.artefacts.add_artefact(self.a_Invalid)
-        
 
     def tearDown(self):
         try:
@@ -78,110 +139,140 @@ class Test(unittest.TestCase):
             pass
 
     def test_simelar_exisiting_alwaysDo(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_valid2_new]),"Action1", alwaysDo = True)
-      
-      action.do()
-      
-      self.assertTrue(action.isSuccess)
-      self.assertIn(self.a_valid_new, action.outputArtefacts)
-      self.assertIn(self.a_valid2_new, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid_new, self.session.artefacts)
-      self.assertIn(self.a_valid2_new, self.session.artefacts)
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid2))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_valid2_new]),
+            "Action1",
+            alwaysDo=True,
+        )
+
+        action.do()
+
+        self.assertTrue(action.isSuccess)
+        self.assertIn(self.a_valid_new, action.outputArtefacts)
+        self.assertIn(self.a_valid2_new, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid_new, self.session.artefacts)
+        self.assertIn(self.a_valid2_new, self.session.artefacts)
+        self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_valid2)
+        )
 
     def test_simelar_exisiting_alwaysOff(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_valid2_new]),"Action1", alwaysDo = False)
-      
-      action.do()
-      
-      self.assertTrue(action.isSkipped)
-      self.assertIn(self.a_valid, action.outputArtefacts)
-      self.assertIn(self.a_valid2, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid, self.session.artefacts)
-      self.assertIn(self.a_valid2, self.session.artefacts)
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid2_new))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_valid2_new]),
+            "Action1",
+            alwaysDo=False,
+        )
 
+        action.do()
+
+        self.assertTrue(action.isSkipped)
+        self.assertIn(self.a_valid, action.outputArtefacts)
+        self.assertIn(self.a_valid2, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid, self.session.artefacts)
+        self.assertIn(self.a_valid2, self.session.artefacts)
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_valid_new)
+        )
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_valid2_new)
+        )
 
     def test_simelar_mixed_alwaysDo(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_Invalid_new]),"Action1", alwaysDo = True)
-      
-      action.do()
-      
-      self.assertTrue(action.isSuccess)
-      self.assertIn(self.a_valid_new, action.outputArtefacts)
-      self.assertIn(self.a_Invalid_new, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid_new, self.session.artefacts)
-      self.assertIn(self.a_Invalid_new, self.session.artefacts)
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_Invalid))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_Invalid_new]),
+            "Action1",
+            alwaysDo=True,
+        )
 
+        action.do()
+
+        self.assertTrue(action.isSuccess)
+        self.assertIn(self.a_valid_new, action.outputArtefacts)
+        self.assertIn(self.a_Invalid_new, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid_new, self.session.artefacts)
+        self.assertIn(self.a_Invalid_new, self.session.artefacts)
+        self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_Invalid)
+        )
 
     def test_simelar_mixed_alwaysOff(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_Invalid_new]),"Action1", alwaysDo = False)
-      
-      action.do()
-      
-      self.assertTrue(action.isSuccess)
-      self.assertIn(self.a_valid, action.outputArtefacts)
-      self.assertIn(self.a_Invalid_new, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid, self.session.artefacts)
-      self.assertIn(self.a_Invalid_new, self.session.artefacts)
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_Invalid))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_Invalid_new]),
+            "Action1",
+            alwaysDo=False,
+        )
 
+        action.do()
+
+        self.assertTrue(action.isSuccess)
+        self.assertIn(self.a_valid, action.outputArtefacts)
+        self.assertIn(self.a_Invalid_new, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid, self.session.artefacts)
+        self.assertIn(self.a_Invalid_new, self.session.artefacts)
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_valid_new)
+        )
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_Invalid)
+        )
 
     def test_failure_mixed_alwaysOn(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_NoFile]),"Action1", alwaysDo = True)
-      
-      action.do()
-      
-      self.assertTrue(action.isFailure)
-      self.assertIn(self.a_valid_new, action.outputArtefacts)
-      self.assertIn(self.a_NoFile, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid_new, self.session.artefacts)
-      self.assertIn(self.a_NoFile, self.session.artefacts)
-      self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_NoFile]), "Action1", alwaysDo=True
+        )
 
-    
+        action.do()
+
+        self.assertTrue(action.isFailure)
+        self.assertIn(self.a_valid_new, action.outputArtefacts)
+        self.assertIn(self.a_NoFile, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid_new, self.session.artefacts)
+        self.assertIn(self.a_NoFile, self.session.artefacts)
+        self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
+        self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid))
+
     def test_failure_mixed_alwaysOff(self):
-      workflow.currentGeneratedSession = self.session
-      action = DummyBatchAction(TestSelector([self.a_valid_new, self.a_NoFile]),"Action1")
-      
-      action.do()
-      
-      self.assertTrue(action.isFailure)
-      self.assertIn(self.a_valid, action.outputArtefacts)
-      self.assertIn(self.a_NoFile, action.outputArtefacts)
-      self.assertEqual(len(action.outputArtefacts), 2)
-      self.assertIn(action._actions[0], self.session.executed_actions)
-      self.assertIn(action._actions[1], self.session.executed_actions)
-      self.assertIn(self.a_valid, self.session.artefacts)
-      self.assertIn(self.a_NoFile, self.session.artefacts)
-      self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
-      self.assertFalse(self.session.artefacts.identical_artefact_exists(self.a_valid_new))
+        workflow.currentGeneratedSession = self.session
+        action = DummyBatchAction(
+            TestSelector([self.a_valid_new, self.a_NoFile]), "Action1"
+        )
+
+        action.do()
+
+        self.assertTrue(action.isFailure)
+        self.assertIn(self.a_valid, action.outputArtefacts)
+        self.assertIn(self.a_NoFile, action.outputArtefacts)
+        self.assertEqual(len(action.outputArtefacts), 2)
+        self.assertIn(action._actions[0], self.session.executed_actions)
+        self.assertIn(action._actions[1], self.session.executed_actions)
+        self.assertIn(self.a_valid, self.session.artefacts)
+        self.assertIn(self.a_NoFile, self.session.artefacts)
+        self.assertTrue(action.outputArtefacts[1][artefactProps.INVALID])
+        self.assertFalse(
+            self.session.artefacts.identical_artefact_exists(self.a_valid_new)
+        )
 
 
 if __name__ == "__main__":

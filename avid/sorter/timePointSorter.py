@@ -16,11 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import avid.common.artefact.defaultProps as artefactProps
 from avid.sorter.keyValueSorter import KeyValueSorter
 
-import avid.common.artefact.defaultProps as artefactProps
 
 class TimePointSorter(KeyValueSorter):
-  '''Special version that enforces that time point is sorted as numeric.'''
-  def __init__(self, reverse = False):
-    KeyValueSorter.__init__(self, key=artefactProps.TIMEPOINT, reverse= reverse, asNumbers=True)
+    """Special version that enforces that time point is sorted as numeric."""
+
+    def __init__(self, reverse=False):
+        KeyValueSorter.__init__(
+            self, key=artefactProps.TIMEPOINT, reverse=reverse, asNumbers=True
+        )

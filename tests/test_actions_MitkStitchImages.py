@@ -16,58 +16,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.mitk.MitkStitchImages import MitkStitchImagesBatchAction as stitch
+from avid.common.AVIDUrlLocater import get_tool_executable_url
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_executable_url
 
-@unittest.skipIf(get_tool_executable_url(None, 'MitkStitchImages') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
+@unittest.skipIf(
+    get_tool_executable_url(None, "MitkStitchImages") is None,
+    "Tool MitkStitchImagesMiniApp not installed on the system.",
+)
 class TestMitkStitchImagesMiniApp(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_mapr")
-      self.testArtefactFile2 = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist_2.avid")
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "mapRTest")
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_mapr"
+        )
+        self.testArtefactFile2 = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist_2.avid"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_stitch_action(self):
-      
-      action = stitch(ActionTagSelector("Moving"), ActionTagSelector("Target"), ActionTagSelector("Registration"), actionTag = "TestStitch")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = stitch(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Target"),
+            ActionTagSelector("Registration"),
+            actionTag="TestStitch",
+        )
+        action.do()
 
-      action = stitch(ActionTagSelector("Moving"), ActionTagSelector("Target"),
-                      actionTag="TestStitch")
-      action.do()
+        self.assertEqual(action.isSuccess, True)
 
-      self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
+
+        action = stitch(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Target"),
+            actionTag="TestStitch",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
 
     def test_simple_stitch_action_alwaysdo(self):
-      
-      action = stitch(ActionTagSelector("Moving"), ActionTagSelector("Target"), ActionTagSelector("Registration"), alwaysDo = True, actionTag = "TestStitch")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = stitch(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Target"),
+            ActionTagSelector("Registration"),
+            alwaysDo=True,
+            actionTag="TestStitch",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

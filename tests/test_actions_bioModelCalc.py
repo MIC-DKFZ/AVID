@@ -16,39 +16,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.rttb.bioModelCalc import BioModelCalcBatchAction as bioModelCalc
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(get_tool_config_file_path('BioModelCalc') is None, 'Tool BioModelCalc not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("BioModelCalc") is None,
+    "Tool BioModelCalc not installed on the system.",
+)
 class TestBioModelCalc(unittest.TestCase):
-  def setUp(self):
-    self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "bioModelCalcTest")
-    self.testArtefactFile = os.path.join(os.path.split(__file__)[0], "data", "bioModelCalcTest", "testlist.avid")
-    self.sessionDir = os.path.join(os.path.split(__file__)[0], "temporary_test_bioModelCalc")
+    def setUp(self):
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "bioModelCalcTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "bioModelCalcTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_bioModelCalc"
+        )
 
-    self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True,
-                                        bootstrapArtefacts=self.testArtefactFile)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-  def tearDown(self):
-    try:
-      shutil.rmtree(self.sessionDir)
-    except:
-      pass
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
-  def test_simple_bio_model_calc_action(self):
+    def test_simple_bio_model_calc_action(self):
 
-    action = bioModelCalc(ActionTagSelector("Dose"), modelParameters=[0.1, 0.01], actionTag="SimpleBioModelCalc")
-    action.do()
-    self.assertEqual(action.isSuccess, True)
-    action.do()
-    self.assertEqual(action.isSkipped, True)
+        action = bioModelCalc(
+            ActionTagSelector("Dose"),
+            modelParameters=[0.1, 0.01],
+            actionTag="SimpleBioModelCalc",
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
 
 if __name__ == "__main__":
-  unittest.main()
+    unittest.main()

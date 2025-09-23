@@ -16,74 +16,107 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.rttb.doseAcc import DoseAccBatchAction as doseAcc
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.sorter import BaseSorter
 
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(get_tool_config_file_path('DoseAcc') is None, 'Tool DoseAcc not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("DoseAcc") is None,
+    "Tool DoseAcc not installed on the system.",
+)
 class TestDoseAcc(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "doseAccTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "doseAccTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_doseAcc")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "doseAccTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "doseAccTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_doseAcc"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_dose_acc_action(self):
-      
-      action = doseAcc(ActionTagSelector("Dose"), actionTag = "SimpleAcc")      
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
-  
-      action = doseAcc(ActionTagSelector("Dose"), ActionTagSelector("Registration"), actionTag = "Acc+Reg")     
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
 
-      action = doseAcc(ActionTagSelector("Dose"), ActionTagSelector("Registration"), actionTag = "Acc+Reg+noSort", doseSorter = BaseSorter())      
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = doseAcc(ActionTagSelector("Dose"), actionTag="SimpleAcc")
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
-      action = doseAcc(ActionTagSelector("Dose"), ActionTagSelector("Registration"), ActionTagSelector("Plan"), actionTag = "Acc+Reg+Plan")    
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = doseAcc(
+            ActionTagSelector("Dose"),
+            ActionTagSelector("Registration"),
+            actionTag="Acc+Reg",
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
-      action = doseAcc(ActionTagSelector("Dose"), ActionTagSelector("Registration"), ActionTagSelector("Plan"), interpolator="rosu", actionTag = "Acc+Reg+Plan+Interpolation")
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = doseAcc(
+            ActionTagSelector("Dose"),
+            ActionTagSelector("Registration"),
+            actionTag="Acc+Reg+noSort",
+            doseSorter=BaseSorter(),
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
+        action = doseAcc(
+            ActionTagSelector("Dose"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Plan"),
+            actionTag="Acc+Reg+Plan",
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
+
+        action = doseAcc(
+            ActionTagSelector("Dose"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Plan"),
+            interpolator="rosu",
+            actionTag="Acc+Reg+Plan+Interpolation",
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_dose_acc_action_alwaysdo(self):
-      
-      action = doseAcc(ActionTagSelector("Dose"), actionTag = "SimpleAcc", alwaysDo = True)      
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+
+        action = doseAcc(
+            ActionTagSelector("Dose"), actionTag="SimpleAcc", alwaysDo=True
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

@@ -20,22 +20,20 @@ from builtins import object
 
 
 class BaseSplitter(object):
-    '''base clase for functors used to split a artefact list by certain criterias
+    """base clase for functors used to split a artefact list by certain criterias
     and pass back a list of splitted artefact lists.
     The default implementation does not touch the selection at all and just passes back a copy of the passed selection
-    as first (and only) split list element.'''
+    as first (and only) split list element."""
 
     def __init__(self):
         pass
 
     def splitSelection(self, selection):
-        '''
+        """
         does nothing
-        '''
+        """
         return [selection.copy()]
 
 
-from .keyValueSplitter import KeyValueSplitter
-from .keyValueSplitter import CaseSplitter
-from .keyValueSplitter import FractionSplitter
+from .keyValueSplitter import CaseSplitter, FractionSplitter, KeyValueSplitter
 from .singleSplitter import SingleSplitter

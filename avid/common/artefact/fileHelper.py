@@ -23,15 +23,21 @@ import time
 import xml.etree.ElementTree as ElementTree
 from builtins import str
 
-from avid.common.artefact import ArtefactCollection, generateArtefactEntry, update_artefacts
+from avid.common.artefact import (
+    ArtefactCollection,
+    generateArtefactEntry,
+    update_artefacts,
+)
+
 from . import defaultProps
 
 logger = logging.getLogger(__name__)
 
+
 def indent(elem, level=0):
-    """ copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
+    """copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
     it basically walks your tree and adds spaces and newlines so the tree is
-    printed in a nice way """
+    printed in a nice way"""
     i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -58,7 +64,13 @@ XML_NAMESPACE_DICT = {"avid": XML_NAMESPACE}
 CURRENT_XML_VERSION = "1.0"
 
 
-def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None, replace_if_exists=True, check_validity=True):
+def load_artefact_collection_from_xml(
+    filePath,
+    expandPaths=False,
+    rootPath=None,
+    replace_if_exists=True,
+    check_validity=True,
+):
     """Loads a artefact list from a XML file.
     @param filePath Path where the artefact list is located or file like object that grants access to the list.
     @param expandPaths If true all relative url will be expanded by the rootPath
@@ -72,13 +84,19 @@ def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None
     if rootPath is None and expandPaths is True:
         rootPath = os.path.split(filePath)[0]
     if not os.path.isfile(filePath):
-        raise ValueError("Cannot load artefact list from file. File does not exist. File path: " + str(filePath))
+        raise ValueError(
+            "Cannot load artefact list from file. File does not exist. File path: "
+            + str(filePath)
+        )
 
     tree = ElementTree.parse(filePath)
     root = tree.getroot()
 
     if root.tag != "{" + XML_NAMESPACE + "}artefacts":
-        raise ValueError("XML has not the correct root element. Must be 'artefacts', but is: " + root.tag)
+        raise ValueError(
+            "XML has not the correct root element. Must be 'artefacts', but is: "
+            + root.tag
+        )
 
     for aElement in root.findall(XML_ARTEFACT, XML_NAMESPACE_DICT):
         artefact = generateArtefactEntry(None, None, 0, "UnknownAction", None, None)
@@ -90,38 +108,57 @@ def load_artefact_collection_from_xml(filePath, expandPaths=False, rootPath=None
                     for aSource in aProp.findall(XML_INPUT_ID, XML_NAMESPACE_DICT):
                         if XML_ATTR_KEY in aSource.attrib:
                             if aSource.attrib[XML_ATTR_KEY] in value:
-                                if aSource.text is None or len(aSource.text)==0:
+                                if aSource.text is None or len(aSource.text) == 0:
                                     value[aSource.attrib[XML_ATTR_KEY]].append(None)
                                 else:
-                                   value[aSource.attrib[XML_ATTR_KEY]].append(aSource.text)
+                                    value[aSource.attrib[XML_ATTR_KEY]].append(
+                                        aSource.text
+                                    )
                             else:
-                                if aSource.text is None or len(aSource.text)==0:
+                                if aSource.text is None or len(aSource.text) == 0:
                                     value[aSource.attrib[XML_ATTR_KEY]] = [None]
                                 else:
                                     value[aSource.attrib[XML_ATTR_KEY]] = [aSource.text]
                         else:
-                            raise ValueError("XML seems not to be valid. SourceID element has no key attribute")
+                            raise ValueError(
+                                "XML seems not to be valid. SourceID element has no key attribute"
+                            )
                     artefact[aProp.attrib[XML_ATTR_KEY]] = value
                 else:
                     artefact[aProp.attrib[XML_ATTR_KEY]] = aProp.text
             else:
-                raise ValueError("XML seems not to be valid. Property element has no key attribute")
+                raise ValueError(
+                    "XML seems not to be valid. Property element has no key attribute"
+                )
 
         if rootPath is not None and not os.path.isabs(artefact[defaultProps.URL]):
-            artefact[defaultProps.URL] = os.path.join(rootPath, artefact[defaultProps.URL])
+            artefact[defaultProps.URL] = os.path.join(
+                rootPath, artefact[defaultProps.URL]
+            )
         artefact[defaultProps.URL] = os.path.normpath(artefact[defaultProps.URL])
 
-        if check_validity and (artefact[defaultProps.URL] is None or not os.path.isfile(artefact[defaultProps.URL])):
+        if check_validity and (
+            artefact[defaultProps.URL] is None
+            or not os.path.isfile(artefact[defaultProps.URL])
+        ):
             artefact[defaultProps.INVALID] = True
-            logger.info("Artefact had no valid URL. Set invalid property to true. Artefact: %s", artefact)
+            logger.info(
+                "Artefact had no valid URL. Set invalid property to true. Artefact: %s",
+                artefact,
+            )
 
-        replaced_artifact = artefacts.add_artefact(artefact=artefact, replace_if_exists=replace_if_exists)
+        replaced_artifact = artefacts.add_artefact(
+            artefact=artefact, replace_if_exists=replace_if_exists
+        )
 
         if replaced_artifact is not None:
             logger.warning(
                 "Artefacts file contained similar artefact which will be overwritten."
-                 "\nOld artifact: %s"
-                 "\nNew artifact: %s", replaced_artifact, artefact)
+                "\nOld artifact: %s"
+                "\nNew artifact: %s",
+                replaced_artifact,
+                artefact,
+            )
 
     return artefacts
 
@@ -137,19 +174,25 @@ def save_artefacts_to_xml(filePath, artefacts, rootPath=None, savePathsRelative=
     if rootPath is None:
         rootPath = os.path.split(filePath)[0]
 
-    root = ElementTree.Element(XML_ARTEFACTS, {XML_ATTR_VERSION: "1.0", "xmlns:avid": XML_NAMESPACE})
+    root = ElementTree.Element(
+        XML_ARTEFACTS, {XML_ATTR_VERSION: "1.0", "xmlns:avid": XML_NAMESPACE}
+    )
 
     for artefact in artefacts:
         xmlArtefact = ElementTree.SubElement(root, XML_ARTEFACT)
         for key in artefact._defaultProps:
             if artefact[key] is not None:
-                xmlProp = ElementTree.SubElement(xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key})
+                xmlProp = ElementTree.SubElement(
+                    xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key}
+                )
                 value = artefact[key]
                 if key is defaultProps.INPUT_IDS:
                     for sourceName in value:
                         if value[sourceName] is not None:
                             for id in value[sourceName]:
-                                xmlInput = ElementTree.SubElement(xmlProp, XML_INPUT_ID, {XML_ATTR_KEY: sourceName})
+                                xmlInput = ElementTree.SubElement(
+                                    xmlProp, XML_INPUT_ID, {XML_ATTR_KEY: sourceName}
+                                )
                                 if id is not None:
                                     xmlInput.text = id
                 else:
@@ -160,12 +203,15 @@ def save_artefacts_to_xml(filePath, artefacts, rootPath=None, savePathsRelative=
                             except:
                                 logger.warning(
                                     "Artefact URL cannot be converted to be relative. Path is kept absolute. Artefact URL: %s",
-                                    value)
+                                    value,
+                                )
                         value = value.replace("\\", "/")
                     xmlProp.text = str(value)
         for key in artefact._additionalProps:
             if artefact[key] is not None:
-                xmlProp = ElementTree.SubElement(xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key})
+                xmlProp = ElementTree.SubElement(
+                    xmlArtefact, XML_PROPERTY, {XML_ATTR_KEY: key}
+                )
                 xmlProp.text = str(artefact[key])
 
     tree = ElementTree.ElementTree(root)
@@ -182,8 +228,14 @@ def save_artefacts_to_xml(filePath, artefacts, rootPath=None, savePathsRelative=
     tree.write(filePath, xml_declaration=True)
 
 
-def update_artefactlist(destination_file, source_artefacts, update_existing=False,
-                        rootPath=None, savePathsRelative=True, wait_time=10):
+def update_artefactlist(
+    destination_file,
+    source_artefacts,
+    update_existing=False,
+    rootPath=None,
+    savePathsRelative=True,
+    wait_time=10,
+):
     """
     Helper function that updates the content of an artefact file with a passed artefact list.
     :param destination_file: File which content should be updated
@@ -201,27 +253,40 @@ def update_artefactlist(destination_file, source_artefacts, update_existing=Fals
     pause_duration = 0.5
     max_pause_count = math.ceil(wait_time / pause_duration)
     pause_count = 0
-    lf_path = destination_file+ os.extsep + 'update_lock'
+    lf_path = destination_file + os.extsep + "update_lock"
     lf = None
     while True:
         try:
-            lf = open(lf_path, 'x')
+            lf = open(lf_path, "x")
             break
         except OSError:
             if pause_count < max_pause_count:
                 time.sleep(pause_duration)
                 pause_count = pause_count + 1
-                logger.debug('"%s" is not accessible. Wait and try again.', destination_file)
+                logger.debug(
+                    '"%s" is not accessible. Wait and try again.', destination_file
+                )
             else:
-                raise PermissionError('Cannot update artefact list file. File is blocked by another update operation.'
-                                   ' File: {}'.format(destination_file))
+                raise PermissionError(
+                    "Cannot update artefact list file. File is blocked by another update operation."
+                    " File: {}".format(destination_file)
+                )
 
     try:
-        destination_artefacts = load_artefact_collection_from_xml(destination_file, rootPath=rootPath)
-        update_artefacts(destination_collection=destination_artefacts, source_collection=source_artefacts,
-                         update_existing=update_existing)
-        save_artefacts_to_xml(filePath=destination_file, artefacts=destination_artefacts, rootPath=rootPath,
-                              savePathsRelative=savePathsRelative)
+        destination_artefacts = load_artefact_collection_from_xml(
+            destination_file, rootPath=rootPath
+        )
+        update_artefacts(
+            destination_collection=destination_artefacts,
+            source_collection=source_artefacts,
+            update_existing=update_existing,
+        )
+        save_artefacts_to_xml(
+            filePath=destination_file,
+            artefacts=destination_artefacts,
+            rootPath=rootPath,
+            savePathsRelative=savePathsRelative,
+        )
     finally:
         if lf is not None:
             lf.close()

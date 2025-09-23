@@ -16,70 +16,104 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.rttb.voxelizer import VoxelizerBatchAction as voxelizer
-from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import get_tool_config_file_path
+from avid.selectors.keyValueSelector import ActionTagSelector
 
-@unittest.skipIf(get_tool_config_file_path('VoxelizerTool') is None, 'Tool VoxelizerTool not installed on the system.')
+
+@unittest.skipIf(
+    get_tool_config_file_path("VoxelizerTool") is None,
+    "Tool VoxelizerTool not installed on the system.",
+)
 class TestVoxelizer(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "voxelizerTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "voxelizerTest", "testlist.avid")
-      self.testStructDef = os.path.join(os.path.split(__file__)[0],"data", "voxelizerTest", "structdef.xml")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_voxelizer")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"),
-                                          expandPaths=True, bootstrapArtefacts=self.testArtefactFile,
-                                          structDefinition = self.testStructDef)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest", "testlist.avid"
+        )
+        self.testStructDef = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest", "structdef.xml"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_voxelizer"
+        )
+
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+            structDefinition=self.testStructDef,
+        )
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_action(self):
-      
-      action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
-                         ['Heart'], actionTag = "TestVoxelizer")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = voxelizer(
+            ActionTagSelector("Struct"),
+            ActionTagSelector("Reference"),
+            ["Heart"],
+            actionTag="TestVoxelizer",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_action_session_struct(self):
-      
-      action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
-                         actionTag = "TestVoxelizer", alwaysDo = True)
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+
+        action = voxelizer(
+            ActionTagSelector("Struct"),
+            ActionTagSelector("Reference"),
+            actionTag="TestVoxelizer",
+            alwaysDo=True,
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
 
     def test_simple_action_boolean(self):
-      
-      action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
-                         booleanMask = True, actionTag = "TestVoxelizer", alwaysDo = True)
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+
+        action = voxelizer(
+            ActionTagSelector("Struct"),
+            ActionTagSelector("Reference"),
+            booleanMask=True,
+            actionTag="TestVoxelizer",
+            alwaysDo=True,
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
 
     def test_simple_action_alwaysdo(self):
-      
-      action = voxelizer(ActionTagSelector('Struct'), ActionTagSelector('Reference'),
-                         ['Heart'], actionTag = "TestVoxelizer", alwaysDo = True)
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = voxelizer(
+            ActionTagSelector("Struct"),
+            ActionTagSelector("Reference"),
+            ["Heart"],
+            actionTag="TestVoxelizer",
+            alwaysDo=True,
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

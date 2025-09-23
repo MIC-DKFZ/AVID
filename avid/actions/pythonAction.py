@@ -19,16 +19,14 @@
 import logging
 import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common.osChecker import checkAndCreateDir
-
-from avid.actions import BatchActionBase
-from avid.actions import SingleActionBase
-from avid.linkers import CaseLinker, CaseInstanceLinker
-from avid.selectors import TypeSelector
+import avid.common.artefact.defaultProps as artefactProps
+from avid.actions import BatchActionBase, SingleActionBase
 from avid.actions.simpleScheduler import SimpleScheduler
-from avid.splitter import KeyValueSplitter, BaseSplitter
+from avid.common.osChecker import checkAndCreateDir
+from avid.linkers import CaseInstanceLinker, CaseLinker
+from avid.selectors import TypeSelector
+from avid.splitter import BaseSplitter, KeyValueSplitter
 
 logger = logging.getLogger(__name__)
 
@@ -64,14 +62,31 @@ class PythonAction(SingleActionBase):
     :param inputArgs: It is assumed that all unkown named arguments are inputs with artefact lists.
     """
 
-    OUTPUTS_ARGUMENT_NAME = 'outputs'
+    OUTPUTS_ARGUMENT_NAME = "outputs"
 
-    def __init__(self, generateCallable, indicateCallable=None, additionalArgs=None, passOnlyURLs=True,
-                 defaultoutputextension='nrrd', outputReferenceArtefactName=None,
-                 actionTag="Python", alwaysDo=False, session=None, additionalActionProps=None,
-                 propInheritanceDict=None, **inputArgs):
-        SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                                  propInheritanceDict=propInheritanceDict)
+    def __init__(
+        self,
+        generateCallable,
+        indicateCallable=None,
+        additionalArgs=None,
+        passOnlyURLs=True,
+        defaultoutputextension="nrrd",
+        outputReferenceArtefactName=None,
+        actionTag="Python",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        propInheritanceDict=None,
+        **inputArgs,
+    ):
+        SingleActionBase.__init__(
+            self,
+            actionTag,
+            alwaysDo,
+            session,
+            additionalActionProps,
+            propInheritanceDict=propInheritanceDict,
+        )
         self._generateCallable = generateCallable
         self._indicateCallable = indicateCallable
         self._passOnlyURLs = passOnlyURLs
@@ -85,41 +100,49 @@ class PythonAction(SingleActionBase):
             for name in additionalArgs:
                 if name == self.OUTPUTS_ARGUMENT_NAME:
                     raise ValueError(
-                        'Additional argument used reserved arguments name. Reserved name: {}'.format(
-                            self.OUTPUTS_ARGUMENT_NAME))
+                        "Additional argument used reserved arguments name. Reserved name: {}".format(
+                            self.OUTPUTS_ARGUMENT_NAME
+                        )
+                    )
                 self._args[name] = additionalArgs[name]
 
         for name in inputArgs:
             inputArtefacts = self._ensureArtefacts(inputArgs[name], name=name)
             if inputArtefacts is None:
                 raise ValueError(
-                    'Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}'.format(
-                        name))
+                    "Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}".format(
+                        name
+                    )
+                )
             if additionalArgs is not None and name in additionalArgs:
                 raise ValueError(
-                    'Input argument name is also defined as additional argument. Name may only by used for inputs or'
-                    ' additional arguments. Input name: {}'.format(
-                        name))
+                    "Input argument name is also defined as additional argument. Name may only by used for inputs or"
+                    " additional arguments. Input name: {}".format(name)
+                )
             if name == self.OUTPUTS_ARGUMENT_NAME:
                 raise ValueError(
-                    'Input argument used reserved arguments name. Reserved name: {}'.format(self.OUTPUTS_ARGUMENT_NAME))
+                    "Input argument used reserved arguments name. Reserved name: {}".format(
+                        self.OUTPUTS_ARGUMENT_NAME
+                    )
+                )
             self._inputArgs[name] = inputArtefacts
 
         self._addInputArtefacts(**self._inputArgs)
 
         if len(self._inputArgs) == 0:
-            raise RuntimeError('Action is not initialized with any artefact inputs')
+            raise RuntimeError("Action is not initialized with any artefact inputs")
 
         self._outputReferenceArtefactName = outputReferenceArtefactName
         if self._outputReferenceArtefactName is not None:
             if self._outputReferenceArtefactName not in self._inputs:
                 raise ValueError(
                     'Action cannot be initialized. Defined outputReferenceArtefactName ("{}") does not exist in the inputs dictionary: {}'.format(
-                        self._outputReferenceArtefactName, self._inputs.keys()))
-
+                        self._outputReferenceArtefactName, self._inputs.keys()
+                    )
+                )
 
     def _generateName(self):
-        name = 'script'
+        name = "script"
         try:
             name = self._generateCallable.__name__
         except:
@@ -133,32 +156,45 @@ class PythonAction(SingleActionBase):
         if self._indicateCallable is not None:
             allargs = self._inputArgs.copy()
             allargs.update(self._args)
-            self._resultArtefacts = self._indicateCallable(actionInstance=self, **allargs)
+            self._resultArtefacts = self._indicateCallable(
+                actionInstance=self, **allargs
+            )
             if self._resultArtefacts is not None:
                 # check if its really a list of artefacts
                 try:
                     for artifact in self._resultArtefacts:
                         if not isinstance(artifact, artefactHelper.Artefact):
                             raise TypeError(
-                                'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                    self._resultArtefacts))
+                                "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                                    self._resultArtefacts
+                                )
+                            )
                 except:
                     raise TypeError(
-                        'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                            self._resultArtefacts))
+                        "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                            self._resultArtefacts
+                        )
+                    )
         else:
             # we generate the default as template the first artefact of the first input (sorted by input names) in the dictionary
             first_input_key = sorted(self._inputArtefacts.keys())[0]
             reference = next(iter(self._inputArtefacts[first_input_key]), None)
 
             if self._outputReferenceArtefactName is not None:
-                reference = next(iter(self._inputArtefacts[self._outputReferenceArtefactName]), None)
+                reference = next(
+                    iter(self._inputArtefacts[self._outputReferenceArtefactName]), None
+                )
 
             self._resultArtefacts = [
-                self.generateArtefact(reference=reference,
-                                      userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                      url_user_defined_part=self.instanceName,
-                                      url_extension=self._outputextension)]
+                self.generateArtefact(
+                    reference=reference,
+                    userDefinedProps={
+                        artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT
+                    },
+                    url_user_defined_part=self.instanceName,
+                    url_extension=self._outputextension,
+                )
+            ]
         return self._resultArtefacts
 
     def _generateOutputs(self):
@@ -168,7 +204,9 @@ class PythonAction(SingleActionBase):
             outputs = list()
             for output in self._resultArtefacts:
                 if self._passOnlyURLs:
-                    outputs.append(artefactHelper.getArtefactProperty(output, artefactProps.URL))
+                    outputs.append(
+                        artefactHelper.getArtefactProperty(output, artefactProps.URL)
+                    )
                 else:
                     outputs.append(output)
             allargs[self.OUTPUTS_ARGUMENT_NAME] = outputs
@@ -176,62 +214,103 @@ class PythonAction(SingleActionBase):
         for name in self._inputArgs:
             if self._passOnlyURLs:
                 if isinstance(self._inputArgs[name], artefactHelper.Artefact):
-                    allargs[name] = artefactHelper.getArtefactProperty(self._inputArgs[name], artefactProps.URL)
+                    allargs[name] = artefactHelper.getArtefactProperty(
+                        self._inputArgs[name], artefactProps.URL
+                    )
                 else:
                     # assuming a list of artefacts
                     inputURLs = list()
                     for artefact in self._inputArgs[name]:
-                        inputURLs.append(artefactHelper.getArtefactProperty(artefact, artefactProps.URL))
+                        inputURLs.append(
+                            artefactHelper.getArtefactProperty(
+                                artefact, artefactProps.URL
+                            )
+                        )
                     allargs[name] = inputURLs
             else:
                 allargs[name] = self._inputArgs[name]
 
         if self._resultArtefacts is not None:
-            destPath = artefactHelper.getArtefactProperty(self._resultArtefacts[0], artefactProps.URL)
+            destPath = artefactHelper.getArtefactProperty(
+                self._resultArtefacts[0], artefactProps.URL
+            )
             checkAndCreateDir(os.path.dirname(destPath))
 
         try:
             self._generateCallable(**allargs)
         except BaseException as e:
-            self._reportWarning('Error occurred while trying to execute custom python callable to generated outputs for'
-                                f' action tag "{self.actionTag}".'
-                                ' Check the implementation of the generateCallable passed to action class'
-                                f' "{self.__class__}" to.', exception=e)
+            self._reportWarning(
+                "Error occurred while trying to execute custom python callable to generated outputs for"
+                f' action tag "{self.actionTag}".'
+                " Check the implementation of the generateCallable passed to action class"
+                f' "{self.__class__}" to.',
+                exception=e,
+            )
             raise
 
 
-
 class PythonUnaryBatchAction(BatchActionBase):
-    '''Batch class that assumes only one input artefact that will be passed to the script.'''
+    """Batch class that assumes only one input artefact that will be passed to the script."""
 
-    def __init__(self, inputSelector, actionTag="UnaryScript", session=None, additionalActionProps=None,
-                 scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PythonAction,
-                                 primaryInputSelector=inputSelector,
-                                 primaryAlias="inputs", session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+    def __init__(
+        self,
+        inputSelector,
+        actionTag="UnaryScript",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=PythonAction,
+            primaryInputSelector=inputSelector,
+            primaryAlias="inputs",
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )
 
 
 class PythonBinaryBatchAction(BatchActionBase):
-    '''Batch class that assumes two input artefacts (joined by an (optional) linker) will be passed to the script.
-     The batch class assumes that the python script takes the inputs as arguments "inputs1" and "inputs2".'''
+    """Batch class that assumes two input artefacts (joined by an (optional) linker) will be passed to the script.
+    The batch class assumes that the python script takes the inputs as arguments "inputs1" and "inputs2".
+    """
 
-    def __init__(self, inputs1Selector, inputs2Selector, inputLinker=None, actionTag="BinaryScript",
-                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        inputs1Selector,
+        inputs2Selector,
+        inputLinker=None,
+        actionTag="BinaryScript",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
         if inputLinker is None:
             inputLinker = CaseLinker()
 
-        additionalSelectors = {'inputs2': inputs2Selector}
+        additionalSelectors = {"inputs2": inputs2Selector}
         linker = {"inputs2": inputLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PythonAction,
-                                 primaryInputSelector=inputs1Selector,
-                                 primaryAlias="inputs1", additionalInputSelectors=additionalSelectors, linker=linker,
-                                 session=session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=PythonAction,
+            primaryInputSelector=inputs1Selector,
+            primaryAlias="inputs1",
+            additionalInputSelectors=additionalSelectors,
+            linker=linker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )
 
 
 class PythonNaryBatchAction(BatchActionBase):
@@ -253,16 +332,23 @@ class PythonNaryBatchAction(BatchActionBase):
     close to the interface of the BatchActionBase, please see PythonNaryBatchActionV2.
     """
 
-    def __init__(self, inputsMaster, actionTag="NaryScript",
-                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        inputsMaster,
+        actionTag="NaryScript",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
 
         otherSelectors = dict()
         otherLinker = dict()
         newSingleActionParameters = dict()
 
         for paramName in singleActionParameters:
-            if paramName.startswith('inputs'):
-                if paramName.endswith('Linker'):
+            if paramName.startswith("inputs"):
+                if paramName.endswith("Linker"):
                     otherLinker[paramName[:-6]] = singleActionParameters[paramName]
                 else:
                     otherSelectors[paramName] = singleActionParameters[paramName]
@@ -273,12 +359,20 @@ class PythonNaryBatchAction(BatchActionBase):
             if not inputName in otherLinker:
                 otherLinker[inputName] = CaseLinker() + CaseInstanceLinker()
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PythonAction, primaryInputSelector=inputsMaster,
-                                 primaryAlias="inputsMaster", additionalInputSelectors=otherSelectors,
-                                 linker=otherLinker, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **newSingleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=PythonAction,
+            primaryInputSelector=inputsMaster,
+            primaryAlias="inputsMaster",
+            additionalInputSelectors=otherSelectors,
+            linker=otherLinker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **newSingleActionParameters,
+        )
 
 
 class PythonNaryBatchActionV2(BatchActionBase):
@@ -287,71 +381,110 @@ class PythonNaryBatchActionV2(BatchActionBase):
     co. Thus you can specify them freely and are not bound to any conventions for your python callable's argument names.
     In addition this class also allows to specify the splitter and sorter explicitly."""
 
-    def __init__(self, primaryInputSelector, actionTag="NaryScript",
-                 primaryAlias = None, additionalInputSelectors = None, splitter = None, sorter = None, linker = None,
-                 dependentLinker = None, session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        primaryInputSelector,
+        actionTag="NaryScript",
+        primaryAlias=None,
+        additionalInputSelectors=None,
+        splitter=None,
+        sorter=None,
+        linker=None,
+        dependentLinker=None,
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
         """init the action and setting the workflow session, the action is working
-          in.
-          :param actionTag: Tag of the action within the session
-          :param additionalActionProps: Dictionary that can be used to define additional
-          properties that should be added to any artefact that are produced by the action.
-          :param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
-          :param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
-          If not set PRIMARY_INPUT_KEY will be used.
-          :param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
-          be passed to an action instance. Key is the name of an additional input an also the argument name used to pass
-          the input to the action instance. The associated dict value must be a selector instance or None to indicate
-          that this input will have no data but exists.
-          :param splitter: Dictionary specifying a splitter that should be used for a specific input (primary or additional)
-          If no splitter is defined explicitly for an input SingleSplitter() will be assumed. The key indicates the
-          input that should be associated with the splitter. To associate primary input use PRIMARY_INPUT_KEY as key.The
-          values of the dict are the splitter instances that should be used for the respective key.
-          :param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
-          If no sorter is defined explicitly for an input, BaseSorter() (so no sorting at all) will be assumed.
-          The key indicates the input that should be associated with the sorter. To associate primary input use
-          PRIMARY_INPUT_KEY as key. The values of the dict are the sorter instances that should be used for the
-          respective key.
-          :param linker: Dictionary specifying a linker that should be used for a specific additional input
-          to link it with the primary input. Thus the master selection passed to the linker will always be provided by
-          the primary input.
-          If no linker is defined explicitly for an input CaseLinker() (so all inputs must have the same case) will be
-          assumed. The key indicates the input that should be associated with the linker. The values of the dict are the
-          linker instances that should be used for the respective key.
-          :param dependentLinker: Allows to specify linkage for an additional input where the master selection must not
-          be the primary input (in contrast to using the linker argument). Thus you can specifies that an additional
-          input A is (also) linked to an additional input B. The method assumes the following structure of the variable.
-          It is a dictionary. The dictionary key indicates the input that should be linked. So it can be any additional
-          input. It must not be the primary input. The value associated with a dict key is an iterable (e.g. list) the
-          first element is the name of the input that serves as master for the linkage. It may be any additional input
-          (except itself = key of the value) or the primary input. The second element is the linker instance that should
-          be used. You may combine linker and dependentLinker specifications for any additional input.
-          To associate primary input as master use PRIMARY_INPUT_KEY as value.
-          :param session: Session object of the workflow the action is working in
-          :param scheduler Strategy how to execute the single actions.
+        in.
+        :param actionTag: Tag of the action within the session
+        :param additionalActionProps: Dictionary that can be used to define additional
+        properties that should be added to any artefact that are produced by the action.
+        :param primaryInputSelector: Selector that indicates the primary input for the actions that should be generated
+        :param primaryAlias: Name of the primary input that should be used as argument key if passed to action.
+        If not set PRIMARY_INPUT_KEY will be used.
+        :param additionalInputSelectors: Dictionary containing additional input selectors for other inputs that should
+        be passed to an action instance. Key is the name of an additional input an also the argument name used to pass
+        the input to the action instance. The associated dict value must be a selector instance or None to indicate
+        that this input will have no data but exists.
+        :param splitter: Dictionary specifying a splitter that should be used for a specific input (primary or additional)
+        If no splitter is defined explicitly for an input SingleSplitter() will be assumed. The key indicates the
+        input that should be associated with the splitter. To associate primary input use PRIMARY_INPUT_KEY as key.The
+        values of the dict are the splitter instances that should be used for the respective key.
+        :param sorter: Dictionary specifying a sorter that should be used for a specific input (primary or additional)
+        If no sorter is defined explicitly for an input, BaseSorter() (so no sorting at all) will be assumed.
+        The key indicates the input that should be associated with the sorter. To associate primary input use
+        PRIMARY_INPUT_KEY as key. The values of the dict are the sorter instances that should be used for the
+        respective key.
+        :param linker: Dictionary specifying a linker that should be used for a specific additional input
+        to link it with the primary input. Thus the master selection passed to the linker will always be provided by
+        the primary input.
+        If no linker is defined explicitly for an input CaseLinker() (so all inputs must have the same case) will be
+        assumed. The key indicates the input that should be associated with the linker. The values of the dict are the
+        linker instances that should be used for the respective key.
+        :param dependentLinker: Allows to specify linkage for an additional input where the master selection must not
+        be the primary input (in contrast to using the linker argument). Thus you can specifies that an additional
+        input A is (also) linked to an additional input B. The method assumes the following structure of the variable.
+        It is a dictionary. The dictionary key indicates the input that should be linked. So it can be any additional
+        input. It must not be the primary input. The value associated with a dict key is an iterable (e.g. list) the
+        first element is the name of the input that serves as master for the linkage. It may be any additional input
+        (except itself = key of the value) or the primary input. The second element is the linker instance that should
+        be used. You may combine linker and dependentLinker specifications for any additional input.
+        To associate primary input as master use PRIMARY_INPUT_KEY as value.
+        :param session: Session object of the workflow the action is working in
+        :param scheduler Strategy how to execute the single actions.
         """
-        BatchActionBase.__init__(self, primaryInputSelector=primaryInputSelector, actionTag=actionTag,
-                                 primaryAlias=primaryAlias, actionClass=PythonAction,
-                                 additionalInputSelectors=additionalInputSelectors,splitter=splitter,
-                                 sorter=sorter, linker=linker, dependentLinker=dependentLinker, session=session,
-                                 additionalActionProps=additionalActionProps,scheduler=scheduler,
-                                 **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            primaryInputSelector=primaryInputSelector,
+            actionTag=actionTag,
+            primaryAlias=primaryAlias,
+            actionClass=PythonAction,
+            additionalInputSelectors=additionalInputSelectors,
+            splitter=splitter,
+            sorter=sorter,
+            linker=linker,
+            dependentLinker=dependentLinker,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            scheduler=scheduler,
+            **singleActionParameters,
+        )
 
 
 class PythonUnaryStackBatchAction(BatchActionBase):
-    '''Batch class that assumes a list of input artefacts will be passed to the script.
+    """Batch class that assumes a list of input artefacts will be passed to the script.
     The list of artefacts is defined via the input selector.
     @param splitProperties You can define a list of split properties (list of property names)
     to separate it into different actions (e.g. like the PixelDumpMiniApp action.
-    '''
+    """
 
-    def __init__(self, inputSelector, splitProperties=None, actionTag="UnaryStackScript",
-                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        inputSelector,
+        splitProperties=None,
+        actionTag="UnaryStackScript",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
         splitter = {BatchActionBase.PRIMARY_INPUT_KEY: BaseSplitter()}
         if splitProperties is not None:
-            splitter = {BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSplitter(*splitProperties)}
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PythonAction,
-                                 primaryInputSelector=inputSelector,
-                                 primaryAlias="inputs", splitter=splitter, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+            splitter = {
+                BatchActionBase.PRIMARY_INPUT_KEY: KeyValueSplitter(*splitProperties)
+            }
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=PythonAction,
+            primaryInputSelector=inputSelector,
+            primaryAlias="inputs",
+            splitter=splitter,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

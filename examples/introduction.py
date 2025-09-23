@@ -20,25 +20,27 @@
 # Imports
 ###############################################################################
 import os
-import avid.common.workflow as workflow
 
-from avid.actions.pythonAction import PythonUnaryBatchAction, PythonBinaryBatchAction
-from avid.selectors import ActionTagSelector, CaseSelector, ValiditySelector
+import avid.common.workflow as workflow
+from avid.actions.pythonAction import PythonBinaryBatchAction, PythonUnaryBatchAction
 from avid.linkers import CaseLinker, TimePointLinker
+from avid.selectors import ActionTagSelector, CaseSelector, ValiditySelector
 
 ###############################################################################
 # Initialize session with existing Artefacts
 ###############################################################################
-session =  workflow.initSession(bootstrapArtefacts=os.path.join(os.getcwd(),'output', 'bootstrap.avid'),
-                                sessionPath=os.path.join(os.getcwd(),'output', 'example.avid'),
-                                expandPaths=True,
-                                debug=True,
-                                autoSave = True)
+session = workflow.initSession(
+    bootstrapArtefacts=os.path.join(os.getcwd(), "output", "bootstrap.avid"),
+    sessionPath=os.path.join(os.getcwd(), "output", "example.avid"),
+    expandPaths=True,
+    debug=True,
+    autoSave=True,
+)
 
 
 def write_filename(outputs, inputs, **kwargs):
     """
-        Simple callable that outputs a sentence including the filename of the input
+    Simple callable that outputs a sentence including the filename of the input
     """
     inputName = inputs[0]
 
@@ -53,7 +55,7 @@ with session:
         inputSelector=allValid_selector,
         generateCallable=write_filename,
         actionTag="example1",
-        defaultoutputextension="txt"
+        defaultoutputextension="txt",
     )
 
     session.run_batches()

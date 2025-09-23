@@ -17,12 +17,15 @@
 # limitations under the License.
 
 from builtins import object
-class SimpleScheduler(object):
-  '''Simple scheduler implementation that just executes the actions sequentially.'''
-  def __init__(self):
-    pass
-  
-  def execute(self, actionList):
 
-    for action in actionList:
-      action.do()
+
+class SimpleScheduler(object):
+    """Simple scheduler implementation that just executes the actions sequentially."""
+
+    def __init__(self):
+        pass
+
+    def execute(self, actionList):
+
+        for action in actionList:
+            action.do()

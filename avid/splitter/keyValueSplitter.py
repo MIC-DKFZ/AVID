@@ -16,28 +16,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.splitter import BaseSplitter
-from avid.common.demultiplexer import splitArtefact
 import avid.common.artefact.defaultProps as artefactProps
+from avid.common.demultiplexer import splitArtefact
+from avid.splitter import BaseSplitter
+
 
 class KeyValueSplitter(BaseSplitter):
-  '''Splits the artefacts in such a way that all artefacts in a splitt list have the same values for all specified keys
-  respectively. So it is a simelar behavour than function splitArtefact().'''
-  def __init__(self, *splitArgs):
-    '''@param splitArgs the function assumes that all unkown arguments passed to the function should be handeled as split
-     properties keys that are used to specify the split.'''
-    super().__init__()
-    self._key = splitArgs
+    """Splits the artefacts in such a way that all artefacts in a splitt list have the same values for all specified keys
+    respectively. So it is a simelar behavour than function splitArtefact()."""
 
-  def splitSelection(self, selection):
-    return splitArtefact(selection, *self._key)
+    def __init__(self, *splitArgs):
+        """@param splitArgs the function assumes that all unkown arguments passed to the function should be handeled as split
+        properties keys that are used to specify the split."""
+        super().__init__()
+        self._key = splitArgs
+
+    def splitSelection(self, selection):
+        return splitArtefact(selection, *self._key)
+
 
 class CaseSplitter(KeyValueSplitter):
-  '''Splits artefact in such a way that all artefacts of same case are in one split.'''
-  def __init__(self):
-    KeyValueSplitter.__init__(self, artefactProps.CASE)
+    """Splits artefact in such a way that all artefacts of same case are in one split."""
+
+    def __init__(self):
+        KeyValueSplitter.__init__(self, artefactProps.CASE)
+
 
 class FractionSplitter(KeyValueSplitter):
-  '''Splits artefact in such a way that all artefacts of same case and timepoint are in one split.'''
-  def __init__(self):
-    KeyValueSplitter.__init__(self, artefactProps.CASE, artefactProps.TIMEPOINT)
+    """Splits artefact in such a way that all artefacts of same case and timepoint are in one split."""
+
+    def __init__(self):
+        KeyValueSplitter.__init__(self, artefactProps.CASE, artefactProps.TIMEPOINT)

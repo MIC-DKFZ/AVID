@@ -16,20 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
-import os
-import logging
 import csv
+import logging
+import os
+from builtins import str
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import osChecker
+import avid.common.artefact.defaultProps as artefactProps
 import avid.externals.doseTool as doseTool
-
-from avid.actions import BatchActionBase
-from avid.actions import SingleActionBase
-from avid.selectors import TypeSelector
+from avid.actions import BatchActionBase, SingleActionBase
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import osChecker
+from avid.selectors import TypeSelector
 from avid.splitter import BaseSplitter
 
 logger = logging.getLogger(__name__)
@@ -50,14 +48,30 @@ def _getColumnHeaderValues(matrix):
 
 class DoseStatsCollectorAction(SingleActionBase):
     """Class that establishes a dose stats collection action on result generate by DoseTool.
-       The result will be stored as CSV"""
-    def __init__(self, doses, selectedStats=None, rowKey=artefactProps.CASEINSTANCE,
-                 columnKey=artefactProps.TIMEPOINT,
-                 withHeaders=True, actionTag="DoseStatCollector",
-                 alwaysDo=True, session=None, additionalActionProps=None, propInheritanceDict=None):
-        SingleActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps,
-                                  propInheritanceDict=propInheritanceDict)
-        self._doseSelections = self._ensureArtefacts(doses, 'doses')
+    The result will be stored as CSV"""
+
+    def __init__(
+        self,
+        doses,
+        selectedStats=None,
+        rowKey=artefactProps.CASEINSTANCE,
+        columnKey=artefactProps.TIMEPOINT,
+        withHeaders=True,
+        actionTag="DoseStatCollector",
+        alwaysDo=True,
+        session=None,
+        additionalActionProps=None,
+        propInheritanceDict=None,
+    ):
+        SingleActionBase.__init__(
+            self,
+            actionTag,
+            alwaysDo,
+            session,
+            additionalActionProps,
+            propInheritanceDict=propInheritanceDict,
+        )
+        self._doseSelections = self._ensureArtefacts(doses, "doses")
 
         self._statsMatrix = None
         self._baseLineValues = None
@@ -79,13 +93,16 @@ class DoseStatsCollectorAction(SingleActionBase):
 
         for key in self._keys:
             if len(self._doseSelections) > 0:
-                artefact = self.generateArtefact(self._doseSelections.first(),
-                                                 userDefinedProps={
-                                                     artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                                                     artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
-                                                     artefactProps.DOSE_STAT: str(key)},
-                                                 url_user_defined_part=self.instanceName + "_" + str(key),
-                                                 url_extension='csv')
+                artefact = self.generateArtefact(
+                    self._doseSelections.first(),
+                    userDefinedProps={
+                        artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                        artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
+                        artefactProps.DOSE_STAT: str(key),
+                    },
+                    url_user_defined_part=self.instanceName + "_" + str(key),
+                    url_extension="csv",
+                )
                 self._resultArtefacts[key] = artefact
 
         return list(self._resultArtefacts.values())
@@ -97,22 +114,27 @@ class DoseStatsCollectorAction(SingleActionBase):
 
         doseMapOneFraction = {}
         if statsOfInterest is None:
-            statsOfInterest = list(resultContainer.results.keys())  # if user hasn't defined something we take all
+            statsOfInterest = list(
+                resultContainer.results.keys()
+            )  # if user hasn't defined something we take all
 
         for key in statsOfInterest:
             if key in resultContainer.results:
                 doseMapOneFraction[key] = resultContainer.results[key].value
             else:
-                logger.warning("Stat key '%s' selected by user, was not found in parsed statistic file. File: %s", key,
-                               filename)
+                logger.warning(
+                    "Stat key '%s' selected by user, was not found in parsed statistic file. File: %s",
+                    key,
+                    filename,
+                )
 
         return doseMapOneFraction
 
     def _generateStatsMatrix(self):
         """generates and returns a n-dimensional value matrix.
-    1st dim is indexed by the dose state key values
-    2nd dim is indexed by the rowKey values
-    3rd dim is indexed by the columnKey values"""
+        1st dim is indexed by the dose state key values
+        2nd dim is indexed by the rowKey values
+        3rd dim is indexed by the columnKey values"""
         matrix = dict()
 
         keys = self._keys
@@ -127,7 +149,9 @@ class DoseStatsCollectorAction(SingleActionBase):
                 valueMap = self._parseDoseStats(aPath, self._keys)
 
             if keys is None:
-                keys = list(valueMap.keys())  # user has not select keys -> take everything
+                keys = list(
+                    valueMap.keys()
+                )  # user has not select keys -> take everything
 
             for key in keys:
                 if key in valueMap:
@@ -144,7 +168,7 @@ class DoseStatsCollectorAction(SingleActionBase):
     @staticmethod
     def _generateRow(rowValueDict, columnHeaderValues):
         """ensures that a row covers a certain key range. missing keys will be filled with None.
-       the row will be returned as list of values"""
+        the row will be returned as list of values"""
         result = list()
 
         for key in columnHeaderValues:
@@ -160,13 +184,15 @@ class DoseStatsCollectorAction(SingleActionBase):
     def _writeToCSV(self, key, columnHeaders, content, filename):
         try:
             osChecker.checkAndCreateDir(os.path.split(filename)[0])
-            with open(filename, 'w', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=';')
+            with open(filename, "w", newline="") as csvfile:
+                writer = csv.writer(csvfile, delimiter=";")
 
                 if self._withHeaders:
-                    writer.writerow([self._rowKey + "/" + self._columnKey] + columnHeaders)
+                    writer.writerow(
+                        [self._rowKey + "/" + self._columnKey] + columnHeaders
+                    )
 
-                '''write given values'''
+                """write given values"""
                 for rowID in sorted(content):
                     row = content[rowID]
                     if self._withHeaders:
@@ -181,7 +207,9 @@ class DoseStatsCollectorAction(SingleActionBase):
             self._statsMatrix = self._generateStatsMatrix()
 
         for key in self._keys:
-            csvPath = artefactHelper.getArtefactProperty(self._resultArtefacts[key], artefactProps.URL)
+            csvPath = artefactHelper.getArtefactProperty(
+                self._resultArtefacts[key], artefactProps.URL
+            )
             keyMatrix = self._statsMatrix[key]
             columnHeaderValues = _getColumnHeaderValues(keyMatrix)
             csvContent = dict()
@@ -197,11 +225,27 @@ class DoseStatsCollectorAction(SingleActionBase):
 class DoseStatsCollectorBatchAction(BatchActionBase):
     """Batch class for the dose collection actions."""
 
-    def __init__(self, inputSelector, selectedStats=None, actionTag="doseStatCollector",
-                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=DoseStatsCollectorAction,
-                                 primaryInputSelector=inputSelector, selectedStats=selectedStats,
-                                 primaryAlias='doses', splitter={'doses': BaseSplitter()}, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+    def __init__(
+        self,
+        inputSelector,
+        selectedStats=None,
+        actionTag="doseStatCollector",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=DoseStatsCollectorAction,
+            primaryInputSelector=inputSelector,
+            selectedStats=selectedStats,
+            primaryAlias="doses",
+            splitter={"doses": BaseSplitter()},
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

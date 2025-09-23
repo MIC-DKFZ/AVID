@@ -16,27 +16,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
+import unittest
+
 import avid.common.artefact.generator as artefactGenerator
-from avid.actions.dummy import DummySingleAction as DummyAction
 import avid.common.workflow as workflow
+from avid.actions.dummy import DummySingleAction as DummyAction
 from avid.actions.simpleScheduler import SimpleScheduler
 from avid.actions.testingScheduler import TestingScheduler
 
 
 class TestTestingScheduler(unittest.TestCase):
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0], "temporary_test_actions")
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_actions"
+        )
         self.testDataDir = os.path.join(os.path.split(__file__)[0], "data")
 
         self.session = workflow.Session("session1", self.sessionDir)
         self.actions = list()
 
         for i in range(6):
-            a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
+            a = artefactGenerator.generateArtefactEntry(
+                "Case1",
+                None,
+                i,
+                "Action1",
+                "result",
+                "dummy",
+                os.path.join(self.testDataDir, "artefact1.txt"),
+            )
             self.session.add_artefact(a)
-            self.actions.append(DummyAction([a], actionTag="Action1", session=self.session, alwaysDo=True))
+            self.actions.append(
+                DummyAction(
+                    [a], actionTag="Action1", session=self.session, alwaysDo=True
+                )
+            )
 
     def test_Scheduler(self):
         scheduler = TestingScheduler(SimpleScheduler(), action_limit=2)
@@ -58,5 +73,5 @@ class TestTestingScheduler(unittest.TestCase):
         self.assertEqual(len(self.session.getSkippedActions()), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

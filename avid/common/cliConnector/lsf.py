@@ -23,7 +23,7 @@ import time
 from pathlib import Path
 
 from avid.common import osChecker
-from avid.common.cliConnector import URLMappingCLIConnectorBase, DefaultCLIConnector
+from avid.common.cliConnector import DefaultCLIConnector, URLMappingCLIConnectorBase
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,13 @@ logger = logging.getLogger(__name__)
 class LSFCLIConnector(URLMappingCLIConnectorBase):
     """Implementation that allows to execute an action on an lsf cluster."""
 
-    def __init__(self, mount_map=None, additional_bsub_arguments=None, polling_wait_time_pending=10,
-                 polling_wait_time_running=1):
+    def __init__(
+        self,
+        mount_map=None,
+        additional_bsub_arguments=None,
+        polling_wait_time_pending=10,
+        polling_wait_time_running=1,
+    ):
         """
         :param mount_map: Dictionary that contains the mapping between relevant paths
             outside of the container (those stored in the session) and the pathes that will
@@ -57,11 +62,13 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
     def generate_lsf_log_file_path(log_file_path):
         path = Path(log_file_path)
         file_extension = path.suffix
-        file_stem = log_file_path[:-len(file_extension)]
+        file_stem = log_file_path[: -len(file_extension)]
 
-        return file_stem+'.lsf'+file_extension
+        return file_stem + ".lsf" + file_extension
 
-    def execute(self, cli_file_path, log_file_path=None, error_log_file_path=None, cwd=None):
+    def execute(
+        self, cli_file_path, log_file_path=None, error_log_file_path=None, cwd=None
+    ):
         global logger
 
         lsf_logfile = None
@@ -72,7 +79,11 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
                 lsf_logfile = open(lsf_path, "w")
             except:
                 lsf_logfile = None
-                logger.debug('Unable to generate lsf log file (%s) for call: %s', lsf_path, cli_file_path)
+                logger.debug(
+                    "Unable to generate lsf log file (%s) for call: %s",
+                    lsf_path,
+                    cli_file_path,
+                )
 
         lsf_error_logfile = None
 
@@ -82,34 +93,38 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
                 lsf_error_logfile = open(lsf_path, "w")
             except:
                 lsf_error_logfile = None
-                logger.debug('Unable to generate lsf error log file (%s) for call: %s', lsf_path, cli_file_path)
+                logger.debug(
+                    "Unable to generate lsf error log file (%s) for call: %s",
+                    lsf_path,
+                    cli_file_path,
+                )
 
         try:
             DefaultCLIConnector.ensure_file_availability(cli_file_path)
 
-            run_arg = ['bsub']
+            run_arg = ["bsub"]
 
             if self.additional_bsub_arguments:
                 for arg in self.additional_bsub_arguments:
                     run_arg.append(str(arg))
 
             if log_file_path is not None:
-                run_arg.append('-o')
+                run_arg.append("-o")
                 run_arg.append(log_file_path)
 
             if error_log_file_path is not None:
-                run_arg.append('-e')
+                run_arg.append("-e")
                 run_arg.append(error_log_file_path)
             run_arg.append(cli_file_path)
 
             run_result = subprocess.run(run_arg, capture_output=True, text=True)
             # Assuming job ID is in the format "Job <job_id> is submitted ..."
             job_id_line = run_result.stdout.strip()
-            job_id = job_id_line.split()[1].strip('<>').strip()
+            job_id = job_id_line.split()[1].strip("<>").strip()
 
             if lsf_logfile is not None:
                 lsf_logfile.write(run_result.stdout)
-                lsf_logfile.write('\n Job process: ')
+                lsf_logfile.write("\n Job process: ")
 
             if lsf_error_logfile is not None and run_result.stderr:
                 lsf_error_logfile.write(run_result.stderr)
@@ -120,15 +135,17 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
             is_successful = False
             wait_rounds = 0
             while is_running or is_pending:
-                if lsf_logfile is not None and wait_rounds%10==0:
-                    lsf_logfile.write('.')
+                if lsf_logfile is not None and wait_rounds % 10 == 0:
+                    lsf_logfile.write(".")
 
                 if is_running:
                     time.sleep(self.polling_wait_time_running)
                 else:
                     time.sleep(self.polling_wait_time_pending)
 
-                status_result = subprocess.run(['bjobs', job_id], capture_output=True, text=True)
+                status_result = subprocess.run(
+                    ["bjobs", job_id], capture_output=True, text=True
+                )
 
                 if lsf_error_logfile is not None and run_result.stderr:
                     lsf_error_logfile.write(run_result.stderr)
@@ -137,18 +154,23 @@ class LSFCLIConnector(URLMappingCLIConnectorBase):
                 is_pending = "PEND" in status_result.stdout
                 is_successful = "DONE" in status_result.stdout
 
-                if not is_running and not is_pending and lsf_logfile is not None and run_result.stdout:
-                    lsf_logfile.write('\n\n')
+                if (
+                    not is_running
+                    and not is_pending
+                    and lsf_logfile is not None
+                    and run_result.stdout
+                ):
+                    lsf_logfile.write("\n\n")
                     lsf_logfile.write(run_result.stdout)
 
             if is_successful:
                 logger.debug('Call "%s" finished normally', cli_file_path)
                 if lsf_logfile is not None:
-                    lsf_logfile.write('\n\nJob finished normally.')
+                    lsf_logfile.write("\n\nJob finished normally.")
             else:
                 logger.error('Call "%s" failed or was suspended', cli_file_path)
                 if lsf_logfile is not None:
-                    lsf_logfile.write('\n\nERROR: Job failed or was suspended/killed.')
+                    lsf_logfile.write("\n\nERROR: Job failed or was suspended/killed.")
 
         finally:
             if lsf_logfile is not None:

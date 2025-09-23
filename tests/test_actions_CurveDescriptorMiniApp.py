@@ -16,38 +16,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
-from avid.actions.unrefactored.CurveDescriptorMiniApp import CurveDescriptorMiniAppBatchAction as curveDescription
-from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_executable_url
+import unittest
 
-@unittest.skipIf(get_tool_executable_url(None, 'CurveDescriptorMiniApp') is None, 'Tool CurveDescriptorMiniApp is not installed on the system.')
+import avid.common.workflow as workflow
+from avid.actions.unrefactored.CurveDescriptorMiniApp import (
+    CurveDescriptorMiniAppBatchAction as curveDescription,
+)
+from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.selectors.keyValueSelector import ActionTagSelector
+
+
+@unittest.skipIf(
+    get_tool_executable_url(None, "CurveDescriptorMiniApp") is None,
+    "Tool CurveDescriptorMiniApp is not installed on the system.",
+)
 class TestCurveDescriptorMiniApp(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_CurveDescriptorMiniApp")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "MRPerfusionMiniAppTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0],
+            "data",
+            "MRPerfusionMiniAppTest",
+            "testlist.avid",
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_CurveDescriptorMiniApp"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_perf_descriptive_action(self):
-      
-      action = curveDescription(ActionTagSelector("Signal"), actionTag = "TestCurve")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+
+        action = curveDescription(ActionTagSelector("Signal"), actionTag="TestCurve")
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

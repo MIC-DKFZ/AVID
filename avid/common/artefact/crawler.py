@@ -16,20 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import object
 import argparse
-import os
-import logging
-import sys
-import re
 import concurrent.futures
-from typing import Callable, Optional, Pattern, Any, Union, Dict, List, Tuple, Generator
+import logging
+import os
+import re
+import sys
+from builtins import object
 from functools import wraps
+from typing import Any, Callable, Dict, Generator, List, Optional, Pattern, Tuple, Union
 
-from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
-from avid.common.artefact import ArtefactCollection, Artefact
 import avid.common.artefact.defaultProps as ArtefactProps
-from avid.common.workflow import Progress, Console
+from avid.common.artefact import Artefact, ArtefactCollection
+from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
+from avid.common.workflow import Console, Progress
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)
@@ -39,9 +39,11 @@ crawl_logger.addHandler(log_stdout)
 crawl_logger.setLevel(logging.INFO)
 
 
-def crawl_filter_by_filename(filename_exclude: Optional[Union[str, List[str]]] = None,
-                            ext_include: Optional[Tuple[str, ...]] = None,
-                            ext_exclude: Optional[Tuple[str, ...]] = None) -> Callable:
+def crawl_filter_by_filename(
+    filename_exclude: Optional[Union[str, List[str]]] = None,
+    ext_include: Optional[Tuple[str, ...]] = None,
+    ext_exclude: Optional[Tuple[str, ...]] = None,
+) -> Callable:
     """Decorator to filter files based on filename patterns and extensions.
 
     :param filename_exclude: Single filename or list of filenames to exclude
@@ -49,10 +51,11 @@ def crawl_filter_by_filename(filename_exclude: Optional[Union[str, List[str]]] =
     :param ext_exclude: Tuple of extensions to exclude
     :return: Decorated function that applies the filtering logic
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Optional[Artefact]:
-            filename = kwargs['filename']
+            filename = kwargs["filename"]
 
             if filename_exclude:
                 if isinstance(filename_exclude, str):
@@ -73,41 +76,49 @@ def crawl_filter_by_filename(filename_exclude: Optional[Union[str, List[str]]] =
                     return None
 
             # It is a potential artefact candidate, so call the function
-            if 'artefact_candidate' not in kwargs:
-                kwargs['artefact_candidate'] = Artefact()
+            if "artefact_candidate" not in kwargs:
+                kwargs["artefact_candidate"] = Artefact()
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
-def crawl_property_by_path(property_map: Dict[int, str], add_none: bool = False) -> Callable :
+def crawl_property_by_path(
+    property_map: Dict[int, str], add_none: bool = False
+) -> Callable:
     """Decorator to extract properties from path parts.
 
     :param property_map: Dictionary mapping path position (int) to property key (str)
     :param add_none: Whether to add properties with None values when path position doesn't exist
     :return: Decorated function that applies path-part-based property extraction
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Optional[Artefact]:
-            path_parts = kwargs['path_parts']
-            if 'artefact_candidate' not in kwargs:
-                kwargs['artefact_candidate'] = Artefact()
+            path_parts = kwargs["path_parts"]
+            if "artefact_candidate" not in kwargs:
+                kwargs["artefact_candidate"] = Artefact()
 
             for pos, key in property_map.items():
                 if -len(path_parts) <= pos < len(path_parts):
-                    kwargs['artefact_candidate'][key] = path_parts[pos]
+                    kwargs["artefact_candidate"][key] = path_parts[pos]
                 elif add_none:
-                    kwargs['artefact_candidate'][key] = None
+                    kwargs["artefact_candidate"][key] = None
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
-def crawl_property_by_filename(extraction_rules: Dict[str, Tuple[str, Any]],
-                              add_none: bool = False) -> Callable:
+def crawl_property_by_filename(
+    extraction_rules: Dict[str, Tuple[str, Any]], add_none: bool = False
+) -> Callable:
     """Decorator to extract property values from the filename of a potential artefact.
 
     :param extraction_rules: Dictionary of extraction rules for certain properties. Key indicates
@@ -136,30 +147,35 @@ def crawl_property_by_filename(extraction_rules: Dict[str, Tuple[str, Any]],
             for key, (regex, default) in extraction_rules.items()
         }
     except re.error as err:
-        crawl_logger.error(f"Error when precompiling the regex to capture property values from filename. "
-                          f"Check regex patterns. Error details: {err}")
+        crawl_logger.error(
+            f"Error when precompiling the regex to capture property values from filename. "
+            f"Check regex patterns. Error details: {err}"
+        )
         raise
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Optional[Artefact]:
-            filename = kwargs['filename']
-            if 'artefact_candidate' not in kwargs:
-                kwargs['artefact_candidate'] = Artefact()
+            filename = kwargs["filename"]
+            if "artefact_candidate" not in kwargs:
+                kwargs["artefact_candidate"] = Artefact()
 
             for key, (regex, default) in compiled_rules.items():
                 match = regex.search(filename)
                 if match:
                     value = match.group(1)
-                    kwargs['artefact_candidate'][key] = value
+                    kwargs["artefact_candidate"][key] = value
                 else:
                     value = default
                     if value or add_none:
-                        kwargs['artefact_candidate'][key] = value
+                        kwargs["artefact_candidate"][key] = value
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
+
 
 def _splitall(path: str) -> List[str]:
     allparts = []
@@ -168,7 +184,7 @@ def _splitall(path: str) -> List[str]:
         if parts[0] == path:  # sentinel for absolute paths
             allparts.insert(0, parts[0])
             break
-        elif parts[1] == path: # sentinel for relative paths
+        elif parts[1] == path:  # sentinel for relative paths
             allparts.insert(0, parts[1])
             break
         else:
@@ -177,8 +193,9 @@ def _splitall(path: str) -> List[str]:
     return allparts
 
 
-
-def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: str) -> Dict[str, Optional[Artefact]]:
+def _get_artefacts_from_folder(
+    folder_path: str, functor: Callable, root_path: str
+) -> Dict[str, Optional[Artefact]]:
     """Helper function that crawls all files in the given folder by calling a functor on each one.
 
     :param folder_path: Path to the folder to scan
@@ -191,7 +208,7 @@ def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: s
     :rtype: Dict[str, Optional[Artefact]]
     """
     relative_path = os.path.relpath(folder_path, root_path)
-    path_parts = _splitall(relative_path) if relative_path != '.' else []
+    path_parts = _splitall(relative_path) if relative_path != "." else []
     artefacts: Dict[str, Optional[Artefact]] = {}
 
     try:
@@ -201,9 +218,7 @@ def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: s
                     full_path = entry.path
 
                     artefact = functor(
-                        path_parts=path_parts,
-                        filename=entry.name,
-                        full_path=full_path
+                        path_parts=path_parts, filename=entry.name, full_path=full_path
                     )
 
                     if artefact and not artefact[ArtefactProps.INVALID]:
@@ -218,8 +233,10 @@ def _get_artefacts_from_folder(folder_path: str, functor: Callable, root_path: s
     return artefacts
 
 
-def _scan_directories(dir_path: str,
-                     break_checker_delegate: Optional[Callable[[os.DirEntry], bool]] = None) -> Generator[str, None, None]:
+def _scan_directories(
+    dir_path: str,
+    break_checker_delegate: Optional[Callable[[os.DirEntry], bool]] = None,
+) -> Generator[str, None, None]:
     """Generator that recursively scans directories using DirEntry for optimal performance.
 
     This function yields directory paths in a depth-first manner, using os.scandir
@@ -264,7 +281,7 @@ def _scan_directories(dir_path: str,
 
 
 class DirectoryCrawler(object):
-    """ Helper class that crawls a directory tree starting from the given rootPath.
+    """Helper class that crawls a directory tree starting from the given rootPath.
 
     The crawler assumes that every file found is a potential artefact and calls
     the provided file functor to interpret each file. If the functor returns an
@@ -287,12 +304,15 @@ class DirectoryCrawler(object):
             # Stop scanning subdirs if we found a .dcm file (assumes one series per folder)
             return os.path.isfile(path) and path.endswith('.dcm')
     """
-    def __init__(self,
-                 root_path: Union[str, os.PathLike],
-                 file_functor: Union[Callable, Callable[[], Callable]],
-                 replace_existing_artefacts: bool = False,
-                 n_processes: int = 1,
-                 scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None):
+
+    def __init__(
+        self,
+        root_path: Union[str, os.PathLike],
+        file_functor: Union[Callable, Callable[[], Callable]],
+        replace_existing_artefacts: bool = False,
+        n_processes: int = 1,
+        scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None,
+    ):
 
         self._rootPath: str = os.fspath(root_path)
         self._fileFunctor = file_functor
@@ -313,28 +333,29 @@ class DirectoryCrawler(object):
         except Exception as err:
             crawl_logger.debug(
                 f"Error when probing file_functor for being a factory. "
-                f"Assuming it is a normal function. Error details: {err}")
+                f"Assuming it is a normal function. Error details: {err}"
+            )
 
     @property
     def number_of_last_irrelevant(self):
-        """ Returns the number of irrelevant files (not ended up in artefats) of the last crawl."""
+        """Returns the number of irrelevant files (not ended up in artefats) of the last crawl."""
         return self._last_irrelevant
 
     @property
     def number_of_last_dropped(self):
-        """ Returns the number of artefacts that were dropped due to being duplicates to already found artefacts
+        """Returns the number of artefacts that were dropped due to being duplicates to already found artefacts
         in the last crawl."""
         return self._last_dropped
 
     @property
     def number_of_last_added(self):
-        """ Returns the number of artefacts that were finally added in the last crawl (and not overwritten or dropped)
+        """Returns the number of artefacts that were finally added in the last crawl (and not overwritten or dropped)
         So that is the number of artefacts finally in the list."""
         return self._last_added
 
     @property
     def number_of_last_overwites(self):
-        """ Returns the number of artefacts that were overwritten by simelar artefact in the cause of crawling."""
+        """Returns the number of artefacts that were overwritten by simelar artefact in the cause of crawling."""
         return self._last_overwrites
 
     def getArtefacts(self) -> ArtefactCollection:
@@ -350,22 +371,32 @@ class DirectoryCrawler(object):
         :raises OSError: If root directory cannot be accessed
         """
         artefacts = ArtefactCollection()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self._n_processes) as executor,\
-                Progress(transient=True, refresh_per_second=2) as progress:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=self._n_processes
+        ) as executor, Progress(transient=True, refresh_per_second=2) as progress:
             directory_scanning = progress.add_task("Found folders to scan")
             futures = []
-            for target_dir in _scan_directories(dir_path=self._rootPath, break_checker_delegate=self._scan_directory_break_delegate):
+            for target_dir in _scan_directories(
+                dir_path=self._rootPath,
+                break_checker_delegate=self._scan_directory_break_delegate,
+            ):
                 if self._functor_is_factory:
                     functor = self._fileFunctor()
                 else:
                     functor = self._fileFunctor
                 progress.update(directory_scanning, advance=1)
-                future = executor.submit(_get_artefacts_from_folder, target_dir, functor, self._rootPath)
+                future = executor.submit(
+                    _get_artefacts_from_folder, target_dir, functor, self._rootPath
+                )
                 futures.append(future)
 
-            progress.console.print(f"\nDiscovered {len(futures)} directories to analyze. Starting file analysis...")
+            progress.console.print(
+                f"\nDiscovered {len(futures)} directories to analyze. Starting file analysis..."
+            )
 
-            directory_analysis = progress.add_task("Processing directories", total=len(futures))
+            directory_analysis = progress.add_task(
+                "Processing directories", total=len(futures)
+            )
 
             self._last_irrelevant = 0
             self._last_dropped = 0
@@ -378,7 +409,10 @@ class DirectoryCrawler(object):
                     for fullpath, artefact in folder_artefacts.items():
                         if artefact is None:
                             self._last_irrelevant += 1
-                        elif not self._replace_existing_artefacts and artefacts.similar_artefact_exists(artefact):
+                        elif (
+                            not self._replace_existing_artefacts
+                            and artefacts.similar_artefact_exists(artefact)
+                        ):
                             self._last_dropped += 1
                         else:
                             replaced_artefact = artefacts.add_artefact(artefact)
@@ -395,8 +429,10 @@ class DirectoryCrawler(object):
         return artefacts
 
 
-def runCrawlerScriptMain(file_function: Callable,
-                        scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None) -> None:
+def runCrawlerScriptMain(
+    file_function: Callable,
+    scan_directory_break_delegate: Optional[Callable[[os.DirEntry], bool]] = None,
+) -> None:
     """Helper function for creating crawler scripts with command line interface.
 
     This function provides a standard CLI interface for crawler scripts that need to
@@ -418,17 +454,36 @@ def runCrawlerScriptMain(file_function: Callable,
         --relative_paths: Store paths relative to output file location
         --replace: Replace existing similar artefacts during crawling
     """
-    parser = argparse.ArgumentParser(description='AVID artefact crawler script for indexing files as artefacts.',)
+    parser = argparse.ArgumentParser(
+        description="AVID artefact crawler script for indexing files as artefacts.",
+    )
 
-    parser.add_argument('root', help='Path to the root directory where the crawler should start scanning.')
-    parser.add_argument('output', help='File path where discovered artefacts will be saved as XML. '
-                            'Existing files will be overwritten.')
+    parser.add_argument(
+        "root",
+        help="Path to the root directory where the crawler should start scanning.",
+    )
+    parser.add_argument(
+        "output",
+        help="File path where discovered artefacts will be saved as XML. "
+        "Existing files will be overwritten.",
+    )
 
-    parser.add_argument('--n_processes', help='Number of processes for parallel folder crawling', default=1, type=int)
-    parser.add_argument('--relative_paths', action='store_true',
-                       help='Store artefact file paths relative to the output file location')
-    parser.add_argument('--replace', action='store_true',
-                       help='Replace existing artefacts when similar ones are found in the same crawl')
+    parser.add_argument(
+        "--n_processes",
+        help="Number of processes for parallel folder crawling",
+        default=1,
+        type=int,
+    )
+    parser.add_argument(
+        "--relative_paths",
+        action="store_true",
+        help="Store artefact file paths relative to the output file location",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Replace existing artefacts when similar ones are found in the same crawl",
+    )
 
     try:
         cliargs, unknown = parser.parse_known_args()
@@ -459,24 +514,34 @@ def runCrawlerScriptMain(file_function: Callable,
 
     # Execute crawling operation
     try:
-        crawler = DirectoryCrawler(root_path=cliargs.root,
-                                   file_functor=file_function,
-                                   n_processes=cliargs.n_processes,
-                                   replace_existing_artefacts=cliargs.replace,
-                                   scan_directory_break_delegate=scan_directory_break_delegate)
+        crawler = DirectoryCrawler(
+            root_path=cliargs.root,
+            file_functor=file_function,
+            n_processes=cliargs.n_processes,
+            replace_existing_artefacts=cliargs.replace,
+            scan_directory_break_delegate=scan_directory_break_delegate,
+        )
         artefacts = crawler.getArtefacts()
 
         console = Console()
-        console.print(f'\n[bold]Crawling Results Summary[/bold]\n'
-                     f'Final artefacts collected: [green]{len(artefacts)}[/green]\n'
-                     f'Dropped duplicate artefacts: [yellow]{crawler.number_of_last_dropped}[/yellow]\n'
-                     f'Overwritten artefacts: [red]{crawler.number_of_last_overwites}[/red]\n'
-                     f'Irrelevant files skipped: [dim]{crawler.number_of_last_irrelevant}[/dim]\n')
+        console.print(
+            f"\n[bold]Crawling Results Summary[/bold]\n"
+            f"Final artefacts collected: [green]{len(artefacts)}[/green]\n"
+            f"Dropped duplicate artefacts: [yellow]{crawler.number_of_last_dropped}[/yellow]\n"
+            f"Overwritten artefacts: [red]{crawler.number_of_last_overwites}[/red]\n"
+            f"Irrelevant files skipped: [dim]{crawler.number_of_last_irrelevant}[/dim]\n"
+        )
 
         crawl_logger.info(f"Saving {len(artefacts)} artefacts to {cliargs.output}...")
-        saveArtefactList(filePath=cliargs.output, artefacts=artefacts, savePathsRelative=cliargs.relative_paths)
+        saveArtefactList(
+            filePath=cliargs.output,
+            artefacts=artefacts,
+            savePathsRelative=cliargs.relative_paths,
+        )
 
-        console.print(f'Successfully saved artefacts to: [green]{cliargs.output}[/green]\n')
+        console.print(
+            f"Successfully saved artefacts to: [green]{cliargs.output}[/green]\n"
+        )
 
     except KeyboardInterrupt:
         crawl_logger.info("Crawling interrupted by user")

@@ -16,38 +16,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.mitk.MitkMRPerfusion import MitkMRPerfusionBatchAction as perfusion
-from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.selectors.keyValueSelector import ActionTagSelector
 
-@unittest.skipIf(get_tool_executable_url(None, 'MitkMRPerfusion') is None, 'Tool MitkMRPerfusionMiniApp is not installed on the system.')
+
+@unittest.skipIf(
+    get_tool_executable_url(None, "MitkMRPerfusion") is None,
+    "Tool MitkMRPerfusionMiniApp is not installed on the system.",
+)
 class TestMitkMRPerfusion(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MRPerfusionMiniApp")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "MRPerfusionMiniAppTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0],
+            "data",
+            "MRPerfusionMiniAppTest",
+            "testlist.avid",
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_MRPerfusionMiniApp"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_perf_descriptive_action(self):
-      
-      action = perfusion(ActionTagSelector("Signal"), model=perfusion.MODEL_DESCRIPTIVE, injectiontime = 0.1, actionTag = "TestPerf")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+
+        action = perfusion(
+            ActionTagSelector("Signal"),
+            model=perfusion.MODEL_DESCRIPTIVE,
+            injectiontime=0.1,
+            actionTag="TestPerf",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

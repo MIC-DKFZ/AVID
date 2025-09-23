@@ -16,54 +16,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkCLGlobalImageFeatures import MitkCLGlobalImageFeaturesBatchAction as radiomics
+from avid.actions.mitk.MitkCLGlobalImageFeatures import (
+    MitkCLGlobalImageFeaturesBatchAction as radiomics,
+)
+from avid.common.AVIDUrlLocater import get_tool_executable_url
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_executable_url
 
-
-@unittest.skipIf(get_tool_executable_url(None, 'MitkCLGlobalImageFeatures') is None, 'Tool MitkCLGlobalImageFeatures not installed on the system.')
+@unittest.skipIf(
+    get_tool_executable_url(None, "MitkCLGlobalImageFeatures") is None,
+    "Tool MitkCLGlobalImageFeatures not installed on the system.",
+)
 class TestMitkFileConverter(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeaturesTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MitkCLGlobalImageFeaturesTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MitkCLGlobalImageFeatures")
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "MitkCLGlobalImageFeaturesTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0],
+            "data",
+            "MitkCLGlobalImageFeaturesTest",
+            "testlist.avid",
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_MitkCLGlobalImageFeatures"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
-
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_gif_action(self):
 
-      action = radiomics(imageSelector=ActionTagSelector("image"), maskSelector=ActionTagSelector("roi"),
-                         actionTag = "TestGIF")
-      action.do()
+        action = radiomics(
+            imageSelector=ActionTagSelector("image"),
+            maskSelector=ActionTagSelector("roi"),
+            actionTag="TestGIF",
+        )
+        action.do()
 
-      self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_gif_action_alwaysdo(self):
 
-      action = radiomics(imageSelector=ActionTagSelector("image"), maskSelector=ActionTagSelector("roi"),
-                         actionTag = "TestGIF", alwaysDo=True)
-      action.do()
+        action = radiomics(
+            imageSelector=ActionTagSelector("image"),
+            maskSelector=ActionTagSelector("roi"),
+            actionTag="TestGIF",
+            alwaysDo=True,
+        )
+        action.do()
 
-      self.assertEqual(True, action.isSuccess)
+        self.assertEqual(True, action.isSuccess)
 
-      action.do()
-      self.assertEqual(True, action.isSuccess)
+        action.do()
+        self.assertEqual(True, action.isSuccess)
 
 
 if __name__ == "__main__":

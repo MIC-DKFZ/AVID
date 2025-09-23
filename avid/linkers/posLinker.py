@@ -18,22 +18,26 @@
 
 from .__init__ import LinkerBase
 
+
 class PosLinker(LinkerBase):
-  ''' Links only by position. Therefore selection is secondarySelection[primaryIndex].
+    """Links only by position. Therefore selection is secondarySelection[primaryIndex].
     If primaryIndex is larger then len(secondarySelection) it will be the last element
     of the slave selection.
-  '''
-  def __init__(self):
-    LinkerBase.__init__(self, allowOnlyFullLinkage=False)
+    """
 
-  def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
-    index = primaryIndex
-    if index > len(secondarySelections):
-      index = len(secondarySelections) - 1
-      
-    resultSelections = list(list(),)
+    def __init__(self):
+        LinkerBase.__init__(self, allowOnlyFullLinkage=False)
 
-    if index >= 0:
-      resultSelections.append(secondarySelections[index])
-               
-    return resultSelections
+    def _getLinkedSelection(self, primaryIndex, primarySelections, secondarySelections):
+        index = primaryIndex
+        if index > len(secondarySelections):
+            index = len(secondarySelections) - 1
+
+        resultSelections = list(
+            list(),
+        )
+
+        if index >= 0:
+            resultSelections.append(secondarySelections[index])
+
+        return resultSelections

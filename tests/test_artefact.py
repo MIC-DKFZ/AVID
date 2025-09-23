@@ -17,53 +17,75 @@
 # limitations under the License.
 
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+from pathlib import Path
+
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact.generator as artefactGenerator
 from avid.common import workflow
-from pathlib import Path
 
 
 class TestArtefact(unittest.TestCase):
-  def setUp(self):
-    self.a1 = artefactGenerator.generateArtefactEntry("Case1", None, 0, "Action1", "result", "dummy", "myCoolFile.any")
-    self.a2 = artefactGenerator.generateArtefactEntry("Case1", 1, 0, "Action2", "result", "dummy", "myCoolFile.any", "target")
-    self.a3 = artefactGenerator.generateArtefactEntry("Case1", 1, 0, "IllegalChars*?", "result", "dummy", "myCoolFile.any")
+    def setUp(self):
+        self.a1 = artefactGenerator.generateArtefactEntry(
+            "Case1", None, 0, "Action1", "result", "dummy", "myCoolFile.any"
+        )
+        self.a2 = artefactGenerator.generateArtefactEntry(
+            "Case1", 1, 0, "Action2", "result", "dummy", "myCoolFile.any", "target"
+        )
+        self.a3 = artefactGenerator.generateArtefactEntry(
+            "Case1", 1, 0, "IllegalChars*?", "result", "dummy", "myCoolFile.any"
+        )
 
-    self.session = workflow.Session('TestSession', 'test_session_dir')
+        self.session = workflow.Session("TestSession", "test_session_dir")
+
+    def test_getArtefactShortName(self):
+        name = artefact.getArtefactShortName(self.a1)
+        self.assertEqual(name, "Action1#0")
+        name = artefact.getArtefactShortName(self.a2)
+        self.assertEqual(name, "Action2-target#0")
+        name = artefact.getArtefactShortName(self.a3)
+        self.assertEqual(name, "IllegalChars#0")
+
+    def test_generateArtefactPath(self):
+        path = Path(artefact.generateArtefactPath(self.session, self.a1))
+        expected = (
+            Path("test_session_dir") / "TestSession" / "Action1" / "result" / "Case1"
+        )
+        self.assertEqual(path, expected)
+
+        path = Path(artefact.generateArtefactPath(self.session, self.a2))
+        expected = (
+            Path("test_session_dir")
+            / "TestSession"
+            / "Action2"
+            / "result"
+            / "Case1"
+            / "1"
+        )
+        self.assertEqual(path, expected)
+
+        path = Path(artefact.generateArtefactPath(self.session, self.a3))
+        expected = (
+            Path("test_session_dir")
+            / "TestSession"
+            / "IllegalChars"
+            / "result"
+            / "Case1"
+            / "1"
+        )
+        self.assertEqual(path, expected)
+
+    def test_ensureSimilarityRelevantProperty(self):
+        self.assertNotIn("ensuredTestProp", artefact.similarityRelevantProperties)
+        artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
+        self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
+
+        propCount = len(artefact.similarityRelevantProperties)
+        artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
+        self.assertEqual(propCount, len(artefact.similarityRelevantProperties))
+        self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
 
 
-  def test_getArtefactShortName(self):
-    name = artefact.getArtefactShortName(self.a1)
-    self.assertEqual(name, 'Action1#0')
-    name = artefact.getArtefactShortName(self.a2)
-    self.assertEqual(name, 'Action2-target#0')
-    name = artefact.getArtefactShortName(self.a3)
-    self.assertEqual(name, 'IllegalChars#0')
-
-  def test_generateArtefactPath(self):
-    path = Path(artefact.generateArtefactPath(self.session, self.a1))
-    expected = Path('test_session_dir') / 'TestSession' / 'Action1' / 'result' / 'Case1'
-    self.assertEqual(path, expected)
-
-    path = Path(artefact.generateArtefactPath(self.session, self.a2))
-    expected = Path('test_session_dir') / 'TestSession' / 'Action2' / 'result' / 'Case1' / '1'
-    self.assertEqual(path, expected)
-
-    path = Path(artefact.generateArtefactPath(self.session, self.a3))
-    expected = Path('test_session_dir') / 'TestSession' / 'IllegalChars' / 'result' / 'Case1' / '1'
-    self.assertEqual(path, expected)
-
-  def test_ensureSimilarityRelevantProperty(self):
-    self.assertNotIn("ensuredTestProp", artefact.similarityRelevantProperties)
-    artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
-    self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
-
-    propCount = len(artefact.similarityRelevantProperties)
-    artefact.ensureSimilarityRelevantProperty("ensuredTestProp")
-    self.assertEqual(propCount, len(artefact.similarityRelevantProperties))
-    self.assertIn("ensuredTestProp", artefact.similarityRelevantProperties)
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

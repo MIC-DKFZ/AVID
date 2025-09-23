@@ -19,15 +19,14 @@
 import logging
 from json import dumps as jsonDumps
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.linkers import CaseLinker, FractionLinker
-
+import avid.common.artefact.defaultProps as artefactProps
 from avid.actions import BatchActionBase
 from avid.actions.genericCLIAction import GenericCLIAction
-from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
+from avid.linkers import CaseLinker, FractionLinker
+from avid.selectors import TypeSelector
 
 logger = logging.getLogger(__name__)
 
@@ -47,32 +46,59 @@ class MitkMatchImageAction(GenericCLIAction):
             else:
                 artefactRef = actionInstance._movingImage[0]
 
-        resultArtefact = actionInstance.generateArtefact(artefactRef,
-                                                         userDefinedProps={artefactProps.TYPE:artefactProps.TYPE_VALUE_RESULT,
-                                                                           artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT},
-                                                         url_user_defined_part=actionInstance._generateName(),
-                                                         url_extension='mapr')
+        resultArtefact = actionInstance.generateArtefact(
+            artefactRef,
+            userDefinedProps={
+                artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                artefactProps.FORMAT: FORMAT_VALUE_MATCHPOINT,
+            },
+            url_user_defined_part=actionInstance._generateName(),
+            url_extension="mapr",
+        )
         return [resultArtefact]
 
     @staticmethod
     def _defaultNameCallable(actionInstance, **allActionArgs):
-        name = "reg_"+artefactHelper.getArtefactShortName(actionInstance._movingImage[0])
+        name = "reg_" + artefactHelper.getArtefactShortName(
+            actionInstance._movingImage[0]
+        )
 
         if actionInstance._movingMask is not None:
-            name += "_" + artefactHelper.getArtefactShortName(actionInstance._movingMask)
+            name += "_" + artefactHelper.getArtefactShortName(
+                actionInstance._movingMask
+            )
 
-        name += "_to_"+artefactHelper.getArtefactShortName(actionInstance._targetImage[0])
+        name += "_to_" + artefactHelper.getArtefactShortName(
+            actionInstance._targetImage[0]
+        )
 
         if actionInstance._targetMask is not None:
-            name += "_" + artefactHelper.getArtefactShortName(actionInstance._targetMask)
+            name += "_" + artefactHelper.getArtefactShortName(
+                actionInstance._targetMask
+            )
 
         return name
 
-    def __init__(self, targetImage, movingImage, algorithm, algorithmParameters = None,
-                 targetMask=None, target_mask_label=None, movingMask=None, moving_mask_label=None,
-                 targetIsArtefactReference=True, actionTag="MitkMatchImage",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
-                 generateNameCallable=None, cli_connector=None):
+    def __init__(
+        self,
+        targetImage,
+        movingImage,
+        algorithm,
+        algorithmParameters=None,
+        targetMask=None,
+        target_mask_label=None,
+        movingMask=None,
+        moving_mask_label=None,
+        targetIsArtefactReference=True,
+        actionTag="MitkMatchImage",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        generateNameCallable=None,
+        cli_connector=None,
+    ):
         """
         :param targetImage: Artefact for the target / static image
         :param movingImage: Artefact for the moving image
@@ -97,15 +123,17 @@ class MitkMatchImageAction(GenericCLIAction):
         self._algorithm = algorithm
         self._targetIsArtefactReference = targetIsArtefactReference
 
-        additionalArgs = {'a':self._algorithm}
+        additionalArgs = {"a": self._algorithm}
         if target_mask_label:
-            additionalArgs['target_mask_label'] = target_mask_label
+            additionalArgs["target_mask_label"] = target_mask_label
         if moving_mask_label:
-            additionalArgs['moving_mask_label'] = moving_mask_label
+            additionalArgs["moving_mask_label"] = moving_mask_label
 
         self._algorithmParameters = algorithmParameters
         if not self._algorithmParameters is None:
-            additionalArgs['parameters'] = jsonDumps(self._algorithmParameters).replace('"', '\\"')
+            additionalArgs["parameters"] = jsonDumps(self._algorithmParameters).replace(
+                '"', '\\"'
+            )
 
         if generateNameCallable is None:
             generateNameCallable = self._defaultNameCallable
@@ -116,13 +144,26 @@ class MitkMatchImageAction(GenericCLIAction):
         if self._movingMask:
             masks["moving_mask"] = self._movingMask
 
-        GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, **masks,
-                                  tool_id="MitkMatchImage", outputFlags=['o'],
-                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'moving', 'target'],
-                                  defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session,
-                                  indicateCallable=self._indicate_outputs, generateNameCallable=generateNameCallable,
-                                  additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
+        GenericCLIAction.__init__(
+            self,
+            t=self._targetImage,
+            m=self._movingImage,
+            **masks,
+            tool_id="MitkMatchImage",
+            outputFlags=["o"],
+            additionalArgs=additionalArgs,
+            illegalArgs=["output", "moving", "target"],
+            defaultoutputextension="mapr",
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            indicateCallable=self._indicate_outputs,
+            generateNameCallable=generateNameCallable,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+        )
 
 
 class MitkMatchImageBatchAction(BatchActionBase):
@@ -146,11 +187,21 @@ class MitkMatchImageBatchAction(BatchActionBase):
         and called something like 'mdra-0-14_MITK_MultiModal_rigid_default.dll'
     """
 
-    def __init__(self, targetSelector, movingSelector, movingLinker=None,
-                 targetMaskSelector=None, targetMaskLinker=None,
-                 movingMaskSelector=None, movingMaskLinker=None,
-                 actionTag="MitkMatchImage", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        targetSelector,
+        movingSelector,
+        movingLinker=None,
+        targetMaskSelector=None,
+        targetMaskLinker=None,
+        movingMaskSelector=None,
+        movingMaskLinker=None,
+        actionTag="MitkMatchImage",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
 
         additionalInputSelectors = {
             "movingImage": movingSelector,
@@ -173,10 +224,18 @@ class MitkMatchImageBatchAction(BatchActionBase):
                 movingMaskLinker = FractionLinker()
             dependent_linker["movingImage"] = ["movingMask", movingMaskLinker]
 
-        BatchActionBase.__init__(self, actionTag= actionTag, actionClass=MitkMatchImageAction,
-                                 primaryInputSelector= targetSelector,
-                                 primaryAlias="targetImage", additionalInputSelectors = additionalInputSelectors,
-                                 linker=linker, dependentLinker=dependent_linker, session= session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps = additionalActionProps, **singleActionParameters)
-
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=MitkMatchImageAction,
+            primaryInputSelector=targetSelector,
+            primaryAlias="targetImage",
+            additionalInputSelectors=additionalInputSelectors,
+            linker=linker,
+            dependentLinker=dependent_linker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

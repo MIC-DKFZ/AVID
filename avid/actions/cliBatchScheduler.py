@@ -27,6 +27,7 @@ from avid.common import osChecker
 
 logger = logging.getLogger(__name__)
 
+
 def generateBatchPath(cli_action_path, action):
     """Helper function that tries to determin the action tag level of the cli_action_path.
     If that does not exist, the content path of the session will be returned."""
@@ -34,62 +35,76 @@ def generateBatchPath(cli_action_path, action):
 
     try:
         idx = path.parts.index(action.actionTag)
-        return Path(*path.parts[:idx + 1])
+        return Path(*path.parts[: idx + 1])
     except ValueError:
         return Path(action._session.contentPath)
+
 
 def process_batch(action_batch):
     global logger
 
     (batch_uid, batch_nr, actions) = action_batch
 
-    logger.debug(f'Process action batch #{batch_nr}. UID: {batch_uid}')
+    logger.debug(f"Process action batch #{batch_nr}. UID: {batch_uid}")
 
     actions_to_process = list()
     for action in actions:
         if action.do_setup():
             actions_to_process.append(action)
 
-    if len(actions_to_process)>0:
+    if len(actions_to_process) > 0:
         # get the CLIConnector of the actions (we assume that all actions have the same CLIEvecutor as BatchActions
         # use the same CLIConnector for all generated actions.
         cli_connector = actions_to_process[0]._cli_connector
         action_tag = actions_to_process[0]._actionTag
 
         # generate the cli script for the whole batch
-        batch_call_content=''
-        modified_call_prefix=''
+        batch_call_content = ""
+        modified_call_prefix = ""
         if osChecker.isWindows():
-            modified_call_prefix = 'call '
+            modified_call_prefix = "call "
 
         for action in actions_to_process:
             # add piping for the logs of one action
-            modified_call = f'{modified_call_prefix}{action._last_cli_call} > {action._last_log_file_path}' \
-                            f' 2> {action._last_log_error_file_path}\n'
+            modified_call = (
+                f"{modified_call_prefix}{action._last_cli_call} > {action._last_log_file_path}"
+                f" 2> {action._last_log_error_file_path}\n"
+            )
             batch_call_content = batch_call_content + modified_call
 
         # generate the file paths
-        path = generateBatchPath(actions_to_process[0]._last_cli_call, actions_to_process[0])
-        batch_cli_path_base = path/f'batch_{action_tag}_{batch_uid}_{batch_nr}'
+        path = generateBatchPath(
+            actions_to_process[0]._last_cli_call, actions_to_process[0]
+        )
+        batch_cli_path_base = path / f"batch_{action_tag}_{batch_uid}_{batch_nr}"
 
-        batch_cli_call=cli_connector.generate_cli_file(str(batch_cli_path_base), batch_call_content)
+        batch_cli_call = cli_connector.generate_cli_file(
+            str(batch_cli_path_base), batch_call_content
+        )
         batch_log_file_path = batch_cli_call + os.extsep + "log"
         batch_log_error_file_path = batch_cli_call + os.extsep + "error.log"
 
         # We don't use action.do_process (which just make the call to cli_connector_execute()
         # We use the cli_connector directly to inject the generated batch cli call
         try:
-            cli_connector.execute(batch_cli_call, log_file_path=batch_log_file_path,
-                                  error_log_file_path=batch_log_error_file_path,
-                                  cwd=actions_to_process[0]._cwd)
+            cli_connector.execute(
+                batch_cli_call,
+                log_file_path=batch_log_file_path,
+                error_log_file_path=batch_log_error_file_path,
+                cwd=actions_to_process[0]._cwd,
+            )
         except BaseException as e:
-            logger.warning(f'Error occurred while CLIBatchScheduler processed a batch.'
-                           f'Check the action states. Some actions might have failed.'
-                           f' Failed batch script: "{batch_cli_call}. Error details: {str(e)}')
+            logger.warning(
+                f"Error occurred while CLIBatchScheduler processed a batch."
+                f"Check the action states. Some actions might have failed."
+                f' Failed batch script: "{batch_cli_call}. Error details: {str(e)}'
+            )
             for action in actions_to_process:
-                action._reportWarning(f'Error occurred while CLIBatchScheduler processed the batch containing this action. '
-                                      f'Check the action state. Action might have failed, but problem could also have been '
-                                      f'by another action. Failed batch script: "{batch_cli_call}. Error details: {str(e)}')
+                action._reportWarning(
+                    f"Error occurred while CLIBatchScheduler processed the batch containing this action. "
+                    f"Check the action state. Action might have failed, but problem could also have been "
+                    f'by another action. Failed batch script: "{batch_cli_call}. Error details: {str(e)}'
+                )
 
     for action in actions:
         action.do_finalize()
@@ -97,27 +112,38 @@ def process_batch(action_batch):
 
 class CLIBatchScheduler(object):
     """Scheduler class that can be used with action based on CLIActionBase. Purpose of the scheduler to allow processing
-       the processing step of a batch of actions in one batch file instead of calling each action on its own.
-       This can e.g. be used in conjunction with external scheduling systems (e.g. LSF cliConnectors) to submit not
-       each action as a lsf job, but a batch of actions as one LSF job."""
+    the processing step of a batch of actions in one batch file instead of calling each action on its own.
+    This can e.g. be used in conjunction with external scheduling systems (e.g. LSF cliConnectors) to submit not
+    each action as a lsf job, but a batch of actions as one LSF job."""
+
     def __init__(self, batch_size, thread_count=1):
         self.batch_size = batch_size
         self.thread_count = thread_count
 
     def execute(self, action_list):
         # check if all actions derive from CLIActionBase
-        wrong_action = next((action for action in action_list if not isinstance(action, CLIActionBase)), None)
+        wrong_action = next(
+            (action for action in action_list if not isinstance(action, CLIActionBase)),
+            None,
+        )
         if wrong_action:
-            raise RuntimeError('Wrong usage of cliBatchScheduler. cliBatchScheduler can only used together with action'
-                               'classes derived from CLIActionBase. Please check your workflow code. First wrong action'
-                               f'instance: {wrong_action}')
+            raise RuntimeError(
+                "Wrong usage of cliBatchScheduler. cliBatchScheduler can only used together with action"
+                "classes derived from CLIActionBase. Please check your workflow code. First wrong action"
+                f"instance: {wrong_action}"
+            )
 
         batch_uid = uuid.uuid4()
 
         # split action in batches
-        action_batches = [action_list[i:i + self.batch_size] for i in range(0, len(action_list), self.batch_size)]
-        action_batches = [(batch_uid, i[0], i[1]) for i in enumerate(action_batches)] # populate the list with additional
-                                                                                # information
+        action_batches = [
+            action_list[i : i + self.batch_size]
+            for i in range(0, len(action_list), self.batch_size)
+        ]
+        action_batches = [
+            (batch_uid, i[0], i[1]) for i in enumerate(action_batches)
+        ]  # populate the list with additional
+        # information
 
         thread_count = min(self.thread_count, len(action_batches))
 

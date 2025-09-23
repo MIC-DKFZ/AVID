@@ -16,45 +16,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import range
-from builtins import object
-from threading import Thread
 import queue
+from builtins import object, range
+from threading import Thread
+
 
 class Worker(Thread):
     def __init__(self, actions):
-      Thread.__init__(self)
-      self.actions = actions
-      self.daemon = True
-      self.start()
-    
+        Thread.__init__(self)
+        self.actions = actions
+        self.daemon = True
+        self.start()
+
     def run(self):
-      try:
-        while True:
-          action = self.actions.get()
-          action.do()
-          self.actions.task_done()
-      except queue.Empty:
-        pass
+        try:
+            while True:
+                action = self.actions.get()
+                action.do()
+                self.actions.task_done()
+        except queue.Empty:
+            pass
 
 
 class ThreadingScheduler(object):
-  '''Simple threaded scheduler that processes the actions via a thread pool.'''
-  def __init__(self, threadcount ):
-    self.threadcount = threadcount
-  
-  def execute(self, actionList):
-    
-    actionqueue = queue.Queue()
+    """Simple threaded scheduler that processes the actions via a thread pool."""
 
-    threadcount = self.threadcount
-    if threadcount>len(actionList):
-      threadcount = len(actionList)
+    def __init__(self, threadcount):
+        self.threadcount = threadcount
 
-    for action in actionList:
-      actionqueue.put(action)
-      
-    for i in range(threadcount):
-      w = Worker(actionqueue)
-      
-    actionqueue.join()
+    def execute(self, actionList):
+
+        actionqueue = queue.Queue()
+
+        threadcount = self.threadcount
+        if threadcount > len(actionList):
+            threadcount = len(actionList)
+
+        for action in actionList:
+            actionqueue.put(action)
+
+        for i in range(threadcount):
+            w = Worker(actionqueue)
+
+        actionqueue.join()

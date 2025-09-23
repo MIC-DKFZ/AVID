@@ -35,10 +35,10 @@ Tool configurations are stored in dedicated TOML files, one per tool,
 located under the respective tools root (``.../tools/tool-configs/<tool-id>/avid_tool_config.toml``).
 """
 
-#from __future__ import annotations
+# from __future__ import annotations
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -58,13 +58,15 @@ SCOPE_VENV = "venv"
 
 
 class SETTING_NAMES:
-    ACTION_SUBPROCESS_PAUSE = 'action.subprocess_pause'  # in [s]
-    ACTION_TIMEOUT = 'action.timeout'  # in [s]
-    TOOLS_PATH = 'tools_path'  # tool root path
+    ACTION_SUBPROCESS_PAUSE = "action.subprocess_pause"  # in [s]
+    ACTION_TIMEOUT = "action.timeout"  # in [s]
+    TOOLS_PATH = "tools_path"  # tool root path
 
 
 class TOOL_SETTING_NAMES:
-    DEFAULT_EXECUTABLE_PATH = 'default.exe'  # path of the executable in the default action config section
+    DEFAULT_EXECUTABLE_PATH = (
+        "default.exe"  # path of the executable in the default action config section
+    )
 
 
 DEFAULTS: Dict[str, Any] = {
@@ -107,11 +109,13 @@ def get_user_data_dir() -> Path:
     """
     return Path(user_data_dir(APP_NAME, APP_AUTHOR))
 
+
 def get_venv_root_dir() -> Optional[Path]:
     """Return the current virtual environment root, if any.
     :returns: Optional[Path]: Path to the venv root, or None if not in a venv.
     """
     return Path(sys.prefix) if in_venv() else None
+
 
 def get_venv_config_dir() -> Optional[Path]:
     """Return the configuration directory for the current venv.
@@ -192,6 +196,7 @@ def ensure_dir(p: Path) -> None:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_toml(path: Path) -> Dict[str, Any]:
     """Load TOML file, returning empty dict if missing or invalid."""
     if not path.exists():
@@ -217,7 +222,10 @@ def _deep_merge(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
             res[k] = v
     return res
 
-def _get_setting_value_from_dict(key: str, config_dict: Dict[str, Any]) -> Optional[Any]:
+
+def _get_setting_value_from_dict(
+    key: str, config_dict: Dict[str, Any]
+) -> Optional[Any]:
     """Retrieve a setting value.
     :param key: Dotted key, e.g. ``"core.timeout"``.
     :param scope: Indicating the scope in which the setting should be fetched.
@@ -232,9 +240,11 @@ def _get_setting_value_from_dict(key: str, config_dict: Dict[str, Any]) -> Optio
         cur = cur[p]
     return cur
 
+
 # ---------------------------------------------------------------------------
 # Config paths
 # ---------------------------------------------------------------------------
+
 
 def get_user_config_file_path() -> Path:
     """Return the path to the user-level config TOML file."""
@@ -258,13 +268,14 @@ def get_venv_tool_config_file_path(tool_id: str) -> Optional[Path]:
     """Return path to a tool's TOML config file for the current venv. Either it is based on the default location or
     the setting stored in the venv config file.
     """
-    v= get_venv_tool_config_dir(tool_id)
+    v = get_venv_tool_config_dir(tool_id)
     return v / TOOL_CONFIG_FILENAME if v else None
 
 
 # ---------------------------------------------------------------------------
 # Config load/save
 # ---------------------------------------------------------------------------
+
 
 def load_user_config() -> Dict[str, Any]:
     """Load the user-level configuration file."""
@@ -327,7 +338,10 @@ def get_setting_from_dict(key: str, config_dict: Dict[str, Any]) -> Optional[Any
         cur = cur[p]
     return cur
 
-def set_setting_in_dict(key: str, config_dict: Dict[str, Any], value:Any) -> Optional[Any]:
+
+def set_setting_in_dict(
+    key: str, config_dict: Dict[str, Any], value: Any
+) -> Optional[Any]:
     """Set a configuration value.
     :param key: Dotted key, e.g. ``"core.timeout"``.
     :param config_dict: The dict into which the value should be set.
@@ -411,7 +425,7 @@ def unset_setting(key: str, scope: Optional[str] = None) -> bool:
     target = get_valid_scope(scope)
     cfg = load_venv_config() if target == SCOPE_VENV else load_user_config()
 
-    was_unset = unset_setting_in_dict(key,cfg)
+    was_unset = unset_setting_in_dict(key, cfg)
 
     if target == SCOPE_VENV:
         save_venv_config(cfg)
@@ -424,6 +438,7 @@ def unset_setting(key: str, scope: Optional[str] = None) -> bool:
 # ---------------------------------------------------------------------------
 # Tools config load/save
 # ---------------------------------------------------------------------------
+
 
 def load_user_tool_config(tool_id: str) -> Optional[Dict[str, Any]]:
     """Load the user-level tool configuration file, if available..

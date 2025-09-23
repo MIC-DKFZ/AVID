@@ -16,60 +16,82 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import FractionLinker
+import avid.common.artefact.defaultProps as artefactProps
 import avid.common.demultiplexer as demux
+from avid.common import AVIDUrlLocater, osChecker
+from avid.linkers import FractionLinker
+from avid.selectors import TypeSelector
 
 from . import BatchActionBase
 from .cliActionBase import CLIActionBase
-from avid.selectors import TypeSelector
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 
 
 def _defaultGetCaption(workflowArtefact):
-    '''Default strategy for the short name. If no objective is defined '''
+    """Default strategy for the short name. If no objective is defined"""
     tag = artefactHelper.getArtefactProperty(workflowArtefact, artefactProps.ACTIONTAG)
-    timePoint = artefactHelper.getArtefactProperty(workflowArtefact, artefactProps.TIMEPOINT)
+    timePoint = artefactHelper.getArtefactProperty(
+        workflowArtefact, artefactProps.TIMEPOINT
+    )
 
-    objective = artefactHelper.getArtefactProperty(workflowArtefact, artefactProps.OBJECTIVE)
-    sub_result = artefactHelper.getArtefactProperty(workflowArtefact, artefactProps.RESULT_SUB_TAG)
-    additionalInfo = ''
+    objective = artefactHelper.getArtefactProperty(
+        workflowArtefact, artefactProps.OBJECTIVE
+    )
+    sub_result = artefactHelper.getArtefactProperty(
+        workflowArtefact, artefactProps.RESULT_SUB_TAG
+    )
+    additionalInfo = ""
     if not objective is None:
-        additionalInfo = '-{}'.format(objective)
+        additionalInfo = "-{}".format(objective)
 
     if not sub_result is None:
-        additionalInfo = '{}-{}'.format(additionalInfo,sub_result)
+        additionalInfo = "{}-{}".format(additionalInfo, sub_result)
 
-    name = '{}{}#{}'.format(tag, additionalInfo, timePoint)
+    name = "{}{}#{}".format(tag, additionalInfo, timePoint)
 
     return name
 
 
 class PixelDumpMiniAppAction(CLIActionBase):
-    '''Class that wrapps the single action for the tool PixelDumpMiniApp.'''
+    """Class that wrapps the single action for the tool PixelDumpMiniApp."""
 
-    def __init__(self, signals, mask=None, captionDelegate=None, actionTag="PixelDump", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None):
-        CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict)
+    def __init__(
+        self,
+        signals,
+        mask=None,
+        captionDelegate=None,
+        actionTag="PixelDump",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+    ):
+        CLIActionBase.__init__(
+            self,
+            actionTag,
+            alwaysDo,
+            session,
+            additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+        )
 
         self._signals = dict()
 
         for pos, artefact in enumerate(signals):
-            self._signals['input_{}'.format(pos)] = artefact
+            self._signals["input_{}".format(pos)] = artefact
 
         self._mask = mask
 
         tempInput = self._signals.copy()
-        tempInput['mask'] = mask
+        tempInput["mask"] = mask
         self._addInputArtefacts(**tempInput)
 
         self._captionDelegate = captionDelegate
@@ -78,7 +100,10 @@ class PixelDumpMiniAppAction(CLIActionBase):
 
         if self._cwd is None:
             self._cwd = os.path.dirname(
-                AVIDUrlLocater.get_tool_executable_url(self._session, "PixelDumpMiniApp", actionConfig))
+                AVIDUrlLocater.get_tool_executable_url(
+                    self._session, "PixelDumpMiniApp", actionConfig
+                )
+            )
 
     def _firstSignal(self):
         return self._signals[sorted(self._signals.keys())[0]]
@@ -87,67 +112,95 @@ class PixelDumpMiniAppAction(CLIActionBase):
         return self._signals[sorted(self._signals.keys())[-1]]
 
     def _generateName(self):
-        name = "dump_{}_to_{}".format(artefactHelper.getArtefactShortName(self._firstSignal()), artefactHelper.getArtefactShortName(self._lastSignal()))
+        name = "dump_{}_to_{}".format(
+            artefactHelper.getArtefactShortName(self._firstSignal()),
+            artefactHelper.getArtefactShortName(self._lastSignal()),
+        )
         if self._mask is not None:
             name += "_ROI_{}".format(artefactHelper.getArtefactShortName(self._mask))
 
         return name
 
     def _indicateOutputs(self):
-        self._resultArtefact = self.generateArtefact(self._firstSignal(),
-                                                     userDefinedProps={
-                                                         artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
-                                                         artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV},
-                                                     urlHumanPrefix=self.instanceName,
-                                                     urlExtension='csv')
+        self._resultArtefact = self.generateArtefact(
+            self._firstSignal(),
+            userDefinedProps={
+                artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT,
+                artefactProps.FORMAT: artefactProps.FORMAT_VALUE_CSV,
+            },
+            urlHumanPrefix=self.instanceName,
+            urlExtension="csv",
+        )
         return [self._resultArtefact]
 
     def _generateCLIArguments(self):
-        resultPath = artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.URL)
+        resultPath = artefactHelper.getArtefactProperty(
+            self._resultArtefact, artefactProps.URL
+        )
         maskPath = artefactHelper.getArtefactProperty(self._mask, artefactProps.URL)
 
         signalPathes = list()
         captions = list()
         for signalname in self._signals:
-            signalPathes.append(artefactHelper.getArtefactProperty(self._signals[signalname], artefactProps.URL))
+            signalPathes.append(
+                artefactHelper.getArtefactProperty(
+                    self._signals[signalname], artefactProps.URL
+                )
+            )
             captions.append(self._captionDelegate(self._signals[signalname]))
 
-        execURL = self._cli_connector.get_executable_url(self._session, "PixelDumpMiniApp", self._actionConfig)
+        execURL = self._cli_connector.get_executable_url(
+            self._session, "PixelDumpMiniApp", self._actionConfig
+        )
 
         result = list()
         result.append(execURL)
-        result.append('-i')
+        result.append("-i")
         for path in signalPathes:
             result.append('"{}"'.format(path))
-        result.append('-o')
+        result.append("-o")
         result.append('"{}"'.format(resultPath))
-        result.append('-c')
+        result.append("-c")
         for caption in captions:
             result.append('"{}"'.format(caption))
 
         if maskPath is not None:
-            result.append('-m')
+            result.append("-m")
             result.append('"{}"'.format(maskPath))
 
         return result
 
     def _prepareCLIExecution(self):
-        content = ' '.join(self._generateCLIArguments())
-        resultPath = artefactHelper.getArtefactProperty(self._resultArtefact, artefactProps.URL)
+        content = " ".join(self._generateCLIArguments())
+        resultPath = artefactHelper.getArtefactProperty(
+            self._resultArtefact, artefactProps.URL
+        )
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
         return content
 
 
 class PixelDumpMiniAppBatchAction(BatchActionBase):
-    '''Batch action for PixelDumpMiniApp.'''
+    """Batch action for PixelDumpMiniApp."""
 
-    def __init__(self, signalSelector, maskSelector=None, maskLinker = FractionLinker(), splitProperties = None,
-                 actionTag = "PixelDump", alwaysDo=False, session = None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        '''@param splitProperty String specifying a property name. If specified this property will be used to split the
-        signals into specific jobs.'''
-        BatchActionBase.__init__(self, actionTag, alwaysDo, scheduler, session, additionalActionProps)
+    def __init__(
+        self,
+        signalSelector,
+        maskSelector=None,
+        maskLinker=FractionLinker(),
+        splitProperties=None,
+        actionTag="PixelDump",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
+        """@param splitProperty String specifying a property name. If specified this property will be used to split the
+        signals into specific jobs."""
+        BatchActionBase.__init__(
+            self, actionTag, alwaysDo, scheduler, session, additionalActionProps
+        )
 
         self._signals = signalSelector.getSelection(self._session.artefacts)
 
@@ -165,7 +218,9 @@ class PixelDumpMiniAppBatchAction(BatchActionBase):
 
         resultSelector = TypeSelector(artefactProps.TYPE_VALUE_RESULT)
 
-        allsignals = self.ensureRelevantArtefacts(self._signals, resultSelector, "signals")
+        allsignals = self.ensureRelevantArtefacts(
+            self._signals, resultSelector, "signals"
+        )
         masks = self.ensureRelevantArtefacts(self._masks, resultSelector, "masks")
 
         global logger
@@ -183,10 +238,15 @@ class PixelDumpMiniAppBatchAction(BatchActionBase):
                 linkedMasks = [None]
 
             for lm in linkedMasks:
-                action = PixelDumpMiniAppAction(signals=signals, mask=lm,
-                                                actionTag=self._actionTag, alwaysDo=self._alwaysDo, session=self._session,
-                                                additionalActionProps=self._additionalActionProps,
-                                                **self._singleActionParameters)
+                action = PixelDumpMiniAppAction(
+                    signals=signals,
+                    mask=lm,
+                    actionTag=self._actionTag,
+                    alwaysDo=self._alwaysDo,
+                    session=self._session,
+                    additionalActionProps=self._additionalActionProps,
+                    **self._singleActionParameters,
+                )
                 actions.append(action)
 
         return actions
