@@ -4,6 +4,7 @@
 /build
 *.log
 /tests/temporary*
+/test-artefacts/*
 /examples/output/*
 avid.config
 

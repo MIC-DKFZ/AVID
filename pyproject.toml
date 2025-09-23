@@ -25,6 +25,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "AVID"
 version = "0.0.1"
+description = "Automated processing of Versatile Image Data (AVID)"
 authors = [
     { name="MIC@DKFZ", email="r.floca@dkfz-heidelberg.de"},
 ]
@@ -45,6 +46,11 @@ license-files = ["LICENSE"]
 [project.optional-dependencies]
 rich = ["rich==13.7.1"]
 mac = ["dmglib==0.9.6"]
+dev = [
+    "black",
+    "isort",
+    "flake8",
+]
 
 [project.urls]
 Homepage = "https://github.com/MIC-DKFZ/AVID"
