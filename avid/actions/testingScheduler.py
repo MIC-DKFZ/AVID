@@ -32,4 +32,4 @@ class TestingScheduler:
         self.action_limit = action_limit
 
     def execute(self, actionList):
-        self.scheduler.execute(actionList[:self.action_limit])
+        self.scheduler.execute(actionList[: self.action_limit])

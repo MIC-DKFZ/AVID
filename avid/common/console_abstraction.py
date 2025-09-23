@@ -36,27 +36,30 @@ try:
     from rich.prompt import Prompt as RichPrompt
     from rich.table import Table as RichTable
     from rich.traceback import Traceback as RichTraceback
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
 
 RICH_TAG_PATTERN = re.compile(
-    r'\[/?(?:'
-    r'[a-zA-Z_][\w-]*'  # tag name like bold, red, underline
-    r'(?:=[^\]]+)?'  # optional =something
-    r'(?:\s+[a-zA-Z_][\w-]*(?:=[^\]]+)?)*'  # optional additional attributes
-    r')?'  # make the entire tag name group optional
-    r'\]'
+    r"\[/?(?:"
+    r"[a-zA-Z_][\w-]*"  # tag name like bold, red, underline
+    r"(?:=[^\]]+)?"  # optional =something
+    r"(?:\s+[a-zA-Z_][\w-]*(?:=[^\]]+)?)*"  # optional additional attributes
+    r")?"  # make the entire tag name group optional
+    r"\]"
 )
 
 
 def _test_for_limited_encoding():
-    return sys.stdout.encoding == 'cp1252'
+    return sys.stdout.encoding == "cp1252"
+
 
 ONLY_LIMITED_ENCODING_IS_SUPPORTED = _test_for_limited_encoding()
 
-#only use rich if it is there and the environment supports rich encoding (e.g utf8)
+# only use rich if it is there and the environment supports rich encoding (e.g utf8)
 RICH_AVAILABLE = RICH_AVAILABLE and not ONLY_LIMITED_ENCODING_IS_SUPPORTED
+
 
 class ConsoleTable:
     """Abstraction for table creation that works with or without rich"""
@@ -134,7 +137,9 @@ class ConsolePretty:
         self.max_width = max_width
 
     def __str__(self):
-        return pprint.pformat(self.obj, indent=self.indent_size, width=self.max_width or 80)
+        return pprint.pformat(
+            self.obj, indent=self.indent_size, width=self.max_width or 80
+        )
 
     def __repr__(self):
         return f"ConsolePretty(obj={repr(self.obj)})"
@@ -144,8 +149,13 @@ class ConsolePrompt:
     """Abstraction for user prompts that works with or without rich"""
 
     @staticmethod
-    def ask(question: str, default: Optional[str] = None, password: bool = False,
-            choices: Optional[list] = None, console: Optional['Console'] = None) -> str:
+    def ask(
+        question: str,
+        default: Optional[str] = None,
+        password: bool = False,
+        choices: Optional[list] = None,
+        console: Optional["Console"] = None,
+    ) -> str:
         """Ask for user input with validation"""
         prompt_text = question
         if default is not None:
@@ -157,6 +167,7 @@ class ConsolePrompt:
         while True:
             if password:
                 import getpass
+
                 try:
                     response = getpass.getpass(prompt_text)
                 except KeyboardInterrupt:
@@ -183,7 +194,9 @@ class ConsoleConfirm:
     """Abstraction for yes/no confirmation that works with or without rich"""
 
     @staticmethod
-    def ask(question: str, default: bool = True, console: Optional['Console'] = None) -> bool:
+    def ask(
+        question: str, default: bool = True, console: Optional["Console"] = None
+    ) -> bool:
         """Ask for yes/no confirmation"""
         suffix = " [Y/n]" if default else " [y/N]"
         prompt_text = question + suffix + ": "
@@ -193,9 +206,9 @@ class ConsoleConfirm:
 
             if not response:
                 return default
-            elif response in ('y', 'yes'):
+            elif response in ("y", "yes"):
                 return True
-            elif response in ('n', 'no'):
+            elif response in ("n", "no"):
                 return False
             else:
                 print("Please answer 'y' or 'n'")
@@ -232,6 +245,7 @@ class Console:
         """Helper function that checks if we are running in a IPython or jupyter environment."""
         try:
             from IPython import get_ipython
+
             shell = get_ipython().__class__.__name__
             if shell == "ZMQInteractiveShell":
                 return True  # Jupyter notebook or qtconsole
@@ -248,16 +262,25 @@ class Console:
         self._rich_console = None
 
         if RICH_AVAILABLE:
-            self._rich_console = RichConsole(file=self.file, width=width, force_jupyter=Console.__force_jupyter())
+            self._rich_console = RichConsole(
+                file=self.file, width=width, force_jupyter=Console.__force_jupyter()
+            )
 
     @property
     def is_terminal(self) -> bool:
         """Check if output is going to a terminal"""
         if self._rich_console:
             return self._rich_console.is_terminal
-        return hasattr(self.file, 'isatty') and self.file.isatty()
+        return hasattr(self.file, "isatty") and self.file.isatty()
 
-    def print(self, *objects, sep: str = " ", end: str = "\n", style: Optional[str] = None, **kwargs):
+    def print(
+        self,
+        *objects,
+        sep: str = " ",
+        end: str = "\n",
+        style: Optional[str] = None,
+        **kwargs,
+    ):
         """Print objects to the console with optional styling"""
         if self._rich_console:
             # Use rich console if available
@@ -269,7 +292,12 @@ class Console:
                 cleaned_objects.append(self._process_object_recursive(obj))
             print(*cleaned_objects, sep=sep, end=end, file=self.file, **kwargs)
 
-    def rule(self, title: Optional[str] = None, characters: str = "─", style: Optional[str] = None):
+    def rule(
+        self,
+        title: Optional[str] = None,
+        characters: str = "─",
+        style: Optional[str] = None,
+    ):
         """Print a horizontal rule"""
         if self._rich_console:
             self._rich_console.rule(title, characters=characters, style=style)
@@ -288,7 +316,17 @@ class Console:
 
     def _process_object_recursive(self, obj) -> str:
         """Recursively process objects, handling nested rich components"""
-        if isinstance(obj, (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback, ConsolePretty)):
+        if isinstance(
+            obj,
+            (
+                ConsoleTable,
+                ConsolePanel,
+                ConsoleColumns,
+                ConsolePadding,
+                ConsoleTraceback,
+                ConsolePretty,
+            ),
+        ):
             return self._render_simple(obj)
         elif isinstance(obj, str):
             return self._strip_markup(obj)
@@ -296,7 +334,7 @@ class Console:
             # Handle lists/tuples of objects (common in columns)
             processed_items = [self._process_object_recursive(item) for item in obj]
             return " | ".join(processed_items)
-        elif hasattr(obj, '__rich__') or hasattr(obj, '__rich_console__'):
+        elif hasattr(obj, "__rich__") or hasattr(obj, "__rich_console__"):
             # Handle other rich objects by converting to string and stripping markup
             return self._strip_markup(str(obj))
         else:
@@ -304,7 +342,7 @@ class Console:
 
     def _strip_markup(self, text: str) -> str:
         """Remove rich markup from text for plain output"""
-        return RICH_TAG_PATTERN.sub('', str(text))
+        return RICH_TAG_PATTERN.sub("", str(text))
 
     def _render_simple(self, obj) -> str:
         """Render objects in simple text format"""
@@ -346,8 +384,14 @@ class Console:
 
             # Print rows
             for row in table.rows:
-                row_str = " | ".join(self._strip_markup(str(cell)).ljust(widths[i]) if i < len(widths) else self._strip_markup(str(cell))
-                                     for i, cell in enumerate(row))
+                row_str = " | ".join(
+                    (
+                        self._strip_markup(str(cell)).ljust(widths[i])
+                        if i < len(widths)
+                        else self._strip_markup(str(cell))
+                    )
+                    for i, cell in enumerate(row)
+                )
                 result.append(row_str)
 
         return "\n".join(result)
@@ -380,9 +424,9 @@ class Console:
 
         # Add left padding and content
         if left > 0:
-            lines = content.split('\n')
+            lines = content.split("\n")
             padded_lines = [" " * left + line for line in lines]
-            result += '\n'.join(padded_lines)
+            result += "\n".join(padded_lines)
         else:
             result += content
 
@@ -393,7 +437,9 @@ class Console:
 
     def _render_traceback_simple(self, tb: ConsoleTraceback) -> str:
         """Render traceback in simple text format"""
-        return ''.join(traceback.format_exception(tb.exc_type, tb.exc_value, tb.exc_traceback))
+        return "".join(
+            traceback.format_exception(tb.exc_type, tb.exc_value, tb.exc_traceback)
+        )
 
     def _render_pretty_simple(self, pretty: ConsolePretty) -> str:
         """Render pretty object in simple text format"""
@@ -403,21 +449,34 @@ class Console:
 class Progress:
     """Progress abstraction that uses rich if available, provides simple fallback otherwise"""
 
-    def __init__(self, console: Optional[Console] = None, transient: bool = False, refresh_per_second: float = 10):
+    def __init__(
+        self,
+        console: Optional[Console] = None,
+        transient: bool = False,
+        refresh_per_second: float = 10,
+    ):
         self.console = console or Console()
         self.transient = transient
         self._refresh_per_second = refresh_per_second
-        self._refresh_wait_in_seconds = 1/refresh_per_second
+        self._refresh_wait_in_seconds = 1 / refresh_per_second
         self._rich_progress = None
         self._tasks = {}
         self._task_counter = 0
         self._last_display_lines = 0
 
         if RICH_AVAILABLE and self.console._rich_console:
-            self._rich_progress = RichProgress(console=self.console._rich_console, transient=transient,
-                                               refresh_per_second=refresh_per_second)
+            self._rich_progress = RichProgress(
+                console=self.console._rich_console,
+                transient=transient,
+                refresh_per_second=refresh_per_second,
+            )
 
-    def add_task(self, description: str, total: Optional[int] = None, indicator_cadence: Optional[float] = None) -> int:
+    def add_task(
+        self,
+        description: str,
+        total: Optional[int] = None,
+        indicator_cadence: Optional[float] = None,
+    ) -> int:
         """
         Add a progress task
         :return: ID of the task that should be updated.
@@ -433,27 +492,34 @@ class Progress:
         if self._rich_progress:
             real_task_id = self._rich_progress.add_task(description, total=total)
             self._tasks[task_id] = {
-                'rich_id': real_task_id,
-                'description': description,
-                'total': total,
-                'completed': 0,
-                'start_time':time.time(),
-                'indicator_cadence': indicator_cadence
+                "rich_id": real_task_id,
+                "description": description,
+                "total": total,
+                "completed": 0,
+                "start_time": time.time(),
+                "indicator_cadence": indicator_cadence,
             }
         else:
             self._tasks[task_id] = {
-                'description': description,
-                'total': total,
-                'completed': 0,
-                'start_time':time.time(),
-                'last_update_time': 0,
-                'indicator_cadence': indicator_cadence
+                "description": description,
+                "total": total,
+                "completed": 0,
+                "start_time": time.time(),
+                "last_update_time": 0,
+                "indicator_cadence": indicator_cadence,
             }
 
         return task_id
 
-    def update(self, task_id: int, advance: Optional[float] = None, total: Optional[float] = None,
-               completed: Optional[float] = None, indicator_cadence: Optional[float] = None, **kwargs):
+    def update(
+        self,
+        task_id: int,
+        advance: Optional[float] = None,
+        total: Optional[float] = None,
+        completed: Optional[float] = None,
+        indicator_cadence: Optional[float] = None,
+        **kwargs,
+    ):
         """Update progress for a task
         :param task_id: ID of the task that should be updated.
         :param advance: Increment of the progress. If None is passed the progress will not be changed but other
@@ -482,19 +548,31 @@ class Progress:
             task["completed"] = completed
         new_complete = task.get("completed", 0)
 
-        has_completed_now = old_complete < new_complete and task.get('total', None)\
-                            and new_complete >= task.get('total', 0)
+        has_completed_now = (
+            old_complete < new_complete
+            and task.get("total", None)
+            and new_complete >= task.get("total", 0)
+        )
 
         if self._rich_progress and "rich_id" in task and self.console.is_terminal:
-            self._rich_progress.update(task["rich_id"], advance=advance, total=total, completed=completed, **kwargs)
+            self._rich_progress.update(
+                task["rich_id"],
+                advance=advance,
+                total=total,
+                completed=completed,
+                **kwargs,
+            )
         else:
             # Simple progress with visual bar and time estimates
             current_time = time.time()
 
             # Only update display every _refresh_wait_in_seconds seconds to avoid flickering,
             # except it was just completed
-            if not has_completed_now\
-                    and current_time - task.get("last_update_time", 0) < self._refresh_wait_in_seconds:
+            if (
+                not has_completed_now
+                and current_time - task.get("last_update_time", 0)
+                < self._refresh_wait_in_seconds
+            ):
                 return
 
             task["last_update_time"] = current_time
@@ -505,15 +583,24 @@ class Progress:
                 # it is an action based progress in a non terminal, thus we indicate the progress with explicit
                 # print-outs in non rich mode
                 current_interval = None
-                if task['indicator_cadence']:
-                    current_interval = round(task["completed"]/task['indicator_cadence'])
+                if task["indicator_cadence"]:
+                    current_interval = round(
+                        task["completed"] / task["indicator_cadence"]
+                    )
 
-                if has_completed_now or current_interval is None or ('current_interval' not in task or task['current_interval'] != current_interval):
-                    task['current_interval'] = current_interval
+                if (
+                    has_completed_now
+                    or current_interval is None
+                    or (
+                        "current_interval" not in task
+                        or task["current_interval"] != current_interval
+                    )
+                ):
+                    task["current_interval"] = current_interval
                     progress_line = self._format_progress_line(task)
-                    self.console.print(f"\n{progress_line}  ", end='')
-                if 'action_state_indicator' in kwargs:
-                    self.console.print(f"{kwargs['action_state_indicator']}", end='')
+                    self.console.print(f"\n{progress_line}  ", end="")
+                if "action_state_indicator" in kwargs:
+                    self.console.print(f"{kwargs['action_state_indicator']}", end="")
 
     def refresh(self):
         """Force a refresh of the progress display (like flush)."""
@@ -530,10 +617,10 @@ class Progress:
             self._display_all_tasks()
             task_completed = 0
             for taskid, task in self._tasks.items():
-                total = task.get('total')
+                total = task.get("total")
                 if not total:
                     total = 0
-                if task.get('completed', 0) >= total:
+                if task.get("completed", 0) >= total:
                     task_completed += 1
             self.console.print(f"Progress stopped. {task_completed} tasks completed.")
 
@@ -543,11 +630,13 @@ class Progress:
         if self._last_display_lines > 0:
             # Move cursor up and clear lines
             for _ in range(self._last_display_lines):
-                self.console.print(f"\033[A\033[K", end='')  # Move up one line and clear it
+                self.console.print(
+                    f"\033[A\033[K", end=""
+                )  # Move up one line and clear it
         else:
-            #first time tasks are displayed in current setup. Move to new  line
-            #to avoid overriding last other line
-            self.console.print('\n')
+            # first time tasks are displayed in current setup. Move to new  line
+            # to avoid overriding last other line
+            self.console.print("\n")
 
         # Display each task
         lines_displayed = 0
@@ -560,7 +649,7 @@ class Progress:
         self._last_display_lines = lines_displayed
 
         # Ensure we flush to see the update immediately
-        if hasattr(self.console.file, 'flush'):
+        if hasattr(self.console.file, "flush"):
             self.console.file.flush()
 
     def _format_progress_line(self, task: dict) -> str:
@@ -572,11 +661,11 @@ class Progress:
         current_time = time.time()
 
         elapsed = current_time - start_time
-        if total and total<=completed:
-            if 'elapsed_time' in task:
-                elapsed = task['elapsed_time']
+        if total and total <= completed:
+            if "elapsed_time" in task:
+                elapsed = task["elapsed_time"]
             else:
-                task['elapsed_time'] = elapsed
+                task["elapsed_time"] = elapsed
 
         if total and total > 0:
             # Calculate percentage and create visual bar
@@ -607,7 +696,9 @@ class Progress:
             elapsed_str = self._format_duration(elapsed)
             return f"{description} {spinner} {int(completed)} items - {elapsed_str} elapsed"
 
-    def _format_time_estimates(self, completed: float, total: float, elapsed: float) -> str:
+    def _format_time_estimates(
+        self, completed: float, total: float, elapsed: float
+    ) -> str:
         """Format time estimates for progress display"""
         elapsed_str = self._format_duration(elapsed)
         if completed <= 0 or elapsed <= 0:
@@ -649,22 +740,26 @@ class Progress:
             self.stop()
 
 
-def inspect(obj, console: Optional[Console] = None, private: bool = False, docs: bool = True):
+def inspect(
+    obj, console: Optional[Console] = None, private: bool = False, docs: bool = True
+):
     """Inspect an object, with rich formatting if available"""
     console = console or Console()
 
     if RICH_AVAILABLE and console._rich_console:
         from rich import inspect as rich_inspect
+
         rich_inspect(obj, console=console._rich_console, private=private, docs=docs)
     else:
         # Simple fallback inspection
         import inspect as py_inspect
+
         console.print(f"Object: {obj}")
         console.print(f"Type: {type(obj)}")
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             console.print("Attributes:")
             for name, value in obj.__dict__.items():
-                if not private and name.startswith('_'):
+                if not private and name.startswith("_"):
                     continue
                 console.print(f"  {name}: {value}")
 
@@ -675,8 +770,9 @@ def get_logging_handler(level=None):
         handler = RichHandler(level=level)
     else:
         import logging
+
         handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter('%(asctime)-8s [%(levelname)s] %(message)s')
+        formatter = logging.Formatter("%(asctime)-8s [%(levelname)s] %(message)s")
         handler.setFormatter(formatter)
 
     if level:
@@ -713,33 +809,55 @@ def create_padding(renderable, pad: tuple = (0, 0, 0, 0)) -> PaddingType:
     return ConsolePadding(renderable, pad=pad)
 
 
-def create_traceback_from_exception(exc_type, exc_value, exc_traceback) -> TracebackType:
+def create_traceback_from_exception(
+    exc_type, exc_value, exc_traceback
+) -> TracebackType:
     """Create a traceback object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichTraceback.from_exception(exc_type, exc_value, exc_traceback)
     return ConsoleTraceback.from_exception(exc_type, exc_value, exc_traceback)
 
 
-def create_pretty(obj, indent_size: int = 4, max_width: Optional[int] = None) -> PrettyType:
+def create_pretty(
+    obj, indent_size: int = 4, max_width: Optional[int] = None
+) -> PrettyType:
     """Create a pretty object using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
         return RichPretty(obj, indent_size=indent_size, max_width=max_width)
     return ConsolePretty(obj, indent_size=indent_size, max_width=max_width)
 
 
-def prompt_ask(question: str, default: Optional[str] = None, password: bool = False,
-               choices: Optional[list] = None, console: Optional[Console] = None) -> str:
+def prompt_ask(
+    question: str,
+    default: Optional[str] = None,
+    password: bool = False,
+    choices: Optional[list] = None,
+    console: Optional[Console] = None,
+) -> str:
     """Ask for user input using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
-        return RichPrompt.ask(question, default=default, password=password, choices=choices,
-                             console=console._rich_console if console else None)
-    return ConsolePrompt.ask(question, default=default, password=password, choices=choices, console=console)
+        return RichPrompt.ask(
+            question,
+            default=default,
+            password=password,
+            choices=choices,
+            console=console._rich_console if console else None,
+        )
+    return ConsolePrompt.ask(
+        question, default=default, password=password, choices=choices, console=console
+    )
 
 
-def confirm_ask(question: str, default: bool = True, console: Optional[Console] = None) -> bool:
+def confirm_ask(
+    question: str, default: bool = True, console: Optional[Console] = None
+) -> bool:
     """Ask for yes/no confirmation using rich if available, fallback otherwise"""
     if RICH_AVAILABLE:
-        return RichConfirm.ask(question, default=default, console=console._rich_console if console else None)
+        return RichConfirm.ask(
+            question,
+            default=default,
+            console=console._rich_console if console else None,
+        )
     return ConsoleConfirm.ask(question, default=default, console=console)
 
 
@@ -747,10 +865,24 @@ def is_rich_object(obj) -> bool:
     """Check if an object is a rich-compatible object"""
     if RICH_AVAILABLE:
         # Check for rich objects
-        rich_types = (RichTable, RichPanel, RichColumns, RichPadding, RichTraceback, RichPretty)
+        rich_types = (
+            RichTable,
+            RichPanel,
+            RichColumns,
+            RichPadding,
+            RichTraceback,
+            RichPretty,
+        )
         if isinstance(obj, rich_types):
             return True
 
     # Check for our abstraction objects
-    abstraction_types = (ConsoleTable, ConsolePanel, ConsoleColumns, ConsolePadding, ConsoleTraceback, ConsolePretty)
+    abstraction_types = (
+        ConsoleTable,
+        ConsolePanel,
+        ConsoleColumns,
+        ConsolePadding,
+        ConsoleTraceback,
+        ConsolePretty,
+    )
     return isinstance(obj, abstraction_types)

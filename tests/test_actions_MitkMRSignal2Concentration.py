@@ -21,36 +21,55 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkMRSignal2Concentration import \
-    MitkMRSignal2ConcentrationBatchAction as conversion
+from avid.actions.mitk.MitkMRSignal2Concentration import (
+    MitkMRSignal2ConcentrationBatchAction as conversion,
+)
 from avid.common.AVIDUrlLocater import get_tool_executable_url
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_executable_url(None, 'MitkMRSignal2Concentration') is None, 'Tool MitkMRSignal2Concentration is not installed on the system.')
+@unittest.skipIf(
+    get_tool_executable_url(None, "MitkMRSignal2Concentration") is None,
+    "Tool MitkMRSignal2Concentration is not installed on the system.",
+)
 class TestMRPerfusionMiniApp(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MRSignal2Concentration")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "MRPerfusionMiniAppTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0],
+            "data",
+            "MRPerfusionMiniAppTest",
+            "testlist.avid",
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_MRSignal2Concentration"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_perf_descriptive_action(self):
-      
-      action = conversion(ActionTagSelector("Signal"), conversiontype=conversion.CONVERSION_T1_RELATIVE, actionTag = "TestConversion")
-      action.do()
-                    
-      self.assertEqual(True, action.isSuccess)
+
+        action = conversion(
+            ActionTagSelector("Signal"),
+            conversiontype=conversion.CONVERSION_T1_RELATIVE,
+            actionTag="TestConversion",
+        )
+        action.do()
+
+        self.assertEqual(True, action.isSuccess)
 
 
 if __name__ == "__main__":

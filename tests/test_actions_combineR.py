@@ -26,44 +26,63 @@ from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('combineR') is None, 'Tool combineR not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("combineR") is None,
+    "Tool combineR not installed on the system.",
+)
 class TestMapR(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "combineRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "combineRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_mapr")
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "combineRTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "combineRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_mapr"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_combiner_action(self):
-      
-      action = combineR(ActionTagSelector("reg1"), ActionTagSelector("reg2"), actionTag = "TestCombination")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = combineR(
+            ActionTagSelector("reg1"),
+            ActionTagSelector("reg2"),
+            actionTag="TestCombination",
+        )
+        action.do()
 
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_combiner_action_alwaysdo(self):
 
-      action = combineR(ActionTagSelector("reg1"), ActionTagSelector("reg2"), alwaysDo=True, actionTag = "TestCombination_alwaysDo")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+        action = combineR(
+            ActionTagSelector("reg1"),
+            ActionTagSelector("reg2"),
+            alwaysDo=True,
+            actionTag="TestCombination_alwaysDo",
+        )
+        action.do()
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

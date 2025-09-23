@@ -23,54 +23,65 @@ from avid.sorter import KeyValueSorter
 
 
 class TestKeyValueSorter(unittest.TestCase):
-  def setUp(self):
-    self.a1 = artefactGenerator.generateArtefactEntry("Case3", "3", 0, "Action1", "result", "dummy", None)
-    self.a2 = artefactGenerator.generateArtefactEntry("Case5", "1", 1, "Action1", "result", "dummy", None)
-    self.a3 = artefactGenerator.generateArtefactEntry("Case1", "20", 0, "Action2", "result", "dummy", None)
-    self.a4 = artefactGenerator.generateArtefactEntry("Case2", "7", 0, "Action1", "result", "dummy", None)
-    self.a5 = artefactGenerator.generateArtefactEntry("Case4", "5", 1, "Action1", "result", "dummy", None)
+    def setUp(self):
+        self.a1 = artefactGenerator.generateArtefactEntry(
+            "Case3", "3", 0, "Action1", "result", "dummy", None
+        )
+        self.a2 = artefactGenerator.generateArtefactEntry(
+            "Case5", "1", 1, "Action1", "result", "dummy", None
+        )
+        self.a3 = artefactGenerator.generateArtefactEntry(
+            "Case1", "20", 0, "Action2", "result", "dummy", None
+        )
+        self.a4 = artefactGenerator.generateArtefactEntry(
+            "Case2", "7", 0, "Action1", "result", "dummy", None
+        )
+        self.a5 = artefactGenerator.generateArtefactEntry(
+            "Case4", "5", 1, "Action1", "result", "dummy", None
+        )
 
-    self.data = ArtefactCollection()
-    self.data.add_artefact(self.a1)
-    self.data.add_artefact(self.a2)
-    self.data.add_artefact(self.a3)
-    self.data.add_artefact(self.a4)
-    self.data.add_artefact(self.a5)
+        self.data = ArtefactCollection()
+        self.data.add_artefact(self.a1)
+        self.data.add_artefact(self.a2)
+        self.data.add_artefact(self.a3)
+        self.data.add_artefact(self.a4)
+        self.data.add_artefact(self.a5)
 
-  def test_KeyValueSorter(self):
-    sorter = KeyValueSorter(key=defaultProps.CASE)
-    selection = sorter.sortSelection(self.data)
-    sel_iter = iter(selection)
+    def test_KeyValueSorter(self):
+        sorter = KeyValueSorter(key=defaultProps.CASE)
+        selection = sorter.sortSelection(self.data)
+        sel_iter = iter(selection)
 
-    self.assertEqual(len(selection), 5)
-    self.assertEqual(self.a3, next(sel_iter))
-    self.assertEqual(self.a4, next(sel_iter))
-    self.assertEqual(self.a1, next(sel_iter))
-    self.assertEqual(self.a5, next(sel_iter))
-    self.assertEqual(self.a2, next(sel_iter))
+        self.assertEqual(len(selection), 5)
+        self.assertEqual(self.a3, next(sel_iter))
+        self.assertEqual(self.a4, next(sel_iter))
+        self.assertEqual(self.a1, next(sel_iter))
+        self.assertEqual(self.a5, next(sel_iter))
+        self.assertEqual(self.a2, next(sel_iter))
 
-    sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE)
-    selection = sorter.sortSelection(self.data)
-    sel_iter = iter(selection)
+        sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE)
+        selection = sorter.sortSelection(self.data)
+        sel_iter = iter(selection)
 
-    self.assertEqual(len(selection), 5)
-    self.assertEqual(self.a2, next(sel_iter))
-    self.assertEqual(self.a3, next(sel_iter))
-    self.assertEqual(self.a1, next(sel_iter))
-    self.assertEqual(self.a5, next(sel_iter))
-    self.assertEqual(self.a4, next(sel_iter))
+        self.assertEqual(len(selection), 5)
+        self.assertEqual(self.a2, next(sel_iter))
+        self.assertEqual(self.a3, next(sel_iter))
+        self.assertEqual(self.a1, next(sel_iter))
+        self.assertEqual(self.a5, next(sel_iter))
+        self.assertEqual(self.a4, next(sel_iter))
 
-  def test_KeyValueSorter_numeric(self):
-    sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE, asNumbers=True)
-    selection = sorter.sortSelection(self.data)
-    sel_iter = iter(selection)
+    def test_KeyValueSorter_numeric(self):
+        sorter = KeyValueSorter(key=defaultProps.CASEINSTANCE, asNumbers=True)
+        selection = sorter.sortSelection(self.data)
+        sel_iter = iter(selection)
 
-    self.assertEqual(len(selection), 5)
-    self.assertEqual(self.a2, next(sel_iter))
-    self.assertEqual(self.a1, next(sel_iter))
-    self.assertEqual(self.a5, next(sel_iter))
-    self.assertEqual(self.a4, next(sel_iter))
-    self.assertEqual(self.a3, next(sel_iter))
+        self.assertEqual(len(selection), 5)
+        self.assertEqual(self.a2, next(sel_iter))
+        self.assertEqual(self.a1, next(sel_iter))
+        self.assertEqual(self.a5, next(sel_iter))
+        self.assertEqual(self.a4, next(sel_iter))
+        self.assertEqual(self.a3, next(sel_iter))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -22,52 +22,74 @@ import unittest
 
 import avid.common.workflow as workflow
 from avid.actions.matchpoint.matchR import matchRBatchAction as matchR
-from avid.common.AVIDUrlLocater import (get_tool_config_dir,
-                                        get_tool_config_file_path)
+from avid.common.AVIDUrlLocater import get_tool_config_dir, get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('matchR') is None, 'Tool matchR not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("matchR") is None,
+    "Tool matchR not installed on the system.",
+)
 class TestMatchR(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "matchRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "matchRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_matchR")
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "matchRTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "matchRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_matchR"
+        )
 
-      self.dllPath = str(get_tool_config_dir("matchR"))
-      self.itkAlgorithm = os.path.join(self.dllPath, "mdra-0-13_ITKEuler3DMattesMIMultiRes.dll")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.dllPath = str(get_tool_config_dir("matchR"))
+        self.itkAlgorithm = os.path.join(
+            self.dllPath, "mdra-0-13_ITKEuler3DMattesMIMultiRes.dll"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_reg_action(self):
-      
-      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = matchR(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            algorithm=self.itkAlgorithm,
+            actionTag="TestReg",
+        )
+        action.do()
 
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_reg_action_always_do(self):
-      
-      action = matchR(ActionTagSelector("Target"), ActionTagSelector("Moving"), algorithm = self.itkAlgorithm, actionTag = "TestReg", alwaysDo = True)
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = matchR(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            algorithm=self.itkAlgorithm,
+            actionTag="TestReg",
+            alwaysDo=True,
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

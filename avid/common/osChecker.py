@@ -22,14 +22,15 @@ import platform
 
 
 def checkAndCreateDir(completePath):
-  """ generates a directory """
-  try:
-    os.makedirs(completePath)
-  except OSError as exc:
-    if exc.errno != errno.EEXIST:
-      raise exc
-    pass
+    """generates a directory"""
+    try:
+        os.makedirs(completePath)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise exc
+        pass
+
 
 def isWindows():
-  """returns true if runs on a windows system"""
-  return platform.system() == 'Windows'
+    """returns true if runs on a windows system"""
+    return platform.system() == "Windows"

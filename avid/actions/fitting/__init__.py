@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Package with actions concercerning the fitting of dynamic data based on
-MITK mini apps.'''
+"""Package with actions concercerning the fitting of dynamic data based on
+MITK mini apps."""
 
 from .linearfit import LinearFitAction, LinearFitBatchAction

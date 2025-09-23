@@ -21,6 +21,9 @@ from avid.sorter.keyValueSorter import KeyValueSorter
 
 
 class TimePointSorter(KeyValueSorter):
-  '''Special version that enforces that time point is sorted as numeric.'''
-  def __init__(self, reverse = False):
-    KeyValueSorter.__init__(self, key=artefactProps.TIMEPOINT, reverse= reverse, asNumbers=True)
+    """Special version that enforces that time point is sorted as numeric."""
+
+    def __init__(self, reverse=False):
+        KeyValueSorter.__init__(
+            self, key=artefactProps.TIMEPOINT, reverse=reverse, asNumbers=True
+        )

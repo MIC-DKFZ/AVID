@@ -26,42 +26,61 @@ from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('DoseMap') is None, 'Tool DoseMap not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("DoseMap") is None,
+    "Tool DoseMap not installed on the system.",
+)
 class TestDoseMap(unittest.TestCase):
 
-
     def setUp(self):
-      
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "maprTest", "testlist.avid")
-            
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_doseMap")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
-              
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "mapRTest")
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "maprTest", "testlist.avid"
+        )
+
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_doseMap"
+        )
+
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_dose_map_action(self):
-      
-      action = doseMap(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")      
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSkipped, True)
-  
+
+        action = doseMap(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            actionTag="TestMapping",
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_dose_map_action_alwaysdo(self):
-      
-      action = doseMap(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping", alwaysDo = True)
-      action.do()
-      self.assertEqual(action.isSuccess, True)
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+
+        action = doseMap(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            actionTag="TestMapping",
+            alwaysDo=True,
+        )
+        action.do()
+        self.assertEqual(action.isSuccess, True)
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

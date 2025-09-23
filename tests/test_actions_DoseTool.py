@@ -26,18 +26,32 @@ from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('DoseTool') is None, 'Tool DoseTool not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("DoseTool") is None,
+    "Tool DoseTool not installed on the system.",
+)
 class TestDoseTool(unittest.TestCase):
 
     def setUp(self):
-        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "voxelizerTest")
-        self.testArtefactFile = os.path.join(os.path.split(__file__)[0], "data", "voxelizerTest", "testlist.avid")
-        self.testStructDef = os.path.join(os.path.split(__file__)[0], "data", "voxelizerTest", "structdef.xml")
-        self.sessionDir = os.path.join(os.path.split(__file__)[0], "temporary_test_DoseTool")
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest", "testlist.avid"
+        )
+        self.testStructDef = os.path.join(
+            os.path.split(__file__)[0], "data", "voxelizerTest", "structdef.xml"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_DoseTool"
+        )
 
-        self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"),
-                                            expandPaths=True, bootstrapArtefacts=self.testArtefactFile,
-                                            structDefinition=self.testStructDef)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+            structDefinition=self.testStructDef,
+        )
 
     def tearDown(self):
         try:
@@ -46,8 +60,12 @@ class TestDoseTool(unittest.TestCase):
             pass
 
     def test_simple_action(self):
-        action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
-                          ['Heart', 'Breast'], actionTag="TestDoseTool")
+        action = doseTool(
+            ActionTagSelector("Reference"),
+            ActionTagSelector("Struct"),
+            ["Heart", "Breast"],
+            actionTag="TestDoseTool",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)
@@ -57,16 +75,26 @@ class TestDoseTool(unittest.TestCase):
         self.assertEqual(action.isSkipped, True)
 
     def test_simple_action_noDVH(self):
-        action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
-                          ['Heart', 'Breast'], computeDVH=False, actionTag="TestDoseTool_noDVH")
+        action = doseTool(
+            ActionTagSelector("Reference"),
+            ActionTagSelector("Struct"),
+            ["Heart", "Breast"],
+            computeDVH=False,
+            actionTag="TestDoseTool_noDVH",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)
         self.assertEqual(len(action.outputArtefacts), 2)
 
     def test_simple_action_alwaysdo(self):
-        action = doseTool(ActionTagSelector('Reference'), ActionTagSelector('Struct'),
-                          ['Heart'], actionTag="TestDoseTool_alwaysDo", alwaysDo=True)
+        action = doseTool(
+            ActionTagSelector("Reference"),
+            ActionTagSelector("Struct"),
+            ["Heart"],
+            actionTag="TestDoseTool_alwaysDo",
+            alwaysDo=True,
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)

@@ -22,20 +22,23 @@ from avid.selectors import SelectorBase
 
 
 class ValiditySelector(SelectorBase):
-  ''' Convenience selector to select only artefacts that are not invalid.'''
-  def __init__(self, negate=False):
-    ''' init '''
-    super().__init__()
-    self._negate = negate
-    
-  def getSelection(self, workflowData):
-    '''Filters the given list of entries and returns all selected entries'''
-    outCollection = ArtefactCollection()
-    
-    for entry in workflowData:
-      value = getArtefactProperty(entry, artefactProps.INVALID)
-      
-      if (value is not True and not self._negate) or (value is True and self._negate):
-        #value may also be None and should be seen as valid.
-        outCollection.add_artefact(entry)
-    return outCollection
+    """Convenience selector to select only artefacts that are not invalid."""
+
+    def __init__(self, negate=False):
+        """init"""
+        super().__init__()
+        self._negate = negate
+
+    def getSelection(self, workflowData):
+        """Filters the given list of entries and returns all selected entries"""
+        outCollection = ArtefactCollection()
+
+        for entry in workflowData:
+            value = getArtefactProperty(entry, artefactProps.INVALID)
+
+            if (value is not True and not self._negate) or (
+                value is True and self._negate
+            ):
+                # value may also be None and should be seen as valid.
+                outCollection.add_artefact(entry)
+        return outCollection

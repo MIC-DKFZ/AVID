@@ -34,9 +34,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_avid_package_root_dir():
-    '''
+    """
     identifies the root dir of the AVID package
-    '''
+    """
     # get the location of this file (to be precisely it's the .pyc)
     path = os.path.dirname(__file__)
 
@@ -86,7 +86,9 @@ def get_tool_config_dir(tool_id, workflow_root_path=None, check_existence=True):
     4. return None
     """
 
-    tool_dir = (Path(workflow_root_path) / "tools" / tool_id) if workflow_root_path else None
+    tool_dir = (
+        (Path(workflow_root_path) / "tools" / tool_id) if workflow_root_path else None
+    )
     if not tool_dir or not tool_dir.exists():
         tool_dir = cfg.get_venv_tool_config_dir(tool_id=tool_id)
     if not tool_dir or not tool_dir.exists():
@@ -114,7 +116,11 @@ def get_tool_config_file_path(tool_id, workflow_root_path=None, check_existence=
     4. return None
     """
 
-    config_path = (Path(workflow_root_path) / "tools" / tool_id / cfg.TOOL_CONFIG_FILENAME) if workflow_root_path else None
+    config_path = (
+        (Path(workflow_root_path) / "tools" / tool_id / cfg.TOOL_CONFIG_FILENAME)
+        if workflow_root_path
+        else None
+    )
     if not config_path or not config_path.is_file():
         config_path = cfg.get_venv_tool_config_file_path(tool_id=tool_id)
     if not config_path or not config_path.is_file():
@@ -128,14 +134,14 @@ def get_tool_config_file_path(tool_id, workflow_root_path=None, check_existence=
 
 def get_tool_executable_url(workflow, tool_id, action_config=None):
     """
-       returns url+executable for a tool id request
-       @param tool_id of the action/tool for which the URL is requested
-       @param action_config specifies if a certain configuration of an action should be used.
-       1. checks if there is a valid tool in workflow.actionTools[tool_id]. If there is, return it else 2.
-       2. check the path:workflowRootPath/tools/<tool_id>/avidtool.config. If it is valid, return it else 3.
-       3. check the path:<AVID toolspath>/<tool_id>/avidtool.config. If it is valid, return it else 4.
-       4. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 5.
-       5. return None
+    returns url+executable for a tool id request
+    @param tool_id of the action/tool for which the URL is requested
+    @param action_config specifies if a certain configuration of an action should be used.
+    1. checks if there is a valid tool in workflow.actionTools[tool_id]. If there is, return it else 2.
+    2. check the path:workflowRootPath/tools/<tool_id>/avidtool.config. If it is valid, return it else 3.
+    3. check the path:<AVID toolspath>/<tool_id>/avidtool.config. If it is valid, return it else 4.
+    4. check path:avidRoot/Utilities/<defaultRelativePath>. If it is valid, return it else 5.
+    5. return None
     """
     returnURL = None
 
@@ -155,8 +161,10 @@ def get_tool_executable_url(workflow, tool_id, action_config=None):
             config = cfg._load_toml(toolconfigPath)
 
             if not action_config:
-                action_config = 'default'
-            execURL = cfg.get_setting_from_dict(key=f"{action_config}.exe", config_dict=config)
+                action_config = "default"
+            execURL = cfg.get_setting_from_dict(
+                key=f"{action_config}.exe", config_dict=config
+            )
 
             if not os.path.isabs(execURL):
                 execURL = os.path.join(os.path.dirname(toolconfigPath), execURL)
@@ -166,17 +174,27 @@ def get_tool_executable_url(workflow, tool_id, action_config=None):
             else:
                 logger.error(
                     'ExecURL for action "%s" is invalid. ToolConfigPath: "%s"; ExecURL: "%s".',
-                    tool_id, toolconfigPath, execURL)
+                    tool_id,
+                    toolconfigPath,
+                    execURL,
+                )
         else:
             logger.error(
                 'ToolConfigPath for action "%s" is invalid. ToolConfigPath "%s".',
-                tool_id, toolconfigPath)
+                tool_id,
+                toolconfigPath,
+            )
 
     if returnURL is None:
         logger.error(
             'Action "%s" seems not to have a configured tool. Please use avidconfig and see the README.md for information how to do it.',
-            tool_id)
+            tool_id,
+        )
     elif not os.path.exists(returnURL):
-        logger.debug('Found executable URL for action "%s" seems to be invalid. Found URL: %s', tool_id, returnURL)
+        logger.debug(
+            'Found executable URL for action "%s" seems to be invalid. Found URL: %s',
+            tool_id,
+            returnURL,
+        )
 
     return returnURL

@@ -21,7 +21,7 @@ import os
 from avid.common.osChecker import checkAndCreateDir
 
 
-def configureExternalFile(inFilePath, outFilePath, paramDict, paramEscape='@'):
+def configureExternalFile(inFilePath, outFilePath, paramDict, paramEscape="@"):
     """
     Reads a given inFilePath configures/modifies it by the given parameter dictionary
     and stores the result at outFilePath.
@@ -30,7 +30,7 @@ def configureExternalFile(inFilePath, outFilePath, paramDict, paramEscape='@'):
     :param paramEscape: Specifies how the keys are escaped in the input file. Default would be
     '@key1@'.
     """
-    with open(inFilePath, 'r') as ifile_handle:
+    with open(inFilePath, "r") as ifile_handle:
         content = ifile_handle.read()
 
         for key in paramDict:
@@ -38,5 +38,5 @@ def configureExternalFile(inFilePath, outFilePath, paramDict, paramEscape='@'):
             content = content.replace(symbol, str(paramDict[key]))
 
         checkAndCreateDir(os.path.split(outFilePath)[0])
-        with open(outFilePath, 'w') as ofile_handle:
+        with open(outFilePath, "w") as ofile_handle:
             ofile_handle.write(content)

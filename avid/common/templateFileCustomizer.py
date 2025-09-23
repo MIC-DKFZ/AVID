@@ -20,13 +20,13 @@ from builtins import str
 
 
 def writeFileCustomized(templateFilename, targetFilename, replaceDict):
-  inputFile = open(templateFilename, 'r')
-  content = inputFile.read()
-  inputFile.close()
+    inputFile = open(templateFilename, "r")
+    content = inputFile.read()
+    inputFile.close()
 
-  for key, value in replaceDict.items() :
-    content = content.replace(key, str(value))
+    for key, value in replaceDict.items():
+        content = content.replace(key, str(value))
 
-  outputFile = open(targetFilename, 'w')
-  outputFile.write(content)
-  outputFile.close()
+    outputFile = open(targetFilename, "w")
+    outputFile.write(content)
+    outputFile.close()

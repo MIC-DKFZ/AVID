@@ -21,38 +21,97 @@ import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.generator as artefactGenerator
 from avid.selectors import ActionTagSelector
-from avid.selectors.diagnosticSelector import (IsInputSelector,
-                                               IsPrimeInvalidSelector,
-                                               RootSelector)
+from avid.selectors.diagnosticSelector import (
+    IsInputSelector,
+    IsPrimeInvalidSelector,
+    RootSelector,
+)
 from avid.selectors.keyMulitValueSelector import KeyMultiValueSelector
 
 
 class TestDiagnosticSelectors(unittest.TestCase):
     def setUp(self):
         self.data = list()
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 0, "Action1", url="no_derivatives"))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 1, "Action1", url="derivatives"))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 2, "Action1", url="derivatives"))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case2", 0, "Action1", url="derivatives"))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case2", 1, "Action1", url="derivatives"))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case3", 0, "Action1", url="no_derivatives",
-                                                                   invalid=True))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 0, "Action2", url="no_derivatives",
-                                                                   **{artefactProps.INPUT_IDS: {
-                                                                       'a': [self.data[1][artefactProps.ID]]}}))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 1, "Action2", url="derivatives",
-                                                                   invalid=True,
-                                                                   **{artefactProps.INPUT_IDS: {
-                                                                       'a': [self.data[1][artefactProps.ID]],
-                                                                       'b': [self.data[2][artefactProps.ID]]}}))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case1", 1, "Action4", url="no_derivatives",
-                                                                   invalid=True,
-                                                                   **{artefactProps.INPUT_IDS: {
-                                                                       'a': [self.data[7][artefactProps.ID]]}}))
-        self.data.append(artefactGenerator.generate_artefact_entry("Case2", 1, "Action3", url="no_derivatives",
-                                                                   **{artefactProps.INPUT_IDS: {
-                                                                       'a': [self.data[3][artefactProps.ID],
-                                                                             self.data[4][artefactProps.ID]]}}))
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1", 0, "Action1", url="no_derivatives"
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1", 1, "Action1", url="derivatives"
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1", 2, "Action1", url="derivatives"
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case2", 0, "Action1", url="derivatives"
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case2", 1, "Action1", url="derivatives"
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case3", 0, "Action1", url="no_derivatives", invalid=True
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1",
+                0,
+                "Action2",
+                url="no_derivatives",
+                **{artefactProps.INPUT_IDS: {"a": [self.data[1][artefactProps.ID]]}},
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1",
+                1,
+                "Action2",
+                url="derivatives",
+                invalid=True,
+                **{
+                    artefactProps.INPUT_IDS: {
+                        "a": [self.data[1][artefactProps.ID]],
+                        "b": [self.data[2][artefactProps.ID]],
+                    }
+                },
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case1",
+                1,
+                "Action4",
+                url="no_derivatives",
+                invalid=True,
+                **{artefactProps.INPUT_IDS: {"a": [self.data[7][artefactProps.ID]]}},
+            )
+        )
+        self.data.append(
+            artefactGenerator.generate_artefact_entry(
+                "Case2",
+                1,
+                "Action3",
+                url="no_derivatives",
+                **{
+                    artefactProps.INPUT_IDS: {
+                        "a": [
+                            self.data[3][artefactProps.ID],
+                            self.data[4][artefactProps.ID],
+                        ]
+                    }
+                },
+            )
+        )
 
     def test_IsInputSelector(self):
         selector = IsInputSelector()
@@ -72,7 +131,7 @@ class TestDiagnosticSelectors(unittest.TestCase):
         self.assertIn(self.data[1], selection)
         self.assertIn(self.data[2], selection)
 
-        selector = IsInputSelector(input_keys=['a'])
+        selector = IsInputSelector(input_keys=["a"])
 
         selection = selector.getSelection(self.data)
         self.assertEqual(4, len(selection))
@@ -81,13 +140,17 @@ class TestDiagnosticSelectors(unittest.TestCase):
         self.assertIn(self.data[4], selection)
         self.assertIn(self.data[7], selection)
 
-        selector = IsInputSelector(input_keys=['a'], derivative_selector=ActionTagSelector("Action2"))
+        selector = IsInputSelector(
+            input_keys=["a"], derivative_selector=ActionTagSelector("Action2")
+        )
 
         selection = selector.getSelection(self.data)
         self.assertEqual(len(selection), 1)
         self.assertIn(self.data[1], selection)
 
-        selector = IsInputSelector(input_keys=['b'], derivative_selector=ActionTagSelector("Inexistant"))
+        selector = IsInputSelector(
+            input_keys=["b"], derivative_selector=ActionTagSelector("Inexistant")
+        )
 
         selection = selector.getSelection(self.data)
         self.assertEqual(len(selection), 0)
@@ -113,5 +176,5 @@ class TestDiagnosticSelectors(unittest.TestCase):
         self.assertIn(self.data[5], selection)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -28,62 +28,101 @@ from avid.selectors import FormatSelector
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('RegVarTool') is None, 'Tool RegVarTool not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("RegVarTool") is None,
+    "Tool RegVarTool not installed on the system.",
+)
 class TestRegVarTool(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "regVarToolTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_regVarTool")
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "regVarToolTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_regVarTool"
+        )
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-      self.numberOfVariations = 3
-      self.dllPath = AVIDUrlLocater.get_tool_config_dir("RegVarTool")
-      self.algorithmDLLEuler = str(self.dllPath / "mdra-0-12_RegVariationRandomGaussianEuler.dll")
-      self.algorithmDLLTPS = str(self.dllPath / "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll")
-      self.parameters = {"MeanGlobal" : "0.0", "StandardDeviationGlobal" : "1.0", "Seed" : "0"}
+        self.numberOfVariations = 3
+        self.dllPath = AVIDUrlLocater.get_tool_config_dir("RegVarTool")
+        self.algorithmDLLEuler = str(
+            self.dllPath / "mdra-0-12_RegVariationRandomGaussianEuler.dll"
+        )
+        self.algorithmDLLTPS = str(
+            self.dllPath / "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll"
+        )
+        self.parameters = {
+            "MeanGlobal": "0.0",
+            "StandardDeviationGlobal": "1.0",
+            "Seed": "0",
+        }
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_regvartool_action(self):
-      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, actionTag = "TestRegVar")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
+        action = regVarTool(
+            ActionTagSelector("Registration") + FormatSelector("MatchPoint"),
+            self.numberOfVariations,
+            algorithmDLL=self.algorithmDLLEuler,
+            actionTag="TestRegVar",
+        )
+        action.do()
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        self.assertEqual(action.isSuccess, True)
 
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_regvar_action_alwaysdo(self):
-      
-      action = regVarTool(ActionTagSelector("Registration")+FormatSelector("MatchPoint"), self.numberOfVariations, algorithmDLL = self.algorithmDLLEuler, alwaysDo = True, actionTag = "TestRegVar")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = regVarTool(
+            ActionTagSelector("Registration") + FormatSelector("MatchPoint"),
+            self.numberOfVariations,
+            algorithmDLL=self.algorithmDLLEuler,
+            alwaysDo=True,
+            actionTag="TestRegVar",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
     def test_simple_regvar_action_parameters(self):
-      action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
-                          algorithmDLL=self.algorithmDLLEuler, regParameters = self.parameters, actionTag="TestRegVarParam")
-      action.do()
+        action = regVarTool(
+            ActionTagSelector("Registration") + FormatSelector("MatchPoint"),
+            self.numberOfVariations,
+            algorithmDLL=self.algorithmDLLEuler,
+            regParameters=self.parameters,
+            actionTag="TestRegVarParam",
+        )
+        action.do()
 
-      self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.isSuccess, True)
 
     def test_simple_regvar_action_image(self):
-      action = regVarTool(ActionTagSelector("Registration") + FormatSelector("MatchPoint"), self.numberOfVariations,
-                          algorithmDLL=self.algorithmDLLTPS, templateSelector=ActionTagSelector("Target"), actionTag="TestRegVarImage")
-      action.do()
+        action = regVarTool(
+            ActionTagSelector("Registration") + FormatSelector("MatchPoint"),
+            self.numberOfVariations,
+            algorithmDLL=self.algorithmDLLTPS,
+            templateSelector=ActionTagSelector("Target"),
+            actionTag="TestRegVarImage",
+        )
+        action.do()
 
-      self.assertEqual(action.isSuccess, True)
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

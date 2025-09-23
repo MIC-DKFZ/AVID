@@ -30,13 +30,13 @@ logger = logging.getLogger(__name__)
 
 def _generateFlag(flagName):
     if len(flagName) == 1:
-        return '-{}'.format(flagName)
+        return "-{}".format(flagName)
     else:
-        return '--{}'.format(flagName)
+        return "--{}".format(flagName)
 
 
 def _generateAdditionalArgValueString(arg_value):
-    result = ''
+    result = ""
     if isinstance(arg_value, list):
         for value in arg_value:
             result += '"{}" '.format(value)
@@ -46,8 +46,13 @@ def _generateAdditionalArgValueString(arg_value):
     return result
 
 
-def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positions=None,
-                      artefact_url_extraction_delegate=None):
+def generate_cli_call(
+    exec_url,
+    artefact_args,
+    additional_args=None,
+    arg_positions=None,
+    artefact_url_extraction_delegate=None,
+):
     """Helper that generates the cli call string for a given set of artefact selection arguments and normal
     arguments.
     :param exec_url: The argument for the cli itself.
@@ -84,47 +89,72 @@ def generate_cli_call(exec_url, artefact_args, additional_args=None, arg_positio
                 if artefactPath is not None:
                     content += ' "{}"'.format(artefactPath)
         elif additional_args is not None and key in additional_args:
-            content += ' {}'.format(_generateAdditionalArgValueString(additional_args[key]))
+            content += " {}".format(
+                _generateAdditionalArgValueString(additional_args[key])
+            )
 
     for pos, artefactKey in enumerate(artefact_args):
         if artefactKey not in arg_positions and artefact_args[artefactKey] is not None:
-            artefact_content = ''
-            urls = extract_delegat(arg_name=artefactKey, arg_value=artefact_args[artefactKey])
+            artefact_content = ""
+            urls = extract_delegat(
+                arg_name=artefactKey, arg_value=artefact_args[artefactKey]
+            )
             for artefactPath in urls:
                 if artefactPath is not None:
                     artefact_content += ' "{}"'.format(artefactPath)
 
             if len(artefact_content) > 0:
-                content += ' {}'.format(_generateFlag(artefactKey)) + artefact_content
+                content += " {}".format(_generateFlag(artefactKey)) + artefact_content
 
     if additional_args is not None:
         for argKey in additional_args:
             if argKey not in arg_positions:
-                content += ' {}'.format(_generateFlag(argKey))
+                content += " {}".format(_generateFlag(argKey))
                 if additional_args[argKey] is not None:
-                    content += ' {}'.format(_generateAdditionalArgValueString(additional_args[argKey]))
+                    content += " {}".format(
+                        _generateAdditionalArgValueString(additional_args[argKey])
+                    )
 
     # escaping %-sign because of its usage in .bat scripts
     if osChecker.isWindows():
-        content = content.replace('%', '%%')
+        content = content.replace("%", "%%")
     return content
 
 
 class GenericCLIAction(CLIActionBase):
     """Action that offers a generic wrapper around a cli execution of an action. The basic idea is to have a simple
-     possibility to define an action that execute a CLI executable. All passed artefact selections are directly
-     converted into cli arguments. The user can define additional cli arguments and if the arguments are flag based
-     or positional arguments. If a user wants to use a tool not known to AVID, the users can specify own tool_id and
-     configure it with avidconig (system wide) or at runtime for a specific session (setWorkflowActionTool()) to point
-     to a certain executable. For more details see the documentation of __init_."""
+    possibility to define an action that execute a CLI executable. All passed artefact selections are directly
+    converted into cli arguments. The user can define additional cli arguments and if the arguments are flag based
+    or positional arguments. If a user wants to use a tool not known to AVID, the users can specify own tool_id and
+    configure it with avidconig (system wide) or at runtime for a specific session (setWorkflowActionTool()) to point
+    to a certain executable. For more details see the documentation of __init_."""
 
-    def __init__(self, tool_id, outputFlags=None, indicateCallable=None, generateNameCallable=None, additionalArgs=None, illegalArgs=None,
-                 argPositions=None, noOutputArgs=False, outputReferenceArtefactName=None, defaultoutputextension='nrrd',
-                 postProcessCLIExecutionCallable=None, collectOutputsCallable=None, additionalArgsAsURL=None,
-                 inputArgsURLExtractionDelegate=None, actionTag="GenericCLI", alwaysDo=False, session=None,
-                 additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None,
-                 use_no_url_id=False,
-                 **inputArgs):
+    def __init__(
+        self,
+        tool_id,
+        outputFlags=None,
+        indicateCallable=None,
+        generateNameCallable=None,
+        additionalArgs=None,
+        illegalArgs=None,
+        argPositions=None,
+        noOutputArgs=False,
+        outputReferenceArtefactName=None,
+        defaultoutputextension="nrrd",
+        postProcessCLIExecutionCallable=None,
+        collectOutputsCallable=None,
+        additionalArgsAsURL=None,
+        inputArgsURLExtractionDelegate=None,
+        actionTag="GenericCLI",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+        use_no_url_id=False,
+        **inputArgs,
+    ):
         """
         :param tool_id: actionID that will be used to deduce the tool/executable for this action instance.
         :param outputFlags: The argument/flag name (without "-" or "--"; the will be added automatically) of the output.
@@ -184,10 +214,17 @@ class GenericCLIAction(CLIActionBase):
             files.
         :param inputArgs: It is assumed that all unknown named arguments are inputs with artefact lists.
         """
-        CLIActionBase.__init__(self, actionTag=actionTag, alwaysDo=alwaysDo, session=session,
-                               additionalActionProps=additionalActionProps,
-                               tool_id=tool_id, actionConfig=actionConfig,
-                               propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
+        CLIActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            tool_id=tool_id,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+        )
 
         self._indicateCallable = indicateCallable
         self._generateNameCallable = generateNameCallable
@@ -215,23 +252,31 @@ class GenericCLIAction(CLIActionBase):
 
         for name in inputArgs:
             if name in self._illegalArgs:
-                raise RuntimeError('Action is initalized with illegal argument "{}". The argument is explicitly defined'
-                                   ' as illegal argument.'.format(name))
+                raise RuntimeError(
+                    'Action is initalized with illegal argument "{}". The argument is explicitly defined'
+                    " as illegal argument.".format(name)
+                )
             try:
                 inputArtefacts = self._ensureArtefacts(inputArgs[name], name=name)
             except Exception:
-                raise RuntimeError('Action is initalized with invalid argument "{}". The unkown argument is not a list of'
-                                   ' artefact and does not qualify as input. Value of invalid input argument: {}'.format(name, inputArgs[name]))
+                raise RuntimeError(
+                    'Action is initalized with invalid argument "{}". The unkown argument is not a list of'
+                    " artefact and does not qualify as input. Value of invalid input argument: {}".format(
+                        name, inputArgs[name]
+                    )
+                )
 
             if inputArtefacts is None:
                 raise ValueError(
-                    'Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}'.format(
-                        name))
+                    "Input argument is invalid as it does not contain artefact instances or is None/empty. Input name: {}".format(
+                        name
+                    )
+                )
             self._inputs[name] = inputArtefacts
         self._addInputArtefacts(**self._inputs)
 
         if len(self._inputs) == 0:
-            raise RuntimeError('Action is not initialized with any artefact inputs')
+            raise RuntimeError("Action is not initialized with any artefact inputs")
 
         self._outputFlags = outputFlags
         if self._outputFlags is None:
@@ -241,10 +286,13 @@ class GenericCLIAction(CLIActionBase):
             if flag in self._illegalArgs:
                 raise RuntimeError(
                     'Action is initalized with illegal output flag "{}". The argument is explicitly defined'
-                    ' as illegal argument.'.format(flag))
+                    " as illegal argument.".format(flag)
+                )
             if flag in self._inputs:
-                raise RuntimeError('Action is initalized with violating output flag "{}". The is already reserved/used'
-                                   ' for an input.'.format(flag))
+                raise RuntimeError(
+                    'Action is initalized with violating output flag "{}". The is already reserved/used'
+                    " for an input.".format(flag)
+                )
 
         self._additionalArgs = dict()
         self.setAdditionalArguments(additionalArgs)
@@ -254,7 +302,9 @@ class GenericCLIAction(CLIActionBase):
             if self._outputReferenceArtefactName not in self._inputs:
                 raise ValueError(
                     'Action cannot be initialized. Defined outputReferenceArtefactName ("{}") does not exist in the inputs dictionary: {}'.format(
-                        self._outputReferenceArtefactName, self._inputs.keys()))
+                        self._outputReferenceArtefactName, self._inputs.keys()
+                    )
+                )
 
     def setAdditionalArguments(self, additionalArgs):
         """Method can be used to (re)set the additional arguments of the action instance.
@@ -271,9 +321,12 @@ class GenericCLIAction(CLIActionBase):
                 if argName not in allIllegalArgs:
                     self._additionalArgs[argName] = additionalArgs[argName]
                 else:
-                    raise RuntimeError('Action is initalized with illegal argument "{}". The argument will be set by'
-                                       'the action (either as input and output or is explicitly defined illegal argument.'.format(
-                        argName))
+                    raise RuntimeError(
+                        'Action is initalized with illegal argument "{}". The argument will be set by'
+                        "the action (either as input and output or is explicitly defined illegal argument.".format(
+                            argName
+                        )
+                    )
 
     def _generateName(self):
         if self._generateNameCallable is not None:
@@ -281,10 +334,16 @@ class GenericCLIAction(CLIActionBase):
             allargs.update(self._additionalArgs)
             name = self._generateNameCallable(actionInstance=self, **allargs)
         else:
-            name = '{}_{}'.format(self._actionID, self._actionTag)
+            name = "{}_{}".format(self._actionID, self._actionTag)
             for inputKey in self._inputs:
-                if self._inputs[inputKey] is not None and self._inputs[inputKey][0] is not None:
-                    name += '_{}_{}'.format(inputKey, artefactHelper.getArtefactShortName(self._inputs[inputKey][0]))
+                if (
+                    self._inputs[inputKey] is not None
+                    and self._inputs[inputKey][0] is not None
+                ):
+                    name += "_{}_{}".format(
+                        inputKey,
+                        artefactHelper.getArtefactShortName(self._inputs[inputKey][0]),
+                    )
         return name
 
     def _indicateOutputs(self):
@@ -296,47 +355,63 @@ class GenericCLIAction(CLIActionBase):
             reference = self._inputs[self._outputReferenceArtefactName][0]
 
         resultArtefacts = [
-            self.generateArtefact(reference=reference,
-                                  userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
-                                  url_user_defined_part=self.instanceName,
-                                  url_extension=self._outputextension,
-                                  use_no_url_id=self._use_no_url_id)]
+            self.generateArtefact(
+                reference=reference,
+                userDefinedProps={artefactProps.TYPE: artefactProps.TYPE_VALUE_RESULT},
+                url_user_defined_part=self.instanceName,
+                url_extension=self._outputextension,
+                use_no_url_id=self._use_no_url_id,
+            )
+        ]
 
         if self._indicateCallable is not None:
             # the action has a specific strategy to indicate outputs, call it.
             allargs = self._inputs.copy()
             allargs.update(self._additionalArgs)
-            if 'indicated_default_output' in allargs:
-                raise RuntimeError('Cannot call custom indicateCallable for indicating the outputs. One of the defined'
-                                   'action inputs or additional arguments uses the reserved name'
-                                   ' "indicated_default_output". Please check the configuration of the'
-                                   ' genericCLIAction.')
-            resultArtefacts = self._indicateCallable(actionInstance=self,  indicated_default_output=resultArtefacts[0],
-                                                     **allargs)
+            if "indicated_default_output" in allargs:
+                raise RuntimeError(
+                    "Cannot call custom indicateCallable for indicating the outputs. One of the defined"
+                    "action inputs or additional arguments uses the reserved name"
+                    ' "indicated_default_output". Please check the configuration of the'
+                    " genericCLIAction."
+                )
+            resultArtefacts = self._indicateCallable(
+                actionInstance=self,
+                indicated_default_output=resultArtefacts[0],
+                **allargs,
+            )
             if resultArtefacts is not None:
                 # check if its really a list of artefacts
                 try:
                     for artifact in resultArtefacts:
                         if not isinstance(artifact, artefactHelper.Artefact):
                             raise TypeError(
-                                'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                    artifact))
+                                "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                                    artifact
+                                )
+                            )
                 except Exception:
                     raise TypeError(
-                        'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                            resultArtefacts))
+                        "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                            resultArtefacts
+                        )
+                    )
         return resultArtefacts
 
     def _prepareCLIExecution(self):
         try:
-            execURL = self._cli_connector.get_executable_url(self._session, self._actionID, self._actionConfig)
+            execURL = self._cli_connector.get_executable_url(
+                self._session, self._actionID, self._actionConfig
+            )
 
             artefactArgs = self._inputs.copy()
             argPositions = self._argPositions.copy()
 
             if not self._noOutputArgs:
                 for pos, resultArtefact in enumerate(self.outputArtefacts):
-                    resultPath = artefactHelper.getArtefactProperty(resultArtefact, artefactProps.URL)
+                    resultPath = artefactHelper.getArtefactProperty(
+                        resultArtefact, artefactProps.URL
+                    )
                     osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
                     key = "output_{}".format(pos)
@@ -346,10 +421,15 @@ class GenericCLIAction(CLIActionBase):
                         argPositions.append(key)
                     artefactArgs[key] = [resultArtefact]
 
-            content = generate_cli_call(exec_url=execURL, artefact_args=artefactArgs,
-                                        additional_args=self._additionalArgs,
-                                        arg_positions=argPositions,
-                                        artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate(self._inputArgsURLExtractionDelegate))
+            content = generate_cli_call(
+                exec_url=execURL,
+                artefact_args=artefactArgs,
+                additional_args=self._additionalArgs,
+                arg_positions=argPositions,
+                artefact_url_extraction_delegate=self._cli_connector.get_artefact_url_extraction_delegate(
+                    self._inputArgsURLExtractionDelegate
+                ),
+            )
 
         except Exception:
             logger.error("Error for getExecutable.")
@@ -364,7 +444,9 @@ class GenericCLIAction(CLIActionBase):
             if self._postProcessCLIExecutionCallable is not None:
                 self._postProcessCLIExecutionCallable(actionInstance=self, **allargs)
         except Exception:
-            logger.error("Error while post processing in generic CLI action: {}.".format(self))
+            logger.error(
+                "Error while post processing in generic CLI action: {}.".format(self)
+            )
             raise
 
     def _collectOutputs(self, indicatedOutputs):
@@ -373,20 +455,27 @@ class GenericCLIAction(CLIActionBase):
             allargs = self._inputs.copy()
             allargs.update(self._additionalArgs)
 
-            collectedArtefacts = self._collectOutputsCallable(actionInstance=self, indicatedOutputs=indicatedOutputs,
-                                                              **allargs)
+            collectedArtefacts = self._collectOutputsCallable(
+                actionInstance=self, indicatedOutputs=indicatedOutputs, **allargs
+            )
             # check if its really a list of artefacts
             try:
                 for artifact in collectedArtefacts:
                     if not isinstance(artifact, artefactHelper.Artefact):
                         raise TypeError(
-                            'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                                artifact))
+                            "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                                artifact
+                            )
+                        )
             except Exception:
                 raise TypeError(
-                    'Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}'.format(
-                        collectedArtefacts))
+                    "Indicate callable does not return a list of artefacts. Please check callable. Erroneous return: {}".format(
+                        collectedArtefacts
+                    )
+                )
 
         else:
-            collectedArtefacts = super()._collectOutputs(indicatedOutputs=indicatedOutputs)
+            collectedArtefacts = super()._collectOutputs(
+                indicatedOutputs=indicatedOutputs
+            )
         return collectedArtefacts

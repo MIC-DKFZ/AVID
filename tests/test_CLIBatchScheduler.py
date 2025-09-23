@@ -29,24 +29,34 @@ from avid.common.artefact import getArtefactProperty
 
 class TestCLIBatchScheduler(unittest.TestCase):
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_CLIBatchScheduler")
-        self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_CLIBatchScheduler"
+        )
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data")
 
         self.session = workflow.Session("session1", self.sessionDir)
-        workflow.currentGeneratedSession =self.session
+        workflow.currentGeneratedSession = self.session
         self.artefact = list()
         self.actions = list()
 
         for i in range(0, 15):
-            a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
+            a = artefactGenerator.generateArtefactEntry(
+                "Case1",
+                None,
+                i,
+                "Action1",
+                "result",
+                "dummy",
+                os.path.join(self.testDataDir, "artefact1.txt"),
+            )
             self.session.add_artefact(a)
-            self.actions.append(DummyAction([a],actionTag="Action1"))
+            self.actions.append(DummyAction([a], actionTag="Action1"))
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_Scheduler(self):
         scheduler = CLIBatchScheduler(5)
@@ -54,7 +64,9 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         for action in self.actions:
             self.assertTrue(action.isSuccess)
-            self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+            self.assertFalse(
+                getArtefactProperty(action.outputArtefacts[0], artefact_props.INVALID)
+            )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), 0)
@@ -81,7 +93,9 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         for action in self.actions:
             self.assertTrue(action.isSuccess)
-            self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+            self.assertFalse(
+                getArtefactProperty(action.outputArtefacts[0], artefact_props.INVALID)
+            )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), 0)
@@ -100,12 +114,14 @@ class TestCLIBatchScheduler(unittest.TestCase):
         self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions))
 
     def test_Scheduler_threaded(self):
-        scheduler = CLIBatchScheduler(4,3)
+        scheduler = CLIBatchScheduler(4, 3)
         scheduler.execute(self.actions)
 
         for action in self.actions:
             self.assertTrue(action.isSuccess)
-            self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+            self.assertFalse(
+                getArtefactProperty(action.outputArtefacts[0], artefact_props.INVALID)
+            )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), 0)
@@ -127,12 +143,14 @@ class TestCLIBatchScheduler(unittest.TestCase):
         for action in self.actions:
             action._alwaysDo = True
 
-        scheduler = CLIBatchScheduler(4,3)
+        scheduler = CLIBatchScheduler(4, 3)
         scheduler.execute(self.actions)
 
         for action in self.actions:
             self.assertTrue(action.isSuccess)
-            self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+            self.assertFalse(
+                getArtefactProperty(action.outputArtefacts[0], artefact_props.INVALID)
+            )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), 0)
@@ -159,18 +177,29 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         scheduler.execute(self.actions)
 
-        for (pos, action) in enumerate(self.actions):
+        for pos, action in enumerate(self.actions):
             if pos in skip_pattern:
                 self.assertTrue(action.isSkipped)
-                self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertFalse(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
             else:
                 self.assertTrue(action.isSuccess)
-                self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertFalse(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), 0)
         self.assertEqual(len(self.session.getSkippedActions()), len(skip_pattern))
-        self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions)-len(skip_pattern))
+        self.assertEqual(
+            len(self.session.getSuccessfulActions()),
+            len(self.actions) - len(skip_pattern),
+        )
 
     def test_Scheduler_failing(self):
         scheduler = CLIBatchScheduler(2)
@@ -181,24 +210,35 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         scheduler.execute(self.actions)
 
-        for (pos, action) in enumerate(self.actions):
+        for pos, action in enumerate(self.actions):
             if pos in fail_pattern:
                 self.assertTrue(action.isFailure)
-                self.assertTrue(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertTrue(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
             else:
                 self.assertTrue(action.isSuccess)
-                self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertFalse(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), len(fail_pattern))
         self.assertEqual(len(self.session.getSkippedActions()), 0)
-        self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions)-len(fail_pattern))
+        self.assertEqual(
+            len(self.session.getSuccessfulActions()),
+            len(self.actions) - len(fail_pattern),
+        )
 
     def test_Scheduler_skipped_failing(self):
         scheduler = CLIBatchScheduler(2)
 
         skip_pattern = [2, 6, 7, 9, 11]
-        fail_pattern = [5, 8, 12,13]
+        fail_pattern = [5, 8, 12, 13]
         for action in [self.actions[i] for i in skip_pattern]:
             action.will_skip = True
         for action in [self.actions[i] for i in fail_pattern]:
@@ -206,22 +246,37 @@ class TestCLIBatchScheduler(unittest.TestCase):
 
         scheduler.execute(self.actions)
 
-        for (pos, action) in enumerate(self.actions):
+        for pos, action in enumerate(self.actions):
             if pos in fail_pattern:
                 self.assertTrue(action.isFailure)
-                self.assertTrue(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertTrue(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
             elif pos in skip_pattern:
                 self.assertTrue(action.isSkipped)
-                self.assertFalse(getArtefactProperty(action.outputArtefacts[0], artefact_props.INVALID))
+                self.assertFalse(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
             else:
                 self.assertTrue(action.isSuccess)
-                self.assertFalse(getArtefactProperty(action.outputArtefacts[0],artefact_props.INVALID))
+                self.assertFalse(
+                    getArtefactProperty(
+                        action.outputArtefacts[0], artefact_props.INVALID
+                    )
+                )
 
         self.assertEqual(len(self.session.executed_actions), len(self.actions))
         self.assertEqual(len(self.session.getFailedActions()), len(fail_pattern))
         self.assertEqual(len(self.session.getSkippedActions()), len(skip_pattern))
-        self.assertEqual(len(self.session.getSuccessfulActions()), len(self.actions)-
-                         (len(fail_pattern)+len(skip_pattern)))
+        self.assertEqual(
+            len(self.session.getSuccessfulActions()),
+            len(self.actions) - (len(fail_pattern) + len(skip_pattern)),
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

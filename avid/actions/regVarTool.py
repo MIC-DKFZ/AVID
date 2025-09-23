@@ -34,46 +34,68 @@ logger = logging.getLogger(__name__)
 class RegVarToolAction(GenericCLIAction):
     """Class that wraps the single action for the tool regVarTool."""
 
-    def __init__(self, registration, instanceNr, algorithmDLL, regParameters=None, templateImage=None,
-                 actionTag="regVarTool",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+    def __init__(
+        self,
+        registration,
+        instanceNr,
+        algorithmDLL,
+        regParameters=None,
+        templateImage=None,
+        actionTag="regVarTool",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+    ):
 
         registration = self._ensureSingleArtefact(registration, "registration")
         templateImage = self._ensureSingleArtefact(templateImage, "templateImage")
 
-        inputArgs = {'r': [registration]}
+        inputArgs = {"r": [registration]}
         if templateImage is not None:
-            inputArgs['i'] = [templateImage]
+            inputArgs["i"] = [templateImage]
 
-        additionalArgs = {'a': algorithmDLL}
+        additionalArgs = {"a": algorithmDLL}
         if regParameters is not None:
             argVal = list()
             for pKey in regParameters:
                 argVal.append(pKey)
                 argVal.append(regParameters[pKey])
-            additionalArgs['p'] = argVal
+            additionalArgs["p"] = argVal
 
         if additionalActionProps is None:
             additionalActionProps = dict()
         additionalActionProps[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
 
-        GenericCLIAction.__init__(self, **inputArgs, tool_id="RegVarTool",
-                                  additionalArgs=additionalArgs,
-                                  outputFlags=['o'],
-                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
-                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
-                                  defaultoutputextension='mapr')
+        GenericCLIAction.__init__(
+            self,
+            **inputArgs,
+            tool_id="RegVarTool",
+            additionalArgs=additionalArgs,
+            outputFlags=["o"],
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+            defaultoutputextension="mapr",
+        )
 
         if self._caseInstance is not None and not instanceNr == self._caseInstance:
             logger.warning(
                 "Case instance conflict between input artefacts (%s) and instance that should be defined by action (%s).",
-                self._caseInstance, instanceNr)
+                self._caseInstance,
+                instanceNr,
+            )
         self._instanceNr = instanceNr
         self._caseInstance = instanceNr
 
     def _generateName(self):
-        return super()._generateName() + '_Var#{}'.format(self._instanceNr)
+        return super()._generateName() + "_Var#{}".format(self._instanceNr)
 
 
 class RegVarToolBatchAction(BatchActionBase):
@@ -84,15 +106,22 @@ class RegVarToolBatchAction(BatchActionBase):
         actions = list()
         actionArgs = kwargs.copy()
         for pos in range(0, instanceNr):
-            actionArgs['instanceNr'] = pos
+            actionArgs["instanceNr"] = pos
             actions.append(RegVarToolAction(**actionArgs))
         return actions
 
-    def __init__(self, regSelector, variationCount, templateSelector=None,
-                 templateLinker=None,
-                 actionTag="regVarTool",
-                 session=None, additionalActionProps=None, scheduler=SimpleScheduler(),
-                 **singleActionParameters):
+    def __init__(
+        self,
+        regSelector,
+        variationCount,
+        templateSelector=None,
+        templateLinker=None,
+        actionTag="regVarTool",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
 
         if templateLinker is None:
             templateLinker = CaseLinker()
@@ -100,9 +129,18 @@ class RegVarToolBatchAction(BatchActionBase):
         additionalInputSelectors = {"templateImage": templateSelector}
         linker = {"templateImage": templateLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionCreationDelegate=self._regvar_creation_delegate,
-                                 primaryInputSelector=regSelector, primaryAlias="registration",
-                                 additionalInputSelectors=additionalInputSelectors, linker=linker,
-                                 session=session, relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 instanceNr=variationCount, **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionCreationDelegate=self._regvar_creation_delegate,
+            primaryInputSelector=regSelector,
+            primaryAlias="registration",
+            additionalInputSelectors=additionalInputSelectors,
+            linker=linker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            instanceNr=variationCount,
+            **singleActionParameters,
+        )

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class MitkSplit4Dto3DImagesAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MitkSplit4Dto3DImages.'''
+    """Class that wraps the single action for the tool MitkSplit4Dto3DImages."""
 
     @staticmethod
     def _indicate_outputs(actionInstance, indicated_default_output, **allActionArgs):
@@ -44,7 +44,9 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
         return [indicated_default_output]
 
     @staticmethod
-    def collectSplitOutputs(actionInstance, indicatedOutputs, i, artefactHelper=None, **allArgs):
+    def collectSplitOutputs(
+        actionInstance, indicatedOutputs, i, artefactHelper=None, **allArgs
+    ):
         outputs = indicatedOutputs.copy()
 
         temp_output = indicatedOutputs[0]
@@ -56,24 +58,28 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
             multi_volume_outputs = list()
 
             file_path = Path(file_url)
-            file_full_extension = ''.join(file_path.suffixes)
-            file_stem = file_url[:-len(file_full_extension)]
+            file_full_extension = "".join(file_path.suffixes)
+            file_stem = file_url[: -len(file_full_extension)]
 
-            search_pattern = file_stem + '_*' + file_full_extension
+            search_pattern = file_stem + "_*" + file_full_extension
 
             find_files = glob(search_pattern)
 
-            for (pos,new_file) in enumerate(find_files):
+            for pos, new_file in enumerate(find_files):
                 # Search for the time step in the file path
-                new_file_stem = new_file[:-len(file_full_extension)]
-                timestep_str = new_file_stem[new_file_stem.rfind('_') + 1:]
+                new_file_stem = new_file[: -len(file_full_extension)]
+                timestep_str = new_file_stem[new_file_stem.rfind("_") + 1 :]
 
                 new_artefact = temp_output.clone()
                 new_artefact[artefactProps.RESULT_SUB_TAG] = pos
                 new_artefact[artefactProps.RESULT_SUB_COUNT] = len(find_files)
                 new_artefact[artefactProps.URL] = new_file
-                new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_DYNAMIC_SOURCE] = i[0][artefactProps.ID]
-                new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_ORIGINAL_TIME_STEP] = timestep_str
+                new_artefact[MitkSplit4Dto3DImagesAction.PROPERTY_DYNAMIC_SOURCE] = i[
+                    0
+                ][artefactProps.ID]
+                new_artefact[
+                    MitkSplit4Dto3DImagesAction.PROPERTY_ORIGINAL_TIME_STEP
+                ] = timestep_str
                 multi_volume_outputs.append(new_artefact)
 
             if len(multi_volume_outputs) > 0:
@@ -82,37 +88,72 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
 
         return outputs
 
-    '''In case actions produce more then one result artefact, this property may be used to make the results distinguishable.'''
+    """In case actions produce more then one result artefact, this property may be used to make the results distinguishable."""
     PROPERTY_DYNAMIC_SOURCE = "MitkSplit4Dto3DImagesAction_dynamic_source"
     PROPERTY_ORIGINAL_TIME_STEP = "MitkSplit4Dto3DImagesAction_original_time_step"
 
-    def __init__(self, inputs, readerName= None, defaultoutputextension ='nrrd', actionTag="MitkSplit4Dto3DImages",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None,
-                 cli_connector=None, **additionalActionArgs):
+    def __init__(
+        self,
+        inputs,
+        readerName=None,
+        defaultoutputextension="nrrd",
+        actionTag="MitkSplit4Dto3DImages",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+        **additionalActionArgs,
+    ):
         addArgs = None
         if readerName is not None:
-            addArgs = {'r':readerName}
+            addArgs = {"r": readerName}
 
-        GenericCLIAction.__init__(self, i=inputs, tool_id="MitkSplit4Dto3DImages", outputFlags=['o'],
-                                  additionalArgs=addArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
-                                  alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
-                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
-                                  defaultoutputextension=defaultoutputextension,
-                                  collectOutputsCallable=self.collectSplitOutputs,
-                                  **additionalActionArgs)
+        GenericCLIAction.__init__(
+            self,
+            i=inputs,
+            tool_id="MitkSplit4Dto3DImages",
+            outputFlags=["o"],
+            additionalArgs=addArgs,
+            illegalArgs=["output", "input"],
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            indicateCallable=self._indicate_outputs,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+            defaultoutputextension=defaultoutputextension,
+            collectOutputsCallable=self.collectSplitOutputs,
+            **additionalActionArgs,
+        )
 
 
 class MitkSplit4Dto3DImagesBatchAction(BatchActionBase):
-    '''Batch action for MitkSplit4Dto3DImages.'''
+    """Batch action for MitkSplit4Dto3DImages."""
 
-    def __init__(self, inputSelector,
-                 actionTag="MitkSplit4Dto3DImages", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkSplit4Dto3DImagesAction,
-                                 primaryInputSelector=inputSelector,
-                                 primaryAlias="inputs", additionalInputSelectors=None,
-                                 linker=None, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+    def __init__(
+        self,
+        inputSelector,
+        actionTag="MitkSplit4Dto3DImages",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=MitkSplit4Dto3DImagesAction,
+            primaryInputSelector=inputSelector,
+            primaryAlias="inputs",
+            additionalInputSelectors=None,
+            linker=None,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

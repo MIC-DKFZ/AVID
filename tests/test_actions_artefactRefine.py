@@ -21,13 +21,14 @@ import shutil
 import unittest
 
 import avid.common.workflow as workflow
-from avid.actions.artefactRefine import \
-    ArtefactRefineBatchAction as artefactRefine
+from avid.actions.artefactRefine import ArtefactRefineBatchAction as artefactRefine
 from avid.common.artefact import defaultProps as artefactProps
 from avid.linkers import TimePointLinker
-from avid.selectors.keyValueSelector import (ActionTagSelector,
-                                             ObjectiveSelector,
-                                             TimepointSelector)
+from avid.selectors.keyValueSelector import (
+    ActionTagSelector,
+    ObjectiveSelector,
+    TimepointSelector,
+)
 
 
 def is_similar(reference, other, ignore_keys=None):
@@ -48,82 +49,111 @@ def is_similar(reference, other, ignore_keys=None):
 
     return True
 
-def custom_refinement_script(primaryInputs, outputs,**kwargs):
-    '''Simple refinement.'''
+
+def custom_refinement_script(primaryInputs, outputs, **kwargs):
+    """Simple refinement."""
     for output in outputs:
         if output[artefactProps.TIMEPOINT] == 0:
-            output['baseline'] = 'true'
+            output["baseline"] = "true"
         else:
-            output['baseline'] = 'false'
+            output["baseline"] = "false"
+
 
 class TestArtefactRefineAction(unittest.TestCase):
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "pythonActionTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "pythonActionTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_pythonAction")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "pythonActionTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "pythonActionTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_pythonAction"
+        )
+
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_refine_action(self):
-      selector = ActionTagSelector("stats")
-      refArtefacts = selector.getSelection(self.session.artefacts)
-      action = artefactRefine(selector, actionTag = "TestRefine")
-      action.do()
-      changedProps = [artefactProps.ACTIONTAG, artefactProps.ACTION_CLASS, artefactProps.ACTION_INSTANCE_UID,
-                      artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
-                      artefactProps.EXECUTION_DURATION]
-      self.assertEqual(action.isSuccess, True)
+        selector = ActionTagSelector("stats")
+        refArtefacts = selector.getSelection(self.session.artefacts)
+        action = artefactRefine(selector, actionTag="TestRefine")
+        action.do()
+        changedProps = [
+            artefactProps.ACTIONTAG,
+            artefactProps.ACTION_CLASS,
+            artefactProps.ACTION_INSTANCE_UID,
+            artefactProps.URL,
+            artefactProps.INPUT_IDS,
+            artefactProps.ID,
+            artefactProps.TIMESTAMP,
+            artefactProps.EXECUTION_DURATION,
+        ]
+        self.assertEqual(action.isSuccess, True)
 
-      ref_artefact_iterator = iter(refArtefacts)
-      result = action.outputArtefacts[0]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      result = action.outputArtefacts[1]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      result = action.outputArtefacts[2]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-
+        ref_artefact_iterator = iter(refArtefacts)
+        result = action.outputArtefacts[0]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
+        result = action.outputArtefacts[1]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
+        result = action.outputArtefacts[2]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
 
     def test_custom_refine_action(self):
-      selector = ActionTagSelector("stats")
-      refArtefacts = selector.getSelection(self.session.artefacts)
+        selector = ActionTagSelector("stats")
+        refArtefacts = selector.getSelection(self.session.artefacts)
 
-      action = artefactRefine(selector, actionTag = "TestRefine", generateCallable = custom_refinement_script)
-      action.do()
-      changedProps = [artefactProps.ACTIONTAG, artefactProps.ACTION_CLASS, artefactProps.ACTION_INSTANCE_UID,
-                      artefactProps.URL, artefactProps.INPUT_IDS, artefactProps.ID, artefactProps.TIMESTAMP,
-                      artefactProps.EXECUTION_DURATION, 'baseline']
-      self.assertEqual(action.isSuccess, True)
+        action = artefactRefine(
+            selector, actionTag="TestRefine", generateCallable=custom_refinement_script
+        )
+        action.do()
+        changedProps = [
+            artefactProps.ACTIONTAG,
+            artefactProps.ACTION_CLASS,
+            artefactProps.ACTION_INSTANCE_UID,
+            artefactProps.URL,
+            artefactProps.INPUT_IDS,
+            artefactProps.ID,
+            artefactProps.TIMESTAMP,
+            artefactProps.EXECUTION_DURATION,
+            "baseline",
+        ]
+        self.assertEqual(action.isSuccess, True)
 
-      ref_artefact_iterator = iter(refArtefacts)
-      result = action.outputArtefacts[0]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], 'true')
+        ref_artefact_iterator = iter(refArtefacts)
+        result = action.outputArtefacts[0]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
+        self.assertEqual(result["baseline"], "true")
 
-      result = action.outputArtefacts[1]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], 'true')
+        result = action.outputArtefacts[1]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
+        self.assertEqual(result["baseline"], "true")
 
-      result = action.outputArtefacts[2]
-      self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
-      self.assertEqual(result[artefactProps.ACTIONTAG], 'TestRefine')
-      self.assertEqual(result[artefactProps.ACTION_CLASS], 'ArtefactRefineAction')
-      self.assertEqual(result['baseline'], 'false')
+        result = action.outputArtefacts[2]
+        self.assertTrue(is_similar(next(ref_artefact_iterator), result, changedProps))
+        self.assertEqual(result[artefactProps.ACTIONTAG], "TestRefine")
+        self.assertEqual(result[artefactProps.ACTION_CLASS], "ArtefactRefineAction")
+        self.assertEqual(result["baseline"], "false")
+
 
 if __name__ == "__main__":
     unittest.main()

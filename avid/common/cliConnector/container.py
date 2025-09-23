@@ -21,8 +21,10 @@ import os
 import stat
 
 from avid.common import osChecker
-from avid.common.cliConnector import (URLMappingCLIConnectorBase,
-                                      default_artefact_url_extraction_delegate)
+from avid.common.cliConnector import (
+    URLMappingCLIConnectorBase,
+    default_artefact_url_extraction_delegate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,18 +45,22 @@ class ContainerCLIConnectorBase(URLMappingCLIConnectorBase):
 
     def generate_cli_file(self, file_path_base, content):
         """Function generates the CLI file based on the passed file name base (w/o extension, extension will be added)
-         and the content. It returns the full path to the CLI file."""
+        and the content. It returns the full path to the CLI file."""
 
-        file_name = file_path_base + os.extsep + 'sh'
+        file_name = file_path_base + os.extsep + "sh"
 
         path = os.path.split(file_name)[0]
 
         try:
-            content = 'Xvfb :99 -screen 0 1024x768x24 &\n export DISPLAY=:99\n exec "$@"' + '\n' + content
+            content = (
+                'Xvfb :99 -screen 0 1024x768x24 &\n export DISPLAY=:99\n exec "$@"'
+                + "\n"
+                + content
+            )
             osChecker.checkAndCreateDir(path)
             with open(file_name, "w") as outputFile:
                 if not osChecker.isWindows():
-                    content = '#!/bin/bash' + '\n' + content
+                    content = "#!/bin/bash" + "\n" + content
                 outputFile.write(content)
                 outputFile.close()
 
@@ -67,5 +73,7 @@ class ContainerCLIConnectorBase(URLMappingCLIConnectorBase):
 
         return file_name
 
-    def execute(self, cli_file_path, log_file_path=None, error_log_file_path=None, cwd=None):
+    def execute(
+        self, cli_file_path, log_file_path=None, error_log_file_path=None, cwd=None
+    ):
         raise NotImplementedError

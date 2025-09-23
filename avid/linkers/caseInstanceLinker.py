@@ -27,27 +27,42 @@ class CaseInstanceLinker(InnerLinkerBase):
     one of primary and secondary is none and the other has a defined value.
     """
 
-    def __init__(self, useStrictLinkage=False, allowOnlyFullLinkage = True, performInternalLinkage=False):
-        '''@param useStrictLinkage If true it will only link with the very same instance id.
-           If false, it will treat None as wildcard that also matches.'''
-        InnerLinkerBase.__init__(self, allowOnlyFullLinkage=allowOnlyFullLinkage,
-                                 performInternalLinkage=performInternalLinkage)
+    def __init__(
+        self,
+        useStrictLinkage=False,
+        allowOnlyFullLinkage=True,
+        performInternalLinkage=False,
+    ):
+        """@param useStrictLinkage If true it will only link with the very same instance id.
+        If false, it will treat None as wildcard that also matches."""
+        InnerLinkerBase.__init__(
+            self,
+            allowOnlyFullLinkage=allowOnlyFullLinkage,
+            performInternalLinkage=performInternalLinkage,
+        )
 
         self._useStrictLinkage = useStrictLinkage
 
     def _findLinkedArtefactOptions(self, primaryArtefact, secondarySelection):
         linkValue = None
 
-        if primaryArtefact is not None and artefactProps.CASEINSTANCE in primaryArtefact:
+        if (
+            primaryArtefact is not None
+            and artefactProps.CASEINSTANCE in primaryArtefact
+        ):
             linkValue = primaryArtefact[artefactProps.CASEINSTANCE]
 
         result = list()
         for secondArtefact in secondarySelection:
-            if secondArtefact is not None and artefactProps.CASEINSTANCE in secondArtefact:
+            if (
+                secondArtefact is not None
+                and artefactProps.CASEINSTANCE in secondArtefact
+            ):
                 itemValue = secondArtefact[artefactProps.CASEINSTANCE]
-                if itemValue == linkValue \
-                        or (not self._useStrictLinkage \
-                            and (linkValue is None or itemValue is None)):
+                if itemValue == linkValue or (
+                    not self._useStrictLinkage
+                    and (linkValue is None or itemValue is None)
+                ):
                     result.append(secondArtefact)
             else:
                 if linkValue is None:

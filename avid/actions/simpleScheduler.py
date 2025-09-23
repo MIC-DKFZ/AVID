@@ -20,11 +20,12 @@ from builtins import object
 
 
 class SimpleScheduler(object):
-  '''Simple scheduler implementation that just executes the actions sequentially.'''
-  def __init__(self):
-    pass
-  
-  def execute(self, actionList):
+    """Simple scheduler implementation that just executes the actions sequentially."""
 
-    for action in actionList:
-      action.do()
+    def __init__(self):
+        pass
+
+    def execute(self, actionList):
+
+        for action in actionList:
+            action.do()

@@ -22,41 +22,67 @@ import unittest
 
 import avid.common.artefact.defaultProps as artefacProps
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkSplit4Dto3DImages import \
-    MitkSplit4Dto3DImagesAction as SplitAction
-from avid.actions.mitk.MitkSplit4Dto3DImages import \
-    MitkSplit4Dto3DImagesBatchAction as split
+from avid.actions.mitk.MitkSplit4Dto3DImages import (
+    MitkSplit4Dto3DImagesAction as SplitAction,
+)
+from avid.actions.mitk.MitkSplit4Dto3DImages import (
+    MitkSplit4Dto3DImagesBatchAction as split,
+)
 from avid.common.AVIDUrlLocater import get_tool_executable_url
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_executable_url(None, 'MitkSplit4Dto3DImages') is None, 'Tool MitkSplit4Dto3DImages is not installed on the system.')
+@unittest.skipIf(
+    get_tool_executable_url(None, "MitkSplit4Dto3DImages") is None,
+    "Tool MitkSplit4Dto3DImages is not installed on the system.",
+)
 class TestMitkSplit4Dto3DImages(unittest.TestCase):
 
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "MRPerfusionMiniAppTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MitkSplit4Dto3DImages")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "MRPerfusionMiniAppTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0],
+            "data",
+            "MRPerfusionMiniAppTest",
+            "testlist.avid",
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_MitkSplit4Dto3DImages"
+        )
+
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_split_action(self):
-      
-      action = split(ActionTagSelector("Signal"), actionTag = "TestSplit")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
-      self.assertEqual(len(action.outputArtefacts), 10)
-      for index, output in enumerate(action.outputArtefacts):
-        self.assertEqual(action.outputArtefacts[index][SplitAction.PROPERTY_ORIGINAL_TIME_STEP], str(index))
-        self.assertEqual(action.outputArtefacts[index][artefacProps.RESULT_SUB_TAG], str(index))
-        self.assertEqual(action.outputArtefacts[index][SplitAction.PROPERTY_DYNAMIC_SOURCE], action.outputArtefacts[index][artefacProps.INPUT_IDS]['i'][0])
+
+        action = split(ActionTagSelector("Signal"), actionTag="TestSplit")
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+        self.assertEqual(len(action.outputArtefacts), 10)
+        for index, output in enumerate(action.outputArtefacts):
+            self.assertEqual(
+                action.outputArtefacts[index][SplitAction.PROPERTY_ORIGINAL_TIME_STEP],
+                str(index),
+            )
+            self.assertEqual(
+                action.outputArtefacts[index][artefacProps.RESULT_SUB_TAG], str(index)
+            )
+            self.assertEqual(
+                action.outputArtefacts[index][SplitAction.PROPERTY_DYNAMIC_SOURCE],
+                action.outputArtefacts[index][artefacProps.INPUT_IDS]["i"][0],
+            )
 
 
 if __name__ == "__main__":

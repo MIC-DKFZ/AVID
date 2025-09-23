@@ -21,17 +21,20 @@ import shutil
 import unittest
 
 from avid.common.workflow import initSession
-from avid.common.workflow.structure_definitions import \
-    loadStructurDefinition_xml as load_xml
+from avid.common.workflow.structure_definitions import (
+    loadStructurDefinition_xml as load_xml,
+)
 
 
 class TestWorkflowHelper(unittest.TestCase):
 
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_workflow")
-        self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_workflow"
+        )
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data")
         self.bootstrapFile = os.path.join(self.testDataDir, "testlist.avid")
-              
+
     def tearDown(self):
         try:
             shutil.rmtree(self.sessionDir)
@@ -40,8 +43,15 @@ class TestWorkflowHelper(unittest.TestCase):
 
     def test_initSession(self):
         session = initSession(os.path.join(self.sessionDir, "test.avid"))
-        session = initSession(os.path.join(self.sessionDir, "test_noLogging.avid"), initLogging=False)
-        session = initSession(os.path.join(self.sessionDir, "test_bootstrap.avid"), expandPaths=True, bootstrapArtefacts=self.bootstrapFile)
+        session = initSession(
+            os.path.join(self.sessionDir, "test_noLogging.avid"), initLogging=False
+        )
+        session = initSession(
+            os.path.join(self.sessionDir, "test_bootstrap.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.bootstrapFile,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

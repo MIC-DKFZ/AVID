@@ -28,58 +28,83 @@ from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("Plastimatch") is None,
+    "Tool Plastimatch not installed on the system.",
+)
 class TestPlmDice(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "plmDiceTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "plmDiceTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_plmDice")
-      
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.testDataDir = os.path.join(
+            os.path.split(__file__)[0], "data", "plmDiceTest"
+        )
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "plmDiceTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_plmDice"
+        )
 
-              
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
+
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_plm_dice_action(self):
-      
-      action = plmDice(ActionTagSelector("Target"), ActionTagSelector("Moving"), actionTag = "TestDice")      
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      refFilePath = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#1_ref.xml")
-      resultFilePath = artefactHelper.getArtefactProperty(action._actions[0].outputArtefacts[0],
-                                                      artefactProps.URL)
-      with open(refFilePath) as refFile:
-          with open(resultFilePath) as resultFile:
-              self.assertEqual(refFile.read(), resultFile.read())
+        action = plmDice(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            actionTag="TestDice",
+        )
+        action.do()
 
-      refFilePath = os.path.join(self.testDataDir, "plmDice_Target_#0_vs_Moving_#2_ref.xml")
-      resultFilePath = artefactHelper.getArtefactProperty(action._actions[1].outputArtefacts[0],
-                                                      artefactProps.URL)
-      with open(refFilePath) as refFile:
-          with open(resultFilePath) as resultFile:
-              self.assertEqual(refFile.read(), resultFile.read())
+        self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        refFilePath = os.path.join(
+            self.testDataDir, "plmDice_Target_#0_vs_Moving_#1_ref.xml"
+        )
+        resultFilePath = artefactHelper.getArtefactProperty(
+            action._actions[0].outputArtefacts[0], artefactProps.URL
+        )
+        with open(refFilePath) as refFile:
+            with open(resultFilePath) as resultFile:
+                self.assertEqual(refFile.read(), resultFile.read())
 
+        refFilePath = os.path.join(
+            self.testDataDir, "plmDice_Target_#0_vs_Moving_#2_ref.xml"
+        )
+        resultFilePath = artefactHelper.getArtefactProperty(
+            action._actions[1].outputArtefacts[0], artefactProps.URL
+        )
+        with open(refFilePath) as refFile:
+            with open(resultFilePath) as resultFile:
+                self.assertEqual(refFile.read(), resultFile.read())
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_plm_dice_action_alwaysdo(self):
-      
-      action = plmDice(ActionTagSelector("Target"), ActionTagSelector("Moving"), alwaysDo = True, actionTag = "TestDice")      
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = plmDice(
+            ActionTagSelector("Target"),
+            ActionTagSelector("Moving"),
+            alwaysDo=True,
+            actionTag="TestDice",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
 
 if __name__ == "__main__":

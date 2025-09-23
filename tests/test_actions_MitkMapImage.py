@@ -28,50 +28,76 @@ from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('MitkMapImage') is None, 'Tool MitkMapImage not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("MitkMapImage") is None,
+    "Tool MitkMapImage not installed on the system.",
+)
 class TestMitkMapImage(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_MitkMapImage")
-      self.testArtefactFile2 = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist_2.avid")
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "mapRTest")
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_MitkMapImage"
+        )
+        self.testArtefactFile2 = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist_2.avid"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_MitkMapImage_action(self):
-      
-      action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            actionTag="TestMapping",
+        )
+        action.do()
 
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_MitkMapImage_action_alwaysdo(self):
-      
-      action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping_alwaysdo")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            alwaysDo=True,
+            actionTag="TestMapping_alwaysdo",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
     def test_MitkMapImage_action_caselinking(self):
 
-        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      regLinker= CaseLinker(), actionTag = "TestMapping_caselinking")
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            regLinker=CaseLinker(),
+            actionTag="TestMapping_caselinking",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)
@@ -81,35 +107,59 @@ class TestMitkMapImage(unittest.TestCase):
 
     def test_MitkMapImage_action_inputIsReference(self):
 
-        newsession = workflow.initSession(os.path.join(self.sessionDir, "testlist_2.avid"), expandPaths=True,
-                                            bootstrapArtefacts=self.testArtefactFile2)
+        newsession = workflow.initSession(
+            os.path.join(self.sessionDir, "testlist_2.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile2,
+        )
 
-        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      alwaysDo=True, actionTag="TestMapping")
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            alwaysDo=True,
+            actionTag="TestMapping",
+        )
         action.do()
         self.assertEqual(action.isSuccess, True)
         self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 1)
 
-        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      inputIsArtefactReference=False, alwaysDo=True, actionTag="TestMapping")
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            inputIsArtefactReference=False,
+            alwaysDo=True,
+            actionTag="TestMapping",
+        )
         action.do()
         self.assertEqual(action.isSuccess, True)
-        #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
-        #the template
+        # now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
+        # the template
         self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 0)
 
     def test_MitkMapImage_action_supersampling(self):
 
-        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                     supersamplingFactor = 3, actionTag = "TestMapping_1ss")
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            supersamplingFactor=3,
+            actionTag="TestMapping_1ss",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)
 
     def test_MitkMapImage_action_supersampling3(self):
 
-        action = map(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                     supersamplingFactor = [3,2,1], actionTag = "TestMapping_3ss")
+        action = map(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            supersamplingFactor=[3, 2, 1],
+            actionTag="TestMapping_3ss",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)

@@ -28,27 +28,63 @@ logger = logging.getLogger(__name__)
 
 
 class MitkResampleImageAction(GenericCLIAction):
-    '''Class that wraps the single action for the tool MITKResampleImage.'''
-    def __init__(self, images, additionalArgs= None, defaultoutputextension ='nrrd', actionTag="MitkResampleImage",
-                 alwaysDo=False, session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
-        GenericCLIAction.__init__(self, i=images, tool_id="MitkResampleImage", outputFlags=['o'],
-                                  additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
-                                  alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
-                                  actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
-                                  defaultoutputextension=defaultoutputextension)
+    """Class that wraps the single action for the tool MITKResampleImage."""
+
+    def __init__(
+        self,
+        images,
+        additionalArgs=None,
+        defaultoutputextension="nrrd",
+        actionTag="MitkResampleImage",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+    ):
+        GenericCLIAction.__init__(
+            self,
+            i=images,
+            tool_id="MitkResampleImage",
+            outputFlags=["o"],
+            additionalArgs=additionalArgs,
+            illegalArgs=["output", "input"],
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+            defaultoutputextension=defaultoutputextension,
+        )
 
 
 class MitkResampleImageBatchAction(BatchActionBase):
-    '''Batch action for MitkResampleImage to produce XML results.'''
+    """Batch action for MitkResampleImage to produce XML results."""
 
-    def __init__(self, imageSelector,
-                 actionTag="MITKResampleImage", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        imageSelector,
+        actionTag="MITKResampleImage",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=MitkResampleImageAction,
-                                 primaryInputSelector=imageSelector,
-                                 primaryAlias="images", additionalInputSelectors=None,
-                                 linker=None, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=MitkResampleImageAction,
+            primaryInputSelector=imageSelector,
+            primaryAlias="images",
+            additionalInputSelectors=None,
+            linker=None,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

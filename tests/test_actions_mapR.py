@@ -28,50 +28,75 @@ from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector
 
 
-@unittest.skipIf(get_tool_config_file_path('mapR') is None, 'Tool mapR not installed on the system.')
+@unittest.skipIf(
+    get_tool_config_file_path("mapR") is None, "Tool mapR not installed on the system."
+)
 class TestMapR(unittest.TestCase):
 
-
     def setUp(self):
-      self.testDataDir = os.path.join(os.path.split(__file__)[0],"data", "mapRTest")
-      self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist.avid")
-      self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_mapr")
-      self.testArtefactFile2 = os.path.join(os.path.split(__file__)[0],"data", "mapRTest", "testlist_2.avid")
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data", "mapRTest")
+        self.testArtefactFile = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist.avid"
+        )
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_mapr"
+        )
+        self.testArtefactFile2 = os.path.join(
+            os.path.split(__file__)[0], "data", "mapRTest", "testlist_2.avid"
+        )
 
-      self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
+        self.session = workflow.initSession(
+            os.path.join(self.sessionDir, "test.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile,
+        )
 
-              
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_simple_mapr_action(self):
-      
-      action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), actionTag = "TestMapping")      
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSkipped, True)
+        action = mapR(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            actionTag="TestMapping",
+        )
+        action.do()
 
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSkipped, True)
 
     def test_simple_mapr_action_alwaysdo(self):
-      
-      action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"), alwaysDo = True, actionTag = "TestMapping_alwaysdo")
-      action.do()
-                    
-      self.assertEqual(action.isSuccess, True)
 
-      action.do()
-      self.assertEqual(action.isSuccess, True)
+        action = mapR(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            alwaysDo=True,
+            actionTag="TestMapping_alwaysdo",
+        )
+        action.do()
+
+        self.assertEqual(action.isSuccess, True)
+
+        action.do()
+        self.assertEqual(action.isSuccess, True)
 
     def test_mapr_action_caselinking(self):
 
-        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      regLinker= CaseLinker(), actionTag = "TestMapping_caselinking")
+        action = mapR(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            regLinker=CaseLinker(),
+            actionTag="TestMapping_caselinking",
+        )
         action.do()
 
         self.assertEqual(action.isSuccess, True)
@@ -81,21 +106,35 @@ class TestMapR(unittest.TestCase):
 
     def test_mapr_action_inputIsReference(self):
 
-        newsession = workflow.initSession(os.path.join(self.sessionDir, "testlist_2.avid"), expandPaths=True,
-                                            bootstrapArtefacts=self.testArtefactFile2)
+        newsession = workflow.initSession(
+            os.path.join(self.sessionDir, "testlist_2.avid"),
+            expandPaths=True,
+            bootstrapArtefacts=self.testArtefactFile2,
+        )
 
-        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      alwaysDo=True, actionTag="TestMapping_inputIsReference")
+        action = mapR(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            alwaysDo=True,
+            actionTag="TestMapping_inputIsReference",
+        )
         action.do()
         self.assertEqual(action.isSuccess, True)
         self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 1)
 
-        action = mapR(ActionTagSelector("Moving"), ActionTagSelector("Registration"), ActionTagSelector("Target"),
-                      inputIsReference=False, alwaysDo=True, actionTag="TestMapping_inputIsReference")
+        action = mapR(
+            ActionTagSelector("Moving"),
+            ActionTagSelector("Registration"),
+            ActionTagSelector("Target"),
+            inputIsReference=False,
+            alwaysDo=True,
+            actionTag="TestMapping_inputIsReference",
+        )
         action.do()
         self.assertEqual(action.isSuccess, True)
-        #now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
-        #the template
+        # now the template should be reference for output artefacts, thus the time point should be 0 (timpoint of
+        # the template
         self.assertEqual(action.outputArtefacts[0][TIMEPOINT], 0)
 
 

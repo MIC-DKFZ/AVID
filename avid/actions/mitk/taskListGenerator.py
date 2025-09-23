@@ -28,12 +28,15 @@ logger = logging.getLogger(__name__)
 
 
 class TaskListGeneratorAction(PythonUnaryStackBatchAction):
-    """ Class that takes a list of artefacts and generates a MITK tasklist based on them """
+    """Class that takes a list of artefacts and generates a MITK tasklist based on them"""
+
     @staticmethod
     def _indicate_outputs(actionInstance, **args):
         rootPath = actionInstance._session.contentPath
         result = actionInstance.generateArtefact()
-        result[artefactProps.URL] = os.path.join(rootPath, actionInstance.actionTag + '.json')
+        result[artefactProps.URL] = os.path.join(
+            rootPath, actionInstance.actionTag + ".json"
+        )
         return [result]
 
     @staticmethod
@@ -44,11 +47,15 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
         for artefact in inputs:
             url = artefact[artefactProps.URL]
             os.path.dirname(url)
-            tasks.append({
-                "Name": artefact['name'],
-                "Image": url,
-                "Result": os.path.join(inspected_dir, 'inspected', os.path.basename(url))
-            })
+            tasks.append(
+                {
+                    "Name": artefact["name"],
+                    "Image": url,
+                    "Result": os.path.join(
+                        inspected_dir, "inspected", os.path.basename(url)
+                    ),
+                }
+            )
 
         return tasks
 
@@ -62,14 +69,22 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
             "FileFormat": "MITK Segmentation Task List",
             "Version": 3,
             "Name": outputs[0][artefactProps.ACTIONTAG],
-            "Tasks": tasks
+            "Tasks": tasks,
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=4)
 
-    def __init__(self, inputSelector, actionTag='TaskListGenerator', generateCallable=None, indicateCallable=None,
-                 generate_tasks_callable=None, passOnlyURLs=False, **kwargs):
+    def __init__(
+        self,
+        inputSelector,
+        actionTag="TaskListGenerator",
+        generateCallable=None,
+        indicateCallable=None,
+        generate_tasks_callable=None,
+        passOnlyURLs=False,
+        **kwargs,
+    ):
         """
         :param inputSelector: Specified artefacts will all be included in the resulting tasklist
         :param generateCallable: Custom callable that defines how the resulting tasklist should be built. By default,
@@ -93,10 +108,12 @@ class TaskListGeneratorAction(PythonUnaryStackBatchAction):
             generate_tasks_callable = TaskListGeneratorAction._generate_tasks
         self.generate_tasks_callable = generate_tasks_callable
 
-        PythonUnaryStackBatchAction.__init__(self,
-                                             inputSelector=inputSelector,
-                                             actionTag=actionTag,
-                                             generateCallable=generateCallable,
-                                             indicateCallable=indicateCallable,
-                                             passOnlyURLs=passOnlyURLs,
-                                             **kwargs)
+        PythonUnaryStackBatchAction.__init__(
+            self,
+            inputSelector=inputSelector,
+            actionTag=actionTag,
+            generateCallable=generateCallable,
+            indicateCallable=indicateCallable,
+            passOnlyURLs=passOnlyURLs,
+            **kwargs,
+        )

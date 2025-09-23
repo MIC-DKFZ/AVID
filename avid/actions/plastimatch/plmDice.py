@@ -36,23 +36,43 @@ logger = logging.getLogger(__name__)
 class PlmDiceAction(GenericCLIAction):
     """Class that wraps the single action for the tool plastimatch dice."""
 
-    def __init__(self, refImage, inputImage,
-                 actionTag="plmDice", alwaysDo=False,
-                 session=None, additionalActionProps=None, actionConfig=None, propInheritanceDict=None, cli_connector=None):
+    def __init__(
+        self,
+        refImage,
+        inputImage,
+        actionTag="plmDice",
+        alwaysDo=False,
+        session=None,
+        additionalActionProps=None,
+        actionConfig=None,
+        propInheritanceDict=None,
+        cli_connector=None,
+    ):
         refImage = self._ensureSingleArtefact(refImage, "refImage")
         inputImage = self._ensureSingleArtefact(inputImage, "inputImage")
 
-        GenericCLIAction.__init__(self, refImage=[refImage], inputImage=[inputImage], tool_id="plastimatch",
-                                  noOutputArgs=True,
-                                  additionalArgs={'command': 'dice', 'all': None},
-                                  argPositions=['command', 'refImage', 'inputImage'],
-                                  actionTag=actionTag, alwaysDo=alwaysDo, session=session,
-                                  additionalActionProps=additionalActionProps, actionConfig=actionConfig,
-                                  propInheritanceDict=propInheritanceDict, cli_connector=cli_connector,
-                                  defaultoutputextension='xml')
+        GenericCLIAction.__init__(
+            self,
+            refImage=[refImage],
+            inputImage=[inputImage],
+            tool_id="plastimatch",
+            noOutputArgs=True,
+            additionalArgs={"command": "dice", "all": None},
+            argPositions=["command", "refImage", "inputImage"],
+            actionTag=actionTag,
+            alwaysDo=alwaysDo,
+            session=session,
+            additionalActionProps=additionalActionProps,
+            actionConfig=actionConfig,
+            propInheritanceDict=propInheritanceDict,
+            cli_connector=cli_connector,
+            defaultoutputextension="xml",
+        )
 
     def _postProcessCLIExecution(self):
-        resultPath = artefactHelper.getArtefactProperty(self.outputArtefacts[0], artefactProps.URL)
+        resultPath = artefactHelper.getArtefactProperty(
+            self.outputArtefacts[0], artefactProps.URL
+        )
         osChecker.checkAndCreateDir(os.path.split(resultPath)[0])
 
         with open(self._last_log_file_path) as logFile:
@@ -63,18 +83,34 @@ class PlmDiceAction(GenericCLIAction):
 class PlmDiceBatchAction(BatchActionBase):
     """Batch action for PlmDiceAction."""
 
-    def __init__(self, refSelector, inputSelector, inputLinker=None, actionTag="plmDice", session=None,
-                 additionalActionProps=None, scheduler=SimpleScheduler(), **singleActionParameters):
+    def __init__(
+        self,
+        refSelector,
+        inputSelector,
+        inputLinker=None,
+        actionTag="plmDice",
+        session=None,
+        additionalActionProps=None,
+        scheduler=SimpleScheduler(),
+        **singleActionParameters,
+    ):
         if inputLinker is None:
             inputLinker = CaseLinker()
 
         additionalInputSelectors = {"inputImage": inputSelector}
         linker = {"inputImage": inputLinker}
 
-        BatchActionBase.__init__(self, actionTag=actionTag, actionClass=PlmDiceAction,
-                                 primaryInputSelector=refSelector,
-                                 primaryAlias="refImage", additionalInputSelectors=additionalInputSelectors,
-                                 linker=linker, session=session,
-                                 relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
-                                 scheduler=scheduler, additionalActionProps=additionalActionProps,
-                                 **singleActionParameters)
+        BatchActionBase.__init__(
+            self,
+            actionTag=actionTag,
+            actionClass=PlmDiceAction,
+            primaryInputSelector=refSelector,
+            primaryAlias="refImage",
+            additionalInputSelectors=additionalInputSelectors,
+            linker=linker,
+            session=session,
+            relevanceSelector=TypeSelector(artefactProps.TYPE_VALUE_RESULT),
+            scheduler=scheduler,
+            additionalActionProps=additionalActionProps,
+            **singleActionParameters,
+        )

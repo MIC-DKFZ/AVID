@@ -28,43 +28,62 @@ from avid.common.workflow.report import create_actions_report
 
 class TestWorkflowReport(unittest.TestCase):
     def setUp(self):
-        self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_workflow_report")
-        self.testDataDir = os.path.join(os.path.split(__file__)[0],"data")
+        self.sessionDir = os.path.join(
+            os.path.split(__file__)[0], "temporary_test_workflow_report"
+        )
+        self.testDataDir = os.path.join(os.path.split(__file__)[0], "data")
 
         self.session = workflow.Session("session1", self.sessionDir)
-        workflow.currentGeneratedSession =self.session
+        workflow.currentGeneratedSession = self.session
         self.artefact = list()
         self.actions_success = list()
         self.actions_skipped = list()
         self.actions_failed = list()
 
         for i in range(0, 3):
-            a = artefactGenerator.generateArtefactEntry("Case1", None, i, "Action1", "result", "dummy", os.path.join(self.testDataDir, "artefact1.txt"))
+            a = artefactGenerator.generateArtefactEntry(
+                "Case1",
+                None,
+                i,
+                "Action1",
+                "result",
+                "dummy",
+                os.path.join(self.testDataDir, "artefact1.txt"),
+            )
             self.session.add_artefact(a)
-            self.actions_success.append(DummyAction([a],actionTag="ActionSuccess"))
-            self.actions_skipped.append(DummyAction([a],actionTag="ActionSkipped",will_skip=True))
-            self.actions_failed.append(DummyAction([a],actionTag="ActionFailed",will_fail=True))
+            self.actions_success.append(DummyAction([a], actionTag="ActionSuccess"))
+            self.actions_skipped.append(
+                DummyAction([a], actionTag="ActionSkipped", will_skip=True)
+            )
+            self.actions_failed.append(
+                DummyAction([a], actionTag="ActionFailed", will_fail=True)
+            )
 
-        self.actions = self.actions_success+self.actions_skipped+self.actions_failed
+        self.actions = self.actions_success + self.actions_skipped + self.actions_failed
 
     def tearDown(self):
-      try:
-        shutil.rmtree(self.sessionDir)
-      except:
-        pass
+        try:
+            shutil.rmtree(self.sessionDir)
+        except:
+            pass
 
     def test_create_actions_report(self):
         scheduler = SimpleScheduler()
         scheduler.execute(self.actions)
-        report_file_path = os.path.join(self.sessionDir,'report.txt')
+        report_file_path = os.path.join(self.sessionDir, "report.txt")
         create_actions_report(actions=self.actions, report_file_path=report_file_path)
 
         self.assertTrue(os.path.exists(report_file_path))
 
-        report_file_2_path = os.path.join(self.sessionDir,'report.zip')
-        create_actions_report(actions=self.actions, report_file_path=report_file_2_path, generate_report_zip=True)
+        report_file_2_path = os.path.join(self.sessionDir, "report.zip")
+        create_actions_report(
+            actions=self.actions,
+            report_file_path=report_file_2_path,
+            generate_report_zip=True,
+        )
 
         self.assertTrue(os.path.exists(report_file_2_path))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
