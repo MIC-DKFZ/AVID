@@ -65,7 +65,7 @@ class MitkStitchImagesAction(GenericCLIAction):
         if stitchStrategy:
             additionalArgs['s'] = str(stitchStrategy)
 
-        GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, actionID="MitkStitchImages", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=images, t=self._template, r=self._registrations, tool_id="MitkStitchImages", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, additionalActionProps=additionalActionProps,
                                   actionConfig=actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)

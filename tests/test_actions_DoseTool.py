@@ -22,10 +22,10 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.rttb.DoseTool import DoseStatBatchAction as doseTool
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
 
-@unittest.skipIf(getToolConfigPath('DoseTool') is None, 'Tool DoseTool not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('DoseTool') is None, 'Tool DoseTool not installed on the system.')
 class TestDoseTool(unittest.TestCase):
 
     def setUp(self):

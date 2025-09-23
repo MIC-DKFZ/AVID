@@ -23,10 +23,10 @@ import avid.common.workflow as workflow
 from avid.actions.mitk.MitkFileConverter import MitkFileConverterBatchAction as convert
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import getExecutableURL
+from avid.common.AVIDUrlLocater import get_tool_executable_url
 import avid.common.artefact.defaultProps as artefactProps
 
-@unittest.skipIf(getExecutableURL(None, 'MitkFileConverter') is None, 'Tool MitkFileConverter not installed on the system.')
+@unittest.skipIf(get_tool_executable_url(None, 'MitkFileConverter') is None, 'Tool MitkFileConverter not installed on the system.')
 class TestMitkFileConverter(unittest.TestCase):
 
     def setUp(self):

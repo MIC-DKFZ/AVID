@@ -1,2 +1,4 @@
 rich==13.7.1
+toml==0.10.2
+platformdirs==4.3.8
 dmglib==0.9.6

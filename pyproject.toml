@@ -28,6 +28,10 @@ version = "0.0.1"
 authors = [
     { name="MIC@DKFZ", email="r.floca@dkfz-heidelberg.de"},
 ]
+dependencies = [
+    "toml==0.10.2",
+    "platformdirs==4.3.8",
+]
 description = "AVID is a Python framework for declarative, data-driven processing of large-scale image datasets, particularly designed for biomedical image analysis workflows."
 readme = "README.md"
 requires-python = ">=3.8"

@@ -24,7 +24,7 @@ import subprocess
 import time
 
 from avid.common import osChecker, AVIDUrlLocater
-import avid.common.settings as AVIDSettings
+import avid.common.config_manager as AVIDConfigManager
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 
@@ -59,13 +59,13 @@ class DefaultCLIConnector(object):
             return default_artefact_url_extraction_delegate
 
     def get_executable_url(self, workflow, actionID, actionConfig = None):
-        """Returns url+executable for a actionID request that should be used in the cli file. This serves as an
+        """Returns url+executable for a tool_id request that should be used in the cli file. This serves as an
         abstraction, in order to allow the connector to change the deduction strategy for the executable url.
         Default implementation just uses the AVIDUrlLocater.
         :param workflow: session instance that should be used for deducing the executable url
-        :param actionID: actionID of the action that requests the URL
-        :param actionConfig: actionConfig specifies if a certian configuration of an action should be used."""
-        return AVIDUrlLocater.getExecutableURL(workflow=workflow, actionID=actionID, actionConfig=actionConfig)
+        :param actionID: tool_id of the action that requests the URL
+        :param actionConfig: action_config specifies if a certain configuration of an action should be used."""
+        return AVIDUrlLocater.get_tool_executable_url(workflow=workflow, tool_id=actionID, action_config=actionConfig)
 
     def generate_cli_file(self, file_path_base, content):
         """Function generates the CLI file based on the passed file name base (w/o extension, extension will be added)
@@ -107,8 +107,9 @@ class DefaultCLIConnector(object):
             # "os.rename" approach was the simpliest way to check os independent
             # if the process can access the bat file or if there is still a racing
             # condition.
-            pause_duration = AVIDSettings.getSetting(AVIDSettings.SUBPROCESS_PAUSE)
-            max_pause_count = math.ceil(AVIDSettings.getSetting(AVIDSettings.ACTION_TIMEOUT) / pause_duration)
+            pause_duration = AVIDConfigManager.get_setting(AVIDConfigManager.SETTING_NAMES.ACTION_SUBPROCESS_PAUSE)
+            max_pause_count = math.ceil(AVIDConfigManager.get_setting(AVIDConfigManager.SETTING_NAMES.ACTION_TIMEOUT)
+                                        / pause_duration)
             pause_count = 0
             time.sleep(0.1)
             while True:

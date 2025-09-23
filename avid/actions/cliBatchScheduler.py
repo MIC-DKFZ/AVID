@@ -87,8 +87,8 @@ def process_batch(action_batch):
                            f'Check the action states. Some actions might have failed.'
                            f' Failed batch script: "{batch_cli_call}. Error details: {str(e)}')
             for action in actions_to_process:
-                action._reportWarning(f'Error occurred while CLIBatchScheduler processed thw batch containing this action.'
-                                      f'Check the action state. Action might have failed, but problem could also have been'
+                action._reportWarning(f'Error occurred while CLIBatchScheduler processed the batch containing this action. '
+                                      f'Check the action state. Action might have failed, but problem could also have been '
                                       f'by another action. Failed batch script: "{batch_cli_call}. Error details: {str(e)}')
 
     for action in actions:

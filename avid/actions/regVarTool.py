@@ -56,7 +56,7 @@ class RegVarToolAction(GenericCLIAction):
             additionalActionProps = dict()
         additionalActionProps[artefactProps.FORMAT] = FORMAT_VALUE_MATCHPOINT
 
-        GenericCLIAction.__init__(self, **inputArgs, actionID="RegVarTool",
+        GenericCLIAction.__init__(self, **inputArgs, tool_id="RegVarTool",
                                   additionalArgs=additionalArgs,
                                   outputFlags=['o'],
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,

@@ -56,20 +56,18 @@ pip install avid[rich]
 After you have installed AVID you can use it, but out of the box only with actions that utilize python functions
 you provide (see e.g. [Basic Example](#basic-example)). In most cases the full power of AVID comes with executing other
 functionality provided e.g. as command line applications or containers.
-To use that, you have to configure AVID, so that it knows where to find the available tools and how to call them. You
-can find more information about that in the [Learning More](#-learning-more) section.
 
 AVID will store all relevant tool information (including tools installed by AVID) in its "tool path".
-If you haven't configured it, it will be `<package install path>/Utilities`. You can set the tool path by changing
-the AVID settings:
+Your easiest way to set everything up execute:
 ```bash
-avidconfig settings avid.toolspath <your_desired_tools_path>
+avidconfig setup
 ```
+AVID supports venv. So you can also do everything just explained in a venv to isolate tools and config
 
 A fast track to get some tools to your disposal is to let avid directly automatically download and configure the latest
-version of [MITK actions](#mitk-httpswwwmitkorg). For that, run
+version of [MITK actions](#mitk-httpswwwmitkorg). The setup wizard will also propose that. Or you can later run
 ```bash
-avidconfig tools install MITK
+avidconfig package install MITK
 ```
 
 ### Basic Example

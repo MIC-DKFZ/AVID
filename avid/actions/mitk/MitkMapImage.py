@@ -102,7 +102,7 @@ class MitkMapImageAction(GenericCLIAction):
         if generateNameCallable is None:
             generateNameCallable = self._defaultNameCallable
 
-        GenericCLIAction.__init__(self, **inputs, actionID="MitkMapImage", outputFlags=['o'],
+        GenericCLIAction.__init__(self, **inputs, tool_id="MitkMapImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'input', 'template', 'registration'],
                                   actionTag= actionTag, alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
                                   generateNameCallable=generateNameCallable, additionalActionProps=additionalActionProps,

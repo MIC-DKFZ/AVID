@@ -48,7 +48,7 @@ class combineRAction(GenericCLIAction):
 
       argPositions = ['o', 'reg1', 'combOperation', 'reg2']
 
-      GenericCLIAction.__init__(self, reg1=reg1, reg2=reg2, actionID="combineR", outputFlags=['o'],
+      GenericCLIAction.__init__(self, reg1=reg1, reg2=reg2, tool_id="combineR", outputFlags=['o'],
                                 additionalArgs=additionalArgs, argPositions= argPositions, illegalArgs= ['output', 'input'],
                                 actionTag= actionTag, alwaysDo=alwaysDo, session=session,
                                 additionalActionProps=additionalActionProps, actionConfig=actionConfig,

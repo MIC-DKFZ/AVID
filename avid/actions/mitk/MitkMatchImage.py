@@ -117,7 +117,7 @@ class MitkMatchImageAction(GenericCLIAction):
             masks["moving_mask"] = self._movingMask
 
         GenericCLIAction.__init__(self, t=self._targetImage, m=self._movingImage, **masks,
-                                  actionID="MitkMatchImage", outputFlags=['o'],
+                                  tool_id="MitkMatchImage", outputFlags=['o'],
                                   additionalArgs=additionalArgs, illegalArgs= ['output', 'moving', 'target'],
                                   defaultoutputextension='mapr', actionTag= actionTag, alwaysDo=alwaysDo, session=session,
                                   indicateCallable=self._indicate_outputs, generateNameCallable=generateNameCallable,

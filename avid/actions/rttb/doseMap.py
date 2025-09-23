@@ -43,7 +43,7 @@ class DoseMapAction(CLIActionBase):
                actionTag = "doseMap", alwaysDo = False,
                session = None, additionalActionProps = None, actionConfig = None, propInheritanceDict = None,
                cli_connector = None):
-    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, actionID="DoseMap",
+    CLIActionBase.__init__(self, actionTag, alwaysDo, session, additionalActionProps, tool_id="DoseMap",
                            actionConfig = actionConfig, propInheritanceDict=propInheritanceDict, cli_connector=cli_connector)
     self._addInputArtefacts(inputDoses=inputDose, registrations=registration, templateDose=templateDose)
 

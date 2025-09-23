@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
         self.assertEqual(ref, call)
 
     def test_GenericCLIAction(self):
-        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], session=self.session)
+        action = GenericCLIAction(tool_id="TestCLI", input=[self.a1], session=self.session)
 
         outputs = action.outputArtefacts
         self.assertEqual('Case1',outputs[0][artefactProps.CASE])
@@ -114,13 +114,13 @@ class Test(unittest.TestCase):
         ref = '"test.exe" "{}" --input "{}"'.format(self.getURL(outputs[0]),self.getURL(self.a1))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], session=self.session,
+        action = GenericCLIAction(tool_id="TestCLI", input=[self.a1], session=self.session,
                                   generateNameCallable=generateNameCallableAlternative)
         outputs = action.outputArtefacts
         filename = Path(outputs[0][artefactProps.URL]).stem
         self.assertTrue(filename.startswith('test_GenericCLI_TestCLI'))
 
-        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
+        action = GenericCLIAction(tool_id="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   session=self.session)
         outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
         self.assertEqual(ref,call)
         self.assertEqual(outputs[0][artefactProps.TIMEPOINT],0, msg='Timpoint of output should be 0 because "input" should be used as default ref (picked by alphabetic order.')
 
-        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
+        action = GenericCLIAction(tool_id="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   outputReferenceArtefactName='x', session=self.session)
         outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
@@ -138,14 +138,14 @@ class Test(unittest.TestCase):
         self.assertEqual(ref,call)
         self.assertEqual(outputs[0][artefactProps.TIMEPOINT],1, msg='Timpoint of output should be 1 because "x" was indicated as ref.')
 
-        action = GenericCLIAction(actionID="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
+        action = GenericCLIAction(tool_id="TestCLI", input=[self.a1], x=[self.a2, self.a3], outputFlags=['out'],
                                   noOutputArgs=True, session=self.session)
         call = action._prepareCLIExecution()
         ref = '"test.exe" --input "{}" -x "{}" "{}"'.format(self.getURL(self.a1),self.getURL(self.a2),
                                                                        self.getURL(self.a3))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+        action = GenericCLIAction(tool_id="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], session=self.session)
         outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+        action = GenericCLIAction(tool_id="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], illegalArgs=['not_existant'], session=self.session)
         outputs = action.outputArtefacts
         call = action._prepareCLIExecution()
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
                                                                       self.getURL(self.a3),self.getURL(outputs[0]))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+        action = GenericCLIAction(tool_id="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], argPositions=['o','bb','input'],
                                   session=self.session)
         outputs = action.outputArtefacts
@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
                                                                    self.getURL(self.a2), self.getURL(self.a3))
         self.assertEqual(ref,call)
 
-        action = GenericCLIAction(actionID="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
+        action = GenericCLIAction(tool_id="TestCLI", additionalArgs={'a': 'A', 'bb': 'BB'}, input=[self.a1],
                                   x=[self.a2, self.a3], outputFlags=['o'], argPositions=['o','bb','input'],
                                   noOutputArgs=True, session=self.session)
         outputs = action.outputArtefacts
@@ -180,26 +180,26 @@ class Test(unittest.TestCase):
         self.assertEqual(ref,call)
 
         #invalid inputs
-        self.assertRaises(ValueError, GenericCLIAction, actionID="TestCLI", input=None, session=self.session)
+        self.assertRaises(ValueError, GenericCLIAction, tool_id="TestCLI", input=None, session=self.session)
         #no inputs
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", session=self.session)
+        self.assertRaises(RuntimeError, GenericCLIAction, tool_id="TestCLI", session=self.session)
         #illegal inputs cli arg collision
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], additionalArgs={'input':None},
+        self.assertRaises(RuntimeError, GenericCLIAction, tool_id="TestCLI", input=[self.a1], additionalArgs={'input':None},
                           session=self.session)
         # illegal cli arg
-        self.assertRaises(RuntimeError, GenericCLIAction ,actionID="TestCLI", input=[self.a1], additionalArgs={'a':None},
+        self.assertRaises(RuntimeError, GenericCLIAction ,tool_id="TestCLI", input=[self.a1], additionalArgs={'a':None},
                           illegalArgs=['a'],session=self.session)
         #invalid inputs
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], illegalArgs=['input'],
+        self.assertRaises(RuntimeError, GenericCLIAction, tool_id="TestCLI", input=[self.a1], illegalArgs=['input'],
                           session=self.session)
         #illegal inputs output arg collision
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], outputFlags=['input'],
+        self.assertRaises(RuntimeError, GenericCLIAction, tool_id="TestCLI", input=[self.a1], outputFlags=['input'],
                           session=self.session)
         # illegal output arg
-        self.assertRaises(RuntimeError, GenericCLIAction, actionID="TestCLI", input=[self.a1], outputFlags=['illegal'],
+        self.assertRaises(RuntimeError, GenericCLIAction, tool_id="TestCLI", input=[self.a1], outputFlags=['illegal'],
                           illegalArgs=['illegal'], session=self.session)
         #invalid outputRefernceArtefactName
-        self.assertRaises(ValueError, GenericCLIAction, actionID="TestCLI", input=[self.a1],
+        self.assertRaises(ValueError, GenericCLIAction, tool_id="TestCLI", input=[self.a1],
                           outputReferenceArtefactName='invalidInput', session=self.session)
 
 

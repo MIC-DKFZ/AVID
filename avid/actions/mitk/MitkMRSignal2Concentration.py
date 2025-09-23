@@ -69,7 +69,7 @@ class MitkMRSignal2ConcentrationAction(GenericCLIAction):
             additionalActionProps = dict()
         additionalActionProps[artefactProps.FORMAT] = artefactProps.FORMAT_VALUE_ITK
 
-        GenericCLIAction.__init__(self, i=[signal], actionID="MitkMRSignal2Concentration",
+        GenericCLIAction.__init__(self, i=[signal], tool_id="MitkMRSignal2Concentration",
                                   outputFlags=['o'],
                                   additionalArgs=additionalArgs,
                                   actionTag=actionTag, alwaysDo=alwaysDo, session=session,

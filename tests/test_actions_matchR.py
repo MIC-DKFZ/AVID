@@ -22,11 +22,11 @@ import unittest
 
 import avid.common.workflow as workflow
 from avid.actions.matchpoint.matchR import matchRBatchAction as matchR
-from avid.common.AVIDUrlLocater import getToolsPath
+from avid.common.AVIDUrlLocater import get_tool_config_dir
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('matchR') is None, 'Tool matchR not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('matchR') is None, 'Tool matchR not installed on the system.')
 class TestMatchR(unittest.TestCase):
 
 
@@ -35,7 +35,7 @@ class TestMatchR(unittest.TestCase):
       self.testArtefactFile = os.path.join(os.path.split(__file__)[0],"data", "matchRTest", "testlist.avid")
       self.sessionDir = os.path.join(os.path.split(__file__)[0],"temporary_test_matchR")
 
-      self.dllPath = os.path.join(getToolsPath(), 'tool-configs', "matchR")
+      self.dllPath = str(get_tool_config_dir("matchR"))
       self.itkAlgorithm = os.path.join(self.dllPath, "mdra-0-13_ITKEuler3DMattesMIMultiRes.dll")
       
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)

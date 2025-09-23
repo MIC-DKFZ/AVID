@@ -24,9 +24,9 @@ from avid.actions.regVarTool import RegVarToolBatchAction as regVarTool
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.selectors import FormatSelector
 from avid.common import AVIDUrlLocater
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('RegVarTool') is None, 'Tool RegVarTool not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('RegVarTool') is None, 'Tool RegVarTool not installed on the system.')
 class TestRegVarTool(unittest.TestCase):
 
 
@@ -37,8 +37,9 @@ class TestRegVarTool(unittest.TestCase):
       self.session = workflow.initSession(os.path.join(self.sessionDir, "test.avid"), expandPaths=True, bootstrapArtefacts=self.testArtefactFile)
 
       self.numberOfVariations = 3
-      self.algorithmDLLEuler = os.path.join(AVIDUrlLocater.getToolsPath(), 'tool-configs', "RegVarTool", "mdra-0-12_RegVariationRandomGaussianEuler.dll")
-      self.algorithmDLLTPS = os.path.join(AVIDUrlLocater.getToolsPath(), 'tool-configs', "RegVarTool", "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll")
+      self.dllPath = AVIDUrlLocater.get_tool_config_dir("RegVarTool")
+      self.algorithmDLLEuler = str(self.dllPath / "mdra-0-12_RegVariationRandomGaussianEuler.dll")
+      self.algorithmDLLTPS = str(self.dllPath / "mdra-0-12_RegVariationKernelRandomGaussianTPS.dll")
       self.parameters = {"MeanGlobal" : "0.0", "StandardDeviationGlobal" : "1.0", "Seed" : "0"}
 
               

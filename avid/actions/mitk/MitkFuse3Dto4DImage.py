@@ -60,7 +60,8 @@ class MitkFuse3Dto4DImageAction(CLIActionBase):
         self._addInputArtefacts(images=images)
 
         if self._cwd is None:
-            self._cwd = os.path.dirname(AVIDUrlLocater.getExecutableURL(self._session, "MitkFuse3Dto4DImage", actionConfig))
+            self._cwd = os.path.dirname(
+                AVIDUrlLocater.get_tool_executable_url(self._session, "MitkFuse3Dto4DImage", actionConfig))
 
 
     def _getFirstImageKey(self):

@@ -25,9 +25,9 @@ from avid.common.artefact.defaultProps import TIMEPOINT
 from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('MitkMapImage') is None, 'Tool MitkMapImage not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('MitkMapImage') is None, 'Tool MitkMapImage not installed on the system.')
 class TestMitkMapImage(unittest.TestCase):
 
 

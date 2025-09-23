@@ -22,9 +22,9 @@ import shutil
 import avid.common.workflow as workflow
 from avid.actions.rttb.imageAcc import ImageAccBatchAction as imageAcc
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import getToolConfigPath
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
-@unittest.skipIf(getToolConfigPath('DoseAcc') is None, 'Tool DoseAcc not installed on the system.')
+@unittest.skipIf(get_tool_config_file_path('DoseAcc') is None, 'Tool DoseAcc not installed on the system.')
 class TestDoseAcc(unittest.TestCase):
 
 

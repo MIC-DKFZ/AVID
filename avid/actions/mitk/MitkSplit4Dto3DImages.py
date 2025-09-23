@@ -94,7 +94,7 @@ class MitkSplit4Dto3DImagesAction(GenericCLIAction):
         if readerName is not None:
             addArgs = {'r':readerName}
 
-        GenericCLIAction.__init__(self, i=inputs, actionID="MitkSplit4Dto3DImages", outputFlags=['o'],
+        GenericCLIAction.__init__(self, i=inputs, tool_id="MitkSplit4Dto3DImages", outputFlags=['o'],
                                   additionalArgs=addArgs, illegalArgs= ['output', 'input'], actionTag= actionTag,
                                   alwaysDo=alwaysDo, session=session, indicateCallable=self._indicate_outputs,
                                   additionalActionProps=additionalActionProps, actionConfig=actionConfig,
