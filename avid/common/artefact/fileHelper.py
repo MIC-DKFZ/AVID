@@ -23,7 +23,9 @@ import time
 import xml.etree.ElementTree as ElementTree
 from builtins import str
 
-from avid.common.artefact import ArtefactCollection, generateArtefactEntry, update_artefacts
+from avid.common.artefact import (ArtefactCollection, generateArtefactEntry,
+                                  update_artefacts)
+
 from . import defaultProps
 
 logger = logging.getLogger(__name__)

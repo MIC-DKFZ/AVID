@@ -18,6 +18,7 @@
 
 from .artefact import defaultProps as artefactProps
 
+
 def getNumberOfPatients(container):
   '''
      determines the number of patients

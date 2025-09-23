@@ -23,6 +23,7 @@ import avid.common.artefact.defaultProps as artefactProps
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
+
 from . import BatchActionBase
 from .genericCLIAction import GenericCLIAction
 from .simpleScheduler import SimpleScheduler

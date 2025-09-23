@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from builtins import object
+
+
 class BaseSorter(object):
   '''base clase for functors used to sort a artefact list by certain criterias
   and pass back the sorted list.

@@ -18,12 +18,13 @@
 
 
 import argparse
+
 from avid.common.artefact import defaultProps
 from avid.common.artefact.fileHelper import load_artefact_collection_from_xml
-
-from avid.selectors import SelectorBase, AndSelector
-from avid.selectors import ValiditySelector
-from avid.selectors.diagnosticSelector import RootSelector, IsInputSelector, IsPrimeInvalidSelector
+from avid.selectors import AndSelector, SelectorBase, ValiditySelector
+from avid.selectors.diagnosticSelector import (IsInputSelector,
+                                               IsPrimeInvalidSelector,
+                                               RootSelector)
 
 
 def main():

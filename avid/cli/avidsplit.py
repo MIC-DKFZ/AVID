@@ -18,15 +18,13 @@
 
 
 import argparse
-from avid.common.artefact.fileHelper import load_artefact_collection_from_xml, save_artefacts_to_xml
-
-import avid.common.demultiplexer as demux
+import os
 from random import shuffle
 
-import os
-
-from avid.selectors import OrSelector
-from avid.selectors import KeyValueSelector
+import avid.common.demultiplexer as demux
+from avid.common.artefact.fileHelper import (load_artefact_collection_from_xml,
+                                             save_artefacts_to_xml)
+from avid.selectors import KeyValueSelector, OrSelector
 
 
 def main():

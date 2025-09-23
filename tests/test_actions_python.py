@@ -16,19 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
-from avid.actions.pythonAction import PythonUnaryBatchAction as unaryPython
 from avid.actions.pythonAction import PythonBinaryBatchAction as binaryPython
 from avid.actions.pythonAction import PythonNaryBatchAction as naryPython
 from avid.actions.pythonAction import PythonNaryBatchActionV2 as naryPythonV2
-from avid.actions.pythonAction import PythonUnaryStackBatchAction as unaryStackPython
-from avid.linkers import TimePointLinker
-
-from avid.selectors.keyValueSelector import ActionTagSelector, ObjectiveSelector, TimepointSelector
+from avid.actions.pythonAction import PythonUnaryBatchAction as unaryPython
+from avid.actions.pythonAction import \
+    PythonUnaryStackBatchAction as unaryStackPython
 from avid.common.artefact import defaultProps as artefactProps
+from avid.linkers import TimePointLinker
+from avid.selectors.keyValueSelector import (ActionTagSelector,
+                                             ObjectiveSelector,
+                                             TimepointSelector)
+
 
 def test_copy_script(inputs, outputs, times = 1):
     '''Simple python test script.'''

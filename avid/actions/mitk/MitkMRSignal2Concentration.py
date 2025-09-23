@@ -19,10 +19,10 @@
 import logging
 
 import avid.common.artefact.defaultProps as artefactProps
-from avid.selectors import TypeSelector
 from avid.actions import BatchActionBase
 from avid.actions.genericCLIAction import GenericCLIAction
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.selectors import TypeSelector
 
 logger = logging.getLogger(__name__)
 

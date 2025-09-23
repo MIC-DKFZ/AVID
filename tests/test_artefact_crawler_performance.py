@@ -16,25 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-import tempfile
-import time
 import os
 import shutil
+import statistics
+import tempfile
+import time
+import unittest
 from pathlib import Path
 
-from avid.common.artefact.crawler import (
-    crawl_filter_by_filename,
-    crawl_property_by_path,
-    crawl_property_by_filename,
-    DirectoryCrawler,
-    _scan_directories
-)
-
-from avid.common.artefact import similarityRelevantProperties
 import avid.common.artefact.defaultProps as ArtefactProps
-from avid.common.workflow.console_abstraction import Progress
-import statistics
+from avid.common.artefact import similarityRelevantProperties
+from avid.common.artefact.crawler import (DirectoryCrawler, _scan_directories,
+                                          crawl_filter_by_filename,
+                                          crawl_property_by_filename,
+                                          crawl_property_by_path)
+from avid.common.console_abstraction import Progress
 
 similarityRelevantProperties.extend(["study_id", "series_id"])
 

@@ -19,16 +19,14 @@
 import logging
 import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common.osChecker import checkAndCreateDir
-
-from avid.actions import BatchActionBase
-from avid.actions import SingleActionBase
-from avid.linkers import CaseLinker, CaseInstanceLinker
-from avid.selectors import TypeSelector
+import avid.common.artefact.defaultProps as artefactProps
+from avid.actions import BatchActionBase, SingleActionBase
 from avid.actions.simpleScheduler import SimpleScheduler
-from avid.splitter import KeyValueSplitter, BaseSplitter
+from avid.common.osChecker import checkAndCreateDir
+from avid.linkers import CaseInstanceLinker, CaseLinker
+from avid.selectors import TypeSelector
+from avid.splitter import BaseSplitter, KeyValueSplitter
 
 logger = logging.getLogger(__name__)
 

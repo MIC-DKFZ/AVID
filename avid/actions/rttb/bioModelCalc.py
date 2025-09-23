@@ -16,21 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
-import os
 import logging
+import os
+from builtins import str
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common import osChecker
+import avid.common.artefact.defaultProps as artefactProps
+import avid.externals.virtuos as virtuos
 from avid.actions import BatchActionBase
 from avid.actions.cliActionBase import CLIActionBase
-from avid.linkers import FractionLinker, CaseLinker
-from avid.sorter import BaseSorter
-from avid.actions.simpleScheduler import SimpleScheduler
-from avid.actions.rttb.doseMap import _getArtefactLoadStyle
 from avid.actions.rttb.doseAcc import _getFractionWeightByArtefact
-import avid.externals.virtuos as virtuos
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import osChecker
+from avid.linkers import CaseLinker, FractionLinker
+from avid.sorter import BaseSorter
 
 logger = logging.getLogger(__name__)
 

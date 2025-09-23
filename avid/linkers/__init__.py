@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from builtins import object
+
+
 class LinkerBase(object):
   ''' Linkers serve as delegate to generate secondary sub selections that have some semantic
       linkage (e.g. only seconadry selections that have the same case id or time point like
@@ -203,9 +205,7 @@ class AndLinker(LinkerBase):
     return resultSelections
 
 
-from .keyValueLinker import KeyValueLinker
-from .keyValueLinker import CaseLinker
-from .keyValueLinker import TimePointLinker
-from .fractionLinker import FractionLinker
 from .caseInstanceLinker import CaseInstanceLinker
+from .fractionLinker import FractionLinker
+from .keyValueLinker import CaseLinker, KeyValueLinker, TimePointLinker
 from .proximityLinker import TimePointProximityLinker

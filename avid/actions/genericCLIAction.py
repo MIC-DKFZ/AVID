@@ -16,13 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker, AVIDUrlLocater, cliConnector
+import avid.common.artefact.defaultProps as artefactProps
+from avid.common import AVIDUrlLocater, cliConnector, osChecker
 
 from .cliActionBase import CLIActionBase
 

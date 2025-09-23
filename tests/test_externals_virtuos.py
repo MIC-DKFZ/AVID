@@ -16,10 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
-import avid.externals.virtuos as virtuos
 import shutil
+import unittest
+
+import avid.externals.virtuos as virtuos
+
 
 class TestVirtuosPlanManipulation(unittest.TestCase):
 

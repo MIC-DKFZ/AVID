@@ -16,8 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.selectors import SelectorBase
 from avid.common.artefact import ArtefactCollection
+from avid.selectors import SelectorBase
 
 
 class MultiKeyValueSelector(SelectorBase):

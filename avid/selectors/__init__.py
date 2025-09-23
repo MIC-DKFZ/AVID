@@ -17,6 +17,7 @@
 # limitations under the License.
 
 from builtins import object
+
 from avid.common.artefact import ArtefactCollection
 
 
@@ -135,19 +136,14 @@ class LambdaSelector(SelectorBase):
     return self._selectionFunction(workflowData)
 
 
-from .multiKeyValueSelector import MultiKeyValueSelector
-from .keyValueSelector import KeyValueSelector
-from .keyValueSelector import ActionTagSelector
-from .keyValueSelector import CaseSelector
-from .keyValueSelector import CaseInstanceSelector
-from .keyValueSelector import FormatSelector
-from .keyValueSelector import TimepointSelector
-from .keyValueSelector import TypeSelector
-from .keyValueSelector import ResultSelector
-from .keyValueSelector import ObjectiveSelector
-from .keyValueSelector import DoseStatSelector
-from .validitySelector import ValiditySelector
 from .keyMulitValueSelector import KeyMultiValueSelector
+from .keyValueSelector import (ActionTagSelector, CaseInstanceSelector,
+                               CaseSelector, DoseStatSelector, FormatSelector,
+                               KeyValueSelector, ObjectiveSelector,
+                               ResultSelector, TimepointSelector, TypeSelector)
+from .multiKeyValueSelector import MultiKeyValueSelector
+from .validitySelector import ValiditySelector
+
 
 class ValidResultSelector(AndSelector):
   ''' Convenience selector to select all valid (!) artefacts of type result.'''

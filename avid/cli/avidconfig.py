@@ -27,13 +27,12 @@ import tarfile
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
 from urllib.request import urlretrieve
 
-from avid.common.console_abstraction import Console, TableType, PrettyType, ConfirmType, PromptType, Progress
-
-import avid.common.config_manager as cfg
 import avid.common.AVIDUrlLocater as loc
+import avid.common.config_manager as cfg
+from avid.common.console_abstraction import (ConfirmType, Console, PrettyType,
+                                             Progress, PromptType, TableType)
 
 console = Console()
 
@@ -128,6 +127,7 @@ def get_and_unpack_mitk(mitk_source_config_path: Path, packages_path: Path, upda
 
     elif os_name == "Darwin":
         import dmglib
+
         # MITK has a license that needs to be confirmed when mounting, so we need to send a "yes"
         subprocess.run("yes | PAGER=cat hdiutil attach " + filepath, shell=True)
         try:

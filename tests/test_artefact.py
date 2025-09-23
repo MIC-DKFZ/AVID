@@ -17,11 +17,12 @@
 # limitations under the License.
 
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+from pathlib import Path
+
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact.generator as artefactGenerator
 from avid.common import workflow
-from pathlib import Path
 
 
 class TestArtefact(unittest.TestCase):

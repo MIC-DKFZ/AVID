@@ -16,9 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import avid.common.artefact.defaultProps as artefactProps
 from avid.linkers import InnerLinkerBase
 
-import avid.common.artefact.defaultProps as artefactProps
 
 class KeyValueLinker(InnerLinkerBase):
   '''

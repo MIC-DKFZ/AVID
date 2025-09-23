@@ -16,9 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.artefact import ArtefactCollection
 from avid.sorter import TimePointSorter
+
 
 class TestKeyValueSorter(unittest.TestCase):
   def setUp(self):

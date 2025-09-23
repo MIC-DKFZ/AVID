@@ -16,16 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
-import avid.common.artefact.defaultProps as artefactProps
+import unittest
+
 import avid.common.artefact as artefactHelper
-from avid.actions.rttb.doseStatsCollector import DoseStatsCollectorBatchAction as collector
-from avid.selectors import CaseSelector
-from avid.selectors import CaseInstanceSelector
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.workflow as workflow
+from avid.actions.rttb.doseStatsCollector import \
+    DoseStatsCollectorBatchAction as collector
+from avid.selectors import CaseInstanceSelector, CaseSelector
 from avid.selectors.keyValueSelector import ActionTagSelector
+
 
 class TestDoseStatsCollector(unittest.TestCase):
 

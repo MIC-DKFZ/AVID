@@ -16,15 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
-from avid.actions.plastimatch.plmRTSSMap import PlmRTSSMapBatchAction as plmRTTSMap
+from avid.actions.plastimatch.plmRTSSMap import \
+    PlmRTSSMapBatchAction as plmRTTSMap
 from avid.common.artefact.defaultProps import FORMAT_VALUE_DCM
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.externals.plastimatch import FORMAT_VALUE_PLM_CXT
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
+
 
 @unittest.skipIf(get_tool_config_file_path('plastimatch') is None, 'Tool Plastimatch not installed on the system.')
 class TestPlmRTSSMap(unittest.TestCase):

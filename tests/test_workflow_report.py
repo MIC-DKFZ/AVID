@@ -15,12 +15,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import unittest
-import os
+
 import avid.common.artefact.generator as artefactGenerator
-from avid.actions.dummy import DummyCLIAction as DummyAction
 import avid.common.workflow as workflow
+from avid.actions.dummy import DummyCLIAction as DummyAction
 from avid.actions.simpleScheduler import SimpleScheduler
 from avid.common.workflow.report import create_actions_report
 

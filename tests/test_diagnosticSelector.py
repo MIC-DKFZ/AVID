@@ -16,11 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact.generator as artefactGenerator
 from avid.selectors import ActionTagSelector
-from avid.selectors.diagnosticSelector import IsInputSelector, RootSelector, IsPrimeInvalidSelector
+from avid.selectors.diagnosticSelector import (IsInputSelector,
+                                               IsPrimeInvalidSelector,
+                                               RootSelector)
 from avid.selectors.keyMulitValueSelector import KeyMultiValueSelector
 
 

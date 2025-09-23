@@ -15,13 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import unittest
-import os
-from avid.actions import ActionBase
-import avid.common.artefact.generator as artefactGenerator
+
 import avid.common.artefact as artefact
+import avid.common.artefact.generator as artefactGenerator
 import avid.common.workflow as workflow
+from avid.actions import ActionBase
+
 
 class Test(unittest.TestCase):
 

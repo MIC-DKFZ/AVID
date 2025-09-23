@@ -24,11 +24,11 @@ Locate AVID configuration, workflow, and tool paths.
    every action has to use this action tool location routines!
 """
 
-from pathlib import Path
-import os
 import logging
-import avid.common.config_manager as cfg
+import os
+from pathlib import Path
 
+import avid.common.config_manager as cfg
 
 logger = logging.getLogger(__name__)
 

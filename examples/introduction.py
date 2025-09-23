@@ -20,11 +20,12 @@
 # Imports
 ###############################################################################
 import os
-import avid.common.workflow as workflow
 
-from avid.actions.pythonAction import PythonUnaryBatchAction, PythonBinaryBatchAction
-from avid.selectors import ActionTagSelector, CaseSelector, ValiditySelector
+import avid.common.workflow as workflow
+from avid.actions.pythonAction import (PythonBinaryBatchAction,
+                                       PythonUnaryBatchAction)
 from avid.linkers import CaseLinker, TimePointLinker
+from avid.selectors import ActionTagSelector, CaseSelector, ValiditySelector
 
 ###############################################################################
 # Initialize session with existing Artefacts

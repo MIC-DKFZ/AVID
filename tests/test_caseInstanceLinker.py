@@ -17,9 +17,11 @@
 # limitations under the License.
 
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+
 import avid.common.artefact as artefact
+import avid.common.artefact.generator as artefactGenerator
 from avid.linkers import CaseInstanceLinker
+
 
 class TestCaseInstanceLinker(unittest.TestCase):
   def setUp(self):

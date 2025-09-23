@@ -16,12 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
+import unittest
+
 import avid.common.artefact.generator as artefactGenerator
-from avid.actions.dummy import DummySingleAction as DummyAction
 import avid.common.workflow as workflow
-from avid.actions.threadingScheduler import ThreadingScheduler 
+from avid.actions.dummy import DummySingleAction as DummyAction
+from avid.actions.threadingScheduler import ThreadingScheduler
+
 
 class TestThreadingScheduler(unittest.TestCase):
   def setUp(self):

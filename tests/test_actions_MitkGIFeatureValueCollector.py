@@ -16,12 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
+import unittest
+
 import avid.common.artefact.defaultProps as artefactProps
-from avid.actions.mitk.MitkGIFeatureValueCollector import MitkGIFeatureValueCollectorBatchAction as collector
+import avid.common.workflow as workflow
+from avid.actions.mitk.MitkGIFeatureValueCollector import \
+    MitkGIFeatureValueCollectorBatchAction as collector
 from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.splitter import KeyValueSplitter
 

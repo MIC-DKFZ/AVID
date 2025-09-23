@@ -21,15 +21,14 @@
   tis responsible to add new dict entries in the flat file data container 
 '''
 
-from collections.abc import Mapping
 import logging
 import os
 import platform
 import threading
 import time
 import uuid
-from builtins import object
-from builtins import str
+from builtins import object, str
+from collections.abc import Mapping
 from copy import deepcopy
 
 from . import defaultProps
@@ -325,8 +324,8 @@ def ensureValidPath(unsafePath):
     Normalizes string, removes non-alpha characters,
     and converts spaces to hyphens.
     """
-    import unicodedata
     import string
+    import unicodedata
     validPathChars = ":-_.() #%s%s" % (string.ascii_letters, string.digits)
     validPathChars += os.sep
     if platform.system() == 'Windows':

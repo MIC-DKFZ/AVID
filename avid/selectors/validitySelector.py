@@ -16,9 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common.artefact import getArtefactProperty, ArtefactCollection
+from avid.common.artefact import ArtefactCollection, getArtefactProperty
+from avid.selectors import SelectorBase
 
 
 class ValiditySelector(SelectorBase):

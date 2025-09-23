@@ -19,6 +19,7 @@
 import logging
 
 import avid.common.artefact.defaultProps as artefactProps
+
 from . import BatchActionBase
 from .pythonAction import PythonAction
 from .simpleScheduler import SimpleScheduler

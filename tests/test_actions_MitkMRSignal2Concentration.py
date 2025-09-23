@@ -16,13 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkMRSignal2Concentration import MitkMRSignal2ConcentrationBatchAction as conversion
-from avid.selectors.keyValueSelector import ActionTagSelector
+from avid.actions.mitk.MitkMRSignal2Concentration import \
+    MitkMRSignal2ConcentrationBatchAction as conversion
 from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.selectors.keyValueSelector import ActionTagSelector
+
 
 @unittest.skipIf(get_tool_executable_url(None, 'MitkMRSignal2Concentration') is None, 'Tool MitkMRSignal2Concentration is not installed on the system.')
 class TestMRPerfusionMiniApp(unittest.TestCase):

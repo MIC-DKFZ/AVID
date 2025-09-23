@@ -18,17 +18,16 @@
 import os
 import shutil
 import zipfile
-from tempfile import TemporaryDirectory
 from pathlib import Path
-
-
-# Import from our console abstraction instead of rich directly
-from avid.common.console_abstraction import (
-    Console, create_table, create_panel, create_columns,
-    create_padding, create_traceback_from_exception, inspect
-)
+from tempfile import TemporaryDirectory
 
 from avid.common.artefact import ensureValidPath
+# Import from our console abstraction instead of rich directly
+from avid.common.console_abstraction import (Console, create_columns,
+                                             create_padding, create_panel,
+                                             create_table,
+                                             create_traceback_from_exception,
+                                             inspect)
 from avid.common.osChecker import checkAndCreateDir
 
 

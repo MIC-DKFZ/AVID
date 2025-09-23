@@ -18,6 +18,7 @@
 
 from .__init__ import LinkerBase
 
+
 class PosLinker(LinkerBase):
   ''' Links only by position. Therefore selection is secondarySelection[primaryIndex].
     If primaryIndex is larger then len(secondarySelection) it will be the last element

@@ -18,6 +18,7 @@
 
 from avid.actions.simpleScheduler import SimpleScheduler
 
+
 class TestingScheduler:
     """
     A helper scheduler for testing purposes that wraps a different scheduler and only passes on a specified number of

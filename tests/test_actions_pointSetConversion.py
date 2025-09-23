@@ -16,16 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
+import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
 import avid.common.workflow as workflow
-from avid.actions.pointSetConversion import PointSetConversionBatchAction as psConversion
+from avid.actions.pointSetConversion import \
+    PointSetConversionBatchAction as psConversion
 from avid.externals.fcsv import FORMAT_VALUE_SLICER_POINTSET
 from avid.externals.matchPoint import FORMAT_VALUE_MATCHPOINT_POINTSET
 from avid.selectors.keyValueSelector import ActionTagSelector
-import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
+
 
 class TestPointSetConversion(unittest.TestCase):
 

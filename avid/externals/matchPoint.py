@@ -15,13 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from builtins import str
 import csv
 import logging
 import os
 import xml.etree.ElementTree as ElementTree
-import avid.common.artefact.defaultProps as artefactProps
+from builtins import str
+
 import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
+
 from .pointset import PointRepresentation
 
 logger = logging.getLogger(__name__)

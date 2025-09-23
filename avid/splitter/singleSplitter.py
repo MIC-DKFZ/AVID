@@ -18,6 +18,7 @@
 
 from avid.splitter import BaseSplitter
 
+
 class SingleSplitter(BaseSplitter):
     '''Splits the passed selection in single artefacts. So the resulting list of split selection will only contain one artefact each.'''
     def __init__(self):

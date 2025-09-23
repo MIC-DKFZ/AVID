@@ -16,14 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import object
 import logging
-from avid.linkers import CaseLinker, CaseInstanceLinker
+from builtins import object
+
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.workflow as workflow
+from avid.linkers import CaseInstanceLinker, CaseLinker
 from avid.selectors import TypeSelector
 from avid.sorter import BaseSorter
 from avid.splitter import SingleSplitter
-import avid.common.artefact.defaultProps as artefactProps
-import avid.common.workflow as workflow
 
 logger = logging.getLogger(__name__)
 

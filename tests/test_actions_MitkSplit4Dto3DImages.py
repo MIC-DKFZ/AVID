@@ -16,15 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
-from avid.actions.mitk.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesBatchAction as split
-from avid.actions.mitk.MitkSplit4Dto3DImages import MitkSplit4Dto3DImagesAction as SplitAction
-from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_executable_url
+import unittest
+
 import avid.common.artefact.defaultProps as artefacProps
+import avid.common.workflow as workflow
+from avid.actions.mitk.MitkSplit4Dto3DImages import \
+    MitkSplit4Dto3DImagesAction as SplitAction
+from avid.actions.mitk.MitkSplit4Dto3DImages import \
+    MitkSplit4Dto3DImagesBatchAction as split
+from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.selectors.keyValueSelector import ActionTagSelector
+
 
 @unittest.skipIf(get_tool_executable_url(None, 'MitkSplit4Dto3DImages') is None, 'Tool MitkSplit4Dto3DImages is not installed on the system.')
 class TestMitkSplit4Dto3DImages(unittest.TestCase):

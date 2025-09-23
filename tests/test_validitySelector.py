@@ -17,9 +17,11 @@
 # limitations under the License.
 
 import unittest
+
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.artefact import ArtefactCollection
 from avid.selectors import ValiditySelector
+
 
 class TestValiditySelector(unittest.TestCase):
   def setUp(self):

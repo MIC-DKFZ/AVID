@@ -22,10 +22,12 @@ import unittest
 from pathlib import Path
 
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkMatchImage import MitkMatchImageBatchAction as mitkMatch
-from avid.common.AVIDUrlLocater import get_tool_executable_url
+from avid.actions.mitk.MitkMatchImage import \
+    MitkMatchImageBatchAction as mitkMatch
+from avid.common.AVIDUrlLocater import (get_tool_config_file_path,
+                                        get_tool_executable_url)
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
+
 
 @unittest.skipIf(get_tool_config_file_path('MitkMatchImage') is None, 'Tool MitkMatchImage not installed on the system.')
 class TestMatchR(unittest.TestCase):

@@ -16,15 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import os
+import shutil
 import threading
 import time
 import unittest
-import os
-import shutil
+
+import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.artefact import ArtefactCollection
-import avid.common.artefact.defaultProps as artefactProps
 
 
 def remove_lock_file(filepath):

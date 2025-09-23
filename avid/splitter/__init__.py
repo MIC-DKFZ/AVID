@@ -35,7 +35,5 @@ class BaseSplitter(object):
         return [selection.copy()]
 
 
-from .keyValueSplitter import KeyValueSplitter
-from .keyValueSplitter import CaseSplitter
-from .keyValueSplitter import FractionSplitter
+from .keyValueSplitter import CaseSplitter, FractionSplitter, KeyValueSplitter
 from .singleSplitter import SingleSplitter

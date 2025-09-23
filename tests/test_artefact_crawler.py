@@ -19,15 +19,12 @@
 import unittest
 from pathlib import Path
 
-from avid.common.artefact.crawler import (
-    crawl_filter_by_filename,
-    crawl_property_by_path,
-    crawl_property_by_filename,
-    DirectoryCrawler
-)
-
-from avid.common.artefact import Artefact, ArtefactCollection
 import avid.common.artefact.defaultProps as ArtefactProps
+from avid.common.artefact import Artefact, ArtefactCollection
+from avid.common.artefact.crawler import (DirectoryCrawler,
+                                          crawl_filter_by_filename,
+                                          crawl_property_by_filename,
+                                          crawl_property_by_path)
 
 
 class TestFileFunctorFactory:

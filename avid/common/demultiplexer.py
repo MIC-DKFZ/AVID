@@ -16,13 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
-from builtins import object
+from builtins import object, str
+
 import avid.common.workflow as workflow
 from avid.common.artefact import get_all_values_of_a_property
-from avid.selectors.keyValueSelector import KeyValueSelector
 from avid.selectors import SelectorBase
-        
+from avid.selectors.keyValueSelector import KeyValueSelector
+
+
 class Demultiplexer(object):
 
   def __init__(self, propKey, selector = SelectorBase(), workflowData = None):

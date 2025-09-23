@@ -16,14 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.rttb.doseMap import DoseMapBatchAction as doseMap
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
 @unittest.skipIf(get_tool_config_file_path('DoseMap') is None, 'Tool DoseMap not installed on the system.')
 class TestDoseMap(unittest.TestCase):

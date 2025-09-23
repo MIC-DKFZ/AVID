@@ -23,12 +23,12 @@ import subprocess
 
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import FractionLinker
-from avid.selectors import TypeSelector
 from avid.actions import BatchActionBase
 from avid.actions.cliActionBase import CLIActionBase
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import AVIDUrlLocater, osChecker
+from avid.linkers import FractionLinker
+from avid.selectors import TypeSelector
 
 logger = logging.getLogger(__name__)
 

@@ -16,25 +16,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import traceback
-import re
-from typing import Any, Optional, TextIO, Union
-import time
 import pprint
+import re
+import sys
+import time
+import traceback
+from typing import Any, Optional, TextIO, Union
 
 # Try to import rich components, set flags for availability
 try:
+    from rich.columns import Columns as RichColumns
     from rich.console import Console as RichConsole
+    from rich.logging import RichHandler
+    from rich.padding import Padding as RichPadding
+    from rich.panel import Panel as RichPanel
+    from rich.pretty import Pretty as RichPretty
+    from rich.progress import Progress as RichProgress
+    from rich.prompt import Confirm as RichConfirm
+    from rich.prompt import Prompt as RichPrompt
     from rich.table import Table as RichTable
     from rich.traceback import Traceback as RichTraceback
-    from rich.panel import Panel as RichPanel
-    from rich.columns import Columns as RichColumns
-    from rich.padding import Padding as RichPadding
-    from rich.progress import Progress as RichProgress
-    from rich.logging import RichHandler
-    from rich.pretty import Pretty as RichPretty
-    from rich.prompt import Prompt as RichPrompt, Confirm as RichConfirm
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False

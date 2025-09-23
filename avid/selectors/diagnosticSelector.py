@@ -16,10 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.selectors import SelectorBase
 import avid.common.artefact.defaultProps as artefactProps
-from avid.common.artefact import getArtefactProperty, Artefact, ArtefactCollection
-from avid.selectors import ValiditySelector
+from avid.common.artefact import (Artefact, ArtefactCollection,
+                                  getArtefactProperty)
+from avid.selectors import SelectorBase, ValiditySelector
 
 
 def get_input_artefact_ids(workflow_data, input_keys=None):

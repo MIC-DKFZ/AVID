@@ -16,9 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
+import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.artefact import ArtefactCollection
-import avid.common.artefact.defaultProps as artefactProps
 from avid.selectors.keyMulitValueSelector import KeyMultiValueSelector
 
 

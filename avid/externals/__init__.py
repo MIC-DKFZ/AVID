@@ -17,6 +17,7 @@
 # limitations under the License.
 
 import os
+
 from avid.common.osChecker import checkAndCreateDir
 
 

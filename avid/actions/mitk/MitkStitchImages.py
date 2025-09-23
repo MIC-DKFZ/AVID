@@ -16,24 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
+import re
 import subprocess
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-import re
-
-from avid.common import osChecker, AVIDUrlLocater
-from avid.linkers import CaseLinker
-from avid.linkers import FractionLinker
-from avid.sorter import BaseSorter, KeyValueSorter
-from avid.splitter import BaseSplitter, KeyValueSplitter
-
+import avid.common.artefact.defaultProps as artefactProps
 from avid.actions import BatchActionBase
 from avid.actions.genericCLIAction import GenericCLIAction
-from avid.selectors import TypeSelector
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import AVIDUrlLocater, osChecker
+from avid.linkers import CaseLinker, FractionLinker
+from avid.selectors import TypeSelector
+from avid.sorter import BaseSorter, KeyValueSorter
+from avid.splitter import BaseSplitter, KeyValueSplitter
 
 logger = logging.getLogger(__name__)
 

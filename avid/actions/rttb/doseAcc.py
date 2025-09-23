@@ -16,23 +16,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str, enumerate
-import os
 import logging
+import os
+from builtins import enumerate, str
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-
-from avid.common import osChecker
-from avid.splitter import BaseSplitter
+import avid.common.artefact.defaultProps as artefactProps
 from avid.actions import BatchActionBase
 from avid.actions.cliActionBase import CLIActionBase
-from avid.linkers import FractionLinker, CaseLinker
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
+from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common import osChecker
+from avid.externals.matchPoint import ensureMAPRegistrationArtefact
+from avid.linkers import CaseLinker, FractionLinker
 from avid.selectors import TypeSelector
 from avid.sorter import TimePointSorter
-from avid.actions.simpleScheduler import SimpleScheduler
-from avid.actions.rttb.doseMap import _getArtefactLoadStyle
-from avid.externals.matchPoint import ensureMAPRegistrationArtefact
+from avid.splitter import BaseSplitter
 
 logger = logging.getLogger(__name__)
 

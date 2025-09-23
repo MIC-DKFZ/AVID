@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from builtins import object
+
+
 class SimpleScheduler(object):
   '''Simple scheduler implementation that just executes the actions sequentially.'''
   def __init__(self):

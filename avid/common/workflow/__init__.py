@@ -21,18 +21,18 @@ import logging
 import os
 import shutil
 import threading
-from builtins import object
-from builtins import str
+from builtins import object, str
 from pathlib import Path
 
 import avid.common.artefact.fileHelper as fileHelper
 import avid.common.patientNumber as patientNumber
 from avid.common.artefact import ArtefactCollection, update_artefacts
-from avid.common.workflow.structure_definitions import loadStructurDefinition_xml
+from avid.common.console_abstraction import (Console, Progress,
+                                             get_logging_handler)
+from avid.common.workflow.structure_definitions import \
+    loadStructurDefinition_xml
 
-from .report import print_action_diagnostics, create_actions_report
-from avid.common.console_abstraction import Console, Progress, get_logging_handler
-
+from .report import create_actions_report, print_action_diagnostics
 
 '''set when at least one session was initialized to ensure this stream is only
  generated once, even if multiple sessions are generated in one run (e.g. in tests)'''
@@ -421,7 +421,7 @@ class Session(object):
   def addProcessedActionInstance(self, action):
       """Adds an action to the session instance as processed action"""
       with self.lock:
-          from avid.actions import SingleActionBase, BatchActionBase
+          from avid.actions import BatchActionBase, SingleActionBase
 
           if isinstance(action, SingleActionBase):
               self.executed_actions.append(action)

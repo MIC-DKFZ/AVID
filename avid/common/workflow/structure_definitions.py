@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
-import os
 import logging
-import xml.etree.ElementTree as ElementTree
+import os
 import re
+import xml.etree.ElementTree as ElementTree
+from builtins import str
 
 XML_STRUCT_DEF = "avid:structure_definition"
 XML_STRUCTURE = "avid:structure"

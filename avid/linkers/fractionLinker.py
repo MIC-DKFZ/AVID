@@ -16,12 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.linkers import InnerLinkerBase
-from .keyValueLinker import CaseLinker
-from .caseInstanceLinker import CaseInstanceLinker
-from .keyValueLinker import TimePointLinker
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
+from avid.linkers import InnerLinkerBase
+
+from .caseInstanceLinker import CaseInstanceLinker
+from .keyValueLinker import CaseLinker, TimePointLinker
+
 
 class FractionLinker(InnerLinkerBase):
   '''

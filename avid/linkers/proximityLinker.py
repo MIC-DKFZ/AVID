@@ -16,10 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.linkers import LinkerBase
-from .keyValueLinker import CaseLinker
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
+from avid.linkers import LinkerBase
+
+from .keyValueLinker import CaseLinker
+
 
 class ProximityLinker(LinkerBase):
   """

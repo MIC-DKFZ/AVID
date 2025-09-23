@@ -16,20 +16,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import object
 import argparse
-import os
-import logging
-import sys
-import re
 import concurrent.futures
-from typing import Callable, Optional, Pattern, Any, Union, Dict, List, Tuple, Generator
+import logging
+import os
+import re
+import sys
+from builtins import object
 from functools import wraps
+from typing import (Any, Callable, Dict, Generator, List, Optional, Pattern,
+                    Tuple, Union)
 
-from avid.common.artefact.fileHelper import save_artefacts_to_xml as saveArtefactList
-from avid.common.artefact import ArtefactCollection, Artefact
 import avid.common.artefact.defaultProps as ArtefactProps
-from avid.common.workflow import Progress, Console
+from avid.common.artefact import Artefact, ArtefactCollection
+from avid.common.artefact.fileHelper import \
+    save_artefacts_to_xml as saveArtefactList
+from avid.common.workflow import Console, Progress
 
 log_stdout = logging.StreamHandler(sys.stdout)
 crawl_logger = logging.getLogger(__name__)

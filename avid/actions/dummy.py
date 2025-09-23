@@ -16,16 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
 import os
+from builtins import str
 
-from ..actions import BatchActionBase
-from avid.actions import SingleActionBase
-from avid.actions.cliActionBase import CLIActionBase
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
+from avid.actions import SingleActionBase
+from avid.actions.cliActionBase import CLIActionBase
+from avid.common import AVIDUrlLocater, osChecker
+
+from ..actions import BatchActionBase
 from .simpleScheduler import SimpleScheduler
-from avid.common import osChecker, AVIDUrlLocater
+
 
 class DummySingleAction(SingleActionBase):
 

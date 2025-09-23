@@ -16,14 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import SingleActionBase
 import logging
 import os
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
 from avid.common import AVIDUrlLocater
 from avid.common.cliConnector import DefaultCLIConnector
+
+from . import SingleActionBase
 
 logger = logging.getLogger(__name__)
 

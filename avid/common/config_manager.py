@@ -37,8 +37,8 @@ located under the respective tools root (``.../tools/tool-configs/<tool-id>/avid
 
 #from __future__ import annotations
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 

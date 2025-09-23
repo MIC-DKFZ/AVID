@@ -16,15 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
-from avid.actions.plastimatch.plmCompare import PlmCompareBatchAction as plmCompare
-from avid.selectors.keyValueSelector import ActionTagSelector
-import avid.common.artefact.defaultProps as artefactProps
+import unittest
+
 import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
+import avid.common.workflow as workflow
+from avid.actions.plastimatch.plmCompare import \
+    PlmCompareBatchAction as plmCompare
 from avid.common.AVIDUrlLocater import get_tool_config_file_path
+from avid.selectors.keyValueSelector import ActionTagSelector
+
 
 @unittest.skipIf(get_tool_config_file_path('Plastimatch') is None, 'Tool Plastimatch not installed on the system.')
 class TestPlmCompare(unittest.TestCase):

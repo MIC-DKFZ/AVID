@@ -17,9 +17,10 @@
 # limitations under the License.
 
 from builtins import str
-from avid.selectors import SelectorBase
+
 import avid.common.artefact.defaultProps as artefactProps
 from avid.common.artefact import ArtefactCollection
+from avid.selectors import SelectorBase
 
 
 class KeyValueSelector(SelectorBase):

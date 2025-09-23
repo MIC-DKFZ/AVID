@@ -16,20 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import csv
+import logging
+import xml.etree.ElementTree as ET
 from builtins import str
 from copy import copy
-import logging
-import csv
 
-import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact as artefactHelper
-from avid.common.demultiplexer import getSelectors
+import avid.common.artefact.defaultProps as artefactProps
 from avid.actions import BatchActionBase
 from avid.actions.pythonAction import PythonAction
-from avid.selectors import TypeSelector, KeyValueSelector
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common.demultiplexer import getSelectors
+from avid.selectors import KeyValueSelector, TypeSelector
 from avid.splitter import BaseSplitter
-import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 

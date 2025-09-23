@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from builtins import str
+
+
 def writeFileCustomized(templateFilename, targetFilename, replaceDict):
   inputFile = open(templateFilename, 'r')
   content = inputFile.read()

@@ -23,8 +23,8 @@ import avid.common.artefact.defaultProps as artefactProps
 import avid.externals.fcsv as fcsv
 import avid.externals.matchPoint as matchpoint
 from avid.selectors import TypeSelector
-from . import BatchActionBase
-from . import SingleActionBase
+
+from . import BatchActionBase, SingleActionBase
 from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)

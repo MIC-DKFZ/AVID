@@ -16,10 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import range
-from builtins import object
-from threading import Thread
 import queue
+from builtins import object, range
+from threading import Thread
+
 
 class Worker(Thread):
     def __init__(self, actions):

@@ -23,10 +23,10 @@ import stat
 import subprocess
 import time
 
-from avid.common import osChecker, AVIDUrlLocater
-import avid.common.config_manager as AVIDConfigManager
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.config_manager as AVIDConfigManager
+from avid.common import AVIDUrlLocater, osChecker
 
 logger = logging.getLogger(__name__)
 

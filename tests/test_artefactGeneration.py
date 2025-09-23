@@ -17,9 +17,11 @@
 # limitations under the License.
 
 import unittest
+
+import avid.common.artefact.defaultProps as artefactProps
 import avid.common.artefact.generator as artefactGenerator
 from avid.common.artefact import ArtefactCollection, ensureCaseInstanceValidity
-import avid.common.artefact.defaultProps as artefactProps
+
 
 class TestArtefactGeneration(unittest.TestCase):
   def setUp(self):

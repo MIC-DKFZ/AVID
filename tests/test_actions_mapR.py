@@ -16,16 +16,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.matchpoint.mapR import mapRBatchAction as mapR
 from avid.common.artefact.defaultProps import TIMEPOINT
+from avid.common.AVIDUrlLocater import get_tool_config_file_path
 from avid.linkers import CaseLinker
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
 
 @unittest.skipIf(get_tool_config_file_path('mapR') is None, 'Tool mapR not installed on the system.')
 class TestMapR(unittest.TestCase):

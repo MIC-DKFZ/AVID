@@ -16,10 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.externals.doseTool as dosetool
+
 
 class TestDoseTool(unittest.TestCase):
 

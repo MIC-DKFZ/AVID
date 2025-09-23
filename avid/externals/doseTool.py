@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import str
-from builtins import object
-import xml.etree.ElementTree as ElementTree
 import logging
 import os
+import xml.etree.ElementTree as ElementTree
+from builtins import object, str
+
 from avid.common.artefact.fileHelper import indent
 
 logger = logging.getLogger(__name__)

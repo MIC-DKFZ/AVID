@@ -16,12 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+
 import avid.common.artefact as artefact
-from avid.selectors import AndSelector, OrSelector, KeyValueSelector
-from avid.selectors import ActionTagSelector
-from avid.selectors import CaseSelector
-from avid.selectors import ValidResultSelector
+import avid.common.artefact.generator as artefactGenerator
+from avid.selectors import (ActionTagSelector, AndSelector, CaseSelector,
+                            KeyValueSelector, OrSelector, ValidResultSelector)
+
 
 class TestSelectors(unittest.TestCase):
   def setUp(self):

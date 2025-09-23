@@ -16,15 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
-import avid.common.workflow as workflow
-from avid.actions.artefactRefine import ArtefactRefineBatchAction as artefactRefine
-from avid.linkers import TimePointLinker
+import unittest
 
-from avid.selectors.keyValueSelector import ActionTagSelector, ObjectiveSelector, TimepointSelector
+import avid.common.workflow as workflow
+from avid.actions.artefactRefine import \
+    ArtefactRefineBatchAction as artefactRefine
 from avid.common.artefact import defaultProps as artefactProps
+from avid.linkers import TimePointLinker
+from avid.selectors.keyValueSelector import (ActionTagSelector,
+                                             ObjectiveSelector,
+                                             TimepointSelector)
+
 
 def is_similar(reference, other, ignore_keys=None):
     rkeys = list(reference.keys())

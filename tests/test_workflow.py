@@ -16,12 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
 
 from avid.common.workflow import initSession
-from avid.common.workflow.structure_definitions import loadStructurDefinition_xml as load_xml
+from avid.common.workflow.structure_definitions import \
+    loadStructurDefinition_xml as load_xml
+
 
 class TestWorkflowHelper(unittest.TestCase):
 

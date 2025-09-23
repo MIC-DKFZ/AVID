@@ -16,9 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.splitter import BaseSplitter
-from avid.common.demultiplexer import splitArtefact
 import avid.common.artefact.defaultProps as artefactProps
+from avid.common.demultiplexer import splitArtefact
+from avid.splitter import BaseSplitter
+
 
 class KeyValueSplitter(BaseSplitter):
   '''Splits the artefacts in such a way that all artefacts in a splitt list have the same values for all specified keys

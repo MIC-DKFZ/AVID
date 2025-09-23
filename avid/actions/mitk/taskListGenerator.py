@@ -16,14 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import logging
 import os
-import json
-
-from avid.common.artefact import defaultProps as artefactProps
 
 from avid.actions.pythonAction import PythonUnaryStackBatchAction
 from avid.actions.simpleScheduler import SimpleScheduler
+from avid.common.artefact import defaultProps as artefactProps
 
 logger = logging.getLogger(__name__)
 

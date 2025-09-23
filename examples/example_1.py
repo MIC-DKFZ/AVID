@@ -1,9 +1,8 @@
 import os
 
 import avid.common.workflow as workflow
-
-from avid.selectors import ActionTagSelector
 from avid.actions.pythonAction import PythonNaryBatchActionV2
+from avid.selectors import ActionTagSelector
 
 mr_image_selector = ActionTagSelector('MR')
 ct_image_selector = ActionTagSelector('CT')

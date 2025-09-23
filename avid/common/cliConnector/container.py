@@ -21,7 +21,8 @@ import os
 import stat
 
 from avid.common import osChecker
-from avid.common.cliConnector import URLMappingCLIConnectorBase, default_artefact_url_extraction_delegate
+from avid.common.cliConnector import (URLMappingCLIConnectorBase,
+                                      default_artefact_url_extraction_delegate)
 
 logger = logging.getLogger(__name__)
 

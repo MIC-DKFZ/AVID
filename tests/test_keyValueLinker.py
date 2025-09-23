@@ -17,13 +17,12 @@
 # limitations under the License.
 
 import unittest
-import avid.common.artefact.generator as artefactGenerator
+
 import avid.common.artefact as artefact
 import avid.common.artefact.defaultProps as artefactProps
+import avid.common.artefact.generator as artefactGenerator
+from avid.linkers import CaseLinker, KeyValueLinker, TimePointLinker
 
-from avid.linkers import KeyValueLinker
-from avid.linkers import CaseLinker
-from avid.linkers import TimePointLinker
 
 class TestKeyValueLinker(unittest.TestCase):
   def setUp(self):

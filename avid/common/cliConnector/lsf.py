@@ -23,7 +23,8 @@ import time
 from pathlib import Path
 
 from avid.common import osChecker
-from avid.common.cliConnector import URLMappingCLIConnectorBase, DefaultCLIConnector
+from avid.common.cliConnector import (DefaultCLIConnector,
+                                      URLMappingCLIConnectorBase)
 
 logger = logging.getLogger(__name__)
 

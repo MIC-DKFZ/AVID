@@ -22,9 +22,10 @@ import unittest
 
 import avid.common.workflow as workflow
 from avid.actions.matchpoint.matchR import matchRBatchAction as matchR
-from avid.common.AVIDUrlLocater import get_tool_config_dir
+from avid.common.AVIDUrlLocater import (get_tool_config_dir,
+                                        get_tool_config_file_path)
 from avid.selectors.keyValueSelector import ActionTagSelector
-from avid.common.AVIDUrlLocater import get_tool_config_file_path
+
 
 @unittest.skipIf(get_tool_config_file_path('matchR') is None, 'Tool matchR not installed on the system.')
 class TestMatchR(unittest.TestCase):

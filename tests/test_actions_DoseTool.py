@@ -16,13 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
 from avid.actions.rttb.DoseTool import DoseStatBatchAction as doseTool
-from avid.selectors.keyValueSelector import ActionTagSelector
 from avid.common.AVIDUrlLocater import get_tool_config_file_path
+from avid.selectors.keyValueSelector import ActionTagSelector
 
 
 @unittest.skipIf(get_tool_config_file_path('DoseTool') is None, 'Tool DoseTool not installed on the system.')

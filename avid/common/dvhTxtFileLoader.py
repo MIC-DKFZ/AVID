@@ -17,6 +17,8 @@
 # limitations under the License.
 
 from builtins import object
+
+
 class DVHType(object):
     Cumulative = 1
     Differential = 2

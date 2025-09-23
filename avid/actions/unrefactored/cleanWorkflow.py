@@ -16,17 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import os
+import shutil
+import stat
+import sys
 from builtins import str
-import sys, os, shutil, stat
-
-import avid.common.artefact.defaultProps as artefactProps
-import avid.common.artefact as artefactHelper
-from . import ActionBase
-from . import BatchActionBase
-from .simpleScheduler import SimpleScheduler
 from os import listdir
 from os.path import isfile, join
-import logging
+
+import avid.common.artefact as artefactHelper
+import avid.common.artefact.defaultProps as artefactProps
+
+from . import ActionBase, BatchActionBase
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

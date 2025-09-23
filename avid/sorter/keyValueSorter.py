@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from avid.sorter import BaseSorter
 from avid.common.artefact import ArtefactCollection
+from avid.sorter import BaseSorter
+
 
 class KeyValueSorter(BaseSorter):
   '''Sorts the selection by the values of a passed property key.'''

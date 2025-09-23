@@ -23,13 +23,13 @@ import re
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
 import avid.externals.virtuos as virtuos
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
+from avid.actions.rttb.doseMap import _getArtefactLoadStyle
+from avid.actions.simpleScheduler import SimpleScheduler
 from avid.linkers import CaseLinker
 from avid.linkers.caseInstanceLinker import CaseInstanceLinker
 from avid.selectors import TypeSelector
-from avid.actions import BatchActionBase
-from avid.actions.rttb.doseMap import _getArtefactLoadStyle
-from avid.actions.genericCLIAction import GenericCLIAction
-from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

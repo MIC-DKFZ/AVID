@@ -15,21 +15,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import threading
-from builtins import str
-from builtins import object
-import os
 import logging
+import os
+import threading
 import time
 import uuid
+from builtins import object, str
 
-import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
-from .simpleScheduler import SimpleScheduler
+import avid.common.artefact.generator as artefactGenerator
 import avid.common.workflow as workflow
-from .actionBatchGenerator import ActionBatchGenerator
+
 from ..selectors import ActionTagSelector
+from .actionBatchGenerator import ActionBatchGenerator
+from .simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

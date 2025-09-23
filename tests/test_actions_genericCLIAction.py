@@ -15,15 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import unittest
-import avid.common.workflow as workflow
-import os
 from pathlib import Path
 
-import avid.common.artefact.generator as artefactGenerator
 import avid.common.artefact.defaultProps as artefactProps
-from avid.actions.genericCLIAction import generate_cli_call, GenericCLIAction
+import avid.common.artefact.generator as artefactGenerator
+import avid.common.workflow as workflow
+from avid.actions.genericCLIAction import GenericCLIAction, generate_cli_call
 
 
 def generateNameCallableAlternative(actionInstance, **allActionArgs):

@@ -21,14 +21,14 @@ import os
 
 import avid.common.artefact as artefactHelper
 import avid.common.artefact.defaultProps as artefactProps
+from avid.actions import BatchActionBase
+from avid.actions.genericCLIAction import GenericCLIAction
+from avid.actions.simpleScheduler import SimpleScheduler
 from avid.common import osChecker
 from avid.externals.doseTool import saveSimpleDictAsResultXML
 from avid.externals.plastimatch import parseDiceResult
 from avid.linkers import CaseLinker
 from avid.selectors import TypeSelector
-from avid.actions import BatchActionBase
-from avid.actions.genericCLIAction import GenericCLIAction
-from avid.actions.simpleScheduler import SimpleScheduler
 
 logger = logging.getLogger(__name__)
 

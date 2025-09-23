@@ -16,14 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import os
 import shutil
+import unittest
+
 import avid.common.workflow as workflow
-from avid.actions.mitk.MitkStitchImages import MitkStitchImagesBatchAction as stitch
+from avid.actions.mitk.MitkStitchImages import \
+    MitkStitchImagesBatchAction as stitch
+from avid.common.AVIDUrlLocater import get_tool_executable_url
 from avid.selectors.keyValueSelector import ActionTagSelector
 
-from avid.common.AVIDUrlLocater import get_tool_executable_url
 
 @unittest.skipIf(get_tool_executable_url(None, 'MitkStitchImages') is None, 'Tool MitkStitchImagesMiniApp not installed on the system.')
 class TestMitkStitchImagesMiniApp(unittest.TestCase):

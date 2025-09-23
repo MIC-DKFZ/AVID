@@ -15,15 +15,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import unittest
-import os
-import avid.common.artefact.generator as artefactGenerator
-from avid.common.artefact import getArtefactProperty
-from avid.actions.dummy import DummyCLIAction as DummyAction
-import avid.common.workflow as workflow
+
 import avid.common.artefact.defaultProps as artefact_props
+import avid.common.artefact.generator as artefactGenerator
+import avid.common.workflow as workflow
 from avid.actions.cliBatchScheduler import CLIBatchScheduler
+from avid.actions.dummy import DummyCLIAction as DummyAction
+from avid.common.artefact import getArtefactProperty
+
 
 class TestCLIBatchScheduler(unittest.TestCase):
     def setUp(self):
