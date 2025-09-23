@@ -69,7 +69,10 @@ def get_all_known_packages() -> List[str]:
 
 
 def _get_os_name() -> str:
-    return platform.system()
+    os_name = platform.system()
+    if os_name == "Darwin":
+        os_name += "-Silicon" if platform.machine() == "arm64" else "-Intel"
+    return os_name
 
 
 def download_with_progress(url: str, dest: Path) -> None:
@@ -140,7 +143,7 @@ def get_and_unpack_mitk(
         if extracted_dir.exists():
             extracted_dir.rename(mitk_dir)
 
-    elif os_name == "Darwin":
+    elif os_name.startswith("Darwin"):
         import dmglib
 
         # MITK has a license that needs to be confirmed when mounting, so we need to send a "yes"
@@ -189,7 +192,7 @@ def install_tool_from_package(
                 exec_path = package_path / "apps" / (mitk_exec_name + ".bat")
             elif os_name == "Linux":
                 exec_path = package_path / "apps" / (mitk_exec_name + ".sh")
-            elif os_name == "Darwin":
+            elif os_name.startswith("Darwin"):
                 exec_path = package_path / "Contents" / "MacOS" / mitk_exec_name
     else:
         console.print(f"[red]No installer logic for package [cyan]{package_name}[/][/]")
