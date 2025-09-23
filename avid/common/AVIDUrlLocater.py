@@ -77,12 +77,12 @@ def get_tool_config_dir(tool_id, workflow_root_path=None, check_existence=True):
     :param tool_id: tool_id of the action that requests the URL
     :param workflow_root_path: Path of the workflow. If none it will be ignored.
     :param check_existence: Indicates if only existing paths should be returned. If True and config path
-    does not exist or can be determined, None will be returned.
+    does not exist or can't be determined, None will be returned.
 
     The following rules will be used to determine the tool config path.
     1. check the path workflowRootPath/tools/<tool_id>. If it is valid, return it, else 2.
     2. check get_venv_tool_config_file_path. If it is valid, return it, else 3.
-    2. check get_user_tool_config_file_path. If it is valid, return it, else 4.
+    3. check get_user_tool_config_file_path. If it is valid, return it, else 4.
     4. return None
     """
 
@@ -100,17 +100,17 @@ def get_tool_config_dir(tool_id, workflow_root_path=None, check_existence=True):
 
 def get_tool_config_file_path(tool_id, workflow_root_path=None, check_existence=True):
     """
-    Helper functions that gets the path to the config file for the passed tool_id
-    If workflowRootPath is set it will be also checked
+    Helper function that gets the path to the config file for the passed tool_id
+    If workflow_root_path is set it will be also checked
     :param tool_id: tool_id of the action that requests the URL
     :param workflow_root_path: Path of the workflow. If none it will be ignored.
     :param check_existence: Indicates if only existing paths should be returned. If True and config path
-    does not exist or can be determined, None will be returned.
+    does not exist or can't be determined, None will be returned.
 
     The following rules will be used to determine the tool config path.
     1. check the path workflowRootPath/tools/<tool_id>/avidtool.config. If it is valid, return it, else 2.
     2. check get_venv_tool_config_file_path. If it is valid, return it, else 3.
-    2. check get_user_tool_config_file_path. If it is valid, return it, else 4.
+    3. check get_user_tool_config_file_path. If it is valid, return it, else 4.
     4. return None
     """
 
@@ -129,7 +129,7 @@ def get_tool_config_file_path(tool_id, workflow_root_path=None, check_existence=
 def get_tool_executable_url(workflow, tool_id, action_config=None):
     """
        returns url+executable for a tool id request
-       @param tool_id of the action/tool for which the URL is requests
+       @param tool_id of the action/tool for which the URL is requested
        @param action_config specifies if a certain configuration of an action should be used.
        1. checks if there is a valid tool in workflow.actionTools[tool_id]. If there is, return it else 2.
        2. check the path:workflowRootPath/tools/<tool_id>/avidtool.config. If it is valid, return it else 3.
