@@ -25,7 +25,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "AVID"
 version = "0.0.1"
-description = "Automated processing of Versatile Image Data (AVID)"
 authors = [
     { name="MIC@DKFZ", email="r.floca@dkfz-heidelberg.de"},
 ]
