@@ -26,13 +26,13 @@ Thanks for considering contributing to AVID! 🎉
 
 ## Development Workflow
 ### Development
-1. Creat your feature branch
+1. Create your feature branch
   ```bash
   git checkout -b feature/short-description
   ```
 2. Make your code changes
 
-Develop your idea or your bug fix in you're venv/repo clone.
+Develop your idea or your bug fix in your venv/repo clone.
 If everything is ready, look for the next section to prepare your contribution for a pull request.
 If you have ideas to improve, fix or somehow advance AVID, **please feel whole heartily invited and encouraged to
 discuss the issues and ideas beforehand** over the GitHub issue section: https://github.com/MIC-DKFZ/AVID/issues  
@@ -50,7 +50,7 @@ discuss the issues and ideas beforehand** over the GitHub issue section: https:/
   ```bash
   python -m unittest
   ```
-Ensure that all tests are green. You may ignore skipped tests due to not available CLI tools as long as you change
+Ensure that all tests are green. You may ignore skipped tests due to not available CLI tools as long as your change
 does not impact those tools.
 
 ### Making a pull request (on GitHub)
