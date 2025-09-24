@@ -45,6 +45,11 @@ license-files = ["LICENSE"]
 [project.optional-dependencies]
 rich = ["rich==13.7.1"]
 mac = ["dmglib==0.9.6"]
+dev = [
+    "black",
+    "isort",
+    "flake8",
+]
 
 [project.urls]
 Homepage = "https://github.com/MIC-DKFZ/AVID"
