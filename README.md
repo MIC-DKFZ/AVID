@@ -2,7 +2,8 @@
 
 [![Python 3.x](https://img.shields.io/badge/python-3.x-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
-[![pipeline status](https://git.dkfz.de/mic/internal/avid/badges/master/pipeline.svg)](https://git.dkfz.de/mic/avid/pipelines)
+[![SemVer](https://img.shields.io/badge/semver-2.0.0-blue.svg)](https://semver.org/)
+[![Documentation](https://readthedocs.org/projects/avid/badge/?version=latest)](https://avid.readthedocs.io/en/latest/)
 
 **AVID** is a Python framework for **declarative, data-driven processing** of large-scale image datasets, particularly designed for biomedical image analysis workflows.
 
@@ -382,7 +383,7 @@ where patient-centric organization and flexible data relationships are key requi
 - 📖 **Documentation**: Full API documentation available
 - 🐛 **Issues**: Report bugs and feature requests
 - 💬 **Discussion**: Join our community for questions and tips
-- 🔧 **Contributing**: We welcome contributions, custom actions, support for other packages
+- 🔧 **Contributing**: We welcome contributions, custom actions, support for other packages. More details can be found in the dedicated [Contribution Guide](CONTRIBUTING.md).
 
 
 

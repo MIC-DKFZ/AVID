@@ -3,11 +3,6 @@ Welcome to AVID's documentation!
 
 **AVID** is a Python library for automated execution of data analysis pipelines.
 
-.. note::
-   This project is under active development.
-
-
-
 .. toctree::
    :maxdepth: 1
    :caption: Introduction
