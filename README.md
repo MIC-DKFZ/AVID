@@ -3,6 +3,7 @@
 [![Python 3.x](https://img.shields.io/badge/python-3.x-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 [![pipeline status](https://git.dkfz.de/mic/internal/avid/badges/master/pipeline.svg)](https://git.dkfz.de/mic/avid/pipelines)
+[![Documentation](https://readthedocs.org/projects/avid/badge/?version=latest)](https://avid.readthedocs.io/en/latest/)
 
 **AVID** is a Python framework for **declarative, data-driven processing** of large-scale image datasets, particularly designed for biomedical image analysis workflows.
 
