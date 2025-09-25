@@ -53,6 +53,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/MIC-DKFZ/AVID"
+Documentation = "https://avid.readthedocs.io/en/latest"
 Issues = "https://github.com/MIC-DKFZ/AVID/issues"
 MITK = "http://mitk.org"
 
