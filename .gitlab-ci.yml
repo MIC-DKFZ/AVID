@@ -36,4 +36,4 @@ publish:
     - pip install twine
     - TWINE_PASSWORD=${PyPI_TOKEN} TWINE_USERNAME=__token__ python -m twine upload dist/*
   rules:
-    - if: $CI_COMMIT_TAG && $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_TAG
