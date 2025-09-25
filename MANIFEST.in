@@ -1,1 +1,1 @@
-graft avid/cli/tool-packages/*
+graft src/avid/cli/tool-packages/*
